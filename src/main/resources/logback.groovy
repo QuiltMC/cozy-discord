@@ -1,10 +1,10 @@
 import ch.qos.logback.core.joran.spi.ConsoleTarget
 
-def environment = System.getenv().getOrDefault("SENTRY_ENVIRONMENT", "dev")
+def environment = System.getenv().getOrDefault("ENVIRONMENT", "prod")
 
 def defaultLevel = INFO
 
-if (environment == "debug") {
+if (environment == "dev") {
     defaultLevel = DEBUG
 
     // Silence warning about missing native PRNG

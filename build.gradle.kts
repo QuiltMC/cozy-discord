@@ -10,7 +10,7 @@ plugins {
     id("io.gitlab.arturbosch.detekt") version "1.15.0"
 }
 
-group = "template"
+group = "org.quiltmc.community"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -26,7 +26,7 @@ repositories {
 dependencies {
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.15.0")
 
-    implementation("com.kotlindiscord.kord.extensions:kord-extensions:1.4.0-RC7")
+    implementation("com.kotlindiscord.kord.extensions:kord-extensions:1.4.0-SNAPSHOT")
 
     implementation("ch.qos.logback:logback-classic:1.2.3")
     implementation("io.github.microutils:kotlin-logging:2.0.3")
@@ -38,7 +38,7 @@ dependencies {
 
 application {
     // This is deprecated, but the Shadow plugin requires it
-    mainClassName = "template.AppKt"
+    mainClassName = "org.quiltmc.community.AppKt"
 }
 
 gitHooks {
@@ -59,7 +59,7 @@ tasks.withType<KotlinCompile> {
 tasks.jar {
     manifest {
         attributes(
-            "Main-Class" to "template.AppKt"
+            "Main-Class" to "org.quiltmc.community.AppKt"
         )
     }
 }
