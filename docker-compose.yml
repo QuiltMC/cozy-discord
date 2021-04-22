@@ -1,0 +1,13 @@
+version: "3"
+services:
+  cozy-discord:
+    image: ghcr.io/QuiltMC/cozy-discord:latest
+    container_name: cozy-discord
+
+    restart: always
+
+    environment:
+      - "GUILDS=817576132726620200,833872081585700874"
+      - "ENVIRONMENT=prod"
+
+      - TOKEN

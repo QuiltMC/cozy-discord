@@ -1,9 +1,9 @@
-name: Build & Publish (Root)
+name: Build (Develop)
 
 on:
   push:
     branches:
-      - root
+      - develop
 
 jobs:
   build:
@@ -34,14 +34,3 @@ jobs:
         with:
           name: JARs
           path: build/libs/*.jar
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.CR_PAT }}
-
-      - run: docker build -t ghcr.io/QuiltMC/cozy-discord:latest -t ghcr.io/QuiltMC/cozy-discord:${GITHUB_SHA} .
-      - run: docker push ghcr.io/QuiltMC/cozy-discord:latest
-      - run: docker push ghcr.io/QuiltMC/cozy-discord:${GITHUB_SHA}
