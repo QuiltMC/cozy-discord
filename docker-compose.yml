@@ -1,7 +1,7 @@
 version: "3"
 services:
   cozy-discord:
-    image: ghcr.io/QuiltMC/cozy-discord:latest
+    image: ghcr.io/quiltmc/cozy-discord:latest
     container_name: cozy-discord
 
     restart: always

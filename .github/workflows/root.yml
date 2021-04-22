@@ -42,6 +42,6 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.CR_PAT }}
 
-      - run: docker build -t ghcr.io/QuiltMC/cozy-discord:latest -t ghcr.io/QuiltMC/cozy-discord:${GITHUB_SHA} .
-      - run: docker push ghcr.io/QuiltMC/cozy-discord:latest
-      - run: docker push ghcr.io/QuiltMC/cozy-discord:${GITHUB_SHA}
+      - run: docker build -t ghcr.io/quiltmc/cozy-discord:latest -t ghcr.io/quiltmc/cozy-discord:${GITHUB_SHA} .
+      - run: docker push ghcr.io/quiltmc/cozy-discord:latest
+      - run: docker push ghcr.io/quiltmc/cozy-discord:${GITHUB_SHA}
