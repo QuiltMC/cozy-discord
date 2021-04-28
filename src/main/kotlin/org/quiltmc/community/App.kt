@@ -5,6 +5,7 @@ package org.quiltmc.community
 
 import com.kotlindiscord.kord.extensions.ExtensibleBot
 import com.kotlindiscord.kord.extensions.utils.env
+import com.kotlindiscord.kordex.ext.mappings.extMappings
 import org.quiltmc.community.extensions.SyncExtension
 
 @Suppress("UnderscoresInNumericLiterals")  // It's an ID
@@ -22,6 +23,8 @@ suspend fun main() {
 
         extensions {
             add(::SyncExtension)
+
+            extMappings { }
         }
     }
 

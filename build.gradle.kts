@@ -21,12 +21,23 @@ repositories {
         name = "Kotlin Discord"
         url = uri("https://maven.kotlindiscord.com/repository/maven-public/")
     }
+
+    maven {
+        name = "Fabric"
+        url = uri("https://maven.fabricmc.net")
+    }
+
+    maven {
+        name = "JitPack"
+        url = uri("https://jitpack.io")
+    }
 }
 
 dependencies {
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.15.0")
 
     implementation("com.kotlindiscord.kord.extensions:kord-extensions:1.4.0-SNAPSHOT")
+    implementation("com.kotlindiscord.kordex.ext.mappings:ext-mappings:1.1.0-SNAPSHOT")
 
     implementation("ch.qos.logback:logback-classic:1.2.3")
     implementation("io.github.microutils:kotlin-logging:2.0.3")
