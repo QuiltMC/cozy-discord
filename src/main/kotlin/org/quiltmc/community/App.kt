@@ -4,16 +4,9 @@
 package org.quiltmc.community
 
 import com.kotlindiscord.kord.extensions.ExtensibleBot
-import com.kotlindiscord.kord.extensions.utils.env
 import com.kotlindiscord.kordex.ext.mappings.extMappings
 import org.quiltmc.community.extensions.SyncExtension
-
-@Suppress("UnderscoresInNumericLiterals")  // It's an ID
-const val TEST_SERVER_ID = 787452339908116521  // Change this to your test server's ID
-
-private val TOKEN = env("TOKEN") ?: error("Required environment variable 'TOKEN' is missing.")
-internal val GUILDS = env("GUILDS")?.split(',')?.map { it.trim().toLong() }
-    ?: error("Required environment variable 'GUILDS' is missing.")
+import org.quiltmc.community.extensions.messagelog.MessageLogExtension
 
 suspend fun main() {
     val bot = ExtensibleBot(TOKEN) {
@@ -22,6 +15,7 @@ suspend fun main() {
         }
 
         extensions {
+            add(::MessageLogExtension)
             add(::SyncExtension)
 
             extMappings { }

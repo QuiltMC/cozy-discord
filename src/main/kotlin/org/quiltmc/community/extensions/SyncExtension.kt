@@ -2,7 +2,6 @@ package org.quiltmc.community.extensions
 
 import com.kotlindiscord.kord.extensions.ExtensibleBot
 import com.kotlindiscord.kord.extensions.checks.hasPermission
-import com.kotlindiscord.kord.extensions.checks.inGuild
 import com.kotlindiscord.kord.extensions.checks.or
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.utils.hasPermission
@@ -17,6 +16,7 @@ import dev.kord.core.event.guild.BanRemoveEvent
 import kotlinx.coroutines.flow.toList
 import mu.KotlinLogging
 import org.quiltmc.community.GUILDS
+import org.quiltmc.community.inQuiltGuild
 
 private val SYNC_PERMS: Array<Permission> = arrayOf(Permission.BanMembers, Permission.Administrator)
 
@@ -27,14 +27,13 @@ class SyncExtension(bot: ExtensibleBot) : Extension(bot) {
 
     @Suppress("SpreadOperator")  // No better way atm, and performance impact is negligible
     override suspend fun setup() {
-        val guildCheck = or(*GUILDS.map { inGuild(Snowflake(it)) }.toTypedArray())
         val permsCheck = or(*SYNC_PERMS.map { hasPermission(it) }.toTypedArray())
 
         command {
             name = "sync"
             description = "Additively synchronise bans between all servers, so that everything matches."
 
-            check(guildCheck, permsCheck)
+            check(inQuiltGuild, permsCheck)
             requirePermissions(Permission.BanMembers)
 
             action {
@@ -94,6 +93,8 @@ class SyncExtension(bot: ExtensibleBot) : Extension(bot) {
         }
 
         event<BanAddEvent> {
+            check(inQuiltGuild)
+
             action {
                 val guilds = getGuilds().filter { it.id != event.guildId }
                 val ban = event.getBan()
@@ -109,6 +110,8 @@ class SyncExtension(bot: ExtensibleBot) : Extension(bot) {
         }
 
         event<BanRemoveEvent> {
+            check(inQuiltGuild)
+
             action {
                 val guilds = getGuilds().filter { it.id != event.guildId }
 
@@ -121,5 +124,5 @@ class SyncExtension(bot: ExtensibleBot) : Extension(bot) {
         }
     }
 
-    private suspend fun getGuilds() = GUILDS.mapNotNull { bot.kord.getGuild(Snowflake(it)) }
+    private suspend fun getGuilds() = GUILDS.mapNotNull { bot.kord.getGuild(it) }
 }
