@@ -386,6 +386,10 @@ class MessageLogExtension(bot: ExtensibleBot) : Extension(bot) {
     private suspend fun EmbedBuilder.addMessage(message: Message) {
         val author = message.author
 
+        footer {
+            text = message.id.asString
+        }
+
         field {
             name = "URL"
             value = message.getUrl()
