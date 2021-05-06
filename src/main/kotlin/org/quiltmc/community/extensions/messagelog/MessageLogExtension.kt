@@ -6,6 +6,7 @@ import com.kotlindiscord.kord.extensions.utils.deltas.MessageDelta
 import com.kotlindiscord.kord.extensions.utils.getUrl
 import dev.kord.common.entity.Snowflake
 import dev.kord.common.entity.optional.Optional
+import dev.kord.core.entity.Message
 import dev.kord.core.entity.ReactionEmoji
 import dev.kord.core.entity.channel.Category
 import dev.kord.core.entity.channel.GuildMessageChannel
@@ -13,6 +14,7 @@ import dev.kord.core.event.guild.GuildCreateEvent
 import dev.kord.core.event.message.MessageBulkDeleteEvent
 import dev.kord.core.event.message.MessageDeleteEvent
 import dev.kord.core.event.message.MessageUpdateEvent
+import dev.kord.rest.builder.message.EmbedBuilder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -28,6 +30,9 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
 private const val LINE_LENGTH = 45
+
+private const val SINGLE_MESSAGE_LIMIT = 1900
+private const val DUAL_MESSAGE_LIMIT = 950
 
 @Suppress("StringLiteralDuplication", "MagicNumber")
 class MessageLogExtension(bot: ExtensibleBot) : Extension(bot) {
@@ -63,7 +68,7 @@ class MessageLogExtension(bot: ExtensibleBot) : Extension(bot) {
 
                 if (category == null) {
                     logger.warn {
-                        "No message log category found for guild: ${event.guild.name} (${event.guild.id.value}"
+                        "No message log category found for guild: ${event.guild.name} (${event.guild.id.value})"
                     }
 
                     return@action
@@ -74,7 +79,7 @@ class MessageLogExtension(bot: ExtensibleBot) : Extension(bot) {
 
                 if (modLogChannel == null) {
                     logger.warn {
-                        "No moderation-log channel found for guild: ${event.guild.name} (${event.guild.id.value}"
+                        "No moderation-log channel found for guild: ${event.guild.name} (${event.guild.id.value})"
                     }
 
                     return@action
@@ -170,32 +175,38 @@ class MessageLogExtension(bot: ExtensibleBot) : Extension(bot) {
                     messages += "No further messages were cached."
                 }
 
-                val logMessage = LogMessage(event.guild!!.asGuild()) {
-                    allowedMentions { }
+                send(
+                    LogMessage(event.guild!!.asGuild()) {
+                        allowedMentions { }
 
-                    embed {
-                        color = COLOUR_NEGATIVE
-                        title = "Bulk message delete"
+                        addFile("messages.md", messages.byteInputStream())
+                    }
+                )
 
-                        timestamp = Instant.now()
+                send(
+                    LogMessage(event.guild!!.asGuild()) {
+                        allowedMentions { }
 
-                        field {
-                            name = "Channel"
-                            value = event.channel.mention
-                            inline = true
-                        }
+                        embed {
+                            color = COLOUR_NEGATIVE
+                            title = "Bulk message delete"
 
-                        field {
-                            name = "Count"
-                            value = event.messageIds.size.toString()
-                            inline = true
+                            timestamp = Instant.now()
+
+                            field {
+                                name = "Channel"
+                                value = event.channel.mention
+                                inline = true
+                            }
+
+                            field {
+                                name = "Count"
+                                value = event.messageIds.size.toString()
+                                inline = true
+                            }
                         }
                     }
-
-                    addFile("messages.md", messages.byteInputStream())
-                }
-
-                send(logMessage)
+                )
             }
         }
 
@@ -203,119 +214,55 @@ class MessageLogExtension(bot: ExtensibleBot) : Extension(bot) {
             check(inQuiltGuild)
 
             action {
+                val message = event.message
+                val messageContent = message?.content
+
                 send(
                     LogMessage(event.guild!!.asGuild()) {
-                        val message = event.message
-
                         allowedMentions { }
 
-                        if (message != null) {
-                            addFile("old.md", splitContent(message.content).byteInputStream())
-                        } else {
+                        if (messageContent != null && messageContent.length <= SINGLE_MESSAGE_LIMIT) {
+                            content = "**Message Content**\n\n" +
+
+                                    messageContent
+                        } else if (messageContent == null) {
                             content = "_Message was not cached, so further information is not available._"
+                        }
+
+                        embed {
+                            color = COLOUR_NEGATIVE
+                            title = "Message deleted"
+
+                            timestamp = Instant.now()
+
+                            if (message != null) {
+                                addMessage(message)
+                            } else {
+                                field {
+                                    name = "Channel"
+                                    value = event.channel.mention
+                                    inline = true
+                                }
+
+                                field {
+                                    name = "Created"
+                                    value = "${dateTimeFormatter.format(event.messageId.timeStamp)} (UTC)\n"
+                                    inline = true
+                                }
+                            }
                         }
                     }
                 )
-                val logMessage = LogMessage(event.guild!!.asGuild()) {
-                    val message = event.message
 
-                    allowedMentions { }
+                if (messageContent != null && messageContent.length > SINGLE_MESSAGE_LIMIT) {
+                    send(
+                        LogMessage(event.guild!!.asGuild()) {
+                            allowedMentions { }
 
-                    embed {
-                        color = COLOUR_NEGATIVE
-                        title = "Message deleted"
-
-                        timestamp = Instant.now()
-
-                        if (message != null) {
-                            val author = message.author
-
-                            if (author != null) {
-                                field {
-                                    name = "Author Mention"
-                                    value = author.mention
-                                    inline = true
-                                }
-
-                                field {
-                                    name = "Author ID/Tag"
-                                    value = "`${author.id.value}` / `${author.tag}`"
-                                    inline = true
-                                }
-                            } else {
-                                field {
-                                    name = "Message Username"
-                                    value = message.data.author.username
-                                    inline = true
-                                }
-
-                                field {
-                                    name = "Webhook ID"
-                                    value = message.webhookId?.asString ?: "N/A"
-                                    inline = true
-                                }
-                            }
-
-                            field {
-                                name = "Channel"
-                                value = event.channel.mention
-                                inline = true
-                            }
-
-                            field {
-                                name = "Sent"
-                                value = "${dateTimeFormatter.format(message.timestamp)} (UTC)\n"
-                                inline = true
-                            }
-
-                            if (message.editedTimestamp != null) {
-                                field {
-                                    name = "Last Edited"
-                                    value = "${dateTimeFormatter.format(message.editedTimestamp)} (UTC)\n"
-                                    inline = true
-                                }
-                            }
-
-                            if (message.attachments.isNotEmpty()) {
-                                field {
-                                    name = "Attachments"
-                                    value = message.attachments.size.toString()
-                                    inline = true
-                                }
-                            }
-
-                            if (message.embeds.isNotEmpty()) {
-                                field {
-                                    name = "Embeds"
-                                    value = message.embeds.size.toString()
-                                    inline = true
-                                }
-                            }
-
-                            if (message.reactions.isNotEmpty()) {
-                                field {
-                                    name = "Embeds"
-                                    value = message.reactions.sumBy { reaction -> reaction.count }.toString()
-                                    inline = true
-                                }
-                            }
-                        } else {
-                            field {
-                                name = "Channel"
-                                value = event.channel.mention
-                                inline = true
-                            }
-
-                            field {
-                                name = "Created"
-                                value = "${dateTimeFormatter.format(event.messageId.timeStamp)} (UTC)\n"
-                                inline = true
-                            }
+                            addFile("old.md", splitContent(message.content).byteInputStream())
                         }
-                    }
+                    )
                 }
-
-                send(logMessage)
             }
         }
 
@@ -332,9 +279,30 @@ class MessageLogExtension(bot: ExtensibleBot) : Extension(bot) {
                     return@action  // Message content wasn't edited and we don't care about embeds/reactions/etc
                 }
 
+                val canEmbedOld = old?.content?.length ?: DUAL_MESSAGE_LIMIT + 1 <= DUAL_MESSAGE_LIMIT
+                val canEmbedNew = new.content.length <= DUAL_MESSAGE_LIMIT
+
                 send(
                     LogMessage(new.getGuild()) {
                         allowedMentions { }
+
+                        content = ""
+
+                        if (old != null && canEmbedOld) {
+                            content = "**Old Message Content**\n\n" +
+
+                                    old.content
+                        }
+
+                        if (canEmbedNew) {
+                            if (content!!.isNotEmpty()) {
+                                content += "\n\n"
+                            }
+
+                            content += "**New Message Content**\n\n" +
+
+                                    new.content
+                        }
 
                         embed {
                             color = COLOUR_BLURPLE
@@ -342,73 +310,32 @@ class MessageLogExtension(bot: ExtensibleBot) : Extension(bot) {
 
                             timestamp = Instant.now()
 
-                            field {
-                                name = "URL"
-                                value = new.getUrl()
-                            }
-
-                            val author = new.author
-
-                            if (author != null) {
-                                field {
-                                    name = "Author Mention"
-                                    value = author.mention
-                                    inline = true
-                                }
-
-                                field {
-                                    name = "Author Tag"
-                                    value = author.tag
-                                    inline = true
-                                }
-
-                                footer {
-                                    text = "Author: ${author.id.value} | Message: ${new.id.value}"
-                                }
-                            } else {
-                                field {
-                                    name = "Message Username"
-                                    value = new.data.author.username
-                                    inline = true
-                                }
-
-                                field {
-                                    name = "Webhook ID"
-                                    value = new.webhookId?.asString ?: "N/A"
-                                    inline = true
-                                }
-
-                                footer {
-                                    text = "Webhook: ${new.webhookId?.asString ?: "N/A"} | Message: ${new.id.value}"
-                                }
-                            }
-
-                            field {
-                                name = "Channel"
-                                value = new.channel.mention
-                                inline = true
-                            }
+                            addMessage(new)
 
                             if (delta == null) {
-                                description =
-                                    "**Note:** Message was not cached, so the content may not have been edited."
+                                description = "**Note:** Message was not cached, so the content may not have been " +
+                                        "edited."
                             }
                         }
                     }
                 )
 
-                send(
-                    LogMessage(new.getGuild()) {
-                        allowedMentions { }
+                @Suppress("UnnecessaryParentheses")  // some of us are insecure :>
+                if ((old != null && !canEmbedOld) || !canEmbedNew) {
+                    send(
+                        LogMessage(new.getGuild()) {
+                            allowedMentions { }
 
-                        if (delta != null) {
-                            addFile("old.md", splitContent(old!!.content).byteInputStream())
-                            addFile("new.md", splitContent(new.content).byteInputStream())
-                        } else {
-                            addFile("new.md", splitContent(new.content).byteInputStream())
+                            if (old != null && !canEmbedOld) {
+                                addFile("old.md", splitContent(old.content).byteInputStream())
+                            }
+
+                            if (!canEmbedNew) {
+                                addFile("new.md", splitContent(new.content).byteInputStream())
+                            }
                         }
-                    }
-                )
+                    )
+                }
             }
         }
 
@@ -419,13 +346,14 @@ class MessageLogExtension(bot: ExtensibleBot) : Extension(bot) {
         super.doUnload()
 
         stop()
+        rotators.clear()
     }
 
-    fun start() {
+    private fun start() {
         loopJob = bot.kord.launch { sendLoop() }
     }
 
-    fun stop() {
+    private fun stop() {
         loopJob?.cancel()
         messageChannel.close()
 
@@ -435,13 +363,13 @@ class MessageLogExtension(bot: ExtensibleBot) : Extension(bot) {
     suspend fun send(message: LogMessage) = messageChannel.send(message)
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    suspend fun sendLoop() {
+    private suspend fun sendLoop() {
         for (logMessage in messageChannel) {
             val rotator = rotators[logMessage.guild.id]
 
             if (rotator == null) {
                 logger.warn {
-                    "No category rotator found for guild: ${logMessage.guild.name} (${logMessage.guild.id.value}"
+                    "No category rotator found for guild: ${logMessage.guild.name} (${logMessage.guild.id.value})"
                 }
 
                 continue
@@ -453,5 +381,84 @@ class MessageLogExtension(bot: ExtensibleBot) : Extension(bot) {
 
     private fun splitContent(content: String) = content.split("\n").joinToString("\n") {
         if (it.length > LINE_LENGTH) it.chunkByWhitespace(LINE_LENGTH).joinToString("\n") else it
+    }
+
+    private suspend fun EmbedBuilder.addMessage(message: Message) {
+        val author = message.author
+
+        field {
+            name = "URL"
+            value = message.getUrl()
+        }
+
+        if (author != null) {
+            field {
+                name = "Author Mention"
+                value = author.mention
+                inline = true
+            }
+
+            field {
+                name = "Author ID/Tag"
+                value = "`${author.id.value}` / `${author.tag}`"
+                inline = true
+            }
+        } else {
+            field {
+                name = "Message Username"
+                value = message.data.author.username
+                inline = true
+            }
+
+            field {
+                name = "Webhook ID"
+                value = message.webhookId?.asString ?: "N/A"
+                inline = true
+            }
+        }
+
+        field {
+            name = "Channel"
+            value = message.channel.mention
+            inline = true
+        }
+
+        field {
+            name = "Sent"
+            value = "${dateTimeFormatter.format(message.timestamp)} (UTC)\n"
+            inline = true
+        }
+
+        if (message.editedTimestamp != null) {
+            field {
+                name = "Last Edited"
+                value = "${dateTimeFormatter.format(message.editedTimestamp)} (UTC)\n"
+                inline = true
+            }
+        }
+
+        if (message.attachments.isNotEmpty()) {
+            field {
+                name = "Attachments"
+                value = message.attachments.size.toString()
+                inline = true
+            }
+        }
+
+        if (message.embeds.isNotEmpty()) {
+            field {
+                name = "Embeds"
+                value = message.embeds.size.toString()
+                inline = true
+            }
+        }
+
+        if (message.reactions.isNotEmpty()) {
+            field {
+                name = "Embeds"
+                value = message.reactions.sumBy { reaction -> reaction.count }.toString()
+                inline = true
+            }
+        }
     }
 }

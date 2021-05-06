@@ -41,5 +41,9 @@ fun String.chunkByWhitespace(length: Int): List<String> {
         }
     }
 
+    if (currentLine.isNotEmpty()) {
+        lines.add(currentLine)
+    }
+
     return lines
 }
