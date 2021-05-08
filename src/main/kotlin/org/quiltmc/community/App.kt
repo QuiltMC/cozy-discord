@@ -18,7 +18,13 @@ suspend fun main() {
             add(::MessageLogExtension)
             add(::SyncExtension)
 
-            extMappings { }
+            extMappings {
+                commandCheck { command ->
+                    { event ->
+                        event.message.author != null
+                    }
+                }
+            }
         }
     }
 
