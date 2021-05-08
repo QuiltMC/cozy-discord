@@ -12,19 +12,15 @@ suspend fun main() {
     val bot = ExtensibleBot(TOKEN) {
         messageCommands {
             defaultPrefix = "?"
+
+            check { it.message.author != null }
         }
 
         extensions {
             add(::MessageLogExtension)
             add(::SyncExtension)
 
-            extMappings {
-                commandCheck { command ->
-                    { event ->
-                        event.message.author != null
-                    }
-                }
-            }
+            extMappings {}
         }
     }
 
