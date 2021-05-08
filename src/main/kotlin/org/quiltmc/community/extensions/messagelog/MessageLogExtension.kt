@@ -6,6 +6,7 @@ import com.kotlindiscord.kord.extensions.utils.deltas.MessageDelta
 import com.kotlindiscord.kord.extensions.utils.getUrl
 import dev.kord.common.entity.Snowflake
 import dev.kord.common.entity.optional.Optional
+import dev.kord.core.entity.Guild
 import dev.kord.core.entity.Message
 import dev.kord.core.entity.ReactionEmoji
 import dev.kord.core.entity.channel.Category
@@ -19,6 +20,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -42,6 +44,7 @@ class MessageLogExtension(bot: ExtensibleBot) : Extension(bot) {
 
     private var loopJob: Job? = null
     private lateinit var messageChannel: Channel<LogMessage>
+    private var firstSetup = true
 
     private val rotators: MutableMap<Snowflake, CategoryRotator> = mutableMapOf()
 
@@ -58,37 +61,7 @@ class MessageLogExtension(bot: ExtensibleBot) : Extension(bot) {
             check(inQuiltGuild)
 
             action {
-                val category = MESSAGE_LOG_CATEGORIES.mapNotNull {
-                    try {
-                        event.guild.getChannelOrNull(it) as? Category
-                    } catch (e: IllegalArgumentException) {
-                        null  // Channel isn't on this guild
-                    }
-                }.firstOrNull()
-
-                if (category == null) {
-                    logger.warn {
-                        "No message log category found for guild: ${event.guild.name} (${event.guild.id.value})"
-                    }
-
-                    return@action
-                }
-
-                val modLogChannel = event.guild.channels.firstOrNull { it.name == "moderation-log" }
-                    ?.asChannelOrNull() as? GuildMessageChannel
-
-                if (modLogChannel == null) {
-                    logger.warn {
-                        "No moderation-log channel found for guild: ${event.guild.name} (${event.guild.id.value})"
-                    }
-
-                    return@action
-                }
-
-                val rotator = CategoryRotator(category, modLogChannel)
-                rotators[category.guildId] = rotator
-
-                rotator.start()
+                addRotator(event.guild)
             }
         }
 
@@ -339,12 +312,50 @@ class MessageLogExtension(bot: ExtensibleBot) : Extension(bot) {
             }
         }
 
+        if (firstSetup) {
+            firstSetup = false
+        } else {
+            bot.kord.guilds.toList().forEach { addRotator(it) }
+        }
+
         start()
     }
 
-    override suspend fun doUnload() {
-        super.doUnload()
+    private suspend fun addRotator(guild: Guild) {
+        val category = MESSAGE_LOG_CATEGORIES.mapNotNull {
+            try {
+                guild.getChannelOrNull(it) as? Category
+            } catch (e: IllegalArgumentException) {
+                null  // Channel isn't on this guild
+            }
+        }.firstOrNull()
 
+        if (category == null) {
+            logger.warn {
+                "No message log category found for guild: ${guild.name} (${guild.id.value})"
+            }
+
+            return
+        }
+
+        val modLogChannel = guild.channels.firstOrNull { it.name == "moderation-log" }
+            ?.asChannelOrNull() as? GuildMessageChannel
+
+        if (modLogChannel == null) {
+            logger.warn {
+                "No moderation-log channel found for guild: ${guild.name} (${guild.id.value})"
+            }
+
+            return
+        }
+
+        val rotator = CategoryRotator(category, modLogChannel)
+        rotators[category.guildId] = rotator
+
+        rotator.start()
+    }
+
+    override suspend fun unload() {
         stop()
         rotators.clear()
     }
@@ -369,7 +380,8 @@ class MessageLogExtension(bot: ExtensibleBot) : Extension(bot) {
 
             if (rotator == null) {
                 logger.warn {
-                    "No category rotator found for guild: ${logMessage.guild.name} (${logMessage.guild.id.value})"
+                    "No category rotator found for guild: ${logMessage.guild.name} (${logMessage.guild.id.value})\n" +
+                            "Rotators: " + rotators.map { "${it.key.value} -> ${it.value}" }.joinToString(" | ")
                 }
 
                 continue
