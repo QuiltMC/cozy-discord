@@ -36,6 +36,7 @@ repositories {
 dependencies {
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.15.0")
 
+//    implementation("com.kotlindiscord.kord.extensions:kord-extensions:1.4.0-20210527.122057-237")
     implementation("com.kotlindiscord.kord.extensions:kord-extensions:1.4.0-SNAPSHOT")
     implementation("com.kotlindiscord.kord.extensions:extra-mappings:1.4.0-SNAPSHOT")
 
@@ -45,6 +46,11 @@ dependencies {
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
+}
+
+configurations.all {
+    resolutionStrategy.cacheDynamicVersionsFor(10, "seconds")
+    resolutionStrategy.cacheChangingModulesFor(10, "seconds")
 }
 
 application {
