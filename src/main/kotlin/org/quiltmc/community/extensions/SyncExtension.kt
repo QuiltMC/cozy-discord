@@ -1,3 +1,5 @@
+@file:Suppress("StringLiteralDuplication")
+
 package org.quiltmc.community.extensions
 
 import com.kotlindiscord.kord.extensions.checks.hasPermission
@@ -136,18 +138,34 @@ class SyncExtension : Extension() {
                     var newAssignments = 0L
 
                     message.channel.withTyping {
-                        guilds.forEach { guild ->
+                        for (guild in guilds) {
+                            val role = guild.roles.toList().firstOrNull {
+                                it.name.equals(TUPPER_ROLE_NAME, true)
+                            }
+
+                            if (role == null) {
+                                logger.debug {
+                                    "Guild ${guild.name} seems to be missing a $TUPPER_ROLE_NAME role"
+                                }
+
+                                continue
+                            }
+
                             guild.members.collect { member ->
-                                if (
-                                    member.roles.toList().firstOrNull {
-                                        it.name.equals(TUPPER_ROLE_NAME, true)
-                                    } != null
-                                ) {
+                                if (member.hasRole(role)) {
                                     logger.debug { "Member ${member.id.value} has role on guild: ${guild.name}" }
 
                                     membersWithRole.add(member.id)
                                 }
                             }
+                        }
+
+                        if (membersWithRole.isEmpty()) {
+                            message.respond {
+                                content = "Nobody seems to have the `$TUPPER_ROLE_NAME` role."
+                            }
+
+                            return@action
                         }
 
                         for (guild in guilds) {
