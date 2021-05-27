@@ -16,7 +16,7 @@ import dev.kord.core.entity.Guild
 import dev.kord.core.event.guild.BanAddEvent
 import dev.kord.core.event.guild.BanRemoveEvent
 import dev.kord.core.event.guild.MemberUpdateEvent
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.toList
 import mu.KotlinLogging
 import org.koin.core.component.inject
@@ -137,9 +137,11 @@ class SyncExtension : Extension() {
 
                     message.channel.withTyping {
                         guilds.forEach { guild ->
-                            guild.members.onEach { member ->
-                                if (member.roles.toList()
-                                        .firstOrNull { it.name.equals(TUPPER_ROLE_NAME, true) } != null
+                            guild.members.collect { member ->
+                                if (
+                                    member.roles.toList().firstOrNull {
+                                        it.name.equals(TUPPER_ROLE_NAME, true)
+                                    } != null
                                 ) {
                                     membersWithRole.add(member.id)
                                 }
@@ -149,7 +151,16 @@ class SyncExtension : Extension() {
                         for (guild in guilds) {
                             val role = guild.roles.toList().firstOrNull {
                                 it.name.equals(TUPPER_ROLE_NAME, true)
-                            } ?: continue
+                            }
+
+                            if (role == null) {
+                                message.respond(pingInReply = false) {
+                                    content = "**Note:** Guild `${guild.name}` seems to be missing a " +
+                                            "`$TUPPER_ROLE_NAME` role."
+                                }
+
+                                continue
+                            }
 
                             for (id in membersWithRole) {
                                 val member = guild.getMemberOrNull(id) ?: continue
