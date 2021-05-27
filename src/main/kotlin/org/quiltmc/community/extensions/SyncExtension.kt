@@ -143,6 +143,8 @@ class SyncExtension : Extension() {
                                         it.name.equals(TUPPER_ROLE_NAME, true)
                                     } != null
                                 ) {
+                                    logger.debug { "Member ${member.id.value} has role on guild: ${guild.name}" }
+
                                     membersWithRole.add(member.id)
                                 }
                             }
@@ -162,12 +164,18 @@ class SyncExtension : Extension() {
                                 continue
                             }
 
+                            logger.debug { "Role ${role.id.value} found on guild ${guild.name}" }
+
                             for (id in membersWithRole) {
                                 val member = guild.getMemberOrNull(id) ?: continue
 
                                 if (!member.hasRole(role)) {
+                                    logger.debug { "Adding role for member: ${member.id.value} / ${member.tag}" }
+
                                     member.addRole(role.id, "Synchronised from another server.")
                                     newAssignments += 1
+                                } else {
+                                    logger.debug { "Member already has role: ${member.id.value} / ${member.tag}" }
                                 }
                             }
                         }
@@ -228,27 +236,53 @@ class SyncExtension : Extension() {
                 val guilds = getGuilds().filter { it.id != event.guildId }
 
                 if (addedRole != null) {
+                    logger.debug { "Syncing role addition for user: ${event.member.id.value} / ${event.member.tag}" }
+
                     for (guild in guilds) {
                         val member = guild.getMemberOrNull(event.member.id) ?: continue
 
                         val role = guild.roles.toList().firstOrNull {
                             it.name.equals(TUPPER_ROLE_NAME, true)
-                        } ?: continue
+                        }
+
+                        if (role == null) {
+                            logger.debug {
+                                "Guild ${guild.name} seems to be missing a $TUPPER_ROLE_NAME role"
+                            }
+
+                            continue
+                        }
 
                         if (!member.hasRole(role)) {
+                            logger.debug { "Member doesn't have the role, adding..." }
                             member.addRole(role.id, "Synchronised from ${event.guild.asGuild().name}.")
+                        } else {
+                            logger.debug { "Member already has the role" }
                         }
                     }
                 } else if (removedRole != null) {
+                    logger.debug { "Syncing role removal for user: ${event.member.id.value} / ${event.member.tag}" }
+
                     for (guild in guilds) {
                         val member = guild.getMemberOrNull(event.member.id) ?: continue
 
                         val role = guild.roles.toList().firstOrNull {
                             it.name.equals(TUPPER_ROLE_NAME, true)
-                        } ?: continue
+                        }
+
+                        if (role == null) {
+                            logger.debug {
+                                "Guild ${guild.name} seems to be missing a $TUPPER_ROLE_NAME role"
+                            }
+
+                            continue
+                        }
 
                         if (member.hasRole(role)) {
+                            logger.debug { "Member has the role, removing..." }
                             member.removeRole(role.id, "Synchronised from ${event.guild.asGuild().name}.")
+                        } else {
+                            logger.debug { "Member doesn't have the role" }
                         }
                     }
                 }
