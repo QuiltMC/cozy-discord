@@ -1,11 +1,11 @@
 package org.quiltmc.community.extensions.messagelog
 
-import com.kotlindiscord.kord.extensions.ExtensibleBot
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.utils.deltas.MessageDelta
 import com.kotlindiscord.kord.extensions.utils.getUrl
 import dev.kord.common.entity.Snowflake
 import dev.kord.common.entity.optional.Optional
+import dev.kord.core.Kord
 import dev.kord.core.entity.Guild
 import dev.kord.core.entity.Message
 import dev.kord.core.entity.ReactionEmoji
@@ -25,6 +25,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import mu.KotlinLogging
+import org.koin.core.component.inject
 import org.quiltmc.community.*
 import java.time.Instant
 import java.time.ZoneId
@@ -37,10 +38,11 @@ private const val SINGLE_MESSAGE_LIMIT = 1900
 private const val DUAL_MESSAGE_LIMIT = 950
 
 @Suppress("StringLiteralDuplication", "MagicNumber")
-class MessageLogExtension(bot: ExtensibleBot) : Extension(bot) {
+class MessageLogExtension : Extension() {
     override val name = "message-log"
 
     private val logger = KotlinLogging.logger { }
+    private val kord: Kord by inject()
 
     private var loopJob: Job? = null
     private lateinit var messageChannel: Channel<LogMessage>
@@ -315,7 +317,7 @@ class MessageLogExtension(bot: ExtensibleBot) : Extension(bot) {
         if (firstSetup) {
             firstSetup = false
         } else {
-            bot.kord.guilds.toList().forEach { addRotator(it) }
+            kord.guilds.toList().forEach { addRotator(it) }
         }
 
         start()
@@ -361,7 +363,7 @@ class MessageLogExtension(bot: ExtensibleBot) : Extension(bot) {
     }
 
     private fun start() {
-        loopJob = bot.kord.launch { sendLoop() }
+        loopJob = kord.launch { sendLoop() }
     }
 
     private fun stop() {

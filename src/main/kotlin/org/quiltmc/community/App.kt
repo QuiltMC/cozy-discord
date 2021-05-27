@@ -4,7 +4,7 @@
 package org.quiltmc.community
 
 import com.kotlindiscord.kord.extensions.ExtensibleBot
-import com.kotlindiscord.kordex.ext.mappings.extMappings
+import com.kotlindiscord.kord.extensions.modules.extra.mappings.extMappings
 import org.quiltmc.community.extensions.SyncExtension
 import org.quiltmc.community.extensions.messagelog.MessageLogExtension
 

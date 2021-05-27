@@ -1,6 +1,5 @@
 package org.quiltmc.community.extensions
 
-import com.kotlindiscord.kord.extensions.ExtensibleBot
 import com.kotlindiscord.kord.extensions.checks.hasPermission
 import com.kotlindiscord.kord.extensions.checks.or
 import com.kotlindiscord.kord.extensions.extensions.Extension
@@ -8,6 +7,7 @@ import com.kotlindiscord.kord.extensions.utils.hasPermission
 import com.kotlindiscord.kord.extensions.utils.respond
 import dev.kord.common.entity.Permission
 import dev.kord.common.entity.Snowflake
+import dev.kord.core.Kord
 import dev.kord.core.behavior.ban
 import dev.kord.core.behavior.channel.withTyping
 import dev.kord.core.entity.Guild
@@ -15,15 +15,17 @@ import dev.kord.core.event.guild.BanAddEvent
 import dev.kord.core.event.guild.BanRemoveEvent
 import kotlinx.coroutines.flow.toList
 import mu.KotlinLogging
+import org.koin.core.component.inject
 import org.quiltmc.community.GUILDS
 import org.quiltmc.community.inQuiltGuild
 
 private val SYNC_PERMS: Array<Permission> = arrayOf(Permission.BanMembers, Permission.Administrator)
 
-class SyncExtension(bot: ExtensibleBot) : Extension(bot) {
+class SyncExtension : Extension() {
     override val name: String = "sync"
 
     private val logger = KotlinLogging.logger {}
+    private val kord: Kord by inject()
 
     @Suppress("SpreadOperator")  // No better way atm, and performance impact is negligible
     override suspend fun setup() {
@@ -44,7 +46,7 @@ class SyncExtension(bot: ExtensibleBot) : Extension(bot) {
                 guilds.forEach {
                     logger.info { "${it.id.value} -> ${it.name}" }
 
-                    val member = it.getMember(bot.kord.selfId)
+                    val member = it.getMember(this@SyncExtension.kord.selfId)
 
                     if (!SYNC_PERMS.any { perm -> member.hasPermission(perm) }) {
                         message.respond(
@@ -124,5 +126,5 @@ class SyncExtension(bot: ExtensibleBot) : Extension(bot) {
         }
     }
 
-    private suspend fun getGuilds() = GUILDS.mapNotNull { bot.kord.getGuild(it) }
+    private suspend fun getGuilds() = GUILDS.mapNotNull { kord.getGuild(it) }
 }

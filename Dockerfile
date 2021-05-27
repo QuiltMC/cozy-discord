@@ -1,4 +1,4 @@
-FROM openjdk:15-jdk-slim
+FROM openjdk:16-jdk-slim
 
 COPY build/libs/CozyDiscord-*-all.jar /usr/local/lib/CozyDiscord.jar
 

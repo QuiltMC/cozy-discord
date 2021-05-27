@@ -37,11 +37,11 @@ dependencies {
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.15.0")
 
     implementation("com.kotlindiscord.kord.extensions:kord-extensions:1.4.0-SNAPSHOT")
-    implementation("com.kotlindiscord.kordex.ext.mappings:ext-mappings:1.1.0-SNAPSHOT")
+    implementation("com.kotlindiscord.kord.extensions:extra-mappings:1.4.0-SNAPSHOT")
 
     implementation("ch.qos.logback:logback-classic:1.2.3")
     implementation("io.github.microutils:kotlin-logging:2.0.3")
-    implementation("org.codehaus.groovy:groovy:3.0.4")
+    implementation("org.codehaus.groovy:groovy:3.0.8")
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
@@ -61,7 +61,7 @@ gitHooks {
 // If you don't want the import, remove it and use org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 tasks.withType<KotlinCompile> {
     // Current LTS version of Java
-    kotlinOptions.jvmTarget = "11"
+    kotlinOptions.jvmTarget = "15"
 
     kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
     kotlinOptions.useIR = true
@@ -77,8 +77,8 @@ tasks.jar {
 
 java {
     // Current LTS version of Java
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
+    sourceCompatibility = JavaVersion.VERSION_15
+    targetCompatibility = JavaVersion.VERSION_15
 }
 
 detekt {
