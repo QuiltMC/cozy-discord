@@ -1,10 +1,14 @@
 package org.quiltmc.community.extensions.minecraft
 
+import com.kotlindiscord.kord.extensions.DISCORD_FUCHSIA
 import com.kotlindiscord.kord.extensions.DISCORD_GREEN
 import com.kotlindiscord.kord.extensions.checks.hasPermission
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalString
 import com.kotlindiscord.kord.extensions.commands.parser.Arguments
 import com.kotlindiscord.kord.extensions.extensions.Extension
+import com.kotlindiscord.kord.extensions.pagination.Paginator
+import com.kotlindiscord.kord.extensions.pagination.pages.Page
+import com.kotlindiscord.kord.extensions.pagination.pages.Pages
 import com.kotlindiscord.kord.extensions.utils.addReaction
 import com.kotlindiscord.kord.extensions.utils.respond
 import com.kotlindiscord.kord.extensions.utils.scheduling.Scheduler
@@ -22,6 +26,9 @@ import io.ktor.client.request.get
 import org.apache.commons.text.StringEscapeUtils
 import org.koin.core.component.inject
 import org.quiltmc.community.inQuiltGuild
+
+private const val PAGINATOR_TIMEOUT = 60_000L  // One minute
+private const val CHUNK_SIZE = 10
 
 private const val BASE_URL = "https://launchercontent.mojang.com"
 private const val JSON_URL = "$BASE_URL/javaPatchNotes.json"
@@ -53,6 +60,7 @@ class MinecraftExtension : Extension() {
 
     private val kord: Kord by inject()
 
+    @OptIn(KordPreview::class)
     override suspend fun setup() {
         populateVersions()
 
@@ -127,25 +135,76 @@ class MinecraftExtension : Extension() {
                 }
             }
 
-            command {
-                name = "forget-latest"
-                description = "Forget the latest version, allowing it to be relayed again."
+            command(::CheckArguments) {
+                name = "forget"
+                description = "Forget a version (the last one by default), allowing it to be relayed again."
 
                 action {
-                    knownVersions.remove(knownVersions.first())
+                    if (!::currentEntries.isInitialized) {
+                        message.respond("Still setting up - try again a bit later!")
+                        return@action
+                    }
 
+                    val version = if (arguments.version == null) {
+                        currentEntries.entries.first().version
+                    } else {
+                        currentEntries.entries.firstOrNull {
+                            it.version.equals(arguments.version, true)
+                        }?.version
+                    }
+
+                    if (version == null) {
+                        message.respond("Unknown version supplied: `${arguments.version}`")
+                        return@action
+                    }
+
+                    knownVersions.remove(version)
                     message.addReaction(THUMBS_UP)
                 }
             }
 
             command {
-                name = "run-now"
+                name = "run"
                 description = "Run the check task now, without waiting for it."
 
                 action {
                     message.addReaction(THUMBS_UP)
 
                     checkTask?.callNow()
+                }
+            }
+
+            command {
+                name = "versions"
+                description = "Get a list of patch note versions."
+
+                action {
+                    if (!::currentEntries.isInitialized) {
+                        message.respond("Still setting up - try again a bit later!")
+                        return@action
+                    }
+
+                    val pages = Pages()
+
+                    currentEntries.entries.chunked(CHUNK_SIZE).forEach { chunk ->
+                        pages.addPage(
+                            Page(
+                                chunk.joinToString("\n") { "**»** `${it.version}`" },
+
+                                title = "Patch note versions",
+                                color = DISCORD_FUCHSIA,
+                                footer = "${currentEntries.entries.size} versions"
+                            )
+                        )
+                    }
+
+                    Paginator(
+                        pages,
+                        channel,
+                        message,
+                        message.author,
+                        PAGINATOR_TIMEOUT
+                    ).send()
                 }
             }
         }
