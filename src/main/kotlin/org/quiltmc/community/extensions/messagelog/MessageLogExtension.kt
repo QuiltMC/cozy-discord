@@ -2,7 +2,7 @@ package org.quiltmc.community.extensions.messagelog
 
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.utils.deltas.MessageDelta
-import com.kotlindiscord.kord.extensions.utils.getUrl
+import com.kotlindiscord.kord.extensions.utils.getJumpUrl
 import dev.kord.common.entity.Snowflake
 import dev.kord.common.entity.optional.Optional
 import dev.kord.core.Kord
@@ -22,15 +22,17 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import mu.KotlinLogging
 import org.koin.core.component.inject
 import org.quiltmc.community.*
-import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import java.time.Instant as jtInstant
 
 private const val LINE_LENGTH = 45
 
@@ -87,10 +89,10 @@ class MessageLogExtension : Extension() {
                             messages += "**Webhook ID:** ${it.data.webhookId.value ?: "N/A"}\n\n"
                         }
 
-                        messages += "**Sent:** ${dateTimeFormatter.format(it.timestamp)} (UTC)\n"
+                        messages += "**Sent:** ${it.timestamp.format()} (UTC)\n"
 
                         if (it.editedTimestamp != null) {
-                            messages += "**Last Edited:** ${dateTimeFormatter.format(it.editedTimestamp)} (UTC)\n"
+                            messages += "**Last Edited:** ${it.editedTimestamp!!.format()} (UTC)\n"
                         }
 
                         messages += "\n"
@@ -166,7 +168,7 @@ class MessageLogExtension : Extension() {
                             color = COLOUR_NEGATIVE
                             title = "Bulk message delete"
 
-                            timestamp = Instant.now()
+                            timestamp = Clock.System.now()
 
                             field {
                                 name = "Channel"
@@ -208,7 +210,7 @@ class MessageLogExtension : Extension() {
                             color = COLOUR_NEGATIVE
                             title = "Message deleted"
 
-                            timestamp = Instant.now()
+                            timestamp = Clock.System.now()
 
                             if (message != null) {
                                 addMessage(message)
@@ -221,7 +223,7 @@ class MessageLogExtension : Extension() {
 
                                 field {
                                     name = "Created"
-                                    value = "${dateTimeFormatter.format(event.messageId.timeStamp)} (UTC)\n"
+                                    value = "${event.messageId.timeStamp.format()} (UTC)\n"
                                     inline = true
                                 }
                             }
@@ -283,7 +285,7 @@ class MessageLogExtension : Extension() {
                             color = COLOUR_BLURPLE
                             title = "Message edited"
 
-                            timestamp = Instant.now()
+                            timestamp = Clock.System.now()
 
                             addMessage(new)
 
@@ -406,7 +408,7 @@ class MessageLogExtension : Extension() {
 
         field {
             name = "URL"
-            value = message.getUrl()
+            value = message.getJumpUrl()
         }
 
         if (author != null) {
@@ -443,14 +445,14 @@ class MessageLogExtension : Extension() {
 
         field {
             name = "Sent"
-            value = "${dateTimeFormatter.format(message.timestamp)} (UTC)\n"
+            value = "${message.timestamp.format()} (UTC)\n"
             inline = true
         }
 
         if (message.editedTimestamp != null) {
             field {
                 name = "Last Edited"
-                value = "${dateTimeFormatter.format(message.editedTimestamp)} (UTC)\n"
+                value = "${message.editedTimestamp!!.format()} (UTC)\n"
                 inline = true
             }
         }
@@ -474,9 +476,15 @@ class MessageLogExtension : Extension() {
         if (message.reactions.isNotEmpty()) {
             field {
                 name = "Embeds"
-                value = message.reactions.sumBy { reaction -> reaction.count }.toString()
+                value = message.reactions.sumOf { reaction -> reaction.count }.toString()
                 inline = true
             }
         }
+    }
+
+    private fun Instant.format(): String {
+        val instant = jtInstant.ofEpochMilli(toEpochMilliseconds())
+
+        return dateTimeFormatter.format(instant)
     }
 }

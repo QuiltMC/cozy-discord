@@ -9,6 +9,7 @@ import dev.kord.gateway.Intents
 import dev.kord.gateway.PrivilegedIntent
 import org.quiltmc.community.extensions.SyncExtension
 import org.quiltmc.community.extensions.messagelog.MessageLogExtension
+import org.quiltmc.community.extensions.minecraft.MinecraftExtension
 
 @OptIn(PrivilegedIntent::class)
 suspend fun main() {
@@ -27,9 +28,16 @@ suspend fun main() {
             check { it.message.author != null }
         }
 
+        slashCommands {
+            enabled = true
+        }
+
         extensions {
             add(::MessageLogExtension)
+            add(::MinecraftExtension)
             add(::SyncExtension)
+
+            sentry = false
 
             extMappings {}
         }
