@@ -1,2 +1,5 @@
 [settings]
 namespaces = [ "yarn" ]
+
+[yarn]
+channels = []
