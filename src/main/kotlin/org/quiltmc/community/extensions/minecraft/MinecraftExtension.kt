@@ -16,7 +16,6 @@ import com.kotlindiscord.kord.extensions.utils.scheduling.Task
 import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.Permission
 import dev.kord.common.entity.Snowflake
-import dev.kord.core.Kord
 import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.entity.channel.MessageChannel
 import dev.kord.rest.builder.message.EmbedBuilder
@@ -24,7 +23,6 @@ import io.ktor.client.HttpClient
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.request.get
 import org.apache.commons.text.StringEscapeUtils
-import org.koin.core.component.inject
 import org.quiltmc.community.inQuiltGuild
 
 private const val PAGINATOR_TIMEOUT = 60_000L  // One minute
@@ -57,8 +55,6 @@ class MinecraftExtension : Extension() {
     private var checkTask: Task? = null
     private var knownVersions: MutableSet<String> = mutableSetOf()
     private lateinit var currentEntries: PatchNoteEntries
-
-    private val kord: Kord by inject()
 
     @OptIn(KordPreview::class)
     override suspend fun setup() {

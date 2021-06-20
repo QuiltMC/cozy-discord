@@ -11,7 +11,6 @@ import com.kotlindiscord.kord.extensions.utils.hasRole
 import com.kotlindiscord.kord.extensions.utils.respond
 import dev.kord.common.entity.Permission
 import dev.kord.common.entity.Snowflake
-import dev.kord.core.Kord
 import dev.kord.core.behavior.ban
 import dev.kord.core.behavior.channel.withTyping
 import dev.kord.core.entity.Guild
@@ -21,7 +20,6 @@ import dev.kord.core.event.guild.MemberUpdateEvent
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.toList
 import mu.KotlinLogging
-import org.koin.core.component.inject
 import org.quiltmc.community.GUILDS
 import org.quiltmc.community.inQuiltGuild
 
@@ -34,7 +32,6 @@ class SyncExtension : Extension() {
     override val name: String = "sync"
 
     private val logger = KotlinLogging.logger {}
-    private val kord: Kord by inject()
 
     @Suppress("SpreadOperator")  // No better way atm, and performance impact is negligible
     override suspend fun setup() {

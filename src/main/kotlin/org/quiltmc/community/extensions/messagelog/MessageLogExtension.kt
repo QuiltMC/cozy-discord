@@ -5,7 +5,6 @@ import com.kotlindiscord.kord.extensions.utils.deltas.MessageDelta
 import com.kotlindiscord.kord.extensions.utils.getJumpUrl
 import dev.kord.common.entity.Snowflake
 import dev.kord.common.entity.optional.Optional
-import dev.kord.core.Kord
 import dev.kord.core.entity.Guild
 import dev.kord.core.entity.Message
 import dev.kord.core.entity.ReactionEmoji
@@ -27,7 +26,6 @@ import kotlinx.datetime.Instant
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import mu.KotlinLogging
-import org.koin.core.component.inject
 import org.quiltmc.community.*
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -44,7 +42,6 @@ class MessageLogExtension : Extension() {
     override val name = "message-log"
 
     private val logger = KotlinLogging.logger { }
-    private val kord: Kord by inject()
 
     private var loopJob: Job? = null
     private lateinit var messageChannel: Channel<LogMessage>
