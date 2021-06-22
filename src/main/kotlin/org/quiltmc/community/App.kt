@@ -5,11 +5,19 @@ package org.quiltmc.community
 
 import com.kotlindiscord.kord.extensions.ExtensibleBot
 import com.kotlindiscord.kord.extensions.modules.extra.mappings.extMappings
+import com.kotlindiscord.kord.extensions.utils.env
+import dev.kord.common.entity.Snowflake
 import dev.kord.gateway.Intents
 import dev.kord.gateway.PrivilegedIntent
+import me.shedaniel.linkie.namespaces.YarnNamespace
 import org.quiltmc.community.extensions.SyncExtension
 import org.quiltmc.community.extensions.messagelog.MessageLogExtension
 import org.quiltmc.community.extensions.minecraft.MinecraftExtension
+
+@Suppress("MagicNumber", "UnderscoresInNumericLiterals")
+private val NON_YARN_CHANNEL = Snowflake(
+    env("NON_YARN_CHANNEL_ID")?.toLong() ?: 856825412695883796
+)
 
 @OptIn(PrivilegedIntent::class)
 suspend fun main() {
@@ -39,7 +47,18 @@ suspend fun main() {
 
             sentry = false
 
-            extMappings {}
+            extMappings {
+                namespaceCheck { namespace ->
+                    { event ->
+                        if (namespace == YarnNamespace) {
+                            true
+                        } else {
+                            event.message.getGuildOrNull() == null ||
+                                    event.message.channelId == NON_YARN_CHANNEL
+                        }
+                    }
+                }
+            }
         }
     }
 
