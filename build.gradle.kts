@@ -8,7 +8,7 @@ plugins {
 
     id("com.github.jakemarsden.git-hooks") version "0.0.1"
     id("com.github.johnrengelman.shadow") version "5.2.0"
-    id("io.gitlab.arturbosch.detekt") version "1.15.0"
+    id("io.gitlab.arturbosch.detekt") version "1.17.1"
 }
 
 group = "org.quiltmc.community"
@@ -35,19 +35,19 @@ repositories {
 }
 
 dependencies {
-    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.15.0")
+    detektPlugins(libs.detekt)
 
-//    implementation("com.kotlindiscord.kord.extensions:kord-extensions:1.4.0-20210527.122057-237")
-    implementation("com.kotlindiscord.kord.extensions:kord-extensions:1.4.1-SNAPSHOT")
-    implementation("com.kotlindiscord.kord.extensions:extra-mappings:1.4.1-SNAPSHOT")
+    implementation(libs.kordex.core)
+    implementation(libs.kordex.mappings)
 
-    implementation("org.apache.commons:commons-text:1.9")
-    implementation("ch.qos.logback:logback-classic:1.2.3")
-    implementation("io.github.microutils:kotlin-logging:2.0.3")
-    implementation("org.codehaus.groovy:groovy:3.0.8")
+    implementation(libs.commons.text)
+    implementation(libs.logback)
+    implementation(libs.logging)
+    implementation(libs.groovy)
 
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
+    implementation(platform(libs.kotlin.bom))
+    implementation(libs.kotlin.stdlib)
+    implementation(libs.kx.ser)
 }
 
 configurations.all {

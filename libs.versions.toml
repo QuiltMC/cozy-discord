@@ -1,0 +1,22 @@
+[versions]
+detekt = "1.17.1"  # Note: Plugin versions must be updated in the settings.gradle.kts too
+kotlin = "1.5.10"  # Note: Plugin versions must be updated in the settings.gradle.kts too
+
+commons-text = "1.9"
+groovy = "3.0.8"
+kordex = "1.4.1-SNAPSHOT"
+kx-ser = "1.2.1"
+logback = "1.2.3"
+logging = "2.0.3"
+
+[libraries]
+commons-text = { module = "org.apache.commons:commons-text", version.ref = "commons-text" }
+detekt = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
+groovy = { module = "org.codehaus.groovy:groovy", version.ref = "groovy" }
+kordex-core = { module = "com.kotlindiscord.kord.extensions:kord-extensions", version.ref = "kordex" }
+kordex-mappings = { module = "com.kotlindiscord.kord.extensions:extra-mappings", version.ref = "kordex" }
+kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom" }
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8" }
+kx-ser = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kx-ser" }
+logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+logging = { module = "io.github.microutils:kotlin-logging", version.ref = "logging" }
