@@ -42,6 +42,11 @@ class SyncExtension : Extension() {
             name = "sync"
             description = "Synchronisation commands."
 
+            check(
+                inQuiltGuild,
+                banPermsCheck or rolePermsCheck
+            )
+
             command {
                 name = "bans"
                 description = "Additively synchronise bans between all servers, so that everything matches."

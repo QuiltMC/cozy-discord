@@ -6,9 +6,7 @@ import com.kotlindiscord.kord.extensions.checks.hasPermission
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalString
 import com.kotlindiscord.kord.extensions.commands.parser.Arguments
 import com.kotlindiscord.kord.extensions.extensions.Extension
-import com.kotlindiscord.kord.extensions.pagination.Paginator
 import com.kotlindiscord.kord.extensions.pagination.pages.Page
-import com.kotlindiscord.kord.extensions.pagination.pages.Pages
 import com.kotlindiscord.kord.extensions.utils.addReaction
 import com.kotlindiscord.kord.extensions.utils.respond
 import com.kotlindiscord.kord.extensions.utils.scheduling.Scheduler
@@ -180,27 +178,22 @@ class MinecraftExtension : Extension() {
                         return@action
                     }
 
-                    val pages = Pages()
+                    paginator(targetChannel = channel, targetMessage = message) {
+                        owner = message.author
+                        timeoutSeconds = PAGINATOR_TIMEOUT
 
-                    currentEntries.entries.chunked(CHUNK_SIZE).forEach { chunk ->
-                        pages.addPage(
-                            Page(
-                                chunk.joinToString("\n") { "**»** `${it.version}`" },
+                        currentEntries.entries.chunked(CHUNK_SIZE).forEach { chunk ->
+                            page(
+                                Page(
+                                    chunk.joinToString("\n") { "**»** `${it.version}`" },
 
-                                title = "Patch note versions",
-                                color = DISCORD_FUCHSIA,
-                                footer = "${currentEntries.entries.size} versions"
+                                    title = "Patch note versions",
+                                    color = DISCORD_FUCHSIA,
+                                    footer = "${currentEntries.entries.size} versions"
+                                )
                             )
-                        )
-                    }
-
-                    Paginator(
-                        pages,
-                        channel,
-                        message,
-                        message.author,
-                        PAGINATOR_TIMEOUT
-                    ).send()
+                        }
+                    }.send()
                 }
             }
         }
