@@ -3,12 +3,13 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     application
 
-    kotlin("jvm") version "1.5.10"
-    kotlin("plugin.serialization") version "1.5.10"
+    kotlin("jvm")
+    kotlin("plugin.serialization")
 
-    id("com.github.jakemarsden.git-hooks") version "0.0.1"
-    id("com.github.johnrengelman.shadow") version "5.2.0"
-    id("io.gitlab.arturbosch.detekt") version "1.17.1"
+    id("com.google.devtools.ksp")
+    id("com.github.jakemarsden.git-hooks")
+    id("com.github.johnrengelman.shadow")
+    id("io.gitlab.arturbosch.detekt")
 }
 
 group = "org.quiltmc.community"
@@ -17,6 +18,7 @@ version = "1.0-SNAPSHOT"
 repositories {
     // You can remove this if you're not testing locally-installed KordEx builds
     mavenLocal()
+    google()
 
     maven {
         name = "Kotlin Discord"
@@ -37,6 +39,9 @@ repositories {
 dependencies {
     detektPlugins(libs.detekt)
 
+    ksp(libs.kordex.annotationProcessor)
+
+    implementation(libs.kordex.annotations)
     implementation(libs.kordex.core)
     implementation(libs.kordex.mappings)
 
@@ -92,4 +97,18 @@ java {
 detekt {
     buildUponDefaultConfig = true
     config = rootProject.files("detekt.yml")
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir(file("$buildDir/generated/ksp/main/kotlin/"))
+        }
+    }
+
+    test {
+        java {
+            srcDir(file("$buildDir/generated/ksp/test/kotlin/"))
+        }
+    }
 }

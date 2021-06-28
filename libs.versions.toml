@@ -13,6 +13,8 @@ logging = "2.0.3"
 commons-text = { module = "org.apache.commons:commons-text", version.ref = "commons-text" }
 detekt = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
 groovy = { module = "org.codehaus.groovy:groovy", version.ref = "groovy" }
+kordex-annotations = { module = "com.kotlindiscord.kord.extensions:annotations", version.ref = "kordex" }
+kordex-annotationProcessor = { module = "com.kotlindiscord.kord.extensions:annotation-processor", version.ref = "kordex" }
 kordex-core = { module = "com.kotlindiscord.kord.extensions:kord-extensions", version.ref = "kordex" }
 kordex-mappings = { module = "com.kotlindiscord.kord.extensions:extra-mappings", version.ref = "kordex" }
 kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom" }

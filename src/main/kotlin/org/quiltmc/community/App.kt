@@ -6,13 +6,18 @@ package org.quiltmc.community
 import com.kotlindiscord.kord.extensions.ExtensibleBot
 import com.kotlindiscord.kord.extensions.modules.extra.mappings.extMappings
 import com.kotlindiscord.kord.extensions.utils.env
+import com.kotlindiscord.kord.extensions.utils.loadModule
 import dev.kord.common.entity.Snowflake
 import dev.kord.gateway.Intents
 import dev.kord.gateway.PrivilegedIntent
 import me.shedaniel.linkie.namespaces.YarnNamespace
+import org.koin.dsl.bind
 import org.quiltmc.community.extensions.SyncExtension
 import org.quiltmc.community.extensions.messagelog.MessageLogExtension
 import org.quiltmc.community.extensions.minecraft.MinecraftExtension
+import org.quiltmc.community.extensions.suggestions.JsonSuggestions
+import org.quiltmc.community.extensions.suggestions.SuggestionsData
+import org.quiltmc.community.extensions.suggestions.SuggestionsExtension
 
 @Suppress("MagicNumber", "UnderscoresInNumericLiterals")
 private val NON_YARN_CHANNEL = Snowflake(
@@ -43,6 +48,7 @@ suspend fun main() {
         extensions {
             add(::MessageLogExtension)
             add(::MinecraftExtension)
+            add(::SuggestionsExtension)
             add(::SyncExtension)
 
             sentry = false
@@ -58,6 +64,15 @@ suspend fun main() {
                         }
                     }
                 }
+            }
+        }
+
+        hooks {
+            afterKoinSetup {
+                val suggestions = JsonSuggestions()
+                suggestions.load()
+
+                loadModule { single { suggestions } bind SuggestionsData::class }
             }
         }
     }

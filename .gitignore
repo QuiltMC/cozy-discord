@@ -110,3 +110,6 @@ build/
 
 # Linkie mappings cacbe
 .linkie-cache
+
+# Data files
+data/
