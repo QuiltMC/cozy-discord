@@ -5,6 +5,7 @@
 package org.quiltmc.community.extensions.suggestions
 
 import com.kotlindiscord.kord.extensions.CommandException
+import com.kotlindiscord.kord.extensions.checks.hasRole
 import com.kotlindiscord.kord.extensions.checks.isNotBot
 import com.kotlindiscord.kord.extensions.commands.converters.impl.coalescedString
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalCoalescingString
@@ -294,6 +295,10 @@ class SuggestionsExtension : Extension() {
 
                 COMMUNITY_MANAGEMENT_ROLES.forEach(::allowRole)
 
+                COMMUNITY_MANAGEMENT_ROLES.forEach {
+                    check(hasRole(it))
+                }
+
                 action {
                     arguments.suggestion.status = SuggestionStatus.Approved
                     arguments.suggestion.comment = arguments.comment ?: arguments.suggestion.comment
@@ -312,6 +317,10 @@ class SuggestionsExtension : Extension() {
                 description = "Deny a suggestion"
 
                 COMMUNITY_MANAGEMENT_ROLES.forEach(::allowRole)
+
+                COMMUNITY_MANAGEMENT_ROLES.forEach {
+                    check(hasRole(it))
+                }
 
                 action {
                     arguments.suggestion.status = SuggestionStatus.Denied
@@ -332,6 +341,10 @@ class SuggestionsExtension : Extension() {
 
                 COMMUNITY_MANAGEMENT_ROLES.forEach(::allowRole)
 
+                COMMUNITY_MANAGEMENT_ROLES.forEach {
+                    check(hasRole(it))
+                }
+
                 action {
                     arguments.suggestion.status = SuggestionStatus.Open
                     arguments.suggestion.comment = arguments.comment ?: arguments.suggestion.comment
@@ -350,6 +363,10 @@ class SuggestionsExtension : Extension() {
                 description = "Mark a suggestion as implemented"
 
                 COMMUNITY_MANAGEMENT_ROLES.forEach(::allowRole)
+
+                COMMUNITY_MANAGEMENT_ROLES.forEach {
+                    check(hasRole(it))
+                }
 
                 action {
                     arguments.suggestion.status = SuggestionStatus.Implemented
@@ -370,6 +387,10 @@ class SuggestionsExtension : Extension() {
 
                 COMMUNITY_MANAGEMENT_ROLES.forEach(::allowRole)
 
+                COMMUNITY_MANAGEMENT_ROLES.forEach {
+                    check(hasRole(it))
+                }
+
                 action {
                     arguments.suggestion.status = SuggestionStatus.Duplicate
                     arguments.suggestion.comment = arguments.comment ?: arguments.suggestion.comment
@@ -388,6 +409,10 @@ class SuggestionsExtension : Extension() {
                 description = "Mark a suggestion as spam"
 
                 COMMUNITY_MANAGEMENT_ROLES.forEach(::allowRole)
+
+                COMMUNITY_MANAGEMENT_ROLES.forEach {
+                    check(hasRole(it))
+                }
 
                 action {
                     arguments.suggestion.status = SuggestionStatus.Spam
@@ -411,6 +436,10 @@ class SuggestionsExtension : Extension() {
                 description = "Set a suggestion's staff comment"
 
                 COMMUNITY_MANAGEMENT_ROLES.forEach(::allowRole)
+
+                COMMUNITY_MANAGEMENT_ROLES.forEach {
+                    check(hasRole(it))
+                }
 
                 action {
                     arguments.suggestion.comment = arguments.comment
