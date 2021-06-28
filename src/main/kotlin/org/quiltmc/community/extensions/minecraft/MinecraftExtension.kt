@@ -271,14 +271,20 @@ class MinecraftExtension : Extension() {
 
         title = patchNote.title
         color = DISCORD_GREEN
-        description = "$truncated\n\n  [... $remaining more lines]"
+
+        description = "[Full patch notes](https://quiltmc.org/mc-patchnotes/#${patchNote.version})\n\n"
+        description += truncated
+
+        if (remaining > 0) {
+            description += "\n\n[... $remaining more lines]"
+        }
 
         thumbnail {
             url = "$BASE_URL${patchNote.image.url}"
         }
 
         footer {
-            text = "See minecraft.net for more information"
+            text = "URL: https://quiltmc.org/mc-patchnotes/#${patchNote.version}"
         }
     }
 
