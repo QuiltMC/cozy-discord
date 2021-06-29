@@ -266,6 +266,8 @@ class SuggestionsExtension : Extension() {
             name = "edit-suggestion"
             description = "Edit one of your suggestions"
 
+            guild(COMMUNITY_GUILD)
+
             action {
                 if (arguments.suggestion.owner != user.id.asString) {
                     ephemeralFollowUp {
