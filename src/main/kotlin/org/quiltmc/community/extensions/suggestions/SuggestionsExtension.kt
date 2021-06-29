@@ -66,6 +66,8 @@ class SuggestionsExtension : Extension() {
         event<MessageCreateEvent> {
             check(::isNotBot)
             check { it.message.channelId == SUGGESTION_CHANNEL }
+            check { it.message.content.trim().isNotEmpty() }
+            check { it.message.interaction == null }
 
             action {
                 event.message.channel.withTyping {
@@ -156,6 +158,9 @@ class SuggestionsExtension : Extension() {
             check(::isNotBot)
             check { it.message?.author != null }
             check { it.message?.webhookId == null }
+            check { it.message?.channelId == SUGGESTION_CHANNEL }
+            check { it.message?.content?.trim()?.isNotEmpty() == true }
+            check { it.message?.interaction == null }
 
             action {
                 messageCache.add(event.message!!.content to event.message!!.author!!.id)
@@ -257,35 +262,38 @@ class SuggestionsExtension : Extension() {
 
         // region: Commands
 
+        slashCommand(::SuggestionEditArguments) {
+            name = "edit-suggestion"
+            description = "Edit one of your suggestions"
+
+            action {
+                if (arguments.suggestion.owner != user.id.asString) {
+                    ephemeralFollowUp {
+                        content = "**Error:** You don't own that suggestion."
+                    }
+
+                    return@action
+                }
+
+                arguments.suggestion.text = arguments.text
+
+                suggestions.save(arguments.suggestion)
+                sendSuggestion(arguments.suggestion.id)
+
+                ephemeralFollowUp {
+                    content = "Suggestion updated."
+                }
+            }
+        }
+
         slashCommand {
             name = "suggestion"
             description = "Suggestion-related commands"
 
             guild(COMMUNITY_GUILD)
 
-            subCommand(::SuggestionEditArguments) {
-                name = "edit"
-                description = "Edit one of your suggestions"
-
-                action {
-                    if (arguments.suggestion.owner != user.id.asString) {
-                        ephemeralFollowUp {
-                            content = "**Error:** You don't own that suggestion."
-                        }
-
-                        return@action
-                    }
-
-                    arguments.suggestion.text = arguments.text
-
-                    suggestions.save(arguments.suggestion)
-                    sendSuggestion(arguments.suggestion.id)
-
-                    ephemeralFollowUp {
-                        content = "Suggestion updated."
-                    }
-                }
-            }
+            COMMUNITY_MANAGEMENT_ROLES.forEach(::allowRole)
+            COMMUNITY_MANAGEMENT_ROLES.forEach { check(hasRole(it)) }
 
             // region: State changes
 
@@ -294,10 +302,6 @@ class SuggestionsExtension : Extension() {
                 description = "Approve a suggestion"
 
                 COMMUNITY_MANAGEMENT_ROLES.forEach(::allowRole)
-
-                COMMUNITY_MANAGEMENT_ROLES.forEach {
-                    check(hasRole(it))
-                }
 
                 action {
                     arguments.suggestion.status = SuggestionStatus.Approved
@@ -318,10 +322,6 @@ class SuggestionsExtension : Extension() {
 
                 COMMUNITY_MANAGEMENT_ROLES.forEach(::allowRole)
 
-                COMMUNITY_MANAGEMENT_ROLES.forEach {
-                    check(hasRole(it))
-                }
-
                 action {
                     arguments.suggestion.status = SuggestionStatus.Denied
                     arguments.suggestion.comment = arguments.comment ?: arguments.suggestion.comment
@@ -340,10 +340,6 @@ class SuggestionsExtension : Extension() {
                 description = "Reopen a suggestion"
 
                 COMMUNITY_MANAGEMENT_ROLES.forEach(::allowRole)
-
-                COMMUNITY_MANAGEMENT_ROLES.forEach {
-                    check(hasRole(it))
-                }
 
                 action {
                     arguments.suggestion.status = SuggestionStatus.Open
@@ -364,10 +360,6 @@ class SuggestionsExtension : Extension() {
 
                 COMMUNITY_MANAGEMENT_ROLES.forEach(::allowRole)
 
-                COMMUNITY_MANAGEMENT_ROLES.forEach {
-                    check(hasRole(it))
-                }
-
                 action {
                     arguments.suggestion.status = SuggestionStatus.Implemented
                     arguments.suggestion.comment = arguments.comment ?: arguments.suggestion.comment
@@ -387,10 +379,6 @@ class SuggestionsExtension : Extension() {
 
                 COMMUNITY_MANAGEMENT_ROLES.forEach(::allowRole)
 
-                COMMUNITY_MANAGEMENT_ROLES.forEach {
-                    check(hasRole(it))
-                }
-
                 action {
                     arguments.suggestion.status = SuggestionStatus.Duplicate
                     arguments.suggestion.comment = arguments.comment ?: arguments.suggestion.comment
@@ -409,10 +397,6 @@ class SuggestionsExtension : Extension() {
                 description = "Mark a suggestion as spam"
 
                 COMMUNITY_MANAGEMENT_ROLES.forEach(::allowRole)
-
-                COMMUNITY_MANAGEMENT_ROLES.forEach {
-                    check(hasRole(it))
-                }
 
                 action {
                     arguments.suggestion.status = SuggestionStatus.Spam
@@ -436,10 +420,6 @@ class SuggestionsExtension : Extension() {
                 description = "Set a suggestion's staff comment"
 
                 COMMUNITY_MANAGEMENT_ROLES.forEach(::allowRole)
-
-                COMMUNITY_MANAGEMENT_ROLES.forEach {
-                    check(hasRole(it))
-                }
 
                 action {
                     arguments.suggestion.comment = arguments.comment

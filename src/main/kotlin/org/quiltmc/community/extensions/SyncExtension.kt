@@ -250,8 +250,8 @@ class SyncExtension : Extension() {
                 val delta = MemberDelta.from(event.old, event.member) ?: return@action
                 val roles = delta.roles.value
 
-                val addedRole = roles?.added?.first { it.name.equals(TUPPER_ROLE_NAME, true) }
-                val removedRole = roles?.removed?.first { it.name.equals(TUPPER_ROLE_NAME, true) }
+                val addedRole = roles?.added?.firstOrNull { it.name.equals(TUPPER_ROLE_NAME, true) }
+                val removedRole = roles?.removed?.firstOrNull { it.name.equals(TUPPER_ROLE_NAME, true) }
 
                 val guilds = getGuilds().filter { it.id != event.guildId }
 
