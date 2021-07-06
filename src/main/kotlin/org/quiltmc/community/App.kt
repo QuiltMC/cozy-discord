@@ -51,7 +51,9 @@ suspend fun main() {
             add(::SuggestionsExtension)
             add(::SyncExtension)
 
-            sentry = false
+            sentry {
+                enable = false
+            }
 
             extMappings {
                 namespaceCheck { namespace ->

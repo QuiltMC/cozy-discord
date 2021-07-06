@@ -4,7 +4,7 @@ kotlin = "1.5.10"  # Note: Plugin versions must be updated in the settings.gradl
 
 commons-text = "1.9"
 groovy = "3.0.8"
-kordex = "1.4.1-SNAPSHOT"
+kordex = "1.4.2-SNAPSHOT"
 kx-ser = "1.2.1"
 logback = "1.2.3"
 logging = "2.0.3"
