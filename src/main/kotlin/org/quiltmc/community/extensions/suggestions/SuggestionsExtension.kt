@@ -26,7 +26,7 @@ import dev.kord.core.builder.components.emoji
 import dev.kord.core.entity.Message
 import dev.kord.core.entity.ReactionEmoji
 import dev.kord.core.entity.channel.GuildMessageChannel
-import dev.kord.core.entity.interaction.ComponentInteraction
+import dev.kord.core.entity.interaction.ButtonInteraction
 import dev.kord.core.event.interaction.InteractionCreateEvent
 import dev.kord.core.event.message.MessageCreateEvent
 import dev.kord.core.event.message.MessageDeleteEvent
@@ -173,10 +173,10 @@ class SuggestionsExtension : Extension() {
 
         event<InteractionCreateEvent> {
             check { it.interaction.channelId == SUGGESTION_CHANNEL }
-            check { it.interaction is ComponentInteraction }
+            check { it.interaction is ButtonInteraction }
 
             action {
-                val interaction = event.interaction as ComponentInteraction
+                val interaction = event.interaction as ButtonInteraction
 
                 if ("/" !in interaction.componentId) {
                     return@action
