@@ -12,7 +12,7 @@ val inQuiltGuild: Check<*> = {
     if (guild == null) {
         logger.nullGuild(event)
 
-        fail()
+        fail("Must be in one of the Quilt servers")
     } else {
         if (guild.id !in GUILDS) {
             fail("Must be in one of the Quilt servers")
