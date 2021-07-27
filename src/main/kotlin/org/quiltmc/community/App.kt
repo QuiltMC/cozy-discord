@@ -38,7 +38,11 @@ suspend fun main() {
         messageCommands {
             defaultPrefix = "?"
 
-            check { it.message.author != null }
+            check {
+                if (event.message.author == null) {
+                    fail()
+                }
+            }
         }
 
         slashCommands {
@@ -57,12 +61,11 @@ suspend fun main() {
 
             extMappings {
                 namespaceCheck { namespace ->
-                    { event ->
-                        if (namespace == YarnNamespace) {
-                            true
-                        } else {
-                            event.message.getGuildOrNull() == null ||
-                                    event.message.channelId == NON_YARN_CHANNEL
+                    {
+                        failIfNot("Non-Yarn commands may only be run in <#${NON_YARN_CHANNEL.value}>") {
+                            namespace == YarnNamespace &&
+                                    (event.message.getGuildOrNull() == null ||
+                                            event.message.channelId == NON_YARN_CHANNEL)
                         }
                     }
                 }

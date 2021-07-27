@@ -6,7 +6,7 @@ package org.quiltmc.community.extensions.suggestions
 
 import com.kotlindiscord.kord.extensions.CommandException
 import com.kotlindiscord.kord.extensions.checks.hasRole
-import com.kotlindiscord.kord.extensions.checks.isNotBot
+import com.kotlindiscord.kord.extensions.checks.isNotbot
 import com.kotlindiscord.kord.extensions.commands.converters.impl.coalescedString
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalCoalescingString
 import com.kotlindiscord.kord.extensions.commands.parser.Arguments
@@ -64,10 +64,11 @@ class SuggestionsExtension : Extension() {
         // region: Events
 
         event<MessageCreateEvent> {
-            check(::isNotBot)
-            check { it.message.channelId == SUGGESTION_CHANNEL }
-            check { it.message.content.trim().isNotEmpty() }
-            check { it.message.interaction == null }
+            check(isNotbot)
+
+            check { failIfNot(event.message.channelId == SUGGESTION_CHANNEL) }
+            check { failIfNot(event.message.content.trim().isNotEmpty()) }
+            check { failIfNot(event.message.interaction == null) }
 
             action {
                 event.message.channel.withTyping {
@@ -155,12 +156,13 @@ class SuggestionsExtension : Extension() {
         }
 
         event<MessageDeleteEvent> {
-            check(::isNotBot)
-            check { it.message?.author != null }
-            check { it.message?.webhookId == null }
-            check { it.message?.channelId == SUGGESTION_CHANNEL }
-            check { it.message?.content?.trim()?.isNotEmpty() == true }
-            check { it.message?.interaction == null }
+            check(isNotbot)
+
+            check { failIfNot(event.message?.author != null) }
+            check { failIfNot(event.message?.webhookId == null) }
+            check { failIfNot(event.message?.channelId == SUGGESTION_CHANNEL) }
+            check { failIfNot(event.message?.content?.trim()?.isNotEmpty() == true) }
+            check { failIfNot(event.message?.interaction == null) }
 
             action {
                 messageCache.add(event.message!!.content to event.message!!.author!!.id)
@@ -172,8 +174,8 @@ class SuggestionsExtension : Extension() {
         }
 
         event<InteractionCreateEvent> {
-            check { it.interaction.channelId == SUGGESTION_CHANNEL }
-            check { it.interaction is ButtonInteraction }
+            check { failIfNot(event.interaction.channelId == SUGGESTION_CHANNEL) }
+            check { failIfNot(event.interaction is ButtonInteraction) }
 
             action {
                 val interaction = event.interaction as ButtonInteraction
