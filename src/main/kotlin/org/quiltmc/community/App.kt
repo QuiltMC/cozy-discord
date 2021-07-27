@@ -63,9 +63,9 @@ suspend fun main() {
                 namespaceCheck { namespace ->
                     {
                         failIfNot("Non-Yarn commands may only be run in <#${NON_YARN_CHANNEL.value}>") {
-                            namespace == YarnNamespace &&
-                                    (event.message.getGuildOrNull() == null ||
-                                            event.message.channelId == NON_YARN_CHANNEL)
+                            namespace == YarnNamespace ||
+                                    event.message.getGuildOrNull() == null ||
+                                    event.message.channelId == NON_YARN_CHANNEL
                         }
                     }
                 }
