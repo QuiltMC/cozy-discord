@@ -14,12 +14,14 @@ import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.utils.ackEphemeral
 import com.kotlindiscord.kord.extensions.utils.delete
 import com.kotlindiscord.kord.extensions.utils.dm
+import com.kotlindiscord.kord.extensions.utils.getJumpUrl
 import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.ButtonStyle
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.behavior.channel.withTyping
 import dev.kord.core.behavior.edit
+import dev.kord.core.behavior.getChannelOf
 import dev.kord.core.behavior.interaction.followUpEphemeral
 import dev.kord.core.behavior.reply
 import dev.kord.core.builder.components.emoji
@@ -313,6 +315,7 @@ class SuggestionsExtension : Extension() {
 
                     suggestions.save(arguments.suggestion)
                     sendSuggestion(arguments.suggestion.id)
+                    sendSuggestionUpdateMessage(arguments.suggestion)
 
                     ephemeralFollowUp {
                         content = "Suggestion updated."
@@ -332,6 +335,7 @@ class SuggestionsExtension : Extension() {
 
                     suggestions.save(arguments.suggestion)
                     sendSuggestion(arguments.suggestion.id)
+                    sendSuggestionUpdateMessage(arguments.suggestion)
 
                     ephemeralFollowUp {
                         content = "Suggestion updated."
@@ -351,6 +355,7 @@ class SuggestionsExtension : Extension() {
 
                     suggestions.save(arguments.suggestion)
                     sendSuggestion(arguments.suggestion.id)
+                    sendSuggestionUpdateMessage(arguments.suggestion)
 
                     ephemeralFollowUp {
                         content = "Suggestion updated."
@@ -370,6 +375,7 @@ class SuggestionsExtension : Extension() {
 
                     suggestions.save(arguments.suggestion)
                     sendSuggestion(arguments.suggestion.id)
+                    sendSuggestionUpdateMessage(arguments.suggestion)
 
                     ephemeralFollowUp {
                         content = "Suggestion updated."
@@ -389,6 +395,7 @@ class SuggestionsExtension : Extension() {
 
                     suggestions.save(arguments.suggestion)
                     sendSuggestion(arguments.suggestion.id)
+                    sendSuggestionUpdateMessage(arguments.suggestion)
 
                     ephemeralFollowUp {
                         content = "Suggestion updated."
@@ -408,6 +415,7 @@ class SuggestionsExtension : Extension() {
 
                     suggestions.save(arguments.suggestion)
                     sendSuggestion(arguments.suggestion.id)
+                    sendSuggestionUpdateMessage(arguments.suggestion)
 
                     ephemeralFollowUp {
                         content = "Suggestion updated."
@@ -430,6 +438,7 @@ class SuggestionsExtension : Extension() {
 
                     suggestions.save(arguments.suggestion)
                     sendSuggestion(arguments.suggestion.id)
+                    sendSuggestionUpdateMessage(arguments.suggestion)
 
                     ephemeralFollowUp {
                         content = "Suggestion updated."
@@ -467,6 +476,42 @@ class SuggestionsExtension : Extension() {
             val message = channel.getMessage(suggestion.message!!)
 
             message.edit { suggestion(suggestion, message) }
+        }
+    }
+
+    suspend fun sendSuggestionUpdateMessage(suggestion: Suggestion) {
+        val user = kord.getUser(Snowflake(suggestion.owner)) ?: return
+
+        val suggestionMessage = if (suggestion.message != null) {
+            kord.getGuild(COMMUNITY_GUILD)
+                ?.getChannelOf<GuildMessageChannel>(SUGGESTION_CHANNEL)
+                ?.getMessageOrNull(suggestion.message!!)
+        } else {
+            null
+        }
+
+        user.dm {
+            embed {
+                color = suggestion.status.color
+                title = "Suggestion updated"
+
+                description = if (suggestionMessage != null) {
+                    "[Suggestion ${suggestion.id}](${suggestionMessage.getJumpUrl()}) "
+                } else {
+                    "Suggestion ${suggestion.id} "
+                }
+
+                description += "has been updated.\n\n" +
+                        "**Status:** ${suggestion.status.readableName}\n\n" +
+                        "**__Suggestion__**\n\n" +
+                        suggestion.text
+
+                if (suggestion.comment != null) {
+                    description += "\n\n" +
+                            "**__Staff response__**\n\n" +
+                            suggestion.comment
+                }
+            }
         }
     }
 
@@ -639,7 +684,7 @@ class SuggestionsExtension : Extension() {
     inner class SuggestionStateArguments : Arguments() {
         val suggestion by suggestion("suggestion", "Suggestion ID to act on")
         val comment by optionalCoalescingString("comment", "Comment text to set") { _, str ->
-            if (str?.length ?: -1 > COMMENT_SIZE_LIMIT) {
+            if ((str?.length ?: -1) > COMMENT_SIZE_LIMIT) {
                 throw CommandException("Comment must not be longer than $COMMENT_SIZE_LIMIT characters.")
             }
         }
