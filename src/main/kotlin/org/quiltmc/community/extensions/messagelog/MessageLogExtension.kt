@@ -5,6 +5,7 @@ package org.quiltmc.community.extensions.messagelog
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.utils.deltas.MessageDelta
 import com.kotlindiscord.kord.extensions.utils.getJumpUrl
+import com.kotlindiscord.kord.extensions.utils.isEphemeral
 import dev.kord.common.entity.Snowflake
 import dev.kord.common.entity.optional.Optional
 import dev.kord.core.entity.Guild
@@ -196,6 +197,12 @@ class MessageLogExtension : Extension() {
         event<MessageDeleteEvent> {
             check(inQuiltGuild)
 
+            check {
+                failIf(
+                    event.message?.asMessageOrNull()?.isEphemeral == true
+                )
+            }
+
             action {
                 // Wait here in case we get a bulk deletion event
                 delay(Duration.seconds(1))
@@ -262,7 +269,9 @@ class MessageLogExtension : Extension() {
             check(inQuiltGuild)
 
             check {
-                failIf(event.message.asMessageOrNull()?.webhookId == kord.selfId)
+                failIf(
+                    event.message.asMessageOrNull()?.isEphemeral == true
+                )
             }
 
             action {
