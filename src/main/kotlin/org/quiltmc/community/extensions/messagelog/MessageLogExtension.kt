@@ -195,19 +195,19 @@ class MessageLogExtension : Extension() {
                     LogMessage(event.guild!!.asGuild()) {
                         allowedMentions { }
 
-                        if (messageContent != null && messageContent.length <= SINGLE_MESSAGE_LIMIT) {
-                            content = "**Message Content**\n\n" +
-
-                                    messageContent
-                        } else if (messageContent == null) {
-                            content = "_Message was not cached, so further information is not available._"
-                        }
-
                         embed {
                             color = COLOUR_NEGATIVE
                             title = "Message deleted"
 
                             timestamp = Clock.System.now()
+
+                            if (messageContent != null && messageContent.length <= SINGLE_MESSAGE_LIMIT) {
+                                description = "**Message Content**\n\n" +
+
+                                        messageContent
+                            } else if (messageContent == null) {
+                                description = "_Message was not cached, so further information is not available._"
+                            }
 
                             if (message != null) {
                                 addMessage(message)
@@ -253,30 +253,12 @@ class MessageLogExtension : Extension() {
                     return@action  // Message content wasn't edited and we don't care about embeds/reactions/etc
                 }
 
-                val canEmbedOld = old?.content?.length ?: DUAL_MESSAGE_LIMIT + 1 <= DUAL_MESSAGE_LIMIT
+                val canEmbedOld = (old?.content?.length ?: (DUAL_MESSAGE_LIMIT + 1)) <= DUAL_MESSAGE_LIMIT
                 val canEmbedNew = new.content.length <= DUAL_MESSAGE_LIMIT
 
                 send(
                     LogMessage(new.getGuild()) {
                         allowedMentions { }
-
-                        content = ""
-
-                        if (old != null && canEmbedOld) {
-                            content = "**Old Message Content**\n\n" +
-
-                                    old.content
-                        }
-
-                        if (canEmbedNew) {
-                            if (content!!.isNotEmpty()) {
-                                content += "\n\n"
-                            }
-
-                            content += "**New Message Content**\n\n" +
-
-                                    new.content
-                        }
 
                         embed {
                             color = COLOUR_BLURPLE
@@ -284,11 +266,29 @@ class MessageLogExtension : Extension() {
 
                             timestamp = Clock.System.now()
 
+                            description = ""
+
+                            if (old != null && canEmbedOld) {
+                                description = "**Old Message Content**\n\n" +
+
+                                        old.content
+                            }
+
+                            if (canEmbedNew) {
+                                if (description!!.isNotEmpty()) {
+                                    description += "\n\n"
+                                }
+
+                                description += "**New Message Content**\n\n" +
+
+                                        new.content
+                            }
+
                             addMessage(new)
 
                             if (delta == null) {
-                                description = "**Note:** Message was not cached, so the content may not have been " +
-                                        "edited."
+                                description += "\n\n**Note:** Message was not cached, so the content may not have " +
+                                        "been edited."
                             }
                         }
                     }
@@ -396,7 +396,7 @@ class MessageLogExtension : Extension() {
         if (it.length > LINE_LENGTH) it.chunkByWhitespace(LINE_LENGTH).joinToString("\n") else it
     }
 
-    private suspend fun EmbedBuilder.addMessage(message: Message) {
+    private fun EmbedBuilder.addMessage(message: Message) {
         val author = message.author
 
         footer {
