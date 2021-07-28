@@ -79,12 +79,12 @@ class MessageLogExtension : Extension() {
                 // Do this as early as possible so that we can catch the usual creation events
                 event.messages.forEach { bulkDeletedMessages.add(it.id) }
 
-                var messages = "# Deleted Messages (${event.messages.count()}\n\n"
+                var messages = "# Deleted Messages (${event.messages.count()})\n\n"
 
                 if (event.messages.isEmpty()) {
                     messages += "**No messages were cached.**"
                 } else {
-                    event.messages.forEach {
+                    event.messages.reversed().forEach {
                         messages += "**ID:** ${it.id.value}\n\n"
 
                         if (it.author != null) {
