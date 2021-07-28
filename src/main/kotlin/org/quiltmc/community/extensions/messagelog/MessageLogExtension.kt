@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalTime::class)
+
 package org.quiltmc.community.extensions.messagelog
 
 import com.kotlindiscord.kord.extensions.extensions.Extension
@@ -18,6 +20,7 @@ import dev.kord.rest.builder.message.EmbedBuilder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
@@ -30,6 +33,8 @@ import org.quiltmc.community.*
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import kotlin.time.Duration
+import kotlin.time.ExperimentalTime
 import java.time.Instant as jtInstant
 
 private const val LINE_LENGTH = 45
@@ -48,6 +53,7 @@ class MessageLogExtension : Extension() {
     private var firstSetup = true
 
     private val rotators: MutableMap<Snowflake, CategoryRotator> = mutableMapOf()
+    private val bulkDeletedMessages: MutableSet<Snowflake> = mutableSetOf()
 
     private val dateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)
         .withLocale(bot.settings.i18nBuilder.defaultLocale)
@@ -70,6 +76,9 @@ class MessageLogExtension : Extension() {
             check(inQuiltGuild)
 
             action {
+                // Do this as early as possible so that we can catch the usual creation events
+                event.messages.forEach { bulkDeletedMessages.add(it.id) }
+
                 var messages = "# Deleted Messages (${event.messages.count()}\n\n"
 
                 if (event.messages.isEmpty()) {
@@ -188,6 +197,15 @@ class MessageLogExtension : Extension() {
             check(inQuiltGuild)
 
             action {
+                // Wait here in case we get a bulk deletion event
+                delay(Duration.seconds(1))
+
+                if (event.messageId in bulkDeletedMessages) {
+                    bulkDeletedMessages.remove(event.messageId)
+
+                    return@action  // Don't log this if it was already bulk-deleted
+                }
+
                 val message = event.message
                 val messageContent = message?.content
 
