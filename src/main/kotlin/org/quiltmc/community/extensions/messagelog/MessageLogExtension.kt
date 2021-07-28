@@ -261,6 +261,10 @@ class MessageLogExtension : Extension() {
         event<MessageUpdateEvent> {
             check(inQuiltGuild)
 
+            check {
+                failIf(event.message.asMessageOrNull()?.webhookId == kord.selfId)
+            }
+
             action {
                 val old = event.old
                 val new = event.getMessage()
