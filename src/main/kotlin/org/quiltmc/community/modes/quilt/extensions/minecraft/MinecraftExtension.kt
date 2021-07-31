@@ -1,4 +1,4 @@
-package org.quiltmc.community.extensions.minecraft
+package org.quiltmc.community.modes.quilt.extensions.minecraft
 
 import com.kotlindiscord.kord.extensions.DISCORD_FUCHSIA
 import com.kotlindiscord.kord.extensions.DISCORD_GREEN

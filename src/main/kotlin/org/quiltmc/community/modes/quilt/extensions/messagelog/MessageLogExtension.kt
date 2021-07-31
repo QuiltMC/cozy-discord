@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalTime::class)
 
-package org.quiltmc.community.extensions.messagelog
+package org.quiltmc.community.modes.quilt.extensions.messagelog
 
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.utils.deltas.MessageDelta

@@ -1,4 +1,4 @@
-package org.quiltmc.community.extensions.suggestions
+package org.quiltmc.community.modes.quilt.extensions.suggestions
 
 import com.kotlindiscord.kord.extensions.utils.env
 import kotlinx.serialization.decodeFromString

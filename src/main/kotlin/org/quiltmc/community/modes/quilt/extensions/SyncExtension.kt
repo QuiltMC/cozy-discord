@@ -1,6 +1,6 @@
 @file:Suppress("StringLiteralDuplication")
 
-package org.quiltmc.community.extensions
+package org.quiltmc.community.modes.quilt.extensions
 
 import com.kotlindiscord.kord.extensions.checks.hasPermission
 import com.kotlindiscord.kord.extensions.checks.or

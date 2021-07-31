@@ -1,6 +1,6 @@
 @file:OptIn(KordPreview::class)
 
-package org.quiltmc.community.extensions.suggestions
+package org.quiltmc.community.modes.quilt.extensions.suggestions
 
 import com.kotlindiscord.kord.extensions.CommandException
 import com.kotlindiscord.kord.extensions.commands.CommandContext

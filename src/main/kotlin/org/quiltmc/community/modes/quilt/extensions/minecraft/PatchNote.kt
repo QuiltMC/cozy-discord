@@ -1,4 +1,4 @@
-package org.quiltmc.community.extensions.minecraft
+package org.quiltmc.community.modes.quilt.extensions.minecraft
 
 import kotlinx.serialization.Serializable
 

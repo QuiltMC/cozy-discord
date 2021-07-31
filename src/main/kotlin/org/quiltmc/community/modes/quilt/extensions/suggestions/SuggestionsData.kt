@@ -1,4 +1,4 @@
-package org.quiltmc.community.extensions.suggestions
+package org.quiltmc.community.modes.quilt.extensions.suggestions
 
 import dev.kord.common.entity.Snowflake
 

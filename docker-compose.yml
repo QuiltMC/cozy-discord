@@ -12,6 +12,7 @@ services:
     environment:
       - "GUILDS=817576132726620200,833872081585700874"
       - "ENVIRONMENT=prod"
+      - "MODE=quilt"
 
       - TOKEN
 

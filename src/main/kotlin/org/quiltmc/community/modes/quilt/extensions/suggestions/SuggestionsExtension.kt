@@ -2,7 +2,7 @@
 
 @file:Suppress("MagicNumber")  // Yep. I'm done.
 
-package org.quiltmc.community.extensions.suggestions
+package org.quiltmc.community.modes.quilt.extensions.suggestions
 
 import com.kotlindiscord.kord.extensions.CommandException
 import com.kotlindiscord.kord.extensions.checks.hasRole

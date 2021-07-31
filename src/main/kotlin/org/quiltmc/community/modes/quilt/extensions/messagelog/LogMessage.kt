@@ -1,4 +1,4 @@
-package org.quiltmc.community.extensions.messagelog
+package org.quiltmc.community.modes.quilt.extensions.messagelog
 
 import dev.kord.core.entity.Guild
 import dev.kord.rest.builder.message.MessageCreateBuilder

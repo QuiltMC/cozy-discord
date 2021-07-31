@@ -1,6 +1,6 @@
 @file:Suppress("DataClassShouldBeImmutable")  // Well, yes, but actually no.
 
-package org.quiltmc.community.extensions.suggestions
+package org.quiltmc.community.modes.quilt.extensions.suggestions
 
 import dev.kord.common.entity.Snowflake
 import kotlinx.serialization.Serializable
