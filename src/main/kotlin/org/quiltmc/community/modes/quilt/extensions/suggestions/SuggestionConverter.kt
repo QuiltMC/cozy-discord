@@ -11,9 +11,12 @@ import com.kotlindiscord.kord.extensions.modules.annotations.converters.Converte
 import com.kotlindiscord.kord.extensions.modules.annotations.converters.ConverterType
 import com.kotlindiscord.kord.extensions.parser.StringParser
 import dev.kord.common.annotation.KordPreview
+import dev.kord.common.entity.Snowflake
 import dev.kord.rest.builder.interaction.OptionsBuilder
 import dev.kord.rest.builder.interaction.StringChoiceBuilder
 import org.koin.core.component.inject
+import org.quiltmc.community.database.collections.SuggestionCollection
+import org.quiltmc.community.database.entities.Suggestion
 
 @Converter(
     names = ["suggestion"],
@@ -24,11 +27,20 @@ class SuggestionConverter(
 ) : SingleConverter<Suggestion>() {
     override val signatureTypeString: String = "Suggestion ID"
 
-    private val suggestions: SuggestionsData by inject()
+    private val suggestions: SuggestionCollection by inject()
 
     override suspend fun parse(parser: StringParser?, context: CommandContext, named: String?): Boolean {
         val arg: String = named ?: parser?.parseNext()?.data ?: return false
-        this.parsed = suggestions.get(arg) ?: throw CommandException("Unknown suggestion ID: $arg")
+
+        try {
+            val snowflake = Snowflake(arg)
+
+            this.parsed = suggestions.get(snowflake)
+                ?: suggestions.getByMessage(snowflake)
+                        ?: throw CommandException("Unknown suggestion ID: $arg")
+        } catch (e: NumberFormatException) {
+            throw CommandException("Unknown suggestion ID: $arg")
+        }
 
         return true
     }

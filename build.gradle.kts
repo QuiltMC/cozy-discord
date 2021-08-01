@@ -41,6 +41,8 @@ dependencies {
 
     ksp(libs.kordex.annotationProcessor)
 
+    implementation(libs.kmongo)
+
     implementation(libs.kordex.annotations)
     implementation(libs.kordex.core)
     implementation(libs.kordex.mappings)

@@ -7,6 +7,7 @@ package org.quiltmc.community.modes.quilt.extensions.suggestions
 import com.kotlindiscord.kord.extensions.CommandException
 import com.kotlindiscord.kord.extensions.checks.hasRole
 import com.kotlindiscord.kord.extensions.checks.isNotbot
+import com.kotlindiscord.kord.extensions.checks.or
 import com.kotlindiscord.kord.extensions.commands.converters.impl.coalescedString
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalCoalescingString
 import com.kotlindiscord.kord.extensions.commands.parser.Arguments
@@ -35,12 +36,16 @@ import dev.kord.core.event.message.MessageDeleteEvent
 import dev.kord.rest.builder.message.MessageCreateBuilder
 import dev.kord.rest.builder.message.MessageModifyBuilder
 import kotlinx.coroutines.delay
+import kotlinx.serialization.decodeFromString
 import org.koin.core.component.inject
 import org.quiltmc.community.COMMUNITY_GUILD
 import org.quiltmc.community.COMMUNITY_MANAGEMENT_ROLES
 import org.quiltmc.community.SUGGESTION_CHANNEL
+import org.quiltmc.community.database.collections.SuggestionCollection
+import java.nio.file.Path
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
+import org.quiltmc.community.database.entities.Suggestion as DBSuggestion
 
 private const val ACTION_DOWN = "down"
 private const val ACTION_REMOVE = "remove"
@@ -59,7 +64,8 @@ private val EMOTE_UPVOTE = ReactionEmoji.Unicode("⬆️")
 class SuggestionsExtension : Extension() {
     override val name: String = "suggestions"
 
-    private val suggestions: SuggestionsData by inject()
+    private val suggestions: SuggestionCollection by inject()
+    private val jsonSuggestions: SuggestionsData by inject()
     private val messageCache: MutableList<Pair<String, Snowflake>> = mutableListOf()
 
     override suspend fun setup() {
@@ -84,7 +90,7 @@ class SuggestionsExtension : Extension() {
                     }
                 }
 
-                val id = event.message.id.asString
+                val id = event.message.id
 
                 val suggestion = if (event.message.webhookId != null) {
                     val cachedEntry = messageCache.firstOrNull { event.message.content in it.first }
@@ -92,11 +98,11 @@ class SuggestionsExtension : Extension() {
                     if (cachedEntry != null) {
                         messageCache.remove(cachedEntry)
 
-                        Suggestion(
-                            id = id,
+                        DBSuggestion(
+                            _id = id,
                             text = event.message.content,
 
-                            owner = cachedEntry.second.asString,
+                            owner = cachedEntry.second,
                             ownerAvatar = "https://cdn.discordapp.com/avatars/" +
                                     "${event.message.data.author.id.value}/" +
                                     "${event.message.data.author.avatar}.png",
@@ -110,11 +116,11 @@ class SuggestionsExtension : Extension() {
                         null
                     }
                 } else {
-                    Suggestion(
-                        id = id,
+                    DBSuggestion(
+                        _id = id,
                         text = event.message.content,
 
-                        owner = event.message.author!!.id.asString,
+                        owner = event.message.author!!.id,
                         ownerAvatar = event.message.author!!.avatar.url,
                         ownerName = event.message.author!!.asMember(event.message.getGuild().id).displayName,
 
@@ -123,7 +129,7 @@ class SuggestionsExtension : Extension() {
                 } ?: return@action
 
                 if (suggestion.text.length > SUGGESTION_SIZE_LIMIT) {
-                    val user = kord.getUser(Snowflake(suggestion.owner))
+                    val user = kord.getUser(suggestion.owner)
 
                     val resentText = if (suggestion.text.length > 1800) {
                         suggestion.text.substring(0, 1797) + "..."
@@ -151,8 +157,8 @@ class SuggestionsExtension : Extension() {
                     return@action
                 }
 
-                suggestions.add(id, suggestion)
-                sendSuggestion(id)
+                suggestions.set(suggestion)
+                sendSuggestion(suggestion)
                 event.message.delete()
             }
         }
@@ -186,7 +192,10 @@ class SuggestionsExtension : Extension() {
                     return@action
                 }
 
-                val (id, action) = interaction.componentId.split('/', limit = 2)
+                val split = interaction.componentId.split('/', limit = 2)
+
+                val id = Snowflake(split[0])
+                val action = split[1]
 
                 val suggestion = suggestions.get(id) ?: return@action
                 val response = interaction.ackEphemeral(false)
@@ -257,8 +266,8 @@ class SuggestionsExtension : Extension() {
                     }
                 }
 
-                suggestions.save(suggestion)
-                sendSuggestion(id)
+                suggestions.set(suggestion)
+                sendSuggestion(suggestion)
             }
         }
 
@@ -273,7 +282,7 @@ class SuggestionsExtension : Extension() {
             guild(COMMUNITY_GUILD)
 
             action {
-                if (arguments.suggestion.owner != user.id.asString) {
+                if (arguments.suggestion.owner != user.id) {
                     ephemeralFollowUp {
                         content = "**Error:** You don't own that suggestion."
                     }
@@ -283,8 +292,8 @@ class SuggestionsExtension : Extension() {
 
                 arguments.suggestion.text = arguments.text
 
-                suggestions.save(arguments.suggestion)
-                sendSuggestion(arguments.suggestion.id)
+                suggestions.set(arguments.suggestion)
+                sendSuggestion(arguments.suggestion)
 
                 ephemeralFollowUp {
                     content = "Suggestion updated."
@@ -299,7 +308,7 @@ class SuggestionsExtension : Extension() {
             guild(COMMUNITY_GUILD)
 
             COMMUNITY_MANAGEMENT_ROLES.forEach(::allowRole)
-            COMMUNITY_MANAGEMENT_ROLES.forEach { check(hasRole(it)) }
+            check(or(checks = COMMUNITY_MANAGEMENT_ROLES.map { hasRole(it) }.toTypedArray()))
 
             // region: State changes
 
@@ -313,8 +322,8 @@ class SuggestionsExtension : Extension() {
                     arguments.suggestion.status = SuggestionStatus.Approved
                     arguments.suggestion.comment = arguments.comment ?: arguments.suggestion.comment
 
-                    suggestions.save(arguments.suggestion)
-                    sendSuggestion(arguments.suggestion.id)
+                    suggestions.set(arguments.suggestion)
+                    sendSuggestion(arguments.suggestion)
                     sendSuggestionUpdateMessage(arguments.suggestion)
 
                     ephemeralFollowUp {
@@ -333,8 +342,8 @@ class SuggestionsExtension : Extension() {
                     arguments.suggestion.status = SuggestionStatus.Denied
                     arguments.suggestion.comment = arguments.comment ?: arguments.suggestion.comment
 
-                    suggestions.save(arguments.suggestion)
-                    sendSuggestion(arguments.suggestion.id)
+                    suggestions.set(arguments.suggestion)
+                    sendSuggestion(arguments.suggestion)
                     sendSuggestionUpdateMessage(arguments.suggestion)
 
                     ephemeralFollowUp {
@@ -353,8 +362,8 @@ class SuggestionsExtension : Extension() {
                     arguments.suggestion.status = SuggestionStatus.Open
                     arguments.suggestion.comment = arguments.comment ?: arguments.suggestion.comment
 
-                    suggestions.save(arguments.suggestion)
-                    sendSuggestion(arguments.suggestion.id)
+                    suggestions.set(arguments.suggestion)
+                    sendSuggestion(arguments.suggestion)
                     sendSuggestionUpdateMessage(arguments.suggestion)
 
                     ephemeralFollowUp {
@@ -373,8 +382,8 @@ class SuggestionsExtension : Extension() {
                     arguments.suggestion.status = SuggestionStatus.Implemented
                     arguments.suggestion.comment = arguments.comment ?: arguments.suggestion.comment
 
-                    suggestions.save(arguments.suggestion)
-                    sendSuggestion(arguments.suggestion.id)
+                    suggestions.set(arguments.suggestion)
+                    sendSuggestion(arguments.suggestion)
                     sendSuggestionUpdateMessage(arguments.suggestion)
 
                     ephemeralFollowUp {
@@ -393,8 +402,8 @@ class SuggestionsExtension : Extension() {
                     arguments.suggestion.status = SuggestionStatus.Duplicate
                     arguments.suggestion.comment = arguments.comment ?: arguments.suggestion.comment
 
-                    suggestions.save(arguments.suggestion)
-                    sendSuggestion(arguments.suggestion.id)
+                    suggestions.set(arguments.suggestion)
+                    sendSuggestion(arguments.suggestion)
                     sendSuggestionUpdateMessage(arguments.suggestion)
 
                     ephemeralFollowUp {
@@ -413,8 +422,8 @@ class SuggestionsExtension : Extension() {
                     arguments.suggestion.status = SuggestionStatus.Spam
                     arguments.suggestion.comment = arguments.comment ?: arguments.suggestion.comment
 
-                    suggestions.save(arguments.suggestion)
-                    sendSuggestion(arguments.suggestion.id)
+                    suggestions.set(arguments.suggestion)
+                    sendSuggestion(arguments.suggestion)
                     sendSuggestionUpdateMessage(arguments.suggestion)
 
                     ephemeralFollowUp {
@@ -436,13 +445,58 @@ class SuggestionsExtension : Extension() {
                 action {
                     arguments.suggestion.comment = arguments.comment
 
-                    suggestions.save(arguments.suggestion)
-                    sendSuggestion(arguments.suggestion.id)
+                    suggestions.set(arguments.suggestion)
+                    sendSuggestion(arguments.suggestion)
                     sendSuggestionUpdateMessage(arguments.suggestion)
 
                     ephemeralFollowUp {
                         content = "Suggestion updated."
                     }
+                }
+            }
+
+            subCommand() {
+                name = "migrate"
+                description = "Migrate all suggestions from their JSON files to the database"
+
+                COMMUNITY_MANAGEMENT_ROLES.forEach(::allowRole)
+
+                action {
+                    val js = jsonSuggestions as? JsonSuggestions ?: return@action
+                    var total = 0
+
+                    ephemeralFollowUp { content = "Migrating suggestions..." }
+
+                    Path.of(js.root).toFile().walk().forEach {
+                        if (it.name.endsWith(".json")) {
+                            val suggestion = js.json.decodeFromString<Suggestion>(it.readText())
+
+                            val dbSuggestion = DBSuggestion(
+                                _id = Snowflake(suggestion.id),
+
+                                comment = suggestion.comment,
+                                status = suggestion.status,
+                                message = suggestion.message,
+
+                                text = suggestion.text,
+
+                                owner = Snowflake(suggestion.owner),
+                                ownerAvatar = suggestion.ownerAvatar,
+                                ownerName = suggestion.ownerName,
+
+                                positiveVoters = suggestion.positiveVoters,
+                                negativeVoters = suggestion.negativeVoters,
+
+                                isTupper = suggestion.isTupper
+                            )
+
+                            suggestions.set(dbSuggestion)
+
+                            total += 1
+                        }
+                    }
+
+                    ephemeralFollowUp { content = "Migrated $total suggestions." }
                 }
             }
 
@@ -464,14 +518,13 @@ class SuggestionsExtension : Extension() {
         // endregion
     }
 
-    suspend fun sendSuggestion(id: String) {
-        val suggestion = suggestions.get(id) ?: return
+    suspend fun sendSuggestion(suggestion: DBSuggestion) {
         val channel = getChannel()
 
         if (suggestion.message == null) {
             suggestion.message = channel.createMessage { suggestion(suggestion) }.id
 
-            suggestions.save(suggestion)
+            suggestions.set(suggestion)
         } else {
             val message = channel.getMessage(suggestion.message!!)
 
@@ -479,8 +532,8 @@ class SuggestionsExtension : Extension() {
         }
     }
 
-    suspend fun sendSuggestionUpdateMessage(suggestion: Suggestion) {
-        val user = kord.getUser(Snowflake(suggestion.owner)) ?: return
+    suspend fun sendSuggestionUpdateMessage(suggestion: DBSuggestion) {
+        val user = kord.getUser(suggestion.owner) ?: return
 
         val suggestionMessage = if (suggestion.message != null) {
             kord.getGuild(COMMUNITY_GUILD)
@@ -496,9 +549,9 @@ class SuggestionsExtension : Extension() {
                 title = "Suggestion updated"
 
                 description = if (suggestionMessage != null) {
-                    "[Suggestion ${suggestion.id}](${suggestionMessage.getJumpUrl()}) "
+                    "[Suggestion ${suggestion._id.value}](${suggestionMessage.getJumpUrl()}) "
                 } else {
-                    "Suggestion ${suggestion.id} "
+                    "Suggestion ${suggestion._id.value} "
                 }
 
                 description += "has been updated.\n\n" +
@@ -517,8 +570,8 @@ class SuggestionsExtension : Extension() {
 
     suspend fun getChannel() = kord.getChannelOf<GuildMessageChannel>(SUGGESTION_CHANNEL)!!
 
-    fun MessageCreateBuilder.suggestion(suggestion: Suggestion) {
-        val id = suggestion.id
+    fun MessageCreateBuilder.suggestion(suggestion: DBSuggestion) {
+        val id = suggestion._id.value
 
         embed {
             author {
@@ -527,9 +580,9 @@ class SuggestionsExtension : Extension() {
             }
 
             description = if (suggestion.isTupper) {
-                "@${suggestion.ownerName} (<@${suggestion.owner}>)\n\n"
+                "@${suggestion.ownerName} (<@${suggestion.owner.value}>)\n\n"
             } else {
-                "<@${suggestion.owner}>\n\n"
+                "<@${suggestion.owner.value}>\n\n"
             }
 
             description += "${suggestion.text}\n\n"
@@ -542,7 +595,7 @@ class SuggestionsExtension : Extension() {
                 description += "**Downvotes:** ${suggestion.negativeVotes}\n"
             }
 
-            description += "\n**Total:** ${suggestion.voteDifference}"
+            description += "**Total:** ${suggestion.voteDifference}"
 
             if (suggestion.comment != null) {
                 description += "\n\n**__Staff response__\n\n** ${suggestion.comment}"
@@ -578,8 +631,8 @@ class SuggestionsExtension : Extension() {
         }
     }
 
-    fun MessageModifyBuilder.suggestion(suggestion: Suggestion, current: Message) {
-        val id = suggestion.id
+    fun MessageModifyBuilder.suggestion(suggestion: DBSuggestion, current: Message) {
+        val id = suggestion._id.value
 
         embed {
             author {
@@ -588,9 +641,9 @@ class SuggestionsExtension : Extension() {
             }
 
             description = if (suggestion.isTupper) {
-                "@${suggestion.ownerName} (<@${suggestion.owner}>)\n\n"
+                "@${suggestion.ownerName} (<@${suggestion.owner.value}>)\n\n"
             } else {
-                "<@${suggestion.owner}>\n\n"
+                "<@${suggestion.owner.value}>\n\n"
             }
 
             description += "${suggestion.text}\n\n"
@@ -603,7 +656,7 @@ class SuggestionsExtension : Extension() {
                 description += "**Downvotes:** ${suggestion.negativeVotes}\n"
             }
 
-            description += "\n**Total:** ${suggestion.voteDifference}"
+            description += "**Total:** ${suggestion.voteDifference}"
 
             if (suggestion.comment != null) {
                 description += "\n\n**__Staff response__\n\n** ${suggestion.comment}"

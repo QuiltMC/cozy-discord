@@ -29,28 +29,18 @@ private val NON_YARN_CHANNEL = Snowflake(
 val MODE = env("MODE")?.lowercase() ?: "quilt"
 
 suspend fun setupCollab() = ExtensibleBot(TOKEN) {
+    common()
+    database()
+
     messageCommands {
-        defaultPrefix = "?"
-
-        check {
-            if (event.message.author == null) {
-                fail()
-            }
-        }
-    }
-
-    slashCommands {
-        enabled = true
-    }
-
-    extensions {
-        sentry {
-            enable = false
-        }
+        enabled = false
     }
 }
 
 suspend fun setupQuilt() = ExtensibleBot(TOKEN) {
+    common()
+    database(true)
+
     intents {
         +Intents.all
     }
@@ -59,25 +49,7 @@ suspend fun setupQuilt() = ExtensibleBot(TOKEN) {
         all()
     }
 
-    messageCommands {
-        defaultPrefix = "?"
-
-        check {
-            if (event.message.author == null) {
-                fail()
-            }
-        }
-    }
-
-    slashCommands {
-        enabled = true
-    }
-
     extensions {
-        sentry {
-            enable = false
-        }
-
         add(::MessageLogExtension)
         add(::MinecraftExtension)
         add(::SuggestionsExtension)
@@ -107,24 +79,11 @@ suspend fun setupQuilt() = ExtensibleBot(TOKEN) {
 }
 
 suspend fun setupShowcase() = ExtensibleBot(TOKEN) {
+    common()
+    database()
+
     messageCommands {
-        defaultPrefix = "?"
-
-        check {
-            if (event.message.author == null) {
-                fail()
-            }
-        }
-    }
-
-    slashCommands {
-        enabled = true
-    }
-
-    extensions {
-        sentry {
-            enable = false
-        }
+        enabled = false
     }
 }
 

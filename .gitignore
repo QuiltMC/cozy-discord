@@ -113,3 +113,6 @@ build/
 
 # Data files
 data/
+
+# Dotenv file
+.env

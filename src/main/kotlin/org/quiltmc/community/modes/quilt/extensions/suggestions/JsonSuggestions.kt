@@ -9,12 +9,12 @@ import java.nio.file.Path
 import kotlin.io.path.*
 
 class JsonSuggestions : SuggestionsData {
-    private val json = Json
+    internal val json = Json
 
-    private val root = (env("DATA_ROOT") ?: "/data") + "/suggestions"
-    private val path = "$root/{id}.json"
+    internal val root = (env("DATA_ROOT") ?: "/data") + "/suggestions"
+    internal val path = "$root/{id}.json"
 
-    private val suggestionCache: MutableMap<String, Suggestion> = mutableMapOf()
+    internal val suggestionCache: MutableMap<String, Suggestion> = mutableMapOf()
 
     override fun get(id: String): Suggestion? {
         if (suggestionCache.containsKey(id)) {
