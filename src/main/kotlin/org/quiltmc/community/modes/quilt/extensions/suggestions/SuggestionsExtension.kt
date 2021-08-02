@@ -5,10 +5,7 @@
 package org.quiltmc.community.modes.quilt.extensions.suggestions
 
 import com.kotlindiscord.kord.extensions.CommandException
-import com.kotlindiscord.kord.extensions.checks.hasRole
-import com.kotlindiscord.kord.extensions.checks.isInThread
-import com.kotlindiscord.kord.extensions.checks.isNotbot
-import com.kotlindiscord.kord.extensions.checks.or
+import com.kotlindiscord.kord.extensions.checks.*
 import com.kotlindiscord.kord.extensions.commands.converters.impl.coalescedString
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalCoalescingString
 import com.kotlindiscord.kord.extensions.commands.converters.impl.string
@@ -197,7 +194,8 @@ class SuggestionsExtension : Extension() {
         }
 
         event<InteractionCreateEvent> {
-            check { failIfNot(event.interaction.channelId == SUGGESTION_CHANNEL) }
+            check(inTopChannel(SUGGESTION_CHANNEL))
+
             check { failIfNot(event.interaction is ButtonInteraction) }
 
             action {
@@ -287,6 +285,8 @@ class SuggestionsExtension : Extension() {
         }
 
         event<ThreadChannelCreateEvent> {
+            check(inTopChannel(SUGGESTION_CHANNEL))
+
             check { failIf(event.channel.ownerId == kord.selfId) }
 
             action {
@@ -427,6 +427,8 @@ class SuggestionsExtension : Extension() {
             )
 
             val infoMessage = thread?.createMessage {
+                suggestion(suggestion, sendEmbed = false)
+
                 content = "This message is at the top of the thread.\n\n" +
                         "If this is your suggestion, feel free to use **/rename** to change the " +
                         "name of the thread!"
@@ -434,19 +436,11 @@ class SuggestionsExtension : Extension() {
 
             infoMessage?.pin()
 
-            // TODO: Think about buttons when Kord updates and allows us to get the thread parent
-
-//            val threadButtons = thread?.createMessage {
-//                suggestion(suggestion, sendEmbed = false)
-//
-//                content = "\u200B"
-//            }
-
             thread?.addUser(suggestion.owner)
 
             suggestion.message = message.id
             suggestion.thread = thread?.id
-//            suggestion.threadButtons = threadButtons?.id
+            suggestion.threadButtons = infoMessage?.id
 
             suggestions.set(suggestion)
         } else {
@@ -462,7 +456,7 @@ class SuggestionsExtension : Extension() {
                 val threadMessage = thread?.getMessage(suggestion.threadButtons!!)
 
                 threadMessage?.edit {
-                    suggestion(suggestion, threadMessage)
+                    suggestion(suggestion, threadMessage, false)
                 }
             }
         }

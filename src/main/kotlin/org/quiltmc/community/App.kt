@@ -6,6 +6,7 @@
 package org.quiltmc.community
 
 import com.kotlindiscord.kord.extensions.ExtensibleBot
+import com.kotlindiscord.kord.extensions.checks.topChannelFor
 import com.kotlindiscord.kord.extensions.modules.extra.mappings.extMappings
 import com.kotlindiscord.kord.extensions.utils.env
 import dev.kord.common.entity.Snowflake
@@ -54,10 +55,12 @@ suspend fun setupQuilt() = ExtensibleBot(TOKEN) {
         extMappings {
             namespaceCheck { namespace ->
                 {
+                    val channel = topChannelFor(event)
+
                     failIfNot("Non-Yarn commands may only be run in <#${NON_YARN_CHANNEL.value}>") {
                         namespace == YarnNamespace ||
                                 event.message.getGuildOrNull() == null ||
-                                event.message.channelId == NON_YARN_CHANNEL
+                                channel?.id == NON_YARN_CHANNEL
                     }
                 }
             }

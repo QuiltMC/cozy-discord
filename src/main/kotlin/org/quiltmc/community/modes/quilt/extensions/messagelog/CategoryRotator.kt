@@ -7,6 +7,7 @@ import dev.kord.core.behavior.createTextChannel
 import dev.kord.core.entity.channel.Category
 import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.core.entity.channel.TextChannel
+import dev.kord.core.entity.channel.TopGuildMessageChannel
 import dev.kord.rest.builder.message.MessageCreateBuilder
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -75,10 +76,10 @@ class CategoryRotator(private val category: Category, private val modLog: GuildM
                 val thisYear = now.getLong(ChronoField.YEAR)
 
                 var currentChannelExists = false
-                val allChannels = mutableListOf<GuildMessageChannel>()
+                val allChannels = mutableListOf<TopGuildMessageChannel>()
 
                 category.channels.toList().forEach {
-                    if (it is GuildMessageChannel) {
+                    if (it is TopGuildMessageChannel) {
                         logger.debug { "Checking existing channel: ${it.name}" }
 
                         val match = NAME_REGEX.matchEntire(it.name)
