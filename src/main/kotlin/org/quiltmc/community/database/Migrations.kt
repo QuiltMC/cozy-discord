@@ -6,6 +6,7 @@ import org.koin.core.component.inject
 import org.quiltmc.community.database.collections.MetaCollection
 import org.quiltmc.community.database.entities.Meta
 import org.quiltmc.community.database.migrations.v1
+import org.quiltmc.community.database.migrations.v2
 
 const val FILE_TEMPLATE = "migrations/v{VERSION}.bson"
 
@@ -36,6 +37,7 @@ object Migrations : KoinComponent {
                 @Suppress("UseIfInsteadOfWhen")  // Definitely not what we'll want later
                 when (nextVersion) {
                     1 -> v1(db.mongo)
+                    2 -> v2(db.mongo)
 
                     else -> break
                 }

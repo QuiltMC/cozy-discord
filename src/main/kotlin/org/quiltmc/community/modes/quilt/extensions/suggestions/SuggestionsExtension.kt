@@ -36,16 +36,14 @@ import dev.kord.core.event.message.MessageDeleteEvent
 import dev.kord.rest.builder.message.MessageCreateBuilder
 import dev.kord.rest.builder.message.MessageModifyBuilder
 import kotlinx.coroutines.delay
-import kotlinx.serialization.decodeFromString
 import org.koin.core.component.inject
 import org.quiltmc.community.COMMUNITY_GUILD
 import org.quiltmc.community.COMMUNITY_MANAGEMENT_ROLES
 import org.quiltmc.community.SUGGESTION_CHANNEL
-import org.quiltmc.community.database.collections.SuggestionCollection
-import java.nio.file.Path
+import org.quiltmc.community.database.collections.SuggestionsCollection
+import org.quiltmc.community.database.entities.Suggestion
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
-import org.quiltmc.community.database.entities.Suggestion as DBSuggestion
 
 private const val ACTION_DOWN = "down"
 private const val ACTION_REMOVE = "remove"
@@ -64,8 +62,7 @@ private val EMOTE_UPVOTE = ReactionEmoji.Unicode("⬆️")
 class SuggestionsExtension : Extension() {
     override val name: String = "suggestions"
 
-    private val suggestions: SuggestionCollection by inject()
-    private val jsonSuggestions: SuggestionsData by inject()
+    private val suggestions: SuggestionsCollection by inject()
     private val messageCache: MutableList<Pair<String, Snowflake>> = mutableListOf()
 
     override suspend fun setup() {
@@ -98,7 +95,7 @@ class SuggestionsExtension : Extension() {
                     if (cachedEntry != null) {
                         messageCache.remove(cachedEntry)
 
-                        DBSuggestion(
+                        Suggestion(
                             _id = id,
                             text = event.message.content,
 
@@ -116,7 +113,7 @@ class SuggestionsExtension : Extension() {
                         null
                     }
                 } else {
-                    DBSuggestion(
+                    Suggestion(
                         _id = id,
                         text = event.message.content,
 
@@ -455,51 +452,6 @@ class SuggestionsExtension : Extension() {
                 }
             }
 
-            subCommand() {
-                name = "migrate"
-                description = "Migrate all suggestions from their JSON files to the database"
-
-                COMMUNITY_MANAGEMENT_ROLES.forEach(::allowRole)
-
-                action {
-                    val js = jsonSuggestions as? JsonSuggestions ?: return@action
-                    var total = 0
-
-                    ephemeralFollowUp { content = "Migrating suggestions..." }
-
-                    Path.of(js.root).toFile().walk().forEach {
-                        if (it.name.endsWith(".json")) {
-                            val suggestion = js.json.decodeFromString<Suggestion>(it.readText())
-
-                            val dbSuggestion = DBSuggestion(
-                                _id = Snowflake(suggestion.id),
-
-                                comment = suggestion.comment,
-                                status = suggestion.status,
-                                message = suggestion.message,
-
-                                text = suggestion.text,
-
-                                owner = Snowflake(suggestion.owner),
-                                ownerAvatar = suggestion.ownerAvatar,
-                                ownerName = suggestion.ownerName,
-
-                                positiveVoters = suggestion.positiveVoters,
-                                negativeVoters = suggestion.negativeVoters,
-
-                                isTupper = suggestion.isTupper
-                            )
-
-                            suggestions.set(dbSuggestion)
-
-                            total += 1
-                        }
-                    }
-
-                    ephemeralFollowUp { content = "Migrated $total suggestions." }
-                }
-            }
-
             // TODO: Searching command?
 //            subCommand(::SuggestionSearchArguments) {
 //                name = "search"
@@ -518,7 +470,7 @@ class SuggestionsExtension : Extension() {
         // endregion
     }
 
-    suspend fun sendSuggestion(suggestion: DBSuggestion) {
+    suspend fun sendSuggestion(suggestion: Suggestion) {
         val channel = getChannel()
 
         if (suggestion.message == null) {
@@ -532,7 +484,7 @@ class SuggestionsExtension : Extension() {
         }
     }
 
-    suspend fun sendSuggestionUpdateMessage(suggestion: DBSuggestion) {
+    suspend fun sendSuggestionUpdateMessage(suggestion: Suggestion) {
         val user = kord.getUser(suggestion.owner) ?: return
 
         val suggestionMessage = if (suggestion.message != null) {
@@ -570,7 +522,7 @@ class SuggestionsExtension : Extension() {
 
     suspend fun getChannel() = kord.getChannelOf<GuildMessageChannel>(SUGGESTION_CHANNEL)!!
 
-    fun MessageCreateBuilder.suggestion(suggestion: DBSuggestion) {
+    fun MessageCreateBuilder.suggestion(suggestion: Suggestion) {
         val id = suggestion._id.value
 
         embed {
@@ -631,7 +583,7 @@ class SuggestionsExtension : Extension() {
         }
     }
 
-    fun MessageModifyBuilder.suggestion(suggestion: DBSuggestion, current: Message) {
+    fun MessageModifyBuilder.suggestion(suggestion: Suggestion, current: Message) {
         val id = suggestion._id.value
 
         embed {

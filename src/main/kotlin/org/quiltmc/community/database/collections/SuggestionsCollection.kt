@@ -6,12 +6,13 @@ import org.bson.conversions.Bson
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.litote.kmongo.eq
+import org.quiltmc.community.database.Collection
 import org.quiltmc.community.database.Database
 import org.quiltmc.community.database.entities.Suggestion
 
-class SuggestionCollection : KoinComponent {
+class SuggestionsCollection : KoinComponent {
     private val database: Database by inject()
-    private val col = database.mongo.getCollection<Suggestion>("suggestions")
+    private val col = database.mongo.getCollection<Suggestion>(name)
 
     suspend fun get(id: Snowflake) =
         col.findOne(Suggestion::_id eq id)
@@ -27,4 +28,6 @@ class SuggestionCollection : KoinComponent {
 
     suspend fun set(suggestion: Suggestion) =
         col.save(suggestion)
+
+    companion object : Collection("suggestions")
 }

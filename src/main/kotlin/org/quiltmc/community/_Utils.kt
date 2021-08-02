@@ -8,7 +8,7 @@ import org.koin.dsl.bind
 import org.quiltmc.community.database.Database
 import org.quiltmc.community.database.collections.MetaCollection
 import org.quiltmc.community.database.collections.ServerSettingsCollection
-import org.quiltmc.community.database.collections.SuggestionCollection
+import org.quiltmc.community.database.collections.SuggestionsCollection
 import org.quiltmc.community.database.getSettings
 
 fun String.chunkByWhitespace(length: Int): List<String> {
@@ -72,7 +72,7 @@ suspend fun ExtensibleBotBuilder.database(migrate: Boolean = false) {
             loadModule {
                 single { MetaCollection() } bind MetaCollection::class
                 single { ServerSettingsCollection() } bind ServerSettingsCollection::class
-                single { SuggestionCollection() } bind SuggestionCollection::class
+                single { SuggestionsCollection() } bind SuggestionsCollection::class
             }
 
             if (migrate) {

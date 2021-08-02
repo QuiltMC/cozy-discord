@@ -8,17 +8,13 @@ package org.quiltmc.community
 import com.kotlindiscord.kord.extensions.ExtensibleBot
 import com.kotlindiscord.kord.extensions.modules.extra.mappings.extMappings
 import com.kotlindiscord.kord.extensions.utils.env
-import com.kotlindiscord.kord.extensions.utils.loadModule
 import dev.kord.common.entity.Snowflake
 import dev.kord.gateway.Intents
 import dev.kord.gateway.PrivilegedIntent
 import me.shedaniel.linkie.namespaces.YarnNamespace
-import org.koin.dsl.bind
 import org.quiltmc.community.modes.quilt.extensions.SyncExtension
 import org.quiltmc.community.modes.quilt.extensions.messagelog.MessageLogExtension
 import org.quiltmc.community.modes.quilt.extensions.minecraft.MinecraftExtension
-import org.quiltmc.community.modes.quilt.extensions.suggestions.JsonSuggestions
-import org.quiltmc.community.modes.quilt.extensions.suggestions.SuggestionsData
 import org.quiltmc.community.modes.quilt.extensions.suggestions.SuggestionsExtension
 
 @Suppress("MagicNumber", "UnderscoresInNumericLiterals")
@@ -65,15 +61,6 @@ suspend fun setupQuilt() = ExtensibleBot(TOKEN) {
                     }
                 }
             }
-        }
-    }
-
-    hooks {
-        afterKoinSetup {
-            val suggestions = JsonSuggestions()
-            suggestions.load()
-
-            loadModule { single { suggestions } bind SuggestionsData::class }
         }
     }
 }

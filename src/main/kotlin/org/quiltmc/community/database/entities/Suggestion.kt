@@ -4,12 +4,13 @@ package org.quiltmc.community.database.entities
 
 import dev.kord.common.entity.Snowflake
 import kotlinx.serialization.Serializable
+import org.quiltmc.community.database.Entity
 import org.quiltmc.community.modes.quilt.extensions.suggestions.SuggestionStatus
 
 @Serializable
 @Suppress("ConstructorParameterNaming")  // MongoDB calls it that...
 data class Suggestion(
-    val _id: Snowflake,
+    override val _id: Snowflake,
 
     var comment: String? = null,
     var status: SuggestionStatus = SuggestionStatus.Open,
@@ -25,7 +26,7 @@ data class Suggestion(
     val negativeVoters: MutableList<Snowflake> = mutableListOf(),
 
     val isTupper: Boolean = false
-) {
+) : Entity<Snowflake> {
     val positiveVotes get() = positiveVoters.size
     val negativeVotes get() = negativeVoters.size
     val voteDifference get() = positiveVotes - negativeVotes

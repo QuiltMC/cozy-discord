@@ -15,7 +15,7 @@ import dev.kord.common.entity.Snowflake
 import dev.kord.rest.builder.interaction.OptionsBuilder
 import dev.kord.rest.builder.interaction.StringChoiceBuilder
 import org.koin.core.component.inject
-import org.quiltmc.community.database.collections.SuggestionCollection
+import org.quiltmc.community.database.collections.SuggestionsCollection
 import org.quiltmc.community.database.entities.Suggestion
 
 @Converter(
@@ -27,7 +27,7 @@ class SuggestionConverter(
 ) : SingleConverter<Suggestion>() {
     override val signatureTypeString: String = "Suggestion ID"
 
-    private val suggestions: SuggestionCollection by inject()
+    private val suggestions: SuggestionsCollection by inject()
 
     override suspend fun parse(parser: StringParser?, context: CommandContext, named: String?): Boolean {
         val arg: String = named ?: parser?.parseNext()?.data ?: return false
