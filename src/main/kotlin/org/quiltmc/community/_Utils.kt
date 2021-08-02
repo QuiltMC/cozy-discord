@@ -3,6 +3,8 @@ package org.quiltmc.community
 import com.kotlindiscord.kord.extensions.builders.ExtensibleBotBuilder
 import com.kotlindiscord.kord.extensions.utils.env
 import com.kotlindiscord.kord.extensions.utils.loadModule
+import dev.kord.common.entity.ArchiveDuration
+import dev.kord.core.entity.Guild
 import kotlinx.coroutines.runBlocking
 import org.koin.dsl.bind
 import org.quiltmc.community.database.Database
@@ -109,5 +111,19 @@ suspend fun ExtensibleBotBuilder.common() {
         sentry {
             enable = false
         }
+    }
+}
+
+fun Guild.getMaxArchiveDuration(): ArchiveDuration {
+    val features = features.filter {
+        it.value == "THREE_DAY_THREAD_ARCHIVE" ||
+                it.value == "SEVEN_DAY_THREAD_ARCHIVE"
+    }.map { it.value }
+
+    return when {
+        features.contains("SEVEN_DAY_THREAD_ARCHIVE") -> ArchiveDuration.Week
+        features.contains("THREE_DAY_THREAD_ARCHIVE") -> ArchiveDuration.ThreeDays
+
+        else -> ArchiveDuration.Day
     }
 }

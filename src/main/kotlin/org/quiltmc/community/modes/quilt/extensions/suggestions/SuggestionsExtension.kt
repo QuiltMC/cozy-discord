@@ -29,6 +29,7 @@ import dev.kord.core.builder.components.emoji
 import dev.kord.core.entity.Message
 import dev.kord.core.entity.ReactionEmoji
 import dev.kord.core.entity.channel.GuildMessageChannel
+import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.entity.interaction.ButtonInteraction
 import dev.kord.core.event.interaction.InteractionCreateEvent
 import dev.kord.core.event.message.MessageCreateEvent
@@ -42,6 +43,7 @@ import org.quiltmc.community.COMMUNITY_MANAGEMENT_ROLES
 import org.quiltmc.community.SUGGESTION_CHANNEL
 import org.quiltmc.community.database.collections.SuggestionsCollection
 import org.quiltmc.community.database.entities.Suggestion
+import org.quiltmc.community.getMaxArchiveDuration
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 
@@ -474,8 +476,15 @@ class SuggestionsExtension : Extension() {
         val channel = getChannel()
 
         if (suggestion.message == null) {
-            suggestion.message = channel.createMessage { suggestion(suggestion) }.id
+            val message = channel.createMessage { suggestion(suggestion) }
 
+            (channel as? TextChannel)?.startPublicThreadWithMessage(
+                message.id,
+                name = "Suggestion ${suggestion._id.value}",
+                archiveDuration = channel.guild.asGuild().getMaxArchiveDuration()
+            )
+
+            suggestion.message = message.id
             suggestions.set(suggestion)
         } else {
             val message = channel.getMessage(suggestion.message!!)
