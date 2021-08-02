@@ -15,6 +15,8 @@ data class Suggestion(
     var comment: String? = null,
     var status: SuggestionStatus = SuggestionStatus.Open,
     var message: Snowflake? = null,
+    var thread: Snowflake? = null,
+    var threadButtons: Snowflake? = null,
 
     var text: String,
 

@@ -20,6 +20,9 @@ class SuggestionsCollection : KoinComponent {
     suspend fun getByMessage(id: Snowflake) =
         col.findOne(Suggestion::message eq id)
 
+    suspend fun getByThread(id: Snowflake) =
+        col.findOne(Suggestion::thread eq id)
+
     suspend fun getByMessage(message: MessageBehavior) =
         getByMessage(message.id)
 

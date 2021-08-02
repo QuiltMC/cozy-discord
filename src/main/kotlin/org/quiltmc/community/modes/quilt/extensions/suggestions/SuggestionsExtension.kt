@@ -6,20 +6,23 @@ package org.quiltmc.community.modes.quilt.extensions.suggestions
 
 import com.kotlindiscord.kord.extensions.CommandException
 import com.kotlindiscord.kord.extensions.checks.hasRole
+import com.kotlindiscord.kord.extensions.checks.isInThread
 import com.kotlindiscord.kord.extensions.checks.isNotbot
 import com.kotlindiscord.kord.extensions.checks.or
 import com.kotlindiscord.kord.extensions.commands.converters.impl.coalescedString
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalCoalescingString
+import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.commands.parser.Arguments
+import com.kotlindiscord.kord.extensions.commands.slash.converters.impl.enumChoice
 import com.kotlindiscord.kord.extensions.extensions.Extension
-import com.kotlindiscord.kord.extensions.utils.ackEphemeral
-import com.kotlindiscord.kord.extensions.utils.delete
-import com.kotlindiscord.kord.extensions.utils.dm
-import com.kotlindiscord.kord.extensions.utils.getJumpUrl
+import com.kotlindiscord.kord.extensions.utils.*
 import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.ButtonStyle
+import dev.kord.common.entity.MessageType
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.channel.createMessage
+import dev.kord.core.behavior.channel.edit
+import dev.kord.core.behavior.channel.threads.edit
 import dev.kord.core.behavior.channel.withTyping
 import dev.kord.core.behavior.edit
 import dev.kord.core.behavior.getChannelOf
@@ -30,13 +33,16 @@ import dev.kord.core.entity.Message
 import dev.kord.core.entity.ReactionEmoji
 import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.core.entity.channel.TextChannel
+import dev.kord.core.entity.channel.thread.ThreadChannel
 import dev.kord.core.entity.interaction.ButtonInteraction
+import dev.kord.core.event.channel.thread.ThreadChannelCreateEvent
 import dev.kord.core.event.interaction.InteractionCreateEvent
 import dev.kord.core.event.message.MessageCreateEvent
 import dev.kord.core.event.message.MessageDeleteEvent
 import dev.kord.rest.builder.message.MessageCreateBuilder
 import dev.kord.rest.builder.message.MessageModifyBuilder
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.toList
 import org.koin.core.component.inject
 import org.quiltmc.community.COMMUNITY_GUILD
 import org.quiltmc.community.COMMUNITY_MANAGEMENT_ROLES
@@ -76,6 +82,7 @@ class SuggestionsExtension : Extension() {
             check { failIfNot(event.message.channelId == SUGGESTION_CHANNEL) }
             check { failIfNot(event.message.content.trim().isNotEmpty()) }
             check { failIfNot(event.message.interaction == null) }
+            check { failIf(event.message.type == MessageType.ThreadCreated) }
 
             action {
                 event.message.channel.withTyping {
@@ -159,6 +166,15 @@ class SuggestionsExtension : Extension() {
                 suggestions.set(suggestion)
                 sendSuggestion(suggestion)
                 event.message.delete()
+            }
+        }
+
+        event<MessageCreateEvent> {
+            check { failIfNot(event.message.channelId == SUGGESTION_CHANNEL) }
+            check { failIfNot(event.message.type == MessageType.ThreadCreated) }
+
+            action {
+                event.message.deleteIgnoringNotFound()
             }
         }
 
@@ -270,6 +286,19 @@ class SuggestionsExtension : Extension() {
             }
         }
 
+        event<ThreadChannelCreateEvent> {
+            check { failIf(event.channel.ownerId == kord.selfId) }
+
+            action {
+                event.channel.delete("Suggestion thread not created by Cozy")
+
+                event.channel.owner.asUser().dm {
+                    content = "I've removed your thread - please note that suggestion threads are only " +
+                            "meant to be created automatically, you shouldn't create your own."
+                }
+            }
+        }
+
         // endregion
 
         // region: Commands
@@ -300,161 +329,77 @@ class SuggestionsExtension : Extension() {
             }
         }
 
-        slashCommand {
+        slashCommand(::RenameArguments) {
+            name = "rename"
+            description = "Rename the current thread, if you have permission"
+
+            guild(COMMUNITY_GUILD)
+
+            check(isInThread)
+
+            action {
+                val channel = channel as ThreadChannel
+                val member = user.asMember(guild!!.id)
+                val roles = member.roles.toList().map { it.id }
+
+                if (COMMUNITY_MANAGEMENT_ROLES.any { it in roles }) {
+                    channel.edit {
+                        name = arguments.name
+                    }
+
+                    ephemeralFollowUp { content = "Thread renamed." }
+
+                    return@action
+                }
+
+                val suggestion = suggestions.getByThread(channel.id)
+
+                if (suggestion == null) {
+                    ephemeralFollowUp { content = "This is not a suggestion thread." }
+
+                    return@action
+                }
+
+                if (suggestion.owner != user.id) {
+                    ephemeralFollowUp { content = "This is not your suggestion." }
+
+                    return@action
+                }
+
+                channel.edit {
+                    name = arguments.name
+                }
+
+                ephemeralFollowUp { content = "Thread renamed." }
+            }
+        }
+
+        slashCommand(::SuggestionStateArguments) {
             name = "suggestion"
-            description = "Suggestion-related commands"
+            description = "Suggestion state change commands"
 
             guild(COMMUNITY_GUILD)
 
             COMMUNITY_MANAGEMENT_ROLES.forEach(::allowRole)
             check(or(checks = COMMUNITY_MANAGEMENT_ROLES.map { hasRole(it) }.toTypedArray()))
 
-            // region: State changes
+            action {
+                val status = arguments.status
 
-            subCommand(::SuggestionStateArguments) {
-                name = "approve"
-                description = "Approve a suggestion"
+                arguments.suggestion.status = status
+                arguments.suggestion.comment = arguments.comment ?: arguments.suggestion.comment
 
-                COMMUNITY_MANAGEMENT_ROLES.forEach(::allowRole)
+                suggestions.set(arguments.suggestion)
+                sendSuggestion(arguments.suggestion)
+                sendSuggestionUpdateMessage(arguments.suggestion)
 
-                action {
-                    arguments.suggestion.status = SuggestionStatus.Approved
-                    arguments.suggestion.comment = arguments.comment ?: arguments.suggestion.comment
-
-                    suggestions.set(arguments.suggestion)
-                    sendSuggestion(arguments.suggestion)
-                    sendSuggestionUpdateMessage(arguments.suggestion)
-
-                    ephemeralFollowUp {
-                        content = "Suggestion updated."
-                    }
+                ephemeralFollowUp {
+                    content = "Suggestion updated."
                 }
             }
+        }
 
-            subCommand(::SuggestionStateArguments) {
-                name = "deny"
-                description = "Deny a suggestion"
-
-                COMMUNITY_MANAGEMENT_ROLES.forEach(::allowRole)
-
-                action {
-                    arguments.suggestion.status = SuggestionStatus.Denied
-                    arguments.suggestion.comment = arguments.comment ?: arguments.suggestion.comment
-
-                    suggestions.set(arguments.suggestion)
-                    sendSuggestion(arguments.suggestion)
-                    sendSuggestionUpdateMessage(arguments.suggestion)
-
-                    ephemeralFollowUp {
-                        content = "Suggestion updated."
-                    }
-                }
-            }
-
-            subCommand(::SuggestionStateArguments) {
-                name = "reopen"
-                description = "Reopen a suggestion"
-
-                COMMUNITY_MANAGEMENT_ROLES.forEach(::allowRole)
-
-                action {
-                    arguments.suggestion.status = SuggestionStatus.Open
-                    arguments.suggestion.comment = arguments.comment ?: arguments.suggestion.comment
-
-                    suggestions.set(arguments.suggestion)
-                    sendSuggestion(arguments.suggestion)
-                    sendSuggestionUpdateMessage(arguments.suggestion)
-
-                    ephemeralFollowUp {
-                        content = "Suggestion updated."
-                    }
-                }
-            }
-
-            subCommand(::SuggestionStateArguments) {
-                name = "implemented"
-                description = "Mark a suggestion as implemented"
-
-                COMMUNITY_MANAGEMENT_ROLES.forEach(::allowRole)
-
-                action {
-                    arguments.suggestion.status = SuggestionStatus.Implemented
-                    arguments.suggestion.comment = arguments.comment ?: arguments.suggestion.comment
-
-                    suggestions.set(arguments.suggestion)
-                    sendSuggestion(arguments.suggestion)
-                    sendSuggestionUpdateMessage(arguments.suggestion)
-
-                    ephemeralFollowUp {
-                        content = "Suggestion updated."
-                    }
-                }
-            }
-
-            subCommand(::SuggestionStateArguments) {
-                name = "duplicate"
-                description = "Mark a suggestion as a duplicate"
-
-                COMMUNITY_MANAGEMENT_ROLES.forEach(::allowRole)
-
-                action {
-                    arguments.suggestion.status = SuggestionStatus.Duplicate
-                    arguments.suggestion.comment = arguments.comment ?: arguments.suggestion.comment
-
-                    suggestions.set(arguments.suggestion)
-                    sendSuggestion(arguments.suggestion)
-                    sendSuggestionUpdateMessage(arguments.suggestion)
-
-                    ephemeralFollowUp {
-                        content = "Suggestion updated."
-                    }
-                }
-            }
-
-            subCommand(::SuggestionStateArguments) {
-                name = "spam"
-                description = "Mark a suggestion as spam"
-
-                COMMUNITY_MANAGEMENT_ROLES.forEach(::allowRole)
-
-                action {
-                    arguments.suggestion.status = SuggestionStatus.Spam
-                    arguments.suggestion.comment = arguments.comment ?: arguments.suggestion.comment
-
-                    suggestions.set(arguments.suggestion)
-                    sendSuggestion(arguments.suggestion)
-                    sendSuggestionUpdateMessage(arguments.suggestion)
-
-                    ephemeralFollowUp {
-                        content = "Suggestion updated."
-                    }
-                }
-            }
-
-            // endregion
-
-            // region: Administration
-
-            subCommand(::SuggestionCommentArguments) {
-                name = "comment"
-                description = "Set a suggestion's staff comment"
-
-                COMMUNITY_MANAGEMENT_ROLES.forEach(::allowRole)
-
-                action {
-                    arguments.suggestion.comment = arguments.comment
-
-                    suggestions.set(arguments.suggestion)
-                    sendSuggestion(arguments.suggestion)
-                    sendSuggestionUpdateMessage(arguments.suggestion)
-
-                    ephemeralFollowUp {
-                        content = "Suggestion updated."
-                    }
-                }
-            }
-
-            // TODO: Searching command?
+        // TODO: Searching command?
 //            subCommand(::SuggestionSearchArguments) {
 //                name = "search"
 //                description = "Search through the submitted suggestions"
@@ -466,9 +411,6 @@ class SuggestionsExtension : Extension() {
 //                }
 //            }
 
-            // endregion
-        }
-
         // endregion
     }
 
@@ -478,18 +420,51 @@ class SuggestionsExtension : Extension() {
         if (suggestion.message == null) {
             val message = channel.createMessage { suggestion(suggestion) }
 
-            (channel as? TextChannel)?.startPublicThreadWithMessage(
+            val thread = (channel as? TextChannel)?.startPublicThreadWithMessage(
                 message.id,
-                name = "Suggestion ${suggestion._id.value}",
+                name = suggestion._id.asString,
                 archiveDuration = channel.guild.asGuild().getMaxArchiveDuration()
             )
 
+            val infoMessage = thread?.createMessage {
+                content = "This message is at the top of the thread.\n\n" +
+                        "If this is your suggestion, feel free to use **/rename** to change the " +
+                        "name of the thread!"
+            }
+
+            infoMessage?.pin()
+
+            // TODO: Think about buttons when Kord updates and allows us to get the thread parent
+
+//            val threadButtons = thread?.createMessage {
+//                suggestion(suggestion, sendEmbed = false)
+//
+//                content = "\u200B"
+//            }
+
+            thread?.addUser(suggestion.owner)
+
             suggestion.message = message.id
+            suggestion.thread = thread?.id
+//            suggestion.threadButtons = threadButtons?.id
+
             suggestions.set(suggestion)
         } else {
             val message = channel.getMessage(suggestion.message!!)
 
             message.edit { suggestion(suggestion, message) }
+
+            if (suggestion.thread != null && suggestion.threadButtons != null) {
+                val thread = (channel as? TextChannel)?.activeThreads?.toList()?.firstOrNull {
+                    it.id == suggestion.thread
+                }
+
+                val threadMessage = thread?.getMessage(suggestion.threadButtons!!)
+
+                threadMessage?.edit {
+                    suggestion(suggestion, threadMessage)
+                }
+            }
         }
     }
 
@@ -527,45 +502,53 @@ class SuggestionsExtension : Extension() {
                 }
             }
         }
+
+        if (suggestion.thread != null) {
+            kord.getChannelOf<ThreadChannel>(suggestion.thread!!)?.createMessage {
+                content = "Suggestion updated."
+            }
+        }
     }
 
     suspend fun getChannel() = kord.getChannelOf<GuildMessageChannel>(SUGGESTION_CHANNEL)!!
 
-    fun MessageCreateBuilder.suggestion(suggestion: Suggestion) {
+    fun MessageCreateBuilder.suggestion(suggestion: Suggestion, sendEmbed: Boolean = true) {
         val id = suggestion._id.value
 
-        embed {
-            author {
-                name = suggestion.ownerName
-                icon = suggestion.ownerAvatar
-            }
+        if (sendEmbed) {
+            embed {
+                author {
+                    name = suggestion.ownerName
+                    icon = suggestion.ownerAvatar
+                }
 
-            description = if (suggestion.isTupper) {
-                "@${suggestion.ownerName} (<@${suggestion.owner.value}>)\n\n"
-            } else {
-                "<@${suggestion.owner.value}>\n\n"
-            }
+                description = if (suggestion.isTupper) {
+                    "@${suggestion.ownerName} (<@${suggestion.owner.value}>)\n\n"
+                } else {
+                    "<@${suggestion.owner.value}>\n\n"
+                }
 
-            description += "${suggestion.text}\n\n"
+                description += "${suggestion.text}\n\n"
 
-            if (suggestion.positiveVotes > 0) {
-                description += "**Upvotes:** ${suggestion.positiveVotes}\n"
-            }
+                if (suggestion.positiveVotes > 0) {
+                    description += "**Upvotes:** ${suggestion.positiveVotes}\n"
+                }
 
-            if (suggestion.negativeVotes > 0) {
-                description += "**Downvotes:** ${suggestion.negativeVotes}\n"
-            }
+                if (suggestion.negativeVotes > 0) {
+                    description += "**Downvotes:** ${suggestion.negativeVotes}\n"
+                }
 
-            description += "**Total:** ${suggestion.voteDifference}"
+                description += "**Total:** ${suggestion.voteDifference}"
 
-            if (suggestion.comment != null) {
-                description += "\n\n**__Staff response__\n\n** ${suggestion.comment}"
-            }
+                if (suggestion.comment != null) {
+                    description += "\n\n**__Staff response__\n\n** ${suggestion.comment}"
+                }
 
-            color = suggestion.status.color
+                color = suggestion.status.color
 
-            footer {
-                text = "Status: ${suggestion.status.readableName} • ID: $id"
+                footer {
+                    text = "Status: ${suggestion.status.readableName} • ID: $id"
+                }
             }
         }
 
@@ -592,41 +575,43 @@ class SuggestionsExtension : Extension() {
         }
     }
 
-    fun MessageModifyBuilder.suggestion(suggestion: Suggestion, current: Message) {
+    fun MessageModifyBuilder.suggestion(suggestion: Suggestion, current: Message, sendEmbed: Boolean = true) {
         val id = suggestion._id.value
 
-        embed {
-            author {
-                name = suggestion.ownerName
-                icon = suggestion.ownerAvatar
-            }
+        if (sendEmbed) {
+            embed {
+                author {
+                    name = suggestion.ownerName
+                    icon = suggestion.ownerAvatar
+                }
 
-            description = if (suggestion.isTupper) {
-                "@${suggestion.ownerName} (<@${suggestion.owner.value}>)\n\n"
-            } else {
-                "<@${suggestion.owner.value}>\n\n"
-            }
+                description = if (suggestion.isTupper) {
+                    "@${suggestion.ownerName} (<@${suggestion.owner.value}>)\n\n"
+                } else {
+                    "<@${suggestion.owner.value}>\n\n"
+                }
 
-            description += "${suggestion.text}\n\n"
+                description += "${suggestion.text}\n\n"
 
-            if (suggestion.positiveVotes > 0) {
-                description += "**Upvotes:** ${suggestion.positiveVotes}\n"
-            }
+                if (suggestion.positiveVotes > 0) {
+                    description += "**Upvotes:** ${suggestion.positiveVotes}\n"
+                }
 
-            if (suggestion.negativeVotes > 0) {
-                description += "**Downvotes:** ${suggestion.negativeVotes}\n"
-            }
+                if (suggestion.negativeVotes > 0) {
+                    description += "**Downvotes:** ${suggestion.negativeVotes}\n"
+                }
 
-            description += "**Total:** ${suggestion.voteDifference}"
+                description += "**Total:** ${suggestion.voteDifference}"
 
-            if (suggestion.comment != null) {
-                description += "\n\n**__Staff response__\n\n** ${suggestion.comment}"
-            }
+                if (suggestion.comment != null) {
+                    description += "\n\n**__Staff response__\n\n** ${suggestion.comment}"
+                }
 
-            color = suggestion.status.color
+                color = suggestion.status.color
 
-            footer {
-                text = "Status: ${suggestion.status.readableName} • ID: $id"
+                footer {
+                    text = "Status: ${suggestion.status.readableName} • ID: $id"
+                }
             }
         }
 
@@ -696,11 +681,17 @@ class SuggestionsExtension : Extension() {
 //    }
 
     inner class SuggestionStateArguments : Arguments() {
+        val status by enumChoice<SuggestionStatus>("status", "Status to apply", "status")
         val suggestion by suggestion("suggestion", "Suggestion ID to act on")
+
         val comment by optionalCoalescingString("comment", "Comment text to set") { _, str ->
             if ((str?.length ?: -1) > COMMENT_SIZE_LIMIT) {
                 throw CommandException("Comment must not be longer than $COMMENT_SIZE_LIMIT characters.")
             }
         }
+    }
+
+    inner class RenameArguments : Arguments() {
+        val name by string("name", "Name to give the current thread")
     }
 }
