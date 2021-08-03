@@ -17,6 +17,7 @@ import dev.kord.core.entity.Guild
 import dev.kord.core.event.guild.BanAddEvent
 import dev.kord.core.event.guild.BanRemoveEvent
 import dev.kord.core.event.guild.MemberUpdateEvent
+import dev.kord.rest.builder.message.create.embed
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.toList
 import mu.KotlinLogging

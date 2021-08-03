@@ -36,8 +36,12 @@ import dev.kord.core.event.channel.thread.ThreadChannelCreateEvent
 import dev.kord.core.event.interaction.InteractionCreateEvent
 import dev.kord.core.event.message.MessageCreateEvent
 import dev.kord.core.event.message.MessageDeleteEvent
-import dev.kord.rest.builder.message.MessageCreateBuilder
-import dev.kord.rest.builder.message.MessageModifyBuilder
+import dev.kord.rest.builder.message.create.MessageCreateBuilder
+import dev.kord.rest.builder.message.create.actionRow
+import dev.kord.rest.builder.message.create.embed
+import dev.kord.rest.builder.message.modify.MessageModifyBuilder
+import dev.kord.rest.builder.message.modify.actionRow
+import dev.kord.rest.builder.message.modify.embed
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.toList
 import org.koin.core.component.inject

@@ -17,5 +17,8 @@ data class CollabServerSettings(
     var banSyncChannel: Snowflake? = null,
 
     var moderatorPerm: Permissions = Permissions(Permission.ManageGuild),
-    val moderatorRoles: MutableList<Snowflake> = mutableListOf()
+    val moderatorRoles: MutableList<Snowflake> = mutableListOf(),
+
+    var isBlocklist: Boolean = true,
+    val listedGuilds: MutableList<Snowflake> = mutableListOf(),
 ) : Entity<Snowflake>
