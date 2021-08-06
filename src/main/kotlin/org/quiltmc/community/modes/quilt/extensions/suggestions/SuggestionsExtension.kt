@@ -58,6 +58,11 @@ private const val ACTION_DOWN = "down"
 private const val ACTION_REMOVE = "remove"
 private const val ACTION_UP = "up"
 
+private const val THREAD_INTRO = "This message is at the top of the thread.\n\n" +
+        "If this is your suggestion, feel free to use **/rename** to change the " +
+        "name of the thread! You can also use **/archive** to archive it when the suggestion has " +
+        "been addressed, but do note that you will not be able to lock the thread."
+
 private const val COMMENT_SIZE_LIMIT: Long = 800
 private const val MESSAGE_CACHE_SIZE = 10
 private const val SUGGESTION_SIZE_LIMIT: Long = 1000
@@ -496,21 +501,19 @@ class SuggestionsExtension : Extension() {
                 archiveDuration = channel.guild.asGuild().getMaxArchiveDuration()
             )
 
-            val infoMessage = thread?.createMessage {
+            val threadMessage = thread?.createMessage {
                 suggestion(suggestion, sendEmbed = false)
 
-                content = "This message is at the top of the thread.\n\n" +
-                        "If this is your suggestion, feel free to use **/rename** to change the " +
-                        "name of the thread!"
+                content = THREAD_INTRO
             }
 
-            infoMessage?.pin()
+            threadMessage?.pin()
 
             thread?.addUser(suggestion.owner)
 
             suggestion.message = message.id
             suggestion.thread = thread?.id
-            suggestion.threadButtons = infoMessage?.id
+            suggestion.threadButtons = threadMessage?.id
 
             suggestions.set(suggestion)
         } else {
@@ -527,6 +530,8 @@ class SuggestionsExtension : Extension() {
 
                 threadMessage?.edit {
                     suggestion(suggestion, threadMessage, false)
+
+                    content = THREAD_INTRO
                 }
             }
         }
