@@ -7,6 +7,7 @@ package org.quiltmc.community.modes.quilt.extensions.suggestions
 import com.kotlindiscord.kord.extensions.CommandException
 import com.kotlindiscord.kord.extensions.checks.*
 import com.kotlindiscord.kord.extensions.commands.converters.impl.coalescedString
+import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingBoolean
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalCoalescingString
 import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.commands.parser.Arguments
@@ -18,7 +19,6 @@ import dev.kord.common.entity.ButtonStyle
 import dev.kord.common.entity.MessageType
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.channel.createMessage
-import dev.kord.core.behavior.channel.edit
 import dev.kord.core.behavior.channel.threads.edit
 import dev.kord.core.behavior.channel.withTyping
 import dev.kord.core.behavior.edit
@@ -378,6 +378,72 @@ class SuggestionsExtension : Extension() {
             }
         }
 
+        slashCommand(::ArchiveArguments) {
+            name = "archive"
+            description = "Archive the current thread, if you have permission"
+
+            guild(COMMUNITY_GUILD)
+
+            check(isInThread)
+
+            action {
+                val channel = channel as ThreadChannel
+                val member = user.asMember(guild!!.id)
+                val roles = member.roles.toList().map { it.id }
+
+                if (COMMUNITY_MANAGEMENT_ROLES.any { it in roles }) {
+                    channel.edit {
+                        this.archived = true
+                        this.locked = arguments.lock
+                    }
+
+                    ephemeralFollowUp {
+                        content = "Thread archived"
+
+                        if (arguments.lock) {
+                            content += " and locked"
+                        }
+
+                        content += "."
+                    }
+
+                    return@action
+                }
+
+                val suggestion = suggestions.getByThread(channel.id)
+
+                if (suggestion == null) {
+                    ephemeralFollowUp { content = "This is not a suggestion thread." }
+
+                    return@action
+                }
+
+                if (suggestion.owner != user.id) {
+                    ephemeralFollowUp { content = "This is not your suggestion." }
+
+                    return@action
+                }
+
+                if (channel.isArchived) {
+                    ephemeralFollowUp { content = "This channel is already archived." }
+
+                    return@action
+                }
+
+                if (arguments.lock) {
+                    ephemeralFollowUp { content = "Only members of the community team may lock threads." }
+
+                    return@action
+                }
+
+                channel.edit {
+                    archived = true
+                }
+
+                ephemeralFollowUp { content = "Thread archived." }
+            }
+        }
+
         slashCommand(::SuggestionStateArguments) {
             name = "suggestion"
             description = "Suggestion state change commands"
@@ -691,5 +757,13 @@ class SuggestionsExtension : Extension() {
 
     inner class RenameArguments : Arguments() {
         val name by string("name", "Name to give the current thread")
+    }
+
+    inner class ArchiveArguments : Arguments() {
+        val lock by defaultingBoolean(
+            "lock",
+            "Whether to lock the thread, if you're staff - defaults to false",
+            false
+        )
     }
 }
