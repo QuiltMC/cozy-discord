@@ -13,6 +13,7 @@ import dev.kord.core.entity.Message
 import dev.kord.core.entity.ReactionEmoji
 import dev.kord.core.entity.channel.Category
 import dev.kord.core.entity.channel.GuildMessageChannel
+import dev.kord.core.entity.channel.thread.ThreadChannel
 import dev.kord.core.event.guild.GuildCreateEvent
 import dev.kord.core.event.message.MessageBulkDeleteEvent
 import dev.kord.core.event.message.MessageDeleteEvent
@@ -59,8 +60,8 @@ class MessageLogExtension : Extension() {
     private val bulkDeletedMessages: MutableSet<Snowflake> = mutableSetOf()
 
     private val dateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)
-        .withLocale(bot.settings.i18nBuilder.defaultLocale)
-        .withZone(ZoneId.of("UTC"))
+            .withLocale(bot.settings.i18nBuilder.defaultLocale)
+            .withZone(ZoneId.of("UTC"))
 
     private val jsonFormat = Json { prettyPrint = true }
 
@@ -162,36 +163,56 @@ class MessageLogExtension : Extension() {
                 }
 
                 send(
-                    LogMessage(event.guild!!.asGuild()) {
-                        allowedMentions { }
+                        LogMessage(event.guild!!.asGuild()) {
+                            allowedMentions { }
 
-                        addFile("messages.md", messages.byteInputStream())
-                    }
+                            addFile("messages.md", messages.byteInputStream())
+                        }
                 )
 
                 send(
-                    LogMessage(event.guild!!.asGuild()) {
-                        allowedMentions { }
+                        LogMessage(event.guild!!.asGuild()) {
+                            allowedMentions { }
 
-                        embed {
-                            color = COLOUR_NEGATIVE
-                            title = "Bulk message delete"
+                            embed {
+                                color = COLOUR_NEGATIVE
+                                title = "Bulk message delete"
 
-                            timestamp = Clock.System.now()
+                                timestamp = Clock.System.now()
 
-                            field {
-                                name = "Channel"
-                                value = event.channel.mention
-                                inline = true
-                            }
+                                if (event.channel is ThreadChannel) {
+                                    field {
+                                        name = "Thread"
+                                        value = event.channel.mention
+                                        inline = true
+                                    }
 
-                            field {
-                                name = "Count"
-                                value = event.messageIds.size.toString()
-                                inline = true
+                                    field {
+                                        name = "Parent Channel"
+                                        value = (event.channel as ThreadChannel).parent.mention
+                                        inline = true
+                                    }
+                                } else {
+                                    field {
+                                        name = "Channel"
+                                        value = event.channel.mention
+                                        inline = true
+                                    }
+                                }
+
+                                field {
+                                    name = "Channel"
+                                    value = event.channel.mention
+                                    inline = true
+                                }
+
+                                field {
+                                    name = "Count"
+                                    value = event.messageIds.size.toString()
+                                    inline = true
+                                }
                             }
                         }
-                    }
                 )
             }
         }
@@ -201,7 +222,7 @@ class MessageLogExtension : Extension() {
 
             check {
                 failIf(
-                    event.message?.asMessageOrNull()?.isEphemeral == true
+                        event.message?.asMessageOrNull()?.isEphemeral == true
                 )
             }
 
@@ -219,49 +240,63 @@ class MessageLogExtension : Extension() {
                 val messageContent = message?.content
 
                 send(
-                    LogMessage(event.guild!!.asGuild()) {
-                        allowedMentions { }
+                        LogMessage(event.guild!!.asGuild()) {
+                            allowedMentions { }
 
-                        embed {
-                            color = COLOUR_NEGATIVE
-                            title = "Message deleted"
+                            embed {
+                                color = COLOUR_NEGATIVE
+                                title = "Message deleted"
 
-                            timestamp = Clock.System.now()
+                                timestamp = Clock.System.now()
 
-                            if (messageContent != null && messageContent.length <= SINGLE_MESSAGE_LIMIT) {
-                                description = "**Message Content**\n\n" +
+                                if (messageContent != null && messageContent.length <= SINGLE_MESSAGE_LIMIT) {
+                                    description = "**Message Content**\n\n" +
 
-                                        messageContent
-                            } else if (messageContent == null) {
-                                description = "_Message was not cached, so further information is not available._"
-                            }
-
-                            if (message != null) {
-                                addMessage(message)
-                            } else {
-                                field {
-                                    name = "Channel"
-                                    value = event.channel.mention
-                                    inline = true
+                                            messageContent
+                                } else if (messageContent == null) {
+                                    description = "_Message was not cached, so further information is not available._"
                                 }
 
-                                field {
-                                    name = "Created"
-                                    value = "${event.messageId.timeStamp.format()} (UTC)\n"
-                                    inline = true
+                                if (message != null) {
+                                    addMessage(message)
+                                } else {
+                                    if (event.channel is ThreadChannel) {
+                                        field {
+                                            name = "Thread"
+                                            value = event.channel.mention
+                                            inline = true
+                                        }
+
+                                        field {
+                                            name = "Parent Channel"
+                                            value = (event.channel as ThreadChannel).parent.mention
+                                            inline = true
+                                        }
+                                    } else {
+                                        field {
+                                            name = "Channel"
+                                            value = event.channel.mention
+                                            inline = true
+                                        }
+                                    }
+
+                                    field {
+                                        name = "Created"
+                                        value = "${event.messageId.timeStamp.format()} (UTC)\n"
+                                        inline = true
+                                    }
                                 }
                             }
                         }
-                    }
                 )
 
                 if (messageContent != null && messageContent.length > SINGLE_MESSAGE_LIMIT) {
                     send(
-                        LogMessage(event.guild!!.asGuild()) {
-                            allowedMentions { }
+                            LogMessage(event.guild!!.asGuild()) {
+                                allowedMentions { }
 
-                            addFile("old.md", splitContent(message.content).byteInputStream())
-                        }
+                                addFile("old.md", splitContent(message.content).byteInputStream())
+                            }
                     )
                 }
             }
@@ -272,7 +307,7 @@ class MessageLogExtension : Extension() {
 
             check {
                 failIf(
-                    event.message.asMessageOrNull()?.isEphemeral == true
+                        event.message.asMessageOrNull()?.isEphemeral == true
                 )
             }
 
@@ -290,57 +325,57 @@ class MessageLogExtension : Extension() {
                 val canEmbedNew = new.content.length <= DUAL_MESSAGE_LIMIT
 
                 send(
-                    LogMessage(new.getGuild()) {
-                        allowedMentions { }
+                        LogMessage(new.getGuild()) {
+                            allowedMentions { }
 
-                        embed {
-                            color = COLOUR_BLURPLE
-                            title = "Message edited"
+                            embed {
+                                color = COLOUR_BLURPLE
+                                title = "Message edited"
 
-                            timestamp = Clock.System.now()
+                                timestamp = Clock.System.now()
 
-                            description = ""
+                                description = ""
 
-                            if (old != null && canEmbedOld) {
-                                description = "**Old Message Content**\n\n" +
+                                if (old != null && canEmbedOld) {
+                                    description = "**Old Message Content**\n\n" +
 
-                                        old.content
-                            }
-
-                            if (canEmbedNew) {
-                                if (description!!.isNotEmpty()) {
-                                    description += "\n\n"
+                                            old.content
                                 }
 
-                                description += "**New Message Content**\n\n" +
+                                if (canEmbedNew) {
+                                    if (description!!.isNotEmpty()) {
+                                        description += "\n\n"
+                                    }
 
-                                        new.content
-                            }
+                                    description += "**New Message Content**\n\n" +
 
-                            addMessage(new)
+                                            new.content
+                                }
 
-                            if (delta == null) {
-                                description += "\n\n**Note:** Message was not cached, so the content may not have " +
-                                        "been edited."
+                                addMessage(new)
+
+                                if (delta == null) {
+                                    description += "\n\n**Note:** Message was not cached, so the content may not " +
+                                            "have been edited."
+                                }
                             }
                         }
-                    }
                 )
 
                 @Suppress("UnnecessaryParentheses")  // some of us are insecure :>
                 if ((old != null && !canEmbedOld) || !canEmbedNew) {
                     send(
-                        LogMessage(new.getGuild()) {
-                            allowedMentions { }
+                            LogMessage(new.getGuild()) {
+                                allowedMentions { }
 
-                            if (old != null && !canEmbedOld) {
-                                addFile("old.md", splitContent(old.content).byteInputStream())
-                            }
+                                if (old != null && !canEmbedOld) {
+                                    addFile("old.md", splitContent(old.content).byteInputStream())
+                                }
 
-                            if (!canEmbedNew) {
-                                addFile("new.md", splitContent(new.content).byteInputStream())
+                                if (!canEmbedNew) {
+                                    addFile("new.md", splitContent(new.content).byteInputStream())
+                                }
                             }
-                        }
                     )
                 }
             }
@@ -373,7 +408,7 @@ class MessageLogExtension : Extension() {
         }
 
         val modLogChannel = guild.channels.firstOrNull { it.name == "moderation-log" }
-            ?.asChannelOrNull() as? GuildMessageChannel
+                ?.asChannelOrNull() as? GuildMessageChannel
 
         if (modLogChannel == null) {
             logger.warn {
@@ -429,7 +464,7 @@ class MessageLogExtension : Extension() {
         if (it.length > LINE_LENGTH) it.chunkByWhitespace(LINE_LENGTH).joinToString("\n") else it
     }
 
-    private fun EmbedBuilder.addMessage(message: Message) {
+    private suspend fun EmbedBuilder.addMessage(message: Message) {
         val author = message.author
 
         footer {
@@ -467,10 +502,26 @@ class MessageLogExtension : Extension() {
             }
         }
 
-        field {
-            name = "Channel"
-            value = message.channel.mention
-            inline = true
+        val channel = message.channel.asChannel()
+
+        if (channel is ThreadChannel) {
+            field {
+                name = "Thread"
+                value = channel.mention
+                inline = true
+            }
+
+            field {
+                name = "Parent Channel"
+                value = channel.parent.mention
+                inline = true
+            }
+        } else {
+            field {
+                name = "Channel"
+                value = channel.mention
+                inline = true
+            }
         }
 
         field {
