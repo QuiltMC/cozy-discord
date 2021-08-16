@@ -32,6 +32,12 @@ suspend fun setupCollab() = ExtensibleBot(TOKEN) {
     messageCommands {
         enabled = false
     }
+
+    extensions {
+        sentry {
+            distribution = "collab"
+        }
+    }
 }
 
 suspend fun setupQuilt() = ExtensibleBot(TOKEN) {
@@ -65,6 +71,10 @@ suspend fun setupQuilt() = ExtensibleBot(TOKEN) {
                 }
             }
         }
+
+        sentry {
+            distribution = "community"
+        }
     }
 }
 
@@ -74,6 +84,12 @@ suspend fun setupShowcase() = ExtensibleBot(TOKEN) {
 
     messageCommands {
         enabled = false
+    }
+
+    extensions {
+        sentry {
+            distribution = "showcase"
+        }
     }
 }
 

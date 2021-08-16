@@ -109,7 +109,13 @@ suspend fun ExtensibleBotBuilder.common() {
 
     extensions {
         sentry {
-            enable = false
+            val sentryDsn = env("SENTRY_DSN")
+
+            if (sentryDsn != null) {
+                enable = true
+
+                dsn = sentryDsn
+            }
         }
     }
 }
