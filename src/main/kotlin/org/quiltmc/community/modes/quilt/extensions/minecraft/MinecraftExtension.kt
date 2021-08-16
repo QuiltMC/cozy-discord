@@ -185,13 +185,16 @@ class MinecraftExtension : Extension() {
 
                         currentEntries.entries.chunked(CHUNK_SIZE).forEach { chunk ->
                             page(
-                                Page(
-                                    chunk.joinToString("\n") { "**»** `${it.version}`" },
+                                Page {
+                                    title = "Patch note versions"
+                                    color = DISCORD_FUCHSIA
 
-                                    title = "Patch note versions",
-                                    color = DISCORD_FUCHSIA,
-                                    footer = "${currentEntries.entries.size} versions"
-                                )
+                                    description = chunk.joinToString("\n") { "**»** `${it.version}`" }
+
+                                    footer {
+                                        text = "${currentEntries.entries.size} versions"
+                                    }
+                                }
                             )
                         }
                     }.send()
