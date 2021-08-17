@@ -7,9 +7,7 @@ package org.quiltmc.community.modes.quilt.extensions.suggestions
 import com.kotlindiscord.kord.extensions.CommandException
 import com.kotlindiscord.kord.extensions.checks.*
 import com.kotlindiscord.kord.extensions.commands.converters.impl.coalescedString
-import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingBoolean
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalCoalescingString
-import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.commands.parser.Arguments
 import com.kotlindiscord.kord.extensions.commands.slash.converters.impl.enumChoice
 import com.kotlindiscord.kord.extensions.extensions.Extension
@@ -19,7 +17,6 @@ import dev.kord.common.entity.ButtonStyle
 import dev.kord.common.entity.MessageType
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.channel.createMessage
-import dev.kord.core.behavior.channel.threads.edit
 import dev.kord.core.behavior.channel.withTyping
 import dev.kord.core.behavior.edit
 import dev.kord.core.behavior.getChannelOf
@@ -48,7 +45,9 @@ import org.koin.core.component.inject
 import org.quiltmc.community.COMMUNITY_GUILD
 import org.quiltmc.community.COMMUNITY_MANAGEMENT_ROLES
 import org.quiltmc.community.SUGGESTION_CHANNEL
+import org.quiltmc.community.database.collections.OwnedThreadCollection
 import org.quiltmc.community.database.collections.SuggestionsCollection
+import org.quiltmc.community.database.entities.OwnedThread
 import org.quiltmc.community.database.entities.Suggestion
 import org.quiltmc.community.getMaxArchiveDuration
 import kotlin.time.Duration
@@ -77,18 +76,20 @@ class SuggestionsExtension : Extension() {
     override val name: String = "suggestions"
 
     private val suggestions: SuggestionsCollection by inject()
+    private val threads: OwnedThreadCollection by inject()
+
     private val messageCache: MutableList<Pair<String, Snowflake>> = mutableListOf()
 
     override suspend fun setup() {
         // region: Events
 
         event<MessageCreateEvent> {
-            check(isNotbot)
-
-            check { failIfNot(event.message.channelId == SUGGESTION_CHANNEL) }
-            check { failIfNot(event.message.content.trim().isNotEmpty()) }
-            check { failIfNot(event.message.interaction == null) }
+            check { failIf(event.message.author?.isBot == true) }
             check { failIf(event.message.type == MessageType.ThreadCreated) }
+            check { failIf(event.message.content.trim().isEmpty()) }
+            check { failIf(event.message.interaction != null) }
+
+            check(inChannel(SUGGESTION_CHANNEL))
 
             action {
                 event.message.channel.withTyping {
@@ -185,13 +186,13 @@ class SuggestionsExtension : Extension() {
         }
 
         event<MessageDeleteEvent> {
+            check(inChannel(SUGGESTION_CHANNEL))
             check(isNotbot)
 
-            check { failIfNot(event.message?.author != null) }
-            check { failIfNot(event.message?.webhookId == null) }
-            check { failIfNot(event.message?.channelId == SUGGESTION_CHANNEL) }
-            check { failIfNot(event.message?.content?.trim()?.isNotEmpty() == true) }
-            check { failIfNot(event.message?.interaction == null) }
+            check { failIf(event.message?.author == null) }
+            check { failIf(event.message?.webhookId != null) }
+            check { failIf(event.message?.content?.trim()?.isEmpty() == true) }
+            check { failIf(event.message?.interaction != null) }
 
             action {
                 messageCache.add(event.message!!.content to event.message!!.author!!.id)
@@ -338,117 +339,6 @@ class SuggestionsExtension : Extension() {
             }
         }
 
-        slashCommand(::RenameArguments) {
-            name = "rename"
-            description = "Rename the current thread, if you have permission"
-
-            guild(COMMUNITY_GUILD)
-
-            check(isInThread)
-
-            action {
-                val channel = channel as ThreadChannel
-                val member = user.asMember(guild!!.id)
-                val roles = member.roles.toList().map { it.id }
-
-                if (COMMUNITY_MANAGEMENT_ROLES.any { it in roles }) {
-                    channel.edit {
-                        name = arguments.name
-                    }
-
-                    ephemeralFollowUp { content = "Thread renamed." }
-
-                    return@action
-                }
-
-                val suggestion = suggestions.getByThread(channel.id)
-
-                if (suggestion == null) {
-                    ephemeralFollowUp { content = "This is not a suggestion thread." }
-
-                    return@action
-                }
-
-                if (suggestion.owner != user.id) {
-                    ephemeralFollowUp { content = "This is not your suggestion." }
-
-                    return@action
-                }
-
-                channel.edit {
-                    name = arguments.name
-                }
-
-                ephemeralFollowUp { content = "Thread renamed." }
-            }
-        }
-
-        slashCommand(::ArchiveArguments) {
-            name = "archive"
-            description = "Archive the current thread, if you have permission"
-
-            guild(COMMUNITY_GUILD)
-
-            check(isInThread)
-
-            action {
-                val channel = channel as ThreadChannel
-                val member = user.asMember(guild!!.id)
-                val roles = member.roles.toList().map { it.id }
-
-                if (COMMUNITY_MANAGEMENT_ROLES.any { it in roles }) {
-                    channel.edit {
-                        this.archived = true
-                        this.locked = arguments.lock
-                    }
-
-                    ephemeralFollowUp {
-                        content = "Thread archived"
-
-                        if (arguments.lock) {
-                            content += " and locked"
-                        }
-
-                        content += "."
-                    }
-
-                    return@action
-                }
-
-                val suggestion = suggestions.getByThread(channel.id)
-
-                if (suggestion == null) {
-                    ephemeralFollowUp { content = "This is not a suggestion thread." }
-
-                    return@action
-                }
-
-                if (suggestion.owner != user.id) {
-                    ephemeralFollowUp { content = "This is not your suggestion." }
-
-                    return@action
-                }
-
-                if (channel.isArchived) {
-                    ephemeralFollowUp { content = "This channel is already archived." }
-
-                    return@action
-                }
-
-                if (arguments.lock) {
-                    ephemeralFollowUp { content = "Only members of the community team may lock threads." }
-
-                    return@action
-                }
-
-                channel.edit {
-                    archived = true
-                }
-
-                ephemeralFollowUp { content = "Thread archived." }
-            }
-        }
-
         slashCommand(::SuggestionStateArguments) {
             name = "suggestion"
             description = "Suggestion state change commands"
@@ -501,19 +391,30 @@ class SuggestionsExtension : Extension() {
                 archiveDuration = channel.guild.asGuild().getMaxArchiveDuration()
             )
 
-            val threadMessage = thread?.createMessage {
-                suggestion(suggestion, sendEmbed = false)
+            if (thread != null) {
+                val threadMessage = thread.createMessage {
+                    suggestion(suggestion, sendEmbed = false)
 
-                content = THREAD_INTRO
+                    content = THREAD_INTRO
+                }
+
+                threadMessage.pin()
+
+                thread.addUser(suggestion.owner)
+
+                threads.set(
+                    OwnedThread(
+                        thread.id,
+                        suggestion.owner,
+                        thread.guildId
+                    )
+                )
+
+                suggestion.thread = thread.id
+                suggestion.threadButtons = threadMessage.id
             }
 
-            threadMessage?.pin()
-
-            thread?.addUser(suggestion.owner)
-
             suggestion.message = message.id
-            suggestion.thread = thread?.id
-            suggestion.threadButtons = threadMessage?.id
 
             suggestions.set(suggestion)
         } else {
@@ -758,17 +659,5 @@ class SuggestionsExtension : Extension() {
                 throw CommandException("Comment must not be longer than $COMMENT_SIZE_LIMIT characters.")
             }
         }
-    }
-
-    inner class RenameArguments : Arguments() {
-        val name by string("name", "Name to give the current thread")
-    }
-
-    inner class ArchiveArguments : Arguments() {
-        val lock by defaultingBoolean(
-            "lock",
-            "Whether to lock the thread, if you're staff - defaults to false",
-            false
-        )
     }
 }

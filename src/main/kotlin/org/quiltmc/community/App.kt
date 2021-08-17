@@ -14,6 +14,7 @@ import dev.kord.gateway.Intents
 import dev.kord.gateway.PrivilegedIntent
 import me.shedaniel.linkie.namespaces.YarnNamespace
 import org.quiltmc.community.modes.quilt.extensions.SyncExtension
+import org.quiltmc.community.modes.quilt.extensions.UtilityExtension
 import org.quiltmc.community.modes.quilt.extensions.messagelog.MessageLogExtension
 import org.quiltmc.community.modes.quilt.extensions.minecraft.MinecraftExtension
 import org.quiltmc.community.modes.quilt.extensions.suggestions.SuggestionsExtension
@@ -57,6 +58,7 @@ suspend fun setupQuilt() = ExtensibleBot(TOKEN) {
         add(::MinecraftExtension)
         add(::SuggestionsExtension)
         add(::SyncExtension)
+        add(::UtilityExtension)
 
         extMappings {
             namespaceCheck { namespace ->

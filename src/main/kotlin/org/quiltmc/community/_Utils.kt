@@ -9,6 +9,7 @@ import kotlinx.coroutines.runBlocking
 import org.koin.dsl.bind
 import org.quiltmc.community.database.Database
 import org.quiltmc.community.database.collections.MetaCollection
+import org.quiltmc.community.database.collections.OwnedThreadCollection
 import org.quiltmc.community.database.collections.ServerSettingsCollection
 import org.quiltmc.community.database.collections.SuggestionsCollection
 import org.quiltmc.community.database.getSettings
@@ -75,6 +76,7 @@ suspend fun ExtensibleBotBuilder.database(migrate: Boolean = false) {
                 single { MetaCollection() } bind MetaCollection::class
                 single { ServerSettingsCollection() } bind ServerSettingsCollection::class
                 single { SuggestionsCollection() } bind SuggestionsCollection::class
+                single { OwnedThreadCollection() } bind OwnedThreadCollection::class
             }
 
             if (migrate) {

@@ -7,6 +7,7 @@ import org.quiltmc.community.database.collections.MetaCollection
 import org.quiltmc.community.database.entities.Meta
 import org.quiltmc.community.database.migrations.v1
 import org.quiltmc.community.database.migrations.v2
+import org.quiltmc.community.database.migrations.v3
 
 const val FILE_TEMPLATE = "migrations/v{VERSION}.bson"
 
@@ -34,13 +35,14 @@ object Migrations : KoinComponent {
 
             @Suppress("TooGenericExceptionCaught")
             try {
-                @Suppress("UseIfInsteadOfWhen")  // Definitely not what we'll want later
+                @Suppress("MagicNumber")
                 when (nextVersion) {
-                    1 -> v1(db.mongo)
-                    2 -> v2(db.mongo)
+                    1 -> ::v1
+                    2 -> ::v2
+                    3 -> ::v3
 
                     else -> break
-                }
+                }(db.mongo)
 
                 logger.info { "Migrated database to v$nextVersion" }
             } catch (t: Throwable) {
