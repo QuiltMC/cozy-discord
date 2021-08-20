@@ -6,23 +6,15 @@
 package org.quiltmc.community
 
 import com.kotlindiscord.kord.extensions.ExtensibleBot
-import com.kotlindiscord.kord.extensions.checks.topChannelFor
 import com.kotlindiscord.kord.extensions.modules.extra.mappings.extMappings
 import com.kotlindiscord.kord.extensions.utils.env
-import dev.kord.common.entity.Snowflake
 import dev.kord.gateway.Intents
 import dev.kord.gateway.PrivilegedIntent
-import me.shedaniel.linkie.namespaces.YarnNamespace
 import org.quiltmc.community.modes.quilt.extensions.SyncExtension
 import org.quiltmc.community.modes.quilt.extensions.UtilityExtension
 import org.quiltmc.community.modes.quilt.extensions.messagelog.MessageLogExtension
 import org.quiltmc.community.modes.quilt.extensions.minecraft.MinecraftExtension
 import org.quiltmc.community.modes.quilt.extensions.suggestions.SuggestionsExtension
-
-@Suppress("MagicNumber", "UnderscoresInNumericLiterals")
-private val NON_YARN_CHANNEL = Snowflake(
-    env("NON_YARN_CHANNEL_ID")?.toLong() ?: 856825412695883796
-)
 
 val MODE = env("MODE")?.lowercase() ?: "quilt"
 
@@ -60,19 +52,7 @@ suspend fun setupQuilt() = ExtensibleBot(TOKEN) {
         add(::SyncExtension)
         add(::UtilityExtension)
 
-        extMappings {
-            namespaceCheck { namespace ->
-                {
-                    val channel = topChannelFor(event)
-
-                    failIfNot("Non-Yarn commands may only be run in <#${NON_YARN_CHANNEL.value}>") {
-                        namespace == YarnNamespace ||
-                                event.message.getGuildOrNull() == null ||
-                                channel?.id == NON_YARN_CHANNEL
-                    }
-                }
-            }
-        }
+        extMappings {}
 
         sentry {
             distribution = "community"

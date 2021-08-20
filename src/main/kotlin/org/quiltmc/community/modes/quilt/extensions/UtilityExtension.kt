@@ -59,7 +59,7 @@ class UtilityExtension : Extension() {
                     return@action
                 }
 
-                if (threads.isOwner(channel, user) != true) {
+                if ((channel.ownerId != user.id && threads.isOwner(channel, user) != true)) {
                     ephemeralFollowUp { content = "This is not your thread." }
 
                     return@action
@@ -105,7 +105,7 @@ class UtilityExtension : Extension() {
                     return@action
                 }
 
-                if (threads.isOwner(channel, user) != true) {
+                if (channel.ownerId != user.id && threads.isOwner(channel, user) != true) {
                     ephemeralFollowUp { content = "This is not your thread." }
 
                     return@action
