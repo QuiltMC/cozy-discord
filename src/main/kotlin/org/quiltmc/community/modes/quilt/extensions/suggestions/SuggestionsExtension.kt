@@ -43,7 +43,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.toList
 import org.koin.core.component.inject
 import org.quiltmc.community.COMMUNITY_GUILD
-import org.quiltmc.community.COMMUNITY_MANAGEMENT_ROLES
+import org.quiltmc.community.MODERATOR_ROLES
 import org.quiltmc.community.SUGGESTION_CHANNEL
 import org.quiltmc.community.database.collections.OwnedThreadCollection
 import org.quiltmc.community.database.collections.SuggestionsCollection
@@ -345,8 +345,8 @@ class SuggestionsExtension : Extension() {
 
             guild(COMMUNITY_GUILD)
 
-            COMMUNITY_MANAGEMENT_ROLES.forEach(::allowRole)
-            check(or(checks = COMMUNITY_MANAGEMENT_ROLES.map { hasRole(it) }.toTypedArray()))
+            MODERATOR_ROLES.forEach(::allowRole)
+            check(or(checks = MODERATOR_ROLES.map { hasRole(it) }.toTypedArray()))
 
             action {
                 val status = arguments.status

@@ -20,12 +20,24 @@ internal val COLOUR_BLURPLE = DISCORD_BLURPLE
 internal val COLOUR_NEGATIVE = DISCORD_RED
 internal val COLOUR_POSITIVE = DISCORD_GREEN
 
-internal val COMMUNITY_MANAGEMENT_ROLES: List<Snowflake> =
-    env("COMMUNITY_MANAGEMENT_ROLES")?.split(',')?.map { Snowflake(it.trim()) }
-        ?: listOf(Snowflake(833808862628544560), Snowflake(832332800551813141))
+internal val COMMUNITY_MODERATOR_ROLE = env("COMMUNITY_MODERATOR_ROLE")?.let { Snowflake(it) }
+    ?: Snowflake(863767207716192306)
+
+internal val TOOLCHAIN_MODERATOR_ROLE = env("COMMUNITY_MODERATOR_ROLE")?.let { Snowflake(it) }
+    ?: Snowflake(863767485609541632)
+
+internal val MODERATOR_ROLES: List<Snowflake> =
+    (env("MODERATOR_ROLES") ?: env("COMMUNITY_MANAGEMENT_ROLES")) // For now, back compat
+        ?.split(',')
+        ?.map { Snowflake(it.trim()) }
+        ?: listOf(COMMUNITY_MODERATOR_ROLE, TOOLCHAIN_MODERATOR_ROLE)
 
 internal val COMMUNITY_GUILD = Snowflake(
     env("COMMUNITY_GUILD_ID")?.toLong() ?: 817576132726620200
+)
+
+internal val TOOLCHAIN_GUILD = Snowflake(
+    env("TOOLCHAIN_GUILD_ID")?.toLong() ?: 833872081585700874
 )
 
 internal val SUGGESTION_CHANNEL = Snowflake(
