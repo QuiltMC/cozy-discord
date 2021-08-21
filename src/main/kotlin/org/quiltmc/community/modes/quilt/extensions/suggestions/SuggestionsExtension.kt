@@ -475,7 +475,14 @@ class SuggestionsExtension : Extension() {
 
         if (suggestion.thread != null) {
             kord.getChannelOf<ThreadChannel>(suggestion.thread!!)?.createMessage {
-                content = "Suggestion updated."
+                content = "**__Suggestion updated__**\n" +
+                        "**Status:** ${suggestion.status.readableName}"
+
+                if (suggestion.comment != null) {
+                    content += "\n\n" +
+                            "**__Staff response__**\n\n" +
+                            suggestion.comment
+                }
             }
         }
     }
