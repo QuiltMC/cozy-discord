@@ -6,4 +6,4 @@ RUN mkdir /bot
 RUN mkdir /data
 WORKDIR /bot
 
-ENTRYPOINT ["java", "-Xms2G", "-Xmx2G", "-jar", "/usr/local/lib/CozyDiscord.jar"]
+ENTRYPOINT ["java", "-Xms2G", "-Xmx2G", "-Dkotlinx.coroutines.debug=true", "-jar", "/usr/local/lib/CozyDiscord.jar"]
