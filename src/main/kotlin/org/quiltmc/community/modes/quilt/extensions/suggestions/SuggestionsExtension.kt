@@ -48,14 +48,17 @@ import dev.kord.rest.builder.message.modify.embed
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.toList
 import org.koin.core.component.inject
+import org.quiltmc.community.*
 import org.quiltmc.community.COMMUNITY_GUILD
+import org.quiltmc.community.COMMUNITY_MODERATOR_ROLE
 import org.quiltmc.community.MODERATOR_ROLES
 import org.quiltmc.community.SUGGESTION_CHANNEL
+import org.quiltmc.community.TOOLCHAIN_GUILD
+import org.quiltmc.community.TOOLCHAIN_MODERATOR_ROLE
 import org.quiltmc.community.database.collections.OwnedThreadCollection
 import org.quiltmc.community.database.collections.SuggestionsCollection
 import org.quiltmc.community.database.entities.OwnedThread
 import org.quiltmc.community.database.entities.Suggestion
-import org.quiltmc.community.getMaxArchiveDuration
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 
@@ -423,6 +426,28 @@ class SuggestionsExtension : Extension() {
 
                 suggestion.thread = thread.id
                 suggestion.threadButtons = threadMessage.id
+
+                val modRole = when (thread.guildId) {
+                    COMMUNITY_GUILD -> thread.guild.getRole(COMMUNITY_MODERATOR_ROLE)
+                    TOOLCHAIN_GUILD -> thread.guild.getRole(TOOLCHAIN_MODERATOR_ROLE)
+
+                    else -> return
+                }
+
+                val pingMessage = thread.createMessage {
+                    content = "Oh right, better get the mods in..."
+                }
+
+                delay(Duration.seconds(3))
+
+                pingMessage.edit {
+                    content = "Oh right, better get the mods in...\n" +
+                            "Hey, ${modRole.mention}! Squirrel!"
+                }
+
+                delay(Duration.seconds(3))
+
+                pingMessage.delete("Removing temporary moderator ping message.")
             }
 
             suggestion.message = message.id

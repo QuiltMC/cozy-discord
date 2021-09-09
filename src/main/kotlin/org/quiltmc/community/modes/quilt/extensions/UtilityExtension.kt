@@ -17,6 +17,7 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalRole
 import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
+import com.kotlindiscord.kord.extensions.extensions.event
 import com.kotlindiscord.kord.extensions.interactions.respond
 import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.Permission
@@ -26,17 +27,22 @@ import dev.kord.core.behavior.channel.createEmbed
 import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.behavior.channel.editRolePermission
 import dev.kord.core.behavior.channel.threads.edit
+import dev.kord.core.behavior.channel.withTyping
 import dev.kord.core.behavior.edit
 import dev.kord.core.entity.Guild
 import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.entity.channel.thread.ThreadChannel
+import dev.kord.core.event.channel.thread.TextChannelThreadCreateEvent
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.toList
 import kotlinx.datetime.Clock
+import mu.KotlinLogging
 import org.koin.core.component.inject
 import org.quiltmc.community.*
 import org.quiltmc.community.database.collections.OwnedThreadCollection
+import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 
 val SPEAKING_PERMISSIONS: Array<Permission> = arrayOf(
@@ -50,7 +56,10 @@ val SPEAKING_PERMISSIONS: Array<Permission> = arrayOf(
 class UtilityExtension : Extension() {
     override val name: String = "utility"
 
+    private val logger = KotlinLogging.logger { }
     private val threads: OwnedThreadCollection by inject()
+
+    private val welcomedThreads: MutableSet<Snowflake> = mutableSetOf()
 
     private suspend fun EphemeralSlashCommand<MuteRoleArguments>.registerFixMuteRoleCommand(guildId: Snowflake) {
         name = "fix-mute-role"
@@ -153,6 +162,57 @@ class UtilityExtension : Extension() {
     }
 
     override suspend fun setup() {
+        event<TextChannelThreadCreateEvent> {
+            check { inQuiltGuild() }
+            check { failIf(event.channel.ownerId == kord.selfId) }
+
+            action {
+                if (event.channel.id in welcomedThreads) {
+                    // Turns out Kord triggers two of these events on thread creation for some reason.
+                    return@action
+                }
+
+                welcomedThreads.add(event.channel.id)
+
+                val owner = event.channel.owner.asUser()
+
+                logger.info { "Thread created by ${owner.tag}" }
+
+                val role = when (event.channel.guildId) {
+                    COMMUNITY_GUILD -> event.channel.guild.getRole(COMMUNITY_MODERATOR_ROLE)
+                    TOOLCHAIN_GUILD -> event.channel.guild.getRole(TOOLCHAIN_MODERATOR_ROLE)
+
+                    else -> return@action
+                }
+
+                val message = event.channel.createMessage {
+                    content = "Oh hey, that's a nice thread you've got there! Let me just get the mods in on this" +
+                            "sweet discussion..."
+                }
+
+                event.channel.withTyping {
+                    delay(Duration.Companion.seconds(3))
+                }
+
+                message.edit {
+                    content = "Hey, ${role.mention}, you've gotta check this thread out!"
+                }
+
+                event.channel.withTyping {
+                    delay(Duration.Companion.seconds(3))
+                }
+
+                message.edit {
+                    content = "Welcome to your new thread, ${owner.mention}! This message is at the " +
+                            "start of the thread. Remember, you're welcome to use `/archive` and `/rename` at any " +
+                            "time!"
+                }
+
+                message.pin("First message in the thread.")
+
+                welcomedThreads.remove(event.channel.id)
+            }
+        }
         GUILDS.forEach {
             ephemeralSlashCommand(::MuteRoleArguments) { registerFixMuteRoleCommand(it) }
         }

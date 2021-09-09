@@ -20,7 +20,7 @@ internal val COLOUR_POSITIVE = DISCORD_GREEN
 internal val COMMUNITY_MODERATOR_ROLE = env("COMMUNITY_MODERATOR_ROLE")?.let { Snowflake(it) }
     ?: Snowflake(863767207716192306)
 
-internal val TOOLCHAIN_MODERATOR_ROLE = env("COMMUNITY_MODERATOR_ROLE")?.let { Snowflake(it) }
+internal val TOOLCHAIN_MODERATOR_ROLE = env("TOOLCHAIN_MODERATOR_ROLE")?.let { Snowflake(it) }
     ?: Snowflake(863767485609541632)
 
 internal val MODERATOR_ROLES: List<Snowflake> =
