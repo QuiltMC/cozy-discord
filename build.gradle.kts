@@ -31,6 +31,16 @@ repositories {
     }
 
     maven {
+        name = "QuiltMC (Releases)"
+        url = uri("https://maven.quiltmc.org/repository/release/")
+    }
+
+    maven {
+        name = "QuiltMC (Snapshots)"
+        url = uri("https://maven.quiltmc.org/repository/snapshot/")
+    }
+
+    maven {
         name = "JitPack"
         url = uri("https://jitpack.io")
     }
