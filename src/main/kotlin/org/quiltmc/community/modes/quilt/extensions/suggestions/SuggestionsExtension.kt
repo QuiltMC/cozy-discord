@@ -210,12 +210,8 @@ class SuggestionsExtension : Extension() {
         }
 
         event<InteractionCreateEvent> {
-            check {
-                inTopChannel(SUGGESTION_CHANNEL)
-            }
-            check {
-                failIfNot(event.interaction is ButtonInteraction)
-            }
+            check { failIfNot(event.interaction is ButtonInteraction) }
+            check { inTopChannel(SUGGESTION_CHANNEL) }
 
             action {
                 val interaction = event.interaction as ButtonInteraction
