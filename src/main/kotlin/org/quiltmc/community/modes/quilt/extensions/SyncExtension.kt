@@ -3,17 +3,21 @@
 package org.quiltmc.community.modes.quilt.extensions
 
 import com.kotlindiscord.kord.extensions.checks.hasPermission
-import com.kotlindiscord.kord.extensions.checks.or
+import com.kotlindiscord.kord.extensions.checks.types.CheckContext
 import com.kotlindiscord.kord.extensions.extensions.Extension
+import com.kotlindiscord.kord.extensions.extensions.chatGroupCommand
+import com.kotlindiscord.kord.extensions.extensions.event
 import com.kotlindiscord.kord.extensions.utils.deltas.MemberDelta
 import com.kotlindiscord.kord.extensions.utils.hasPermission
 import com.kotlindiscord.kord.extensions.utils.hasRole
 import com.kotlindiscord.kord.extensions.utils.respond
+import com.kotlindiscord.kord.extensions.utils.translate
 import dev.kord.common.entity.Permission
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.ban
 import dev.kord.core.behavior.channel.withTyping
 import dev.kord.core.entity.Guild
+import dev.kord.core.event.Event
 import dev.kord.core.event.guild.BanAddEvent
 import dev.kord.core.event.guild.BanRemoveEvent
 import dev.kord.core.event.guild.MemberUpdateEvent
@@ -34,25 +38,81 @@ class SyncExtension : Extension() {
 
     private val logger = KotlinLogging.logger {}
 
+    private suspend fun <T : Event> CheckContext<T>.hasBanPerms() {
+        fail(
+            "Must have at least one of these permissions: " + BAN_PERMS.joinToString {
+                "**${it.translate(locale)}**"
+            }
+        )
+
+        BAN_PERMS.forEach {
+            val innerCheck = CheckContext(event, locale)
+            innerCheck.hasPermission(it)
+
+            if (innerCheck.passed) {
+                pass()
+
+                return
+            }
+        }
+    }
+
+    private suspend fun <T : Event> CheckContext<T>.hasRolePerms() {
+        fail(
+            "Must have at least one of these permissions: " + ROLE_PERMS.joinToString { perm ->
+                "**${perm.translate(locale)}**"
+            }
+        )
+
+        ROLE_PERMS.forEach {
+            val innerCheck = CheckContext(event, locale)
+            innerCheck.hasPermission(it)
+
+            if (innerCheck.passed) {
+                pass()
+
+                return
+            }
+        }
+    }
+
+    private suspend fun <T : Event> CheckContext<T>.hasBanOrRolePerms() {
+        val requiredPerms = (BAN_PERMS + ROLE_PERMS).toSet()
+
+        fail(
+            "Must have at least one of these permissions: " + requiredPerms.joinToString { perm ->
+                "**${perm.translate(locale)}**"
+            }
+        )
+
+        requiredPerms.forEach {
+            val innerCheck = CheckContext(event, locale)
+            innerCheck.hasPermission(it)
+
+            if (innerCheck.passed) {
+                pass()
+
+                return
+            }
+        }
+    }
+
     @Suppress("SpreadOperator")  // No better way atm, and performance impact is negligible
     override suspend fun setup() {
-        val banPermsCheck = or(*BAN_PERMS.map { hasPermission(it) }.toTypedArray())
-        val rolePermsCheck = or(*ROLE_PERMS.map { hasPermission(it) }.toTypedArray())
-
-        group {
+        chatGroupCommand {
             name = "sync"
             description = "Synchronisation commands."
 
-            check(
-                inQuiltGuild,
-                banPermsCheck or rolePermsCheck
-            )
+            check { inQuiltGuild() }
+            check { hasBanOrRolePerms() }
 
-            command {
+            chatCommand {
                 name = "bans"
                 description = "Additively synchronise bans between all servers, so that everything matches."
 
-                check(inQuiltGuild, banPermsCheck)
+                check { inQuiltGuild() }
+                check { hasBanPerms() }
+
                 requirePermissions(Permission.BanMembers)
 
                 action {
@@ -111,11 +171,13 @@ class SyncExtension : Extension() {
                 }
             }
 
-            command {
+            chatCommand {
                 name = "roles"
                 description = "Additively synchronise roles between all servers, so that everything matches."
 
-                check(inQuiltGuild, rolePermsCheck)
+                check { inQuiltGuild() }
+                check { hasRolePerms() }
+
                 requirePermissions(Permission.ManageRoles)
 
                 action {
@@ -214,7 +276,7 @@ class SyncExtension : Extension() {
         }
 
         event<BanAddEvent> {
-            check(inQuiltGuild)
+            check { inQuiltGuild() }
 
             action {
                 val guilds = getGuilds().filter { it.id != event.guildId }
@@ -231,7 +293,7 @@ class SyncExtension : Extension() {
         }
 
         event<BanRemoveEvent> {
-            check(inQuiltGuild)
+            check { inQuiltGuild() }
 
             action {
                 val guilds = getGuilds().filter { it.id != event.guildId }
@@ -245,7 +307,7 @@ class SyncExtension : Extension() {
         }
 
         event<MemberUpdateEvent> {
-            check(inQuiltGuild)
+            check { inQuiltGuild() }
 
             action {
                 val delta = MemberDelta.from(event.old, event.member) ?: return@action

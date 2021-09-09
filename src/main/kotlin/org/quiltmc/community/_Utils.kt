@@ -89,7 +89,7 @@ suspend fun ExtensibleBotBuilder.database(migrate: Boolean = false) {
 }
 
 suspend fun ExtensibleBotBuilder.common() {
-    messageCommands {
+    chatCommands {
         defaultPrefix = "?"
 
         prefix { default ->
@@ -103,10 +103,6 @@ suspend fun ExtensibleBotBuilder.common() {
                 fail()
             }
         }
-    }
-
-    slashCommands {
-        enabled = true
     }
 
     extensions {

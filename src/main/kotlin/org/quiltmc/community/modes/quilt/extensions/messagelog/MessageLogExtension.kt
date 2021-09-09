@@ -3,6 +3,7 @@
 package org.quiltmc.community.modes.quilt.extensions.messagelog
 
 import com.kotlindiscord.kord.extensions.extensions.Extension
+import com.kotlindiscord.kord.extensions.extensions.event
 import com.kotlindiscord.kord.extensions.utils.deltas.MessageDelta
 import com.kotlindiscord.kord.extensions.utils.getJumpUrl
 import com.kotlindiscord.kord.extensions.utils.isEphemeral
@@ -60,8 +61,8 @@ class MessageLogExtension : Extension() {
     private val bulkDeletedMessages: MutableSet<Snowflake> = mutableSetOf()
 
     private val dateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)
-            .withLocale(bot.settings.i18nBuilder.defaultLocale)
-            .withZone(ZoneId.of("UTC"))
+        .withLocale(bot.settings.i18nBuilder.defaultLocale)
+        .withZone(ZoneId.of("UTC"))
 
     private val jsonFormat = Json { prettyPrint = true }
 
@@ -69,7 +70,7 @@ class MessageLogExtension : Extension() {
         messageChannel = Channel(50)
 
         event<GuildCreateEvent> {
-            check(inQuiltGuild)
+            check { inQuiltGuild() }
 
             action {
                 addRotator(event.guild)
@@ -77,7 +78,7 @@ class MessageLogExtension : Extension() {
         }
 
         event<MessageBulkDeleteEvent> {
-            check(inQuiltGuild)
+            check { inQuiltGuild() }
 
             action {
                 // Do this as early as possible so that we can catch the usual creation events
@@ -163,23 +164,103 @@ class MessageLogExtension : Extension() {
                 }
 
                 send(
-                        LogMessage(event.guild!!.asGuild()) {
-                            allowedMentions { }
+                    LogMessage(event.guild!!.asGuild()) {
+                        allowedMentions { }
 
-                            addFile("messages.md", messages.byteInputStream())
-                        }
+                        addFile("messages.md", messages.byteInputStream())
+                    }
                 )
 
                 send(
-                        LogMessage(event.guild!!.asGuild()) {
-                            allowedMentions { }
+                    LogMessage(event.guild!!.asGuild()) {
+                        allowedMentions { }
 
-                            embed {
-                                color = COLOUR_NEGATIVE
-                                title = "Bulk message delete"
+                        embed {
+                            color = COLOUR_NEGATIVE
+                            title = "Bulk message delete"
 
-                                timestamp = Clock.System.now()
+                            timestamp = Clock.System.now()
 
+                            if (event.channel is ThreadChannel) {
+                                field {
+                                    name = "Thread"
+                                    value = event.channel.mention
+                                    inline = true
+                                }
+
+                                field {
+                                    name = "Parent Channel"
+                                    value = (event.channel as ThreadChannel).parent.mention
+                                    inline = true
+                                }
+                            } else {
+                                field {
+                                    name = "Channel"
+                                    value = event.channel.mention
+                                    inline = true
+                                }
+                            }
+
+                            field {
+                                name = "Channel"
+                                value = event.channel.mention
+                                inline = true
+                            }
+
+                            field {
+                                name = "Count"
+                                value = event.messageIds.size.toString()
+                                inline = true
+                            }
+                        }
+                    }
+                )
+            }
+        }
+
+        event<MessageDeleteEvent> {
+            check { inQuiltGuild() }
+
+            check {
+                failIf(
+                    event.message?.asMessageOrNull()?.isEphemeral == true
+                )
+            }
+
+            action {
+                // Wait here in case we get a bulk deletion event
+                delay(Duration.seconds(1))
+
+                if (event.messageId in bulkDeletedMessages) {
+                    bulkDeletedMessages.remove(event.messageId)
+
+                    return@action  // Don't log this if it was already bulk-deleted
+                }
+
+                val message = event.message
+                val messageContent = message?.content
+
+                send(
+                    LogMessage(event.guild!!.asGuild()) {
+                        allowedMentions { }
+
+                        embed {
+                            color = COLOUR_NEGATIVE
+                            title = "Message deleted"
+
+                            timestamp = Clock.System.now()
+
+                            if (messageContent != null && messageContent.length <= SINGLE_MESSAGE_LIMIT) {
+                                description = "**Message Content**\n\n" +
+
+                                        messageContent
+                            } else if (messageContent == null) {
+                                description = "_Message was not cached, so further information is not available._"
+                            }
+
+                            if (message != null) {
+                                addMessage(message)
+                            } else {
                                 if (event.channel is ThreadChannel) {
                                     field {
                                         name = "Thread"
@@ -201,113 +282,33 @@ class MessageLogExtension : Extension() {
                                 }
 
                                 field {
-                                    name = "Channel"
-                                    value = event.channel.mention
-                                    inline = true
-                                }
-
-                                field {
-                                    name = "Count"
-                                    value = event.messageIds.size.toString()
+                                    name = "Created"
+                                    value = "${event.messageId.timeStamp.format()} (UTC)\n"
                                     inline = true
                                 }
                             }
                         }
-                )
-            }
-        }
-
-        event<MessageDeleteEvent> {
-            check(inQuiltGuild)
-
-            check {
-                failIf(
-                        event.message?.asMessageOrNull()?.isEphemeral == true
-                )
-            }
-
-            action {
-                // Wait here in case we get a bulk deletion event
-                delay(Duration.seconds(1))
-
-                if (event.messageId in bulkDeletedMessages) {
-                    bulkDeletedMessages.remove(event.messageId)
-
-                    return@action  // Don't log this if it was already bulk-deleted
-                }
-
-                val message = event.message
-                val messageContent = message?.content
-
-                send(
-                        LogMessage(event.guild!!.asGuild()) {
-                            allowedMentions { }
-
-                            embed {
-                                color = COLOUR_NEGATIVE
-                                title = "Message deleted"
-
-                                timestamp = Clock.System.now()
-
-                                if (messageContent != null && messageContent.length <= SINGLE_MESSAGE_LIMIT) {
-                                    description = "**Message Content**\n\n" +
-
-                                            messageContent
-                                } else if (messageContent == null) {
-                                    description = "_Message was not cached, so further information is not available._"
-                                }
-
-                                if (message != null) {
-                                    addMessage(message)
-                                } else {
-                                    if (event.channel is ThreadChannel) {
-                                        field {
-                                            name = "Thread"
-                                            value = event.channel.mention
-                                            inline = true
-                                        }
-
-                                        field {
-                                            name = "Parent Channel"
-                                            value = (event.channel as ThreadChannel).parent.mention
-                                            inline = true
-                                        }
-                                    } else {
-                                        field {
-                                            name = "Channel"
-                                            value = event.channel.mention
-                                            inline = true
-                                        }
-                                    }
-
-                                    field {
-                                        name = "Created"
-                                        value = "${event.messageId.timeStamp.format()} (UTC)\n"
-                                        inline = true
-                                    }
-                                }
-                            }
-                        }
+                    }
                 )
 
                 if (messageContent != null && messageContent.length > SINGLE_MESSAGE_LIMIT) {
                     send(
-                            LogMessage(event.guild!!.asGuild()) {
-                                allowedMentions { }
+                        LogMessage(event.guild!!.asGuild()) {
+                            allowedMentions { }
 
-                                addFile("old.md", splitContent(message.content).byteInputStream())
-                            }
+                            addFile("old.md", splitContent(message.content).byteInputStream())
+                        }
                     )
                 }
             }
         }
 
         event<MessageUpdateEvent> {
-            check(inQuiltGuild)
+            check { inQuiltGuild() }
 
             check {
                 failIf(
-                        event.message.asMessageOrNull()?.isEphemeral == true
+                    event.message.asMessageOrNull()?.isEphemeral == true
                 )
             }
 
@@ -325,57 +326,57 @@ class MessageLogExtension : Extension() {
                 val canEmbedNew = new.content.length <= DUAL_MESSAGE_LIMIT
 
                 send(
-                        LogMessage(new.getGuild()) {
-                            allowedMentions { }
+                    LogMessage(new.getGuild()) {
+                        allowedMentions { }
 
-                            embed {
-                                color = COLOUR_BLURPLE
-                                title = "Message edited"
+                        embed {
+                            color = COLOUR_BLURPLE
+                            title = "Message edited"
 
-                                timestamp = Clock.System.now()
+                            timestamp = Clock.System.now()
 
-                                description = ""
+                            description = ""
 
-                                if (old != null && canEmbedOld) {
-                                    description = "**Old Message Content**\n\n" +
+                            if (old != null && canEmbedOld) {
+                                description = "**Old Message Content**\n\n" +
 
-                                            old.content
+                                        old.content
+                            }
+
+                            if (canEmbedNew) {
+                                if (description!!.isNotEmpty()) {
+                                    description += "\n\n"
                                 }
 
-                                if (canEmbedNew) {
-                                    if (description!!.isNotEmpty()) {
-                                        description += "\n\n"
-                                    }
+                                description += "**New Message Content**\n\n" +
 
-                                    description += "**New Message Content**\n\n" +
+                                        new.content
+                            }
 
-                                            new.content
-                                }
+                            addMessage(new)
 
-                                addMessage(new)
-
-                                if (delta == null) {
-                                    description += "\n\n**Note:** Message was not cached, so the content may not " +
-                                            "have been edited."
-                                }
+                            if (delta == null) {
+                                description += "\n\n**Note:** Message was not cached, so the content may not " +
+                                        "have been edited."
                             }
                         }
+                    }
                 )
 
                 @Suppress("UnnecessaryParentheses")  // some of us are insecure :>
                 if ((old != null && !canEmbedOld) || !canEmbedNew) {
                     send(
-                            LogMessage(new.getGuild()) {
-                                allowedMentions { }
+                        LogMessage(new.getGuild()) {
+                            allowedMentions { }
 
-                                if (old != null && !canEmbedOld) {
-                                    addFile("old.md", splitContent(old.content).byteInputStream())
-                                }
-
-                                if (!canEmbedNew) {
-                                    addFile("new.md", splitContent(new.content).byteInputStream())
-                                }
+                            if (old != null && !canEmbedOld) {
+                                addFile("old.md", splitContent(old.content).byteInputStream())
                             }
+
+                            if (!canEmbedNew) {
+                                addFile("new.md", splitContent(new.content).byteInputStream())
+                            }
+                        }
                     )
                 }
             }
@@ -408,7 +409,7 @@ class MessageLogExtension : Extension() {
         }
 
         val modLogChannel = guild.channels.firstOrNull { it.name == "moderation-log" }
-                ?.asChannelOrNull() as? GuildMessageChannel
+            ?.asChannelOrNull() as? GuildMessageChannel
 
         if (modLogChannel == null) {
             logger.warn {

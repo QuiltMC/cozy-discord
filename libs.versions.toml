@@ -1,11 +1,11 @@
 [versions]
 detekt = "1.17.1"  # Note: Plugin versions must be updated in the settings.gradle.kts too
-kotlin = "1.5.10"  # Note: Plugin versions must be updated in the settings.gradle.kts too
+kotlin = "1.5.30"  # Note: Plugin versions must be updated in the settings.gradle.kts too
 
 commons-text = "1.9"
 kmongo = "4.2.8"
 groovy = "3.0.8"
-kordex = "1.4.4-RC4"
+kordex = "1.5.0-SNAPSHOT"
 kx-ser = "1.2.1"
 logback = "1.2.3"
 logging = "2.0.3"

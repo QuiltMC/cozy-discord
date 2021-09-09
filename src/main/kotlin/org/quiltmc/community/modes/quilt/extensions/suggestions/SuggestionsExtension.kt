@@ -5,12 +5,18 @@
 package org.quiltmc.community.modes.quilt.extensions.suggestions
 
 import com.kotlindiscord.kord.extensions.CommandException
-import com.kotlindiscord.kord.extensions.checks.*
+import com.kotlindiscord.kord.extensions.checks.hasRole
+import com.kotlindiscord.kord.extensions.checks.inChannel
+import com.kotlindiscord.kord.extensions.checks.inTopChannel
+import com.kotlindiscord.kord.extensions.checks.isNotBot
+import com.kotlindiscord.kord.extensions.commands.Arguments
+import com.kotlindiscord.kord.extensions.commands.application.slash.converters.impl.enumChoice
 import com.kotlindiscord.kord.extensions.commands.converters.impl.coalescedString
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalCoalescingString
-import com.kotlindiscord.kord.extensions.commands.parser.Arguments
-import com.kotlindiscord.kord.extensions.commands.slash.converters.impl.enumChoice
 import com.kotlindiscord.kord.extensions.extensions.Extension
+import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
+import com.kotlindiscord.kord.extensions.extensions.event
+import com.kotlindiscord.kord.extensions.interactions.respond
 import com.kotlindiscord.kord.extensions.utils.*
 import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.ButtonStyle
@@ -89,7 +95,7 @@ class SuggestionsExtension : Extension() {
             check { failIf(event.message.content.trim().isEmpty()) }
             check { failIf(event.message.interaction != null) }
 
-            check(inChannel(SUGGESTION_CHANNEL))
+            check { inChannel(SUGGESTION_CHANNEL) }
 
             action {
                 event.message.channel.withTyping {
@@ -186,8 +192,8 @@ class SuggestionsExtension : Extension() {
         }
 
         event<MessageDeleteEvent> {
-            check(inChannel(SUGGESTION_CHANNEL))
-            check(isNotbot)
+            check { inChannel(SUGGESTION_CHANNEL) }
+            check { isNotBot() }
 
             check { failIf(event.message?.author == null) }
             check { failIf(event.message?.webhookId != null) }
@@ -204,9 +210,12 @@ class SuggestionsExtension : Extension() {
         }
 
         event<InteractionCreateEvent> {
-            check(inTopChannel(SUGGESTION_CHANNEL))
-
-            check { failIfNot(event.interaction is ButtonInteraction) }
+            check {
+                inTopChannel(SUGGESTION_CHANNEL)
+            }
+            check {
+                failIfNot(event.interaction is ButtonInteraction)
+            }
 
             action {
                 val interaction = event.interaction as ButtonInteraction
@@ -295,7 +304,7 @@ class SuggestionsExtension : Extension() {
         }
 
         event<ThreadChannelCreateEvent> {
-            check(inTopChannel(SUGGESTION_CHANNEL))
+            check { inTopChannel(SUGGESTION_CHANNEL) }
 
             check { failIf(event.channel.ownerId == kord.selfId) }
 
@@ -313,7 +322,7 @@ class SuggestionsExtension : Extension() {
 
         // region: Commands
 
-        slashCommand(::SuggestionEditArguments) {
+        ephemeralSlashCommand(::SuggestionEditArguments) {
             name = "edit-suggestion"
             description = "Edit one of your suggestions"
 
@@ -321,7 +330,7 @@ class SuggestionsExtension : Extension() {
 
             action {
                 if (arguments.suggestion.owner != user.id) {
-                    ephemeralFollowUp {
+                    respond {
                         content = "**Error:** You don't own that suggestion."
                     }
 
@@ -333,20 +342,26 @@ class SuggestionsExtension : Extension() {
                 suggestions.set(arguments.suggestion)
                 sendSuggestion(arguments.suggestion)
 
-                ephemeralFollowUp {
+                respond {
                     content = "Suggestion updated."
                 }
             }
         }
 
-        slashCommand(::SuggestionStateArguments) {
+        ephemeralSlashCommand(::SuggestionStateArguments) {
             name = "suggestion"
             description = "Suggestion state change commands"
 
             guild(COMMUNITY_GUILD)
 
             MODERATOR_ROLES.forEach(::allowRole)
-            check(or(checks = MODERATOR_ROLES.map { hasRole(it) }.toTypedArray()))
+            check {
+                MODERATOR_ROLES.forEach {
+                    if (passed) {
+                        hasRole(it)
+                    }
+                }
+            }
 
             action {
                 val status = arguments.status
@@ -358,7 +373,7 @@ class SuggestionsExtension : Extension() {
                 sendSuggestion(arguments.suggestion)
                 sendSuggestionUpdateMessage(arguments.suggestion)
 
-                ephemeralFollowUp {
+                respond {
                     content = "Suggestion updated."
                 }
             }

@@ -1,10 +1,10 @@
 package org.quiltmc.community
 
 import com.kotlindiscord.kord.extensions.checks.*
-import com.kotlindiscord.kord.extensions.checks.types.Check
+import com.kotlindiscord.kord.extensions.checks.types.CheckContext
 import mu.KotlinLogging
 
-val inQuiltGuild: Check<*> = {
+suspend fun CheckContext<*>.inQuiltGuild() {
     val logger = KotlinLogging.logger("org.quiltmc.community.inQuiltGuild")
     val guild = guildFor(event)
 
@@ -19,8 +19,8 @@ val inQuiltGuild: Check<*> = {
     }
 }
 
-val hasBaseModeratorRole: Check<*> = {
-    inQuiltGuild(this)
+suspend fun CheckContext<*>.hasBaseModeratorRole() {
+    inQuiltGuild()
 
     if (this.passed) {  // They're on a Quilt guild
         val logger = KotlinLogging.logger("org.quiltmc.community.hasBaseModeratorRole")

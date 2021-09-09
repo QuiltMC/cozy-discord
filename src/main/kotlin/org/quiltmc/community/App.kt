@@ -22,10 +22,6 @@ suspend fun setupCollab() = ExtensibleBot(TOKEN) {
     common()
     database()
 
-    messageCommands {
-        enabled = false
-    }
-
     extensions {
         sentry {
             distribution = "collab"
@@ -36,6 +32,10 @@ suspend fun setupCollab() = ExtensibleBot(TOKEN) {
 suspend fun setupQuilt() = ExtensibleBot(TOKEN) {
     common()
     database(true)
+
+    chatCommands {
+        enabled = true
+    }
 
     intents {
         +Intents.all
@@ -63,10 +63,6 @@ suspend fun setupQuilt() = ExtensibleBot(TOKEN) {
 suspend fun setupShowcase() = ExtensibleBot(TOKEN) {
     common()
     database()
-
-    messageCommands {
-        enabled = false
-    }
 
     extensions {
         sentry {

@@ -4,20 +4,29 @@
 
 package org.quiltmc.community.modes.quilt.extensions
 
+import com.kotlindiscord.kord.extensions.DISCORD_BLURPLE
 import com.kotlindiscord.kord.extensions.DISCORD_GREEN
 import com.kotlindiscord.kord.extensions.DISCORD_RED
+import com.kotlindiscord.kord.extensions.checks.hasPermission
 import com.kotlindiscord.kord.extensions.checks.isInThread
+import com.kotlindiscord.kord.extensions.commands.Arguments
+import com.kotlindiscord.kord.extensions.commands.application.slash.EphemeralSlashCommand
 import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingBoolean
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalChannel
+import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalRole
 import com.kotlindiscord.kord.extensions.commands.converters.impl.string
-import com.kotlindiscord.kord.extensions.commands.parser.Arguments
 import com.kotlindiscord.kord.extensions.extensions.Extension
+import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
+import com.kotlindiscord.kord.extensions.interactions.respond
 import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.Permission
+import dev.kord.common.entity.Permissions
+import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.channel.createEmbed
 import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.behavior.channel.editRolePermission
 import dev.kord.core.behavior.channel.threads.edit
+import dev.kord.core.behavior.edit
 import dev.kord.core.entity.Guild
 import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.core.entity.channel.TextChannel
@@ -30,19 +39,131 @@ import org.quiltmc.community.*
 import org.quiltmc.community.database.collections.OwnedThreadCollection
 import kotlin.time.ExperimentalTime
 
+val SPEAKING_PERMISSIONS: Array<Permission> = arrayOf(
+    Permission.SendMessages,
+    Permission.AddReactions,
+    Permission.CreatePublicThreads,
+    Permission.CreatePrivateThreads,
+    Permission.SendMessagesInThreads,
+)
+
 class UtilityExtension : Extension() {
     override val name: String = "utility"
 
     private val threads: OwnedThreadCollection by inject()
 
+    private suspend fun EphemeralSlashCommand<MuteRoleArguments>.registerFixMuteRoleCommand(guildId: Snowflake) {
+        name = "fix-mute-role"
+        description = "Fix the permissions for the mute role on this server."
+
+        guild(guildId)
+
+        check { hasPermission(Permission.Administrator) }
+
+        action {
+            val role = arguments.role ?: guild?.asGuild()?.roles?.firstOrNull { it.name.lowercase() == "muted" }
+
+            if (role == null) {
+                respond {
+                    content = "Unable to find a role named `Muted` - double-check the list of roles, or provide one " +
+                            "as an argument."
+                }
+                return@action
+            }
+
+            var channelsUpdated = 0
+
+            for (channel in guild!!.channels.toList()) {
+                val overwrite = channel.getPermissionOverwritesForRole(role.id)
+
+                val allowedPerms = overwrite?.allowed
+                val deniedPerms = overwrite?.denied
+
+                val hasNonDeniedPerms = deniedPerms == null || SPEAKING_PERMISSIONS.any { !deniedPerms.contains(it) }
+
+                val canDenyNonAllowedPerms = allowedPerms == null || SPEAKING_PERMISSIONS.any {
+                    !allowedPerms.contains(it) && deniedPerms?.contains(it) != true
+                }
+
+                if (hasNonDeniedPerms && canDenyNonAllowedPerms) {
+                    channel.editRolePermission(role.id) {
+                        SPEAKING_PERMISSIONS
+                            .filter { allowedPerms?.contains(it) != true }
+                            .forEach { denied += it }
+
+                        SPEAKING_PERMISSIONS
+                            .filter { allowedPerms?.contains(it) == true }
+                            .forEach { allowed += it }
+
+                        reason = "Automatically updating mute role permissions."
+                    }
+
+                    channelsUpdated += 1
+                }
+            }
+
+            respond {
+                content = if (channelsUpdated > 0) {
+                    "Updated permissions for $channelsUpdated channel/s."
+                } else {
+                    "No channels to update."
+                }
+            }
+
+            val roleUpdated = if (role.permissions.values.isNotEmpty()) {
+                role.edit {
+                    permissions = Permissions()
+                }
+
+                respond { content = "Mute role permissions cleared." }
+
+                true
+            } else {
+                respond { content = "Mute role already has no extra permissions." }
+
+                false
+            }
+
+            if (channelsUpdated > 0 || roleUpdated) {
+                guild?.asGuildOrNull()?.getModLogChannel()?.createEmbed {
+                    title = "Mute role updated"
+                    color = DISCORD_BLURPLE
+
+                    description = "Mute role (${role.mention} / `${role.id.asString}`) permissions updated by " +
+                            "${user.mention}."
+
+                    timestamp = Clock.System.now()
+
+                    field {
+                        name = "Channels Updated"
+                        inline = true
+
+                        value = "$channelsUpdated"
+                    }
+
+                    field {
+                        name = "Role Updated"
+                        inline = true
+
+                        value = if (roleUpdated) "Yes" else "No"
+                    }
+                }
+            }
+        }
+    }
+
     override suspend fun setup() {
-        slashCommand(::RenameArguments) {
+        GUILDS.forEach {
+            ephemeralSlashCommand(::MuteRoleArguments) { registerFixMuteRoleCommand(it) }
+        }
+
+        ephemeralSlashCommand(::RenameArguments) {
             name = "rename"
             description = "Rename the current thread, if you have permission"
 
             guild(COMMUNITY_GUILD)
 
-            check(isInThread)
+            check { isInThread() }
 
             action {
                 val channel = channel as ThreadChannel
@@ -54,13 +175,13 @@ class UtilityExtension : Extension() {
                         name = arguments.name
                     }
 
-                    ephemeralFollowUp { content = "Thread renamed." }
+                    respond { content = "Thread renamed." }
 
                     return@action
                 }
 
                 if ((channel.ownerId != user.id && threads.isOwner(channel, user) != true)) {
-                    ephemeralFollowUp { content = "This is not your thread." }
+                    respond { content = "This is not your thread." }
 
                     return@action
                 }
@@ -69,17 +190,17 @@ class UtilityExtension : Extension() {
                     name = arguments.name
                 }
 
-                ephemeralFollowUp { content = "Thread renamed." }
+                respond { content = "Thread renamed." }
             }
         }
 
-        slashCommand(::ArchiveArguments) {
+        ephemeralSlashCommand(::ArchiveArguments) {
             name = "archive"
             description = "Archive the current thread, if you have permission"
 
             guild(COMMUNITY_GUILD)
 
-            check(isInThread)
+            check { isInThread() }
 
             action {
                 val channel = channel as ThreadChannel
@@ -92,7 +213,7 @@ class UtilityExtension : Extension() {
                         this.locked = arguments.lock
                     }
 
-                    ephemeralFollowUp {
+                    respond {
                         content = "Thread archived"
 
                         if (arguments.lock) {
@@ -106,19 +227,19 @@ class UtilityExtension : Extension() {
                 }
 
                 if (channel.ownerId != user.id && threads.isOwner(channel, user) != true) {
-                    ephemeralFollowUp { content = "This is not your thread." }
+                    respond { content = "This is not your thread." }
 
                     return@action
                 }
 
                 if (channel.isArchived) {
-                    ephemeralFollowUp { content = "This channel is already archived." }
+                    respond { content = "This channel is already archived." }
 
                     return@action
                 }
 
                 if (arguments.lock) {
-                    ephemeralFollowUp { content = "Only members of the community team may lock threads." }
+                    respond { content = "Only members of the community team may lock threads." }
 
                     return@action
                 }
@@ -127,15 +248,15 @@ class UtilityExtension : Extension() {
                     archived = true
                 }
 
-                ephemeralFollowUp { content = "Thread archived." }
+                respond { content = "Thread archived." }
             }
         }
 
-        slashCommand(::LockArguments) {
+        ephemeralSlashCommand(::LockArguments) {
             name = "lock"
             description = "Lock a channel, so only moderators can interact in it"
 
-            check(hasBaseModeratorRole)
+            check { hasBaseModeratorRole() }
 
             action {
                 var channelObj = arguments.channel ?: channel
@@ -145,7 +266,7 @@ class UtilityExtension : Extension() {
                 }
 
                 if (channelObj !is TextChannel) {  // Should never happen, but we handle it for safety
-                    ephemeralFollowUp {
+                    respond {
                         content = "This command can only be run in a guild text channel."
                     }
                 }
@@ -161,20 +282,14 @@ class UtilityExtension : Extension() {
 
                 if (staffRoleId != null) {
                     ch.editRolePermission(staffRoleId) {
-                        allowed += Permission.SendMessages
-                        allowed += Permission.AddReactions
-                        allowed += Permission.UsePublicThreads
-                        allowed += Permission.UsePrivateThreads
+                        SPEAKING_PERMISSIONS.forEach { allowed += it }
 
                         reason = "Channel locked by a moderator."
                     }
                 }
 
                 ch.editRolePermission(guild!!.id) {
-                    denied += Permission.SendMessages
-                    denied += Permission.AddReactions
-                    denied += Permission.UsePublicThreads
-                    denied += Permission.UsePrivateThreads
+                    SPEAKING_PERMISSIONS.forEach { denied += it }
 
                     reason = "Channel locked by a moderator."
                 }
@@ -183,7 +298,7 @@ class UtilityExtension : Extension() {
                     content = "Channel locked by a moderator."
                 }
 
-                guild?.getModLogChannel()?.createEmbed {
+                guild?.asGuildOrNull()?.getModLogChannel()?.createEmbed {
                     title = "Channel locked"
                     color = DISCORD_RED
 
@@ -191,17 +306,17 @@ class UtilityExtension : Extension() {
                     timestamp = Clock.System.now()
                 }
 
-                ephemeralFollowUp {
+                respond {
                     content = "Channel locked."
                 }
             }
         }
 
-        slashCommand(::LockArguments) {
+        ephemeralSlashCommand(::LockArguments) {
             name = "unlock"
             description = "Unlock a previously locked channel"
 
-            check(hasBaseModeratorRole)
+            check { hasBaseModeratorRole() }
 
             action {
                 var channelObj = arguments.channel ?: channel
@@ -211,22 +326,20 @@ class UtilityExtension : Extension() {
                 }
 
                 if (channelObj !is TextChannel) {  // Should never happen, but we handle it for safety
-                    ephemeralFollowUp {
+                    respond {
                         content = "This command can only be run in a guild text channel."
                     }
                 }
 
                 val ch = channelObj as TextChannel
 
-                ch.editRolePermission(guild!!.id) {
-                    reason = "Channel unlocked by a moderator."
-                }
+                ch.getPermissionOverwritesForRole(guild!!.id)?.delete("Channel unlocked by a moderator.")
 
                 ch.createMessage {
                     content = "Channel unlocked by a moderator."
                 }
 
-                guild?.getModLogChannel()?.createEmbed {
+                guild?.asGuildOrNull()?.getModLogChannel()?.createEmbed {
                     title = "Channel unlocked"
                     color = DISCORD_GREEN
 
@@ -234,7 +347,7 @@ class UtilityExtension : Extension() {
                     timestamp = Clock.System.now()
                 }
 
-                ephemeralFollowUp {
+                respond {
                     content = "Channel unlocked."
                 }
             }
@@ -259,5 +372,9 @@ class UtilityExtension : Extension() {
 
     inner class LockArguments : Arguments() {
         val channel by optionalChannel("channel", "Channel to lock, if not the current one")
+    }
+
+    inner class MuteRoleArguments : Arguments() {
+        val role by optionalRole("role", "Mute role ID, if the role isn't named Muted")
     }
 }

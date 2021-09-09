@@ -3,9 +3,10 @@ package org.quiltmc.community.modes.quilt.extensions.minecraft
 import com.kotlindiscord.kord.extensions.DISCORD_FUCHSIA
 import com.kotlindiscord.kord.extensions.DISCORD_GREEN
 import com.kotlindiscord.kord.extensions.checks.hasPermission
+import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalString
-import com.kotlindiscord.kord.extensions.commands.parser.Arguments
 import com.kotlindiscord.kord.extensions.extensions.Extension
+import com.kotlindiscord.kord.extensions.extensions.chatGroupCommand
 import com.kotlindiscord.kord.extensions.pagination.pages.Page
 import com.kotlindiscord.kord.extensions.utils.addReaction
 import com.kotlindiscord.kord.extensions.utils.respond
@@ -96,14 +97,14 @@ class MinecraftExtension : Extension() {
 //            }
 //        }
 
-        group {
+        chatGroupCommand {
             name = "mc"
             description = "Commands related to Minecraft updates"
 
-            check(inQuiltGuild)
-            check(hasPermission(Permission.Administrator))
+            check { inQuiltGuild() }
+            check { hasPermission(Permission.Administrator) }
 
-            command(::CheckArguments) {
+            chatCommand(::CheckArguments) {
                 name = "check"
                 description = "Retrieve the patch notes for a given Minecraft version, or the latest if not supplied."
 
@@ -130,7 +131,7 @@ class MinecraftExtension : Extension() {
                 }
             }
 
-            command(::CheckArguments) {
+            chatCommand(::CheckArguments) {
                 name = "forget"
                 description = "Forget a version (the last one by default), allowing it to be relayed again."
 
@@ -158,7 +159,7 @@ class MinecraftExtension : Extension() {
                 }
             }
 
-            command {
+            chatCommand {
                 name = "run"
                 description = "Run the check task now, without waiting for it."
 
@@ -169,7 +170,7 @@ class MinecraftExtension : Extension() {
                 }
             }
 
-            command {
+            chatCommand {
                 name = "versions"
                 description = "Get a list of patch note versions."
 
