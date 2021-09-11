@@ -59,8 +59,6 @@ class UtilityExtension : Extension() {
     private val logger = KotlinLogging.logger { }
     private val threads: OwnedThreadCollection by inject()
 
-    private val welcomedThreads: MutableSet<Snowflake> = mutableSetOf()
-
     private suspend fun EphemeralSlashCommand<MuteRoleArguments>.registerFixMuteRoleCommand(guildId: Snowflake) {
         name = "fix-mute-role"
         description = "Fix the permissions for the mute role on this server."
@@ -165,15 +163,9 @@ class UtilityExtension : Extension() {
         event<TextChannelThreadCreateEvent> {
             check { inQuiltGuild() }
             check { failIf(event.channel.ownerId == kord.selfId) }
+            check { failIf(event.channel.member != null) }  // We only want thread creation, not join
 
             action {
-                if (event.channel.id in welcomedThreads) {
-                    // Turns out Kord triggers two of these events on thread creation for some reason.
-                    return@action
-                }
-
-                welcomedThreads.add(event.channel.id)
-
                 val owner = event.channel.owner.asUser()
 
                 logger.info { "Thread created by ${owner.tag}" }
@@ -209,8 +201,6 @@ class UtilityExtension : Extension() {
                 }
 
                 message.pin("First message in the thread.")
-
-                welcomedThreads.remove(event.channel.id)
             }
         }
         GUILDS.forEach {

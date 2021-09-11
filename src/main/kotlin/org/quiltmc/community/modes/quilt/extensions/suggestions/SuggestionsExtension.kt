@@ -354,13 +354,8 @@ class SuggestionsExtension : Extension() {
             guild(COMMUNITY_GUILD)
 
             MODERATOR_ROLES.forEach(::allowRole)
-            check {
-                MODERATOR_ROLES.forEach {
-                    if (passed) {
-                        hasRole(it)
-                    }
-                }
-            }
+
+            check { hasRole(COMMUNITY_MODERATOR_ROLE) }
 
             action {
                 val status = arguments.status
