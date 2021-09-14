@@ -2,7 +2,7 @@
 
 package org.quiltmc.community.modes.quilt.extensions.suggestions
 
-import com.kotlindiscord.kord.extensions.CommandException
+import com.kotlindiscord.kord.extensions.DiscordRelayedException
 import com.kotlindiscord.kord.extensions.commands.Argument
 import com.kotlindiscord.kord.extensions.commands.CommandContext
 import com.kotlindiscord.kord.extensions.commands.converters.SingleConverter
@@ -37,9 +37,9 @@ class SuggestionConverter(
 
             this.parsed = suggestions.get(snowflake)
                 ?: suggestions.getByMessage(snowflake)
-                        ?: throw CommandException("Unknown suggestion ID: $arg")
+                        ?: throw DiscordRelayedException("Unknown suggestion ID: $arg")
         } catch (e: NumberFormatException) {
-            throw CommandException("Unknown suggestion ID: $arg")
+            throw DiscordRelayedException("Unknown suggestion ID: $arg")
         }
 
         return true

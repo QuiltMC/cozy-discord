@@ -4,7 +4,7 @@
 
 package org.quiltmc.community.modes.quilt.extensions.suggestions
 
-import com.kotlindiscord.kord.extensions.CommandException
+import com.kotlindiscord.kord.extensions.DiscordRelayedException
 import com.kotlindiscord.kord.extensions.checks.hasRole
 import com.kotlindiscord.kord.extensions.checks.inChannel
 import com.kotlindiscord.kord.extensions.checks.inTopChannel
@@ -360,6 +360,8 @@ class SuggestionsExtension : Extension() {
             action {
                 val status = arguments.status
 
+                listOf<String>().listIterator(5)
+
                 arguments.suggestion.status = status
                 arguments.suggestion.comment = arguments.comment ?: arguments.suggestion.comment
 
@@ -653,7 +655,7 @@ class SuggestionsExtension : Extension() {
 
         val comment by coalescedString("comment", "Comment text to set") { _, str ->
             if (str.length > COMMENT_SIZE_LIMIT) {
-                throw CommandException("Comment must not be longer than $COMMENT_SIZE_LIMIT characters.")
+                throw DiscordRelayedException("Comment must not be longer than $COMMENT_SIZE_LIMIT characters.")
             }
         }
     }
@@ -663,7 +665,9 @@ class SuggestionsExtension : Extension() {
 
         val text by coalescedString("text", "New suggestion text") { _, str ->
             if (str.length > SUGGESTION_SIZE_LIMIT) {
-                throw CommandException("Suggestion text must not be longer than $SUGGESTION_SIZE_LIMIT characters.")
+                throw DiscordRelayedException(
+                    "Suggestion text must not be longer than $SUGGESTION_SIZE_LIMIT characters."
+                )
             }
         }
     }
@@ -694,7 +698,7 @@ class SuggestionsExtension : Extension() {
 
         val comment by optionalCoalescingString("comment", "Comment text to set") { _, str ->
             if ((str?.length ?: -1) > COMMENT_SIZE_LIMIT) {
-                throw CommandException("Comment must not be longer than $COMMENT_SIZE_LIMIT characters.")
+                throw DiscordRelayedException("Comment must not be longer than $COMMENT_SIZE_LIMIT characters.")
             }
         }
     }
