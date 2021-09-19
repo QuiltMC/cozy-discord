@@ -215,7 +215,7 @@ class UtilityExtension : Extension() {
                 check { isInThread() }
 
                 action {
-                    val channel = channel as ThreadChannel
+                    val channel = channel.asChannel() as ThreadChannel
                     val member = user.asMember(guild!!.id)
                     val roles = member.roles.toList().map { it.id }
 
@@ -252,7 +252,7 @@ class UtilityExtension : Extension() {
                 check { isInThread() }
 
                 action {
-                    val channel = channel as ThreadChannel
+                    val channel = channel.asChannel() as ThreadChannel
                     val member = user.asMember(guild!!.id)
                     val roles = member.roles.toList().map { it.id }
 
@@ -310,7 +310,7 @@ class UtilityExtension : Extension() {
                 check { hasBaseModeratorRole() }
 
                 action {
-                    var channelObj = arguments.channel ?: channel
+                    var channelObj = arguments.channel ?: channel.asChannel()
 
                     if (channelObj is ThreadChannel) {
                         channelObj = channelObj.parent.asChannel()
@@ -372,7 +372,7 @@ class UtilityExtension : Extension() {
                 check { hasBaseModeratorRole() }
 
                 action {
-                    var channelObj = arguments.channel ?: channel
+                    var channelObj = arguments.channel ?: channel.asChannel()
 
                     if (channelObj is ThreadChannel) {
                         channelObj = (channelObj as ThreadChannel).parent.asChannel()
