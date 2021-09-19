@@ -5,6 +5,7 @@
 package org.quiltmc.community.modes.quilt.extensions
 
 import com.kotlindiscord.kord.extensions.DISCORD_BLURPLE
+import com.kotlindiscord.kord.extensions.DISCORD_FUCHSIA
 import com.kotlindiscord.kord.extensions.DISCORD_GREEN
 import com.kotlindiscord.kord.extensions.DISCORD_RED
 import com.kotlindiscord.kord.extensions.checks.hasPermission
@@ -21,6 +22,7 @@ import com.kotlindiscord.kord.extensions.interactions.respond
 import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.Permission
 import dev.kord.common.entity.Permissions
+import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.channel.createEmbed
 import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.behavior.channel.editRolePermission
@@ -32,6 +34,8 @@ import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.entity.channel.thread.ThreadChannel
 import dev.kord.core.event.channel.thread.TextChannelThreadCreateEvent
+import dev.kord.core.event.guild.GuildCreateEvent
+import dev.kord.core.event.guild.GuildUpdateEvent
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.toList
@@ -56,6 +60,8 @@ class UtilityExtension : Extension() {
 
     private val logger = KotlinLogging.logger { }
     private val threads: OwnedThreadCollection by inject()
+
+    private val guildCache: MutableMap<Snowflake, Guild> = mutableMapOf()
 
     override suspend fun setup() {
         event<TextChannelThreadCreateEvent> {
@@ -99,6 +105,42 @@ class UtilityExtension : Extension() {
                 }
 
                 message.pin("First message in the thread.")
+            }
+        }
+
+        event<GuildCreateEvent> {
+            action {
+                guildCache[event.guild.id] = event.guild
+            }
+        }
+
+        event<GuildUpdateEvent> {
+            action {
+                val new = event.guild
+                val old = guildCache[new.id] ?: return@action
+
+                if (old.features != new.features) {
+                    val added = new.features - old.features
+                    val removed = old.features - new.features
+
+                    if (added.isNotEmpty() && removed.isNotEmpty()) return@action
+
+                    new.getModLogChannel()?.createEmbed {
+                        color = DISCORD_FUCHSIA
+                        timestamp = Clock.System.now()
+                        title = "Guild Flags Updated"
+
+                        description = ""
+
+                        if (added.isNotEmpty()) {
+                            description += "**Added:** " + added.joinToString { "`${it.value}`" } + "\n"
+                        }
+
+                        if (removed.isNotEmpty()) {
+                            description += "**Removed:** " + removed.joinToString { "`${it.value}`" }
+                        }
+                    }
+                }
             }
         }
 
