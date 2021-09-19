@@ -7,7 +7,7 @@ package org.quiltmc.community
 
 import com.kotlindiscord.kord.extensions.ExtensibleBot
 import com.kotlindiscord.kord.extensions.modules.extra.mappings.extMappings
-import com.kotlindiscord.kord.extensions.utils.env
+import com.kotlindiscord.kord.extensions.utils.envOrNull
 import dev.kord.gateway.Intents
 import dev.kord.gateway.PrivilegedIntent
 import org.quiltmc.community.modes.quilt.extensions.SyncExtension
@@ -16,7 +16,7 @@ import org.quiltmc.community.modes.quilt.extensions.messagelog.MessageLogExtensi
 import org.quiltmc.community.modes.quilt.extensions.minecraft.MinecraftExtension
 import org.quiltmc.community.modes.quilt.extensions.suggestions.SuggestionsExtension
 
-val MODE = env("MODE")?.lowercase() ?: "quilt"
+val MODE = envOrNull("MODE")?.lowercase() ?: "quilt"
 
 suspend fun setupCollab() = ExtensibleBot(TOKEN) {
     common()

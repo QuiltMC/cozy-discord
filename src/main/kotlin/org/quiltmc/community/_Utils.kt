@@ -2,6 +2,7 @@ package org.quiltmc.community
 
 import com.kotlindiscord.kord.extensions.builders.ExtensibleBotBuilder
 import com.kotlindiscord.kord.extensions.utils.env
+import com.kotlindiscord.kord.extensions.utils.envOrNull
 import com.kotlindiscord.kord.extensions.utils.loadModule
 import dev.kord.common.entity.ArchiveDuration
 import dev.kord.core.entity.Guild
@@ -63,7 +64,7 @@ fun String.chunkByWhitespace(length: Int): List<String> {
 }
 
 suspend fun ExtensibleBotBuilder.database(migrate: Boolean = false) {
-    val url = env("DB_URL") ?: error("Missing required env var: DB_URL")
+    val url = env("DB_URL")
     val db = Database(url)
 
     hooks {
@@ -107,7 +108,7 @@ suspend fun ExtensibleBotBuilder.common() {
 
     extensions {
         sentry {
-            val sentryDsn = env("SENTRY_DSN")
+            val sentryDsn = envOrNull("SENTRY_DSN")
 
             if (sentryDsn != null) {
                 enable = true

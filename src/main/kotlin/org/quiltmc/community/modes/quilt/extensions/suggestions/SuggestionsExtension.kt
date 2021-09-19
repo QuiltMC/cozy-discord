@@ -49,12 +49,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.toList
 import org.koin.core.component.inject
 import org.quiltmc.community.*
-import org.quiltmc.community.COMMUNITY_GUILD
-import org.quiltmc.community.COMMUNITY_MODERATOR_ROLE
-import org.quiltmc.community.MODERATOR_ROLES
-import org.quiltmc.community.SUGGESTION_CHANNEL
-import org.quiltmc.community.TOOLCHAIN_GUILD
-import org.quiltmc.community.TOOLCHAIN_MODERATOR_ROLE
 import org.quiltmc.community.database.collections.OwnedThreadCollection
 import org.quiltmc.community.database.collections.SuggestionsCollection
 import org.quiltmc.community.database.entities.OwnedThread
@@ -359,8 +353,6 @@ class SuggestionsExtension : Extension() {
 
             action {
                 val status = arguments.status
-
-                listOf<String>().listIterator(5)
 
                 arguments.suggestion.status = status
                 arguments.suggestion.comment = arguments.comment ?: arguments.suggestion.comment
