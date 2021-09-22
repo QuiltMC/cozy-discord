@@ -113,7 +113,7 @@ class SyncExtension : Extension() {
                 check { inQuiltGuild() }
                 check { hasBanPerms() }
 
-                requirePermissions(Permission.BanMembers)
+                requireBotPermissions(Permission.BanMembers)
 
                 action {
                     val guilds = getGuilds()
@@ -178,7 +178,7 @@ class SyncExtension : Extension() {
                 check { inQuiltGuild() }
                 check { hasRolePerms() }
 
-                requirePermissions(Permission.ManageRoles)
+                requireBotPermissions(Permission.ManageRoles)
 
                 action {
                     val guilds = getGuilds()

@@ -15,6 +15,7 @@ import dev.kord.core.entity.ReactionEmoji
 import dev.kord.core.entity.channel.Category
 import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.core.entity.channel.thread.ThreadChannel
+import dev.kord.core.event.gateway.ReadyEvent
 import dev.kord.core.event.guild.GuildCreateEvent
 import dev.kord.core.event.message.MessageBulkDeleteEvent
 import dev.kord.core.event.message.MessageDeleteEvent
@@ -384,11 +385,17 @@ class MessageLogExtension : Extension() {
 
         if (firstSetup) {
             firstSetup = false
+
+            event<ReadyEvent> {
+                action {
+                    start()
+                }
+            }
         } else {
             kord.guilds.toList().forEach { addRotator(it) }
-        }
 
-        start()
+            start()
+        }
     }
 
     private suspend fun addRotator(guild: Guild) {
@@ -431,6 +438,8 @@ class MessageLogExtension : Extension() {
     }
 
     private fun start() {
+        loopJob?.cancel()
+
         loopJob = kord.launch { sendLoop() }
     }
 
