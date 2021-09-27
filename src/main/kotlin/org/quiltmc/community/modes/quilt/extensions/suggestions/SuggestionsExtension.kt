@@ -16,7 +16,7 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalCoales
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.extensions.event
-import com.kotlindiscord.kord.extensions.interactions.respond
+import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.*
 import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.ButtonStyle
@@ -29,7 +29,6 @@ import dev.kord.core.behavior.getChannelOf
 import dev.kord.core.behavior.interaction.followUpEphemeral
 import dev.kord.core.behavior.reply
 import dev.kord.core.builder.components.emoji
-import dev.kord.core.entity.Message
 import dev.kord.core.entity.ReactionEmoji
 import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.core.entity.channel.TextChannel
@@ -445,7 +444,7 @@ class SuggestionsExtension : Extension() {
         } else {
             val message = channel.getMessage(suggestion.message!!)
 
-            message.edit { suggestion(suggestion, message) }
+            message.edit { suggestion(suggestion) }
 
             if (suggestion.thread != null && suggestion.threadButtons != null) {
                 val thread = (channel as? TextChannel)?.activeThreads?.toList()?.firstOrNull {
@@ -455,7 +454,7 @@ class SuggestionsExtension : Extension() {
                 val threadMessage = thread?.getMessage(suggestion.threadButtons!!)
 
                 threadMessage?.edit {
-                    suggestion(suggestion, threadMessage, false)
+                    suggestion(suggestion, false)
 
                     content = THREAD_INTRO
                 }
@@ -577,7 +576,7 @@ class SuggestionsExtension : Extension() {
         }
     }
 
-    fun MessageModifyBuilder.suggestion(suggestion: Suggestion, current: Message, sendEmbed: Boolean = true) {
+    fun MessageModifyBuilder.suggestion(suggestion: Suggestion, sendEmbed: Boolean = true) {
         val id = suggestion._id.value
 
         if (sendEmbed) {
@@ -617,7 +616,7 @@ class SuggestionsExtension : Extension() {
             }
         }
 
-        if (suggestion.status == SuggestionStatus.Open && current.components.isEmpty()) {
+        if (suggestion.status == SuggestionStatus.Open) {
             actionRow {
                 interactionButton(ButtonStyle.Primary, "$id/$ACTION_UP") {
                     emoji(EMOTE_UPVOTE)
