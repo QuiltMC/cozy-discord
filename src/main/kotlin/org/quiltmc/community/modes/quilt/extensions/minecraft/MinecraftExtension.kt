@@ -3,13 +3,15 @@ package org.quiltmc.community.modes.quilt.extensions.minecraft
 import com.kotlindiscord.kord.extensions.DISCORD_FUCHSIA
 import com.kotlindiscord.kord.extensions.DISCORD_GREEN
 import com.kotlindiscord.kord.extensions.checks.hasPermission
+import com.kotlindiscord.kord.extensions.checks.hasRole
 import com.kotlindiscord.kord.extensions.commands.Arguments
+import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalString
 import com.kotlindiscord.kord.extensions.extensions.Extension
-import com.kotlindiscord.kord.extensions.extensions.chatGroupCommand
+import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.pagination.pages.Page
-import com.kotlindiscord.kord.extensions.utils.addReaction
-import com.kotlindiscord.kord.extensions.utils.respond
+import com.kotlindiscord.kord.extensions.types.editingPaginator
+import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.scheduling.Scheduler
 import com.kotlindiscord.kord.extensions.utils.scheduling.Task
 import dev.kord.common.annotation.KordPreview
@@ -23,7 +25,12 @@ import io.ktor.client.HttpClient
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.request.get
 import org.apache.commons.text.StringEscapeUtils
-import org.quiltmc.community.inQuiltGuild
+import org.quiltmc.community.*
+import org.quiltmc.community.COMMUNITY_GUILD
+import org.quiltmc.community.COMMUNITY_MODERATOR_ROLE
+import org.quiltmc.community.GUILDS
+import org.quiltmc.community.TOOLCHAIN_GUILD
+import org.quiltmc.community.TOOLCHAIN_MODERATOR_ROLE
 
 private const val PAGINATOR_TIMEOUT = 60_000L  // One minute
 private const val CHUNK_SIZE = 10
@@ -32,7 +39,6 @@ private const val BASE_URL = "https://launchercontent.mojang.com"
 private const val JSON_URL = "$BASE_URL/javaPatchNotes.json"
 
 private const val CHECK_DELAY = 60L
-private const val THUMBS_UP = "\uD83D\uDC4D"
 
 private val LINK_REGEX = "<a href=\"(?<url>[^\"]+)\"[^>]*>(?<text>[^<]+)</a>".toRegex()
 
@@ -62,143 +68,125 @@ class MinecraftExtension : Extension() {
 
         checkTask = scheduler.schedule(CHECK_DELAY, callback = ::checkTask)
 
-// Not using this for now as Kord doesn't have what we need to paginate it
-//        slashCommand(::CheckArguments) {
-//            name = "patch-notes"
-//            description = "Get patch notes for the given Minecraft version"
-//
-//            guild(629369990092554240L)  // Testcord
-//
-//            action {
-//
-//                if (!::currentEntries.isInitialized) {
-//                    ephemeralFollowUp("Still setting up - try again a bit later!")
-//                    return@action
-//                }
-//
-//                val patch = if (arguments.version == null) {
-//                    currentEntries.entries.first()
-//                } else {
-//                    currentEntries.entries.firstOrNull { it.version.equals(arguments.version, true) }
-//                }
-//
-//                if (patch == null) {
-//                    ephemeralFollowUp("Unknown version supplied: `${arguments.version}`")
-//                    return@action
-//                }
-//
-//                var content = "**${patch.title}**\n\n"
-//                val (truncated, remaining) = patch.body.formatHTML().truncateMarkdown(2000)
-//
-//                content += truncated
-//                content += "\n\n[... $remaining more line${if(remaining > 1) "s" else ""}]"
-//
-//                ephemeralFollowUp(content)
-//            }
-//        }
+        for (guildId in GUILDS) {
+            ephemeralSlashCommand {
+                name = "mc"
+                description = "Commands related to Minecraft updates"
 
-        chatGroupCommand {
-            name = "mc"
-            description = "Commands related to Minecraft updates"
+                guild(guildId)
 
-            check { inQuiltGuild() }
-            check { hasPermission(Permission.Administrator) }
+                ephemeralSubCommand(::CheckArguments) {
+                    name = "get"
+                    description = "Retrieve the patch notes for a given Minecraft version, or the latest if not " +
+                            "supplied."
 
-            chatCommand(::CheckArguments) {
-                name = "check"
-                description = "Retrieve the patch notes for a given Minecraft version, or the latest if not supplied."
-
-                action {
-                    if (!::currentEntries.isInitialized) {
-                        message.respond("Still setting up - try again a bit later!")
-                        return@action
-                    }
-
-                    val channelObj = channel.asChannel()
-
-                    val patch = if (arguments.version == null) {
-                        currentEntries.entries.first()
-                    } else {
-                        currentEntries.entries.firstOrNull { it.version.equals(arguments.version, true) }
-                    }
-
-                    if (patch == null) {
-                        message.respond("Unknown version supplied: `${arguments.version}`")
-                        return@action
-                    }
-
-                    channelObj.relay(patch)
-                }
-            }
-
-            chatCommand(::CheckArguments) {
-                name = "forget"
-                description = "Forget a version (the last one by default), allowing it to be relayed again."
-
-                action {
-                    if (!::currentEntries.isInitialized) {
-                        message.respond("Still setting up - try again a bit later!")
-                        return@action
-                    }
-
-                    val version = if (arguments.version == null) {
-                        currentEntries.entries.first().version
-                    } else {
-                        currentEntries.entries.firstOrNull {
-                            it.version.equals(arguments.version, true)
-                        }?.version
-                    }
-
-                    if (version == null) {
-                        message.respond("Unknown version supplied: `${arguments.version}`")
-                        return@action
-                    }
-
-                    knownVersions.remove(version)
-                    message.addReaction(THUMBS_UP)
-                }
-            }
-
-            chatCommand {
-                name = "run"
-                description = "Run the check task now, without waiting for it."
-
-                action {
-                    message.addReaction(THUMBS_UP)
-
-                    checkTask?.callNow()
-                }
-            }
-
-            chatCommand {
-                name = "versions"
-                description = "Get a list of patch note versions."
-
-                action {
-                    if (!::currentEntries.isInitialized) {
-                        message.respond("Still setting up - try again a bit later!")
-                        return@action
-                    }
-
-                    paginator(targetChannel = channel, targetMessage = message) {
-                        owner = message.author
-                        timeoutSeconds = PAGINATOR_TIMEOUT
-
-                        currentEntries.entries.chunked(CHUNK_SIZE).forEach { chunk ->
-                            page(
-                                Page {
-                                    title = "Patch note versions"
-                                    color = DISCORD_FUCHSIA
-
-                                    description = chunk.joinToString("\n") { "**»** `${it.version}`" }
-
-                                    footer {
-                                        text = "${currentEntries.entries.size} versions"
-                                    }
-                                }
-                            )
+                    action {
+                        if (!::currentEntries.isInitialized) {
+                            respond { content = "Still setting up - try again a bit later!" }
+                            return@action
                         }
-                    }.send()
+
+                        val patch = if (arguments.version == null) {
+                            currentEntries.entries.first()
+                        } else {
+                            currentEntries.entries.firstOrNull { it.version.equals(arguments.version, true) }
+                        }
+
+                        if (patch == null) {
+                            respond { content = "Unknown version supplied: `${arguments.version}`" }
+                            return@action
+                        }
+
+                        respond {
+                            embed {
+                                patchNotes(patch)
+                            }
+                        }
+                    }
+                }
+
+                ephemeralSubCommand {
+                    name = "versions"
+                    description = "Get a list of patch note versions."
+
+                    action {
+                        if (!::currentEntries.isInitialized) {
+                            respond { content = "Still setting up - try again a bit later!" }
+
+                            return@action
+                        }
+
+                        editingPaginator {
+                            timeoutSeconds = PAGINATOR_TIMEOUT
+
+                            currentEntries.entries.chunked(CHUNK_SIZE).forEach { chunk ->
+                                page(
+                                    Page {
+                                        title = "Patch note versions"
+                                        color = DISCORD_FUCHSIA
+
+                                        description = chunk.joinToString("\n") { "**»** `${it.version}`" }
+
+                                        footer {
+                                            text = "${currentEntries.entries.size} versions"
+                                        }
+                                    }
+                                )
+                            }
+                        }.send()
+                    }
+                }
+
+                ephemeralSubCommand(::CheckArguments) {
+                    name = "forget"
+                    description = "Forget a version (the last one by default), allowing it to be relayed again."
+
+                    when (guildId) {
+                        COMMUNITY_GUILD -> check { hasRole(COMMUNITY_MODERATOR_ROLE) }
+                        TOOLCHAIN_GUILD -> check { hasRole(TOOLCHAIN_MODERATOR_ROLE) }
+                    }
+
+                    check { hasPermission(Permission.Administrator) }
+
+                    action {
+                        if (!::currentEntries.isInitialized) {
+                            respond { content = "Still setting up - try again a bit later!" }
+                            return@action
+                        }
+
+                        val version = if (arguments.version == null) {
+                            currentEntries.entries.first().version
+                        } else {
+                            currentEntries.entries.firstOrNull {
+                                it.version.equals(arguments.version, true)
+                            }?.version
+                        }
+
+                        if (version == null) {
+                            respond { content = "Unknown version supplied: `${arguments.version}`" }
+                            return@action
+                        }
+
+                        knownVersions.remove(version)
+
+                        respond { content = "Version forgotten: `$version`" }
+                    }
+                }
+
+                ephemeralSubCommand {
+                    name = "run"
+                    description = "Run the check task now, without waiting for it."
+
+                    when (guildId) {
+                        COMMUNITY_GUILD -> check { hasRole(COMMUNITY_MODERATOR_ROLE) }
+                        TOOLCHAIN_GUILD -> check { hasRole(TOOLCHAIN_MODERATOR_ROLE) }
+                    }
+
+                    action {
+                        respond { content = "Checking now..." }
+
+                        checkTask?.callNow()
+                    }
                 }
             }
         }
