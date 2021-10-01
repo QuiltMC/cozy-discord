@@ -1,6 +1,6 @@
 package org.quiltmc.community.database
 
-@Suppress("VariableNaming")
+@Suppress("VariableNaming", "PropertyName")
 interface Entity<ID> {
     val _id: ID
 }
