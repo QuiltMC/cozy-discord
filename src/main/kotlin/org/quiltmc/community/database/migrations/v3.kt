@@ -38,5 +38,7 @@ suspend fun v3(db: CoroutineDatabase) {
         }
     }
 
-    ownedThreads.bulkWrite(requests = documents, BulkWriteOptions().ordered(false))
+    if (documents.isNotEmpty()) {
+        ownedThreads.bulkWrite(requests = documents, BulkWriteOptions().ordered(false))
+    }
 }
