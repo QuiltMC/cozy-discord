@@ -113,6 +113,7 @@ class SubteamsExtension : Extension() {
                     }
                 }
             }
+
             ephemeralSubCommand(::ManageTeamDisallowArguments) {
                 name = "disallow"
                 description = "Prevent a role from being managed by another again"
