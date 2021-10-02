@@ -9,10 +9,7 @@ import dev.kord.core.entity.Guild
 import kotlinx.coroutines.runBlocking
 import org.koin.dsl.bind
 import org.quiltmc.community.database.Database
-import org.quiltmc.community.database.collections.MetaCollection
-import org.quiltmc.community.database.collections.OwnedThreadCollection
-import org.quiltmc.community.database.collections.ServerSettingsCollection
-import org.quiltmc.community.database.collections.SuggestionsCollection
+import org.quiltmc.community.database.collections.*
 import org.quiltmc.community.database.getSettings
 
 fun String.chunkByWhitespace(length: Int): List<String> {
@@ -78,6 +75,7 @@ suspend fun ExtensibleBotBuilder.database(migrate: Boolean = false) {
                 single { ServerSettingsCollection() } bind ServerSettingsCollection::class
                 single { SuggestionsCollection() } bind SuggestionsCollection::class
                 single { OwnedThreadCollection() } bind OwnedThreadCollection::class
+                single { TeamCollection() } bind TeamCollection::class
             }
 
             if (migrate) {
