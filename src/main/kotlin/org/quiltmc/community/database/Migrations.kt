@@ -37,7 +37,7 @@ object Migrations : KoinComponent {
             @Suppress("TooGenericExceptionCaught")
             try {
                 @Suppress("MagicNumber")
-                when (nextVersion) {
+                when (nextVersion) {  // TODO: This should be annotation-based probably
                     1 -> ::v1
                     2 -> ::v2
                     3 -> ::v3

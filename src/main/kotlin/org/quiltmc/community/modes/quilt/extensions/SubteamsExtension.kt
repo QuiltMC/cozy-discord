@@ -40,14 +40,17 @@ class SubteamsExtension : Extension() {
                             arguments.role.id,
                             "${this.user.asUserOrNull()?.tag ?: this.user.id} used /team add"
                         )
+
                         respond {
                             content = "Successfully added ${arguments.targetUser.mention} to ${arguments.role.mention}."
-                            allowedMentions {}
+
+                            allowedMentions { }
                         }
                     } else {
                         respond {
-                            content =
-                                "Your team needs to be above ${arguments.role.mention} in order to add anyone to it."
+                            content = "Your team needs to be above ${arguments.role.mention} in order to add anyone " +
+                                    "to it."
+
                             allowedMentions { }
                         }
                     }
@@ -65,14 +68,16 @@ class SubteamsExtension : Extension() {
                             "${this.user.asUserOrNull()?.tag ?: this.user.id} used /team remove"
                         )
                         respond {
-                            content =
-                                "Successfully removed ${arguments.targetUser.mention} from ${arguments.role.mention}."
-                            allowedMentions {}
+                            content = "Successfully removed ${arguments.targetUser.mention} from " +
+                                    "${arguments.role.mention}."
+
+                            allowedMentions { }
                         }
                     } else {
                         respond {
-                            content =
-                                "Your team needs to be above ${arguments.role.mention} in order to remove anyone from it."
+                            content = "Your team needs to be above ${arguments.role.mention} in order to remove " +
+                                    "anyone from it."
+
                             allowedMentions { }
                         }
                     }
@@ -100,8 +105,10 @@ class SubteamsExtension : Extension() {
                             parent = arguments.superior.id
                         )
                     )
+
                     respond {
                         content = "${arguments.superior.mention} can now manage ${arguments.inferior.mention}"
+
                         allowedMentions { }
                     }
                 }
@@ -112,15 +119,14 @@ class SubteamsExtension : Extension() {
 
                 action {
                     teamColl.delete(arguments.role.id)
+
                     respond {
                         content = "${arguments.role.mention} can no longer be managed using /team."
+
                         allowedMentions { }
                     }
-
                 }
-
             }
-
         }
     }
 
@@ -138,7 +144,6 @@ class SubteamsExtension : Extension() {
         val role by role("role", "Role to disallow managing for", requiredGuild = { TOOLCHAIN_GUILD })
     }
 
-    private suspend fun Member.mayManageRole(role: Role): Boolean {
-        return teamColl.getParents(role.id).any { it in this.roleIds }
-    }
+    private suspend fun Member.mayManageRole(role: Role): Boolean =
+        teamColl.getParents(role.id).any { it in this.roleIds }
 }

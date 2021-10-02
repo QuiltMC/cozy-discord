@@ -37,6 +37,7 @@ class TeamCollection : KoinComponent {
                     "_id",
                     "parentHierarchy"
                 ),
+
                 limit(1)
             )
         ).first()?.parentHierarchy?.map { it.parent }.orEmpty()
