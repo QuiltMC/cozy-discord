@@ -23,7 +23,6 @@ import dev.kord.common.entity.ButtonStyle
 import dev.kord.common.entity.MessageType
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.channel.createMessage
-import dev.kord.core.behavior.channel.withTyping
 import dev.kord.core.behavior.edit
 import dev.kord.core.behavior.getChannelOf
 import dev.kord.core.behavior.interaction.followUpEphemeral
@@ -94,16 +93,16 @@ class SuggestionsExtension : Extension() {
             check { inChannel(SUGGESTION_CHANNEL) }
 
             action {
-                event.message.channel.withTyping {
-                    delay(Duration.seconds(TUPPERBOX_DELAY))
+//                event.message.channel.withTyping {
+                delay(Duration.seconds(TUPPERBOX_DELAY))
 
-                    // If it's been yeeted, it's probably been moderated or proxied
-                    val message = event.message.channel.getMessageOrNull(event.message.id)
+                // If it's been yeeted, it's probably been moderated or proxied
+                val message = event.message.channel.getMessageOrNull(event.message.id)
 
-                    if (message == null) {
-                        return@action
-                    }
+                if (message == null) {
+                    return@action
                 }
+//                }
 
                 val id = event.message.id
 
