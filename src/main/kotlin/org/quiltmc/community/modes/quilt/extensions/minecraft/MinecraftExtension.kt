@@ -222,8 +222,11 @@ class MinecraftExtension : Extension() {
         result = result.replace("[\n]*</p>\n+<p>[\n]*".toRegex(), "\n\n")
         result = result.replace("[\n]*<[/]*p>[\n]*".toRegex(), "\n")
 
-        result = result.replace("[\n]*<h\\d+>[\n]*".toRegex(), "\n\n**")
-        result = result.replace("[\n]*</h\\d+>[\n]*".toRegex(), "**\n")
+        result = result.replace("<strong>", "**")
+        result = result.replace("</strong>", "**")
+
+        result = result.replace("[\n]*<h\\d+>[\n]*".toRegex(), "\n\n__**")
+        result = result.replace("[\n]*</h\\d+>[\n]*".toRegex(), "**__\n")
 
         result = result.replace("[\n]*<[ou]l>[\n]*".toRegex(), "\n\n")
         result = result.replace("[\n]*</[ou]l>[\n]*".toRegex(), "\n\n")
