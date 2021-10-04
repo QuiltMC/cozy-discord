@@ -22,7 +22,9 @@ jobs:
           java-version: 1.16
 
       - name: Gradle (Build)
-        run: sh gradlew build
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: build
 
       - name: Upload artifacts (Main JAR)
         uses: actions/upload-artifact@v2
