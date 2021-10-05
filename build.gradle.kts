@@ -51,6 +51,7 @@ dependencies {
 
     ksp(libs.kordex.annotationProcessor)
 
+    implementation(libs.autolink)
     implementation(libs.kmongo)
 
     implementation(libs.kordex.annotations)
@@ -58,6 +59,7 @@ dependencies {
     implementation(libs.kordex.mappings)
 
     implementation(libs.commons.text)
+    implementation(libs.ktor.logging)
     implementation(libs.logback)
     implementation(libs.logging)
     implementation(libs.groovy)

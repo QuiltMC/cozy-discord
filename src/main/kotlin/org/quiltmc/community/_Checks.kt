@@ -39,3 +39,20 @@ suspend fun CheckContext<*>.hasBaseModeratorRole() {
         }
     }
 }
+
+suspend fun CheckContext<*>.notHasBaseModeratorRole() {
+    val logger = KotlinLogging.logger("org.quiltmc.community.notHasBaseModeratorRole")
+    val member = memberFor(event)?.asMemberOrNull()
+
+    if (member == null) {  // Not on a guild, fail.
+        logger.nullMember(event)
+
+        fail()
+    } else {
+        if (member.roleIds.any { it in MODERATOR_ROLES }) {
+            logger.failed("Member has a Quilt base moderator role")
+
+            fail("Must **not** be a Quilt moderator")
+        }
+    }
+}
