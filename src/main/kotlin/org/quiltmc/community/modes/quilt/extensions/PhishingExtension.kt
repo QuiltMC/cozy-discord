@@ -22,22 +22,17 @@ import dev.kord.rest.builder.message.create.embed
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import mu.KotlinLogging
-import org.nibor.autolink.LinkExtractor
-import org.nibor.autolink.LinkType
 import org.quiltmc.community.GUILDS
 import org.quiltmc.community.api.PhishingApi
 import org.quiltmc.community.hasBaseModeratorRole
 import org.quiltmc.community.inQuiltGuild
 import org.quiltmc.community.notHasBaseModeratorRole
 
+val domainRegex = "([^\\s</]+\\s*(?:\\.|dot)+\\s*[^\\s>/]+)".toRegex(RegexOption.IGNORE_CASE)
+
 class PhishingExtension : Extension() {
     override val name: String = "phishing"
-
     private val logger = KotlinLogging.logger { }
-
-    val extractor: LinkExtractor = LinkExtractor.builder()
-        .linkTypes(setOf(LinkType.URL, LinkType.WWW))
-        .build()
 
     val api = PhishingApi()
 
@@ -141,39 +136,22 @@ class PhishingExtension : Extension() {
     }
 
     suspend inline fun hasBadDomain(content: String): Boolean =
-        extractUrlInfo(content).any { (_, domain) ->
+        extractUrlInfo(content).any { domain ->
             api.checkDomain(domain)
         }
 
     suspend inline fun hasBadDomain(message: Message): Boolean = hasBadDomain(message.content)
 
-    fun extractUrlInfo(content: String): Set<Pair<String?, String>> {  // Pair(scheme, domain)
-        val links = extractor.extractLinks(content)
-        val foundPairs: MutableSet<Pair<String?, String>> = mutableSetOf()
+    fun extractUrlInfo(content: String): Set<String> {
+        val found: MutableSet<String> = mutableSetOf()
 
-        for (link in links) {
-            var domain = content.substring(link.beginIndex, link.endIndex)
-            var scheme: String? = null
-
-            if ("://" in domain) {
-                val split = domain.split("://")
-
-                scheme = split[0]
-                domain = split[1]
-            }
-
-            if ("/" in domain) {
-                domain = domain.split("/").first()
-            }
-
-            logger.debug { "Found link ($link) - $scheme / $domain" }
-
-            foundPairs += Pair(scheme, domain)
+        for (match in domainRegex.findAll(content)) {
+            found.add(match.groups[1]!!.value)
         }
 
-        logger.debug { "Found ${foundPairs.size} links." }
+        logger.debug { "Matches (${found.size}): ${found.joinToString()}" }
 
-        return foundPairs
+        return found
     }
 
     suspend fun Guild.getCozyLogChannel() =

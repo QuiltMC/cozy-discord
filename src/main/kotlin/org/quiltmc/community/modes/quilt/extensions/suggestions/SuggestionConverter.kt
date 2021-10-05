@@ -12,6 +12,7 @@ import com.kotlindiscord.kord.extensions.modules.annotations.converters.Converte
 import com.kotlindiscord.kord.extensions.parser.StringParser
 import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.Snowflake
+import dev.kord.core.entity.interaction.OptionValue
 import dev.kord.rest.builder.interaction.OptionsBuilder
 import dev.kord.rest.builder.interaction.StringChoiceBuilder
 import org.koin.core.component.inject
@@ -47,4 +48,20 @@ class SuggestionConverter(
 
     override suspend fun toSlashOption(arg: Argument<*>): OptionsBuilder =
         StringChoiceBuilder(arg.displayName, arg.description).apply { required = true }
+
+    override suspend fun parseOption(context: CommandContext, option: OptionValue<*>): Boolean {
+        val arg = (option as? OptionValue.StringOptionValue)?.value ?: return false
+
+        try {
+            val snowflake = Snowflake(arg)
+
+            this.parsed = suggestions.get(snowflake)
+                ?: suggestions.getByMessage(snowflake)
+                        ?: throw DiscordRelayedException("Unknown suggestion ID: $arg")
+        } catch (e: NumberFormatException) {
+            throw DiscordRelayedException("Unknown suggestion ID: $arg")
+        }
+
+        return true
+    }
 }

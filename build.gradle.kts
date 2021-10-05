@@ -51,7 +51,6 @@ dependencies {
 
     ksp(libs.kordex.annotationProcessor)
 
-    implementation(libs.autolink)
     implementation(libs.kmongo)
 
     implementation(libs.kordex.annotations)

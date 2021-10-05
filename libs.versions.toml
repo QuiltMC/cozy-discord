@@ -2,7 +2,6 @@
 detekt = "1.17.1"  # Note: Plugin versions must be updated in the settings.gradle.kts too
 kotlin = "1.5.30"  # Note: Plugin versions must be updated in the settings.gradle.kts too
 
-autolink = "0.10.0"
 commons-text = "1.9"
 kmongo = "4.2.8"
 groovy = "3.0.8"
@@ -13,7 +12,6 @@ logback = "1.2.3"
 logging = "2.0.3"
 
 [libraries]
-autolink = { module = "org.nibor.autolink:autolink", version.ref = "autolink" }
 commons-text = { module = "org.apache.commons:commons-text", version.ref = "commons-text" }
 detekt = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
 groovy = { module = "org.codehaus.groovy:groovy", version.ref = "groovy" }
