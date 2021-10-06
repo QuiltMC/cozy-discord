@@ -56,9 +56,9 @@ dependencies {
     implementation(libs.kordex.annotations)
     implementation(libs.kordex.core)
     implementation(libs.kordex.mappings)
+    implementation(libs.kordex.phishing)
 
     implementation(libs.commons.text)
-    implementation(libs.ktor.logging)
     implementation(libs.logback)
     implementation(libs.logging)
     implementation(libs.groovy)

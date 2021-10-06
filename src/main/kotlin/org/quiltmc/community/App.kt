@@ -7,10 +7,11 @@ package org.quiltmc.community
 
 import com.kotlindiscord.kord.extensions.ExtensibleBot
 import com.kotlindiscord.kord.extensions.modules.extra.mappings.extMappings
+import com.kotlindiscord.kord.extensions.modules.extra.phishing.DetectionAction
+import com.kotlindiscord.kord.extensions.modules.extra.phishing.extPhishing
 import com.kotlindiscord.kord.extensions.utils.envOrNull
 import dev.kord.gateway.Intents
 import dev.kord.gateway.PrivilegedIntent
-import org.quiltmc.community.modes.quilt.extensions.PhishingExtension
 import org.quiltmc.community.modes.quilt.extensions.SubteamsExtension
 import org.quiltmc.community.modes.quilt.extensions.SyncExtension
 import org.quiltmc.community.modes.quilt.extensions.UtilityExtension
@@ -50,13 +51,24 @@ suspend fun setupQuilt() = ExtensibleBot(TOKEN) {
     extensions {
         add(::MessageLogExtension)
         add(::MinecraftExtension)
-        add(::PhishingExtension)
         add(::SubteamsExtension)
         add(::SuggestionsExtension)
         add(::SyncExtension)
         add(::UtilityExtension)
 
-        extMappings {}
+        extMappings { }
+
+        extPhishing {
+            appName = "QuiltMC's Cozy Bot"
+            detectionAction = DetectionAction.Kick
+            logChannelName = "cozy-logs"
+            requiredCommandPermission = null
+
+            check { inQuiltGuild() }
+            check { notHasBaseModeratorRole() }
+
+            regex("([^\\s</]+\\s*(?:\\.|dot)+\\s*[^\\s>/]+)")
+        }
 
         sentry {
             distribution = "community"

@@ -6,7 +6,6 @@ commons-text = "1.9"
 kmongo = "4.2.8"
 groovy = "3.0.8"
 kordex = "1.5.0-SNAPSHOT"
-ktor = "1.6.0"
 kx-ser = "1.2.1"
 logback = "1.2.3"
 logging = "2.0.3"
@@ -20,9 +19,9 @@ kordex-annotations = { module = "com.kotlindiscord.kord.extensions:annotations",
 kordex-annotationProcessor = { module = "com.kotlindiscord.kord.extensions:annotation-processor", version.ref = "kordex" }
 kordex-core = { module = "com.kotlindiscord.kord.extensions:kord-extensions", version.ref = "kordex" }
 kordex-mappings = { module = "com.kotlindiscord.kord.extensions:extra-mappings", version.ref = "kordex" }
+kordex-phishing = { module = "com.kotlindiscord.kord.extensions:extra-phishing", version.ref = "kordex" }
 kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8" }
-ktor-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
 kx-ser = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kx-ser" }
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 logging = { module = "io.github.microutils:kotlin-logging", version.ref = "logging" }
