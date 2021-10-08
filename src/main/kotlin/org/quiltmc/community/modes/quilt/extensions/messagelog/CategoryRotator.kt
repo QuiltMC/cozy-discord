@@ -8,7 +8,7 @@ import dev.kord.core.entity.channel.Category
 import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.entity.channel.TopGuildMessageChannel
-import dev.kord.rest.builder.message.create.PersistentMessageCreateBuilder
+import dev.kord.rest.builder.message.create.UserMessageCreateBuilder
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.toList
@@ -61,7 +61,7 @@ class CategoryRotator(private val category: Category, private val modLog: GuildM
         }
     }
 
-    suspend fun send(messageBuilder: suspend PersistentMessageCreateBuilder.() -> Unit) = rotationLock.withLock {
+    suspend fun send(messageBuilder: suspend UserMessageCreateBuilder.() -> Unit) = rotationLock.withLock {
         channel.createMessage {
             messageBuilder()
         }

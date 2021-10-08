@@ -4,10 +4,7 @@
 
 package org.quiltmc.community.modes.quilt.extensions
 
-import com.kotlindiscord.kord.extensions.DISCORD_BLURPLE
-import com.kotlindiscord.kord.extensions.DISCORD_FUCHSIA
-import com.kotlindiscord.kord.extensions.DISCORD_GREEN
-import com.kotlindiscord.kord.extensions.DISCORD_RED
+import com.kotlindiscord.kord.extensions.*
 import com.kotlindiscord.kord.extensions.checks.hasPermission
 import com.kotlindiscord.kord.extensions.checks.isInThread
 import com.kotlindiscord.kord.extensions.commands.Arguments
@@ -18,6 +15,7 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.extensions.event
+import com.kotlindiscord.kord.extensions.types.edit
 import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.Permission
@@ -145,6 +143,23 @@ class UtilityExtension : Extension() {
         }
 
         GUILDS.forEach { guildId ->
+            ephemeralSlashCommand(::SayArguments) {
+                name = "say"
+                description = "Send a message."
+
+                guild(guildId)
+
+                check { hasBaseModeratorRole() }
+
+                action {
+                    val targetChannel = (arguments.target ?: channel.asChannel()) as GuildMessageChannel
+
+                    targetChannel.createMessage(arguments.message)
+
+                    edit { content = "Done!" }
+                }
+            }
+
             ephemeralSlashCommand(::MuteRoleArguments) {
                 name = "fix-mute-role"
                 description = "Fix the permissions for the mute role on this server."
@@ -472,5 +487,14 @@ class UtilityExtension : Extension() {
 
     inner class MuteRoleArguments : Arguments() {
         val role by optionalRole("role", "Mute role ID, if the role isn't named Muted")
+    }
+
+    inner class SayArguments : Arguments() {
+        val message by string("message", "Message to send")
+        val target by optionalChannel("target", "Channel to use, if not this one") { _, value ->
+            if (value != null && value !is GuildMessageChannel) {
+                throw DiscordRelayedException("${value.mention} is not a guild text channel.")
+            }
+        }
     }
 }

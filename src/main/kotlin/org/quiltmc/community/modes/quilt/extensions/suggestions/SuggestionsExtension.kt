@@ -25,7 +25,6 @@ import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.behavior.edit
 import dev.kord.core.behavior.getChannelOf
-import dev.kord.core.behavior.interaction.followUpEphemeral
 import dev.kord.core.behavior.reply
 import dev.kord.core.builder.components.emoji
 import dev.kord.core.entity.ReactionEmoji
@@ -135,7 +134,7 @@ class SuggestionsExtension : Extension() {
                         text = event.message.content,
 
                         owner = event.message.author!!.id,
-                        ownerAvatar = event.message.author!!.avatar.url,
+                        ownerAvatar = event.message.author!!.avatar?.url,
                         ownerName = event.message.author!!.asMember(event.message.getGuild().id).displayName,
 
                         positiveVoters = mutableListOf(event.message.author!!.id)
@@ -224,7 +223,7 @@ class SuggestionsExtension : Extension() {
                 val response = interaction.ackEphemeral(false)
 
                 if (suggestion.status != SuggestionStatus.Open) {
-                    response.followUpEphemeral {
+                    response.ephemeralFollowup {
                         content = "**Error:** This suggestion isn't open, and votes can't be changed."
                     }
 
@@ -236,11 +235,11 @@ class SuggestionsExtension : Extension() {
                         suggestion.positiveVoters.add(interaction.user.id)
                         suggestion.negativeVoters.remove(interaction.user.id)
 
-                        response.followUpEphemeral {
+                        response.ephemeralFollowup {
                             content = "Vote registered!"
                         }
                     } else {
-                        response.followUpEphemeral {
+                        response.ephemeralFollowup {
                             content = "**Error:** You've already upvoted this suggestion."
                         }
 
@@ -251,11 +250,11 @@ class SuggestionsExtension : Extension() {
                         suggestion.negativeVoters.add(interaction.user.id)
                         suggestion.positiveVoters.remove(interaction.user.id)
 
-                        response.followUpEphemeral {
+                        response.ephemeralFollowup {
                             content = "Vote registered!"
                         }
                     } else {
-                        response.followUpEphemeral {
+                        response.ephemeralFollowup {
                             content = "**Error:** You've already downvoted this suggestion."
                         }
 
@@ -265,24 +264,24 @@ class SuggestionsExtension : Extension() {
                     ACTION_REMOVE -> if (suggestion.positiveVoters.contains(interaction.user.id)) {
                         suggestion.positiveVoters.remove(interaction.user.id)
 
-                        response.followUpEphemeral {
+                        response.ephemeralFollowup {
                             content = "Vote removed!"
                         }
                     } else if (suggestion.negativeVoters.contains(interaction.user.id)) {
                         suggestion.negativeVoters.remove(interaction.user.id)
 
-                        response.followUpEphemeral {
+                        response.ephemeralFollowup {
                             content = "Vote removed!"
                         }
                     } else {
-                        response.followUpEphemeral {
+                        response.ephemeralFollowup {
                             content = "**Error:** You haven't voted for this suggestion."
                         }
 
                         return@action
                     }
 
-                    else -> response.followUpEphemeral {
+                    else -> response.ephemeralFollowup {
                         content = "Unknown action: $action"
 
                         return@action
@@ -637,16 +636,6 @@ class SuggestionsExtension : Extension() {
             }
         } else if (suggestion.status != SuggestionStatus.Open) {
             components = mutableListOf()
-        }
-    }
-
-    inner class SuggestionCommentArguments : Arguments() {
-        val suggestion by suggestion("suggestion", "Suggestion ID to act on")
-
-        val comment by coalescedString("comment", "Comment text to set") { _, str ->
-            if (str.length > COMMENT_SIZE_LIMIT) {
-                throw DiscordRelayedException("Comment must not be longer than $COMMENT_SIZE_LIMIT characters.")
-            }
         }
     }
 

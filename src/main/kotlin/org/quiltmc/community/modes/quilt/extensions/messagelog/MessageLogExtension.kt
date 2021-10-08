@@ -284,7 +284,7 @@ class MessageLogExtension : Extension() {
 
                                 field {
                                     name = "Created"
-                                    value = "${event.messageId.timeStamp.format()} (UTC)\n"
+                                    value = "${event.messageId.timestamp.format()} (UTC)\n"
                                     inline = true
                                 }
                             }
