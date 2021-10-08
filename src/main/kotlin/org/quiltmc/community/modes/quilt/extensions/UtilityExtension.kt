@@ -156,6 +156,23 @@ class UtilityExtension : Extension() {
 
                     targetChannel.createMessage(arguments.message)
 
+                    guild?.asGuild()?.getCozyLogChannel()?.createEmbed {
+                        title = "/say command used"
+                        description = arguments.message
+
+                        field {
+                            inline = true
+                            name = "Channel"
+                            value = targetChannel.mention
+                        }
+
+                        field {
+                            inline = true
+                            name = "User"
+                            value = user.mention
+                        }
+                    }
+
                     edit { content = "Done!" }
                 }
             }
@@ -467,6 +484,10 @@ class UtilityExtension : Extension() {
 
     suspend fun Guild.getModLogChannel() =
         channels.firstOrNull { it.name == "moderation-log" }
+            ?.asChannelOrNull() as? GuildMessageChannel
+
+    suspend fun Guild.getCozyLogChannel() =
+        channels.firstOrNull { it.name == "cozy-logs" }
             ?.asChannelOrNull() as? GuildMessageChannel
 
     inner class RenameArguments : Arguments() {
