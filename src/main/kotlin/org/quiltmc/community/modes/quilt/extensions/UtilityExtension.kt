@@ -13,6 +13,7 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalChanne
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalRole
 import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.extensions.Extension
+import com.kotlindiscord.kord.extensions.extensions.ephemeralMessageCommand
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.extensions.event
 import com.kotlindiscord.kord.extensions.types.edit
@@ -372,6 +373,68 @@ class UtilityExtension : Extension() {
                     }
 
                     respond { content = "Thread archived." }
+                }
+            }
+
+            ephemeralMessageCommand {
+                name = "Pin in thread"
+
+                guild(guildId)
+
+                check { isInThread() }
+
+                action {
+                    val channel = channel.asChannel() as ThreadChannel
+                    val member = user.asMember(guild!!.id)
+                    val roles = member.roles.toList().map { it.id }
+
+                    if (MODERATOR_ROLES.any { it in roles }) {
+                        targetMessages.forEach { it.pin("Pinned by ${member.tag}") }
+                        edit { content = "Messages pinned." }
+
+                        return@action
+                    }
+
+                    if (channel.ownerId != user.id && threads.isOwner(channel, user) != true) {
+                        respond { content = "This is not your thread." }
+
+                        return@action
+                    }
+
+                    targetMessages.forEach { it.pin("Pinned by ${member.tag}") }
+
+                    edit { content = "Messages pinned." }
+                }
+            }
+
+            ephemeralMessageCommand {
+                name = "Unpin in thread"
+
+                guild(guildId)
+
+                check { isInThread() }
+
+                action {
+                    val channel = channel.asChannel() as ThreadChannel
+                    val member = user.asMember(guild!!.id)
+                    val roles = member.roles.toList().map { it.id }
+
+                    if (MODERATOR_ROLES.any { it in roles }) {
+                        targetMessages.forEach { it.unpin("Unpinned by ${member.tag}") }
+                        edit { content = "Messages unpinned." }
+
+                        return@action
+                    }
+
+                    if (channel.ownerId != user.id && threads.isOwner(channel, user) != true) {
+                        respond { content = "This is not your thread." }
+
+                        return@action
+                    }
+
+                    targetMessages.forEach { it.unpin("Unpinned by ${member.tag}") }
+
+                    edit { content = "Messages unpinned." }
                 }
             }
 
