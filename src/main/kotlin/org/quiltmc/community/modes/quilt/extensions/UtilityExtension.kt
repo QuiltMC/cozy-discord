@@ -438,6 +438,116 @@ class UtilityExtension : Extension() {
                 }
             }
 
+            ephemeralSlashCommand {
+                name = "lock-server"
+                description = "Lock the server, preventing anyone but staff from talking"
+
+                guild(guildId)
+
+                check { hasPermission(Permission.Administrator) }
+
+                action {
+                    val roleId = when (guild!!.id) {
+                        COMMUNITY_GUILD -> COMMUNITY_MODERATOR_ROLE
+                        TOOLCHAIN_GUILD -> TOOLCHAIN_MODERATOR_ROLE
+
+                        else -> throw DiscordRelayedException("Incorrect server ID: ${guild?.id?.value}")
+                    }
+
+                    val moderatorRole = guild!!.getRole(roleId)
+                    val everyoneRole = guild!!.getRole(guild!!.id)
+
+                    everyoneRole.edit {
+                        permissions = everyoneRole.permissions
+                            .minus(Permission.AddReactions)
+                            .minus(Permission.CreatePrivateThreads)
+                            .minus(Permission.CreatePublicThreads)
+                            .minus(Permission.SendMessages)
+                            .minus(Permission.SendMessagesInThreads)
+
+                        reason = "Server entering lockdown"
+                    }
+
+                    moderatorRole.edit {
+                        permissions = moderatorRole.permissions
+                            .plus(Permission.AddReactions)
+                            .plus(Permission.CreatePrivateThreads)
+                            .plus(Permission.CreatePublicThreads)
+                            .plus(Permission.SendMessages)
+                            .plus(Permission.SendMessagesInThreads)
+
+                        reason = "Server entering lockdown"
+                    }
+
+                    guild?.asGuildOrNull()?.getModLogChannel()?.createEmbed {
+                        title = "Server locked"
+                        color = DISCORD_RED
+
+                        description = "Server was locked by ${user.mention}."
+                        timestamp = Clock.System.now()
+                    }
+
+                    respond {
+                        content = "Server locked."
+                    }
+                }
+            }
+
+            ephemeralSlashCommand {
+                name = "unlock-server"
+                description = "Unlock the server, allowing users to talk again"
+
+                guild(guildId)
+
+                check { hasPermission(Permission.Administrator) }
+
+                action {
+                    val roleId = when (guild!!.id) {
+                        COMMUNITY_GUILD -> COMMUNITY_MODERATOR_ROLE
+                        TOOLCHAIN_GUILD -> TOOLCHAIN_MODERATOR_ROLE
+
+                        else -> throw DiscordRelayedException("Incorrect server ID: ${guild?.id?.value}")
+                    }
+
+                    val moderatorRole = guild!!.getRole(roleId)
+                    val everyoneRole = guild!!.getRole(guild!!.id)
+
+                    everyoneRole.edit {
+                        permissions = everyoneRole.permissions
+                            .plus(Permission.AddReactions)
+                            .plus(Permission.CreatePrivateThreads)
+                            .plus(Permission.CreatePublicThreads)
+                            .plus(Permission.SendMessages)
+                            .plus(Permission.SendMessagesInThreads)
+
+                        reason = "Server exiting lockdown"
+                    }
+
+                    moderatorRole.edit {
+                        permissions = moderatorRole.permissions
+                            .minus(Permission.AddReactions)
+                            .minus(Permission.CreatePrivateThreads)
+                            .minus(Permission.CreatePublicThreads)
+                            .minus(Permission.SendMessages)
+                            .minus(Permission.SendMessagesInThreads)
+
+                        reason = "Server exiting lockdown"
+                    }
+
+                    guild?.asGuildOrNull()?.getModLogChannel()?.createEmbed {
+                        title = "Server unlocked"
+                        color = DISCORD_GREEN
+
+                        description = "Server was unlocked by ${user.mention}."
+                        timestamp = Clock.System.now()
+                    }
+
+                    respond {
+                        content = "Server unlocked."
+                    }
+                }
+            }
+
             ephemeralSlashCommand(::LockArguments) {
                 name = "lock"
                 description = "Lock a channel, so only moderators can interact in it"
