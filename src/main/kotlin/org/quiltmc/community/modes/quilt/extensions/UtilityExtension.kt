@@ -13,6 +13,7 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalChanne
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalRole
 import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.extensions.Extension
+import com.kotlindiscord.kord.extensions.extensions.ephemeralMessageCommand
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.extensions.event
 import com.kotlindiscord.kord.extensions.types.edit
@@ -372,6 +373,178 @@ class UtilityExtension : Extension() {
                     }
 
                     respond { content = "Thread archived." }
+                }
+            }
+
+            ephemeralMessageCommand {
+                name = "Pin in thread"
+
+                guild(guildId)
+
+                check { isInThread() }
+
+                action {
+                    val channel = channel.asChannel() as ThreadChannel
+                    val member = user.asMember(guild!!.id)
+                    val roles = member.roles.toList().map { it.id }
+
+                    if (MODERATOR_ROLES.any { it in roles }) {
+                        targetMessages.forEach { it.pin("Pinned by ${member.tag}") }
+                        edit { content = "Messages pinned." }
+
+                        return@action
+                    }
+
+                    if (channel.ownerId != user.id && threads.isOwner(channel, user) != true) {
+                        respond { content = "This is not your thread." }
+
+                        return@action
+                    }
+
+                    targetMessages.forEach { it.pin("Pinned by ${member.tag}") }
+
+                    edit { content = "Messages pinned." }
+                }
+            }
+
+            ephemeralMessageCommand {
+                name = "Unpin in thread"
+
+                guild(guildId)
+
+                check { isInThread() }
+
+                action {
+                    val channel = channel.asChannel() as ThreadChannel
+                    val member = user.asMember(guild!!.id)
+                    val roles = member.roles.toList().map { it.id }
+
+                    if (MODERATOR_ROLES.any { it in roles }) {
+                        targetMessages.forEach { it.unpin("Unpinned by ${member.tag}") }
+                        edit { content = "Messages unpinned." }
+
+                        return@action
+                    }
+
+                    if (channel.ownerId != user.id && threads.isOwner(channel, user) != true) {
+                        respond { content = "This is not your thread." }
+
+                        return@action
+                    }
+
+                    targetMessages.forEach { it.unpin("Unpinned by ${member.tag}") }
+
+                    edit { content = "Messages unpinned." }
+                }
+            }
+
+            ephemeralSlashCommand {
+                name = "lock-server"
+                description = "Lock the server, preventing anyone but staff from talking"
+
+                guild(guildId)
+
+                check { hasPermission(Permission.Administrator) }
+
+                action {
+                    val roleId = when (guild!!.id) {
+                        COMMUNITY_GUILD -> COMMUNITY_MODERATOR_ROLE
+                        TOOLCHAIN_GUILD -> TOOLCHAIN_MODERATOR_ROLE
+
+                        else -> throw DiscordRelayedException("Incorrect server ID: ${guild?.id?.value}")
+                    }
+
+                    val moderatorRole = guild!!.getRole(roleId)
+                    val everyoneRole = guild!!.getRole(guild!!.id)
+
+                    everyoneRole.edit {
+                        permissions = everyoneRole.permissions
+                            .minus(Permission.AddReactions)
+                            .minus(Permission.CreatePrivateThreads)
+                            .minus(Permission.CreatePublicThreads)
+                            .minus(Permission.SendMessages)
+                            .minus(Permission.SendMessagesInThreads)
+
+                        reason = "Server entering lockdown"
+                    }
+
+                    moderatorRole.edit {
+                        permissions = moderatorRole.permissions
+                            .plus(Permission.AddReactions)
+                            .plus(Permission.CreatePrivateThreads)
+                            .plus(Permission.CreatePublicThreads)
+                            .plus(Permission.SendMessages)
+                            .plus(Permission.SendMessagesInThreads)
+
+                        reason = "Server entering lockdown"
+                    }
+
+                    guild?.asGuildOrNull()?.getModLogChannel()?.createEmbed {
+                        title = "Server locked"
+                        color = DISCORD_RED
+
+                        description = "Server was locked by ${user.mention}."
+                        timestamp = Clock.System.now()
+                    }
+
+                    respond {
+                        content = "Server locked."
+                    }
+                }
+            }
+
+            ephemeralSlashCommand {
+                name = "unlock-server"
+                description = "Unlock the server, allowing users to talk again"
+
+                guild(guildId)
+
+                check { hasPermission(Permission.Administrator) }
+
+                action {
+                    val roleId = when (guild!!.id) {
+                        COMMUNITY_GUILD -> COMMUNITY_MODERATOR_ROLE
+                        TOOLCHAIN_GUILD -> TOOLCHAIN_MODERATOR_ROLE
+
+                        else -> throw DiscordRelayedException("Incorrect server ID: ${guild?.id?.value}")
+                    }
+
+                    val moderatorRole = guild!!.getRole(roleId)
+                    val everyoneRole = guild!!.getRole(guild!!.id)
+
+                    everyoneRole.edit {
+                        permissions = everyoneRole.permissions
+                            .plus(Permission.AddReactions)
+                            .plus(Permission.CreatePrivateThreads)
+                            .plus(Permission.CreatePublicThreads)
+                            .plus(Permission.SendMessages)
+                            .plus(Permission.SendMessagesInThreads)
+
+                        reason = "Server exiting lockdown"
+                    }
+
+                    moderatorRole.edit {
+                        permissions = moderatorRole.permissions
+                            .minus(Permission.AddReactions)
+                            .minus(Permission.CreatePrivateThreads)
+                            .minus(Permission.CreatePublicThreads)
+                            .minus(Permission.SendMessages)
+                            .minus(Permission.SendMessagesInThreads)
+
+                        reason = "Server exiting lockdown"
+                    }
+
+                    guild?.asGuildOrNull()?.getModLogChannel()?.createEmbed {
+                        title = "Server unlocked"
+                        color = DISCORD_GREEN
+
+                        description = "Server was unlocked by ${user.mention}."
+                        timestamp = Clock.System.now()
+                    }
+
+                    respond {
+                        content = "Server unlocked."
+                    }
                 }
             }
 
