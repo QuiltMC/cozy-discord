@@ -223,7 +223,7 @@ class UtilityExtension : Extension() {
                                     .filter { allowedPerms?.contains(it) == true }
                                     .forEach { allowed += it }
 
-                                reason = "Automatically updating mute role permissions."
+                                reason = "Mute role permissions update triggered by ${user.asUser().tag}"
                             }
 
                             channelsUpdated += 1
@@ -241,6 +241,8 @@ class UtilityExtension : Extension() {
                     val roleUpdated = if (role.permissions.values.isNotEmpty()) {
                         role.edit {
                             permissions = Permissions()
+
+                            reason = "Mute role permissions update triggered by ${user.asUser().tag}"
                         }
 
                         respond { content = "Mute role permissions cleared." }
@@ -297,6 +299,8 @@ class UtilityExtension : Extension() {
                     if (MODERATOR_ROLES.any { it in roles }) {
                         channel.edit {
                             name = arguments.name
+
+                            reason = "Renamed by ${member.tag}"
                         }
 
                         respond { content = "Thread renamed." }
@@ -312,6 +316,8 @@ class UtilityExtension : Extension() {
 
                     channel.edit {
                         name = arguments.name
+
+                        reason = "Renamed by ${member.tag}"
                     }
 
                     respond { content = "Thread renamed." }
@@ -335,6 +341,8 @@ class UtilityExtension : Extension() {
                         channel.edit {
                             this.archived = true
                             this.locked = arguments.lock
+
+                            reason = "Archived by ${user.asUser().tag}"
                         }
 
                         respond {
@@ -370,6 +378,8 @@ class UtilityExtension : Extension() {
 
                     channel.edit {
                         archived = true
+
+                        reason = "Archived by ${user.asUser().tag}"
                     }
 
                     respond { content = "Thread archived." }
@@ -465,7 +475,7 @@ class UtilityExtension : Extension() {
                             .minus(Permission.SendMessages)
                             .minus(Permission.SendMessagesInThreads)
 
-                        reason = "Server entering lockdown"
+                        reason = "Server locked down by ${user.asUser().tag}"
                     }
 
                     moderatorRole.edit {
@@ -476,7 +486,7 @@ class UtilityExtension : Extension() {
                             .plus(Permission.SendMessages)
                             .plus(Permission.SendMessagesInThreads)
 
-                        reason = "Server entering lockdown"
+                        reason = "Server locked down by ${user.asUser().tag}"
                     }
 
                     guild?.asGuildOrNull()?.getModLogChannel()?.createEmbed {
@@ -520,7 +530,7 @@ class UtilityExtension : Extension() {
                             .plus(Permission.SendMessages)
                             .plus(Permission.SendMessagesInThreads)
 
-                        reason = "Server exiting lockdown"
+                        reason = "Server unlocked by ${user.asUser().tag}"
                     }
 
                     moderatorRole.edit {
@@ -531,7 +541,7 @@ class UtilityExtension : Extension() {
                             .minus(Permission.SendMessages)
                             .minus(Permission.SendMessagesInThreads)
 
-                        reason = "Server exiting lockdown"
+                        reason = "Server unlocked by ${user.asUser().tag}"
                     }
 
                     guild?.asGuildOrNull()?.getModLogChannel()?.createEmbed {
@@ -582,14 +592,14 @@ class UtilityExtension : Extension() {
                         ch.editRolePermission(staffRoleId) {
                             SPEAKING_PERMISSIONS.forEach { allowed += it }
 
-                            reason = "Channel locked by a moderator."
+                            reason = "Channel locked by ${user.asUser().tag}"
                         }
                     }
 
                     ch.editRolePermission(guild!!.id) {
                         SPEAKING_PERMISSIONS.forEach { denied += it }
 
-                        reason = "Channel locked by a moderator."
+                        reason = "Channel locked by ${user.asUser().tag}"
                     }
 
                     ch.createMessage {
@@ -633,7 +643,8 @@ class UtilityExtension : Extension() {
 
                     val ch = channelObj as TextChannel
 
-                    ch.getPermissionOverwritesForRole(guild!!.id)?.delete("Channel unlocked by a moderator.")
+                    ch.getPermissionOverwritesForRole(guild!!.id)
+                        ?.delete("Channel unlocked by ${user.asUser().tag}")
 
                     ch.createMessage {
                         content = "Channel unlocked by a moderator."
