@@ -18,7 +18,7 @@ import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.Permission
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.channel.createMessage
-import dev.kord.core.entity.channel.MessageChannel
+import dev.kord.core.entity.channel.TextChannel
 import dev.kord.rest.builder.message.EmbedBuilder
 import dev.kord.rest.builder.message.create.embed
 import io.ktor.client.HttpClient
@@ -26,11 +26,6 @@ import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.request.get
 import org.apache.commons.text.StringEscapeUtils
 import org.quiltmc.community.*
-import org.quiltmc.community.COMMUNITY_GUILD
-import org.quiltmc.community.COMMUNITY_MODERATOR_ROLE
-import org.quiltmc.community.GUILDS
-import org.quiltmc.community.TOOLCHAIN_GUILD
-import org.quiltmc.community.TOOLCHAIN_MODERATOR_ROLE
 
 private const val PAGINATOR_TIMEOUT = 60_000L  // One minute
 private const val CHUNK_SIZE = 10
@@ -212,7 +207,7 @@ class MinecraftExtension : Extension() {
     }
 
     suspend fun relayUpdate(patchNote: PatchNote) =
-        CHANNELS.map { kord.getChannelOf<MessageChannel>(it) }
+        CHANNELS.map { kord.getChannelOf<TextChannel>(it) }
             .filterNotNull()
             .forEach { it.relay(patchNote) }
 
@@ -284,8 +279,17 @@ class MinecraftExtension : Extension() {
         }
     }
 
-    private suspend fun MessageChannel.relay(patchNote: PatchNote, maxLength: Int = 1000) =
-        createMessage { embed { patchNotes(patchNote, maxLength) } }
+    private suspend fun TextChannel.relay(patchNote: PatchNote, maxLength: Int = 1000) {
+        val message = createMessage { embed { patchNotes(patchNote, maxLength) } }
+
+        if (guildId == COMMUNITY_GUILD) {
+            startPublicThreadWithMessage(
+                message.id,
+                patchNote.title,
+                guild.asGuild().getMaxArchiveDuration()
+            )
+        }
+    }
 
     @OptIn(KordPreview::class)
     class CheckArguments : Arguments() {
