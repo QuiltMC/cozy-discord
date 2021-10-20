@@ -304,17 +304,23 @@ class MinecraftExtension : Extension() {
     private suspend fun TopGuildMessageChannel.relay(patchNote: PatchNote, maxLength: Int = 1000) {
         val message = createMessage { embed { patchNotes(patchNote, maxLength) } }
 
+        val title = if (patchNote.title.startsWith("minecraft ", true)) {
+            patchNote.title.split(" ", limit = 2).last()
+        } else {
+            patchNote.title
+        }
+
         if (guildId == COMMUNITY_GUILD) {
             when (this) {
                 is TextChannel -> startPublicThreadWithMessage(
                     message.id,
-                    patchNote.title,
+                    title,
                     guild.asGuild().getMaxArchiveDuration()
                 )
 
                 is NewsChannel -> startPublicThreadWithMessage(
                     message.id,
-                    patchNote.title,
+                    title,
                     guild.asGuild().getMaxArchiveDuration()
                 )
             }
