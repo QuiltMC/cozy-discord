@@ -24,6 +24,8 @@ import dev.kord.rest.builder.message.create.embed
 import io.ktor.client.HttpClient
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.request.get
+import kotlinx.datetime.Clock
+import mu.KotlinLogging
 import org.apache.commons.text.StringEscapeUtils
 import org.quiltmc.community.*
 
@@ -46,6 +48,8 @@ private val CHANNELS: List<Snowflake> = listOf(
 
 class MinecraftExtension : Extension() {
     override val name: String = "minecraft"
+
+    private val logger = KotlinLogging.logger { }
 
     private val client = HttpClient {
         install(JsonFeature)
@@ -193,17 +197,23 @@ class MinecraftExtension : Extension() {
         currentEntries.entries.forEach { knownVersions.add(it.version) }
     }
 
+    @Suppress("TooGenericExceptionCaught")
     suspend fun checkTask() {
-        currentEntries = client.get(JSON_URL)
+        try {
+            val now = Clock.System.now()
+            currentEntries = client.get(JSON_URL + "?cbt=${now.epochSeconds}")
 
-        currentEntries.entries.forEach {
-            if (it.version !in knownVersions) {
-                relayUpdate(it)
-                knownVersions.add(it.version)
+            currentEntries.entries.forEach {
+                if (it.version !in knownVersions) {
+                    relayUpdate(it)
+                    knownVersions.add(it.version)
+                }
             }
+        } catch (t: Throwable) {
+            logger.error(t) { "Check task run failed" }
+        } finally {
+            checkTask = scheduler.schedule(CHECK_DELAY, callback = ::checkTask)
         }
-
-        checkTask = scheduler.schedule(CHECK_DELAY, callback = ::checkTask)
     }
 
     suspend fun relayUpdate(patchNote: PatchNote) =
