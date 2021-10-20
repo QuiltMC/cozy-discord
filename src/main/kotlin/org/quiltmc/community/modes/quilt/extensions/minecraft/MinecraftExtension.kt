@@ -18,7 +18,9 @@ import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.Permission
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.channel.createMessage
+import dev.kord.core.entity.channel.NewsChannel
 import dev.kord.core.entity.channel.TextChannel
+import dev.kord.core.entity.channel.TopGuildMessageChannel
 import dev.kord.rest.builder.message.EmbedBuilder
 import dev.kord.rest.builder.message.create.embed
 import io.ktor.client.HttpClient
@@ -118,13 +120,13 @@ class MinecraftExtension : Extension() {
                         editingPaginator {
                             timeoutSeconds = PAGINATOR_TIMEOUT
 
-                            currentEntries.entries.chunked(CHUNK_SIZE).forEach { chunk ->
+                            knownVersions.chunked(CHUNK_SIZE).forEach { chunk ->
                                 page(
                                     Page {
                                         title = "Patch note versions"
                                         color = DISCORD_FUCHSIA
 
-                                        description = chunk.joinToString("\n") { "**»** `${it.version}`" }
+                                        description = chunk.joinToString("\n") { "**»** `$it`" }
 
                                         footer {
                                             text = "${currentEntries.entries.size} versions"
@@ -216,8 +218,18 @@ class MinecraftExtension : Extension() {
         }
     }
 
+    @Suppress("TooGenericExceptionCaught")
     suspend fun relayUpdate(patchNote: PatchNote) =
-        CHANNELS.map { kord.getChannelOf<TextChannel>(it) }
+        CHANNELS
+            .map {
+                try {
+                    kord.getChannelOf<TopGuildMessageChannel>(it)
+                } catch (t: Throwable) {
+                    logger.warn(t) { "Unable to get channel of ID: ${it.value}" }
+
+                    null
+                }
+            }
             .filterNotNull()
             .forEach { it.relay(patchNote) }
 
@@ -289,15 +301,23 @@ class MinecraftExtension : Extension() {
         }
     }
 
-    private suspend fun TextChannel.relay(patchNote: PatchNote, maxLength: Int = 1000) {
+    private suspend fun TopGuildMessageChannel.relay(patchNote: PatchNote, maxLength: Int = 1000) {
         val message = createMessage { embed { patchNotes(patchNote, maxLength) } }
 
         if (guildId == COMMUNITY_GUILD) {
-            startPublicThreadWithMessage(
-                message.id,
-                patchNote.title,
-                guild.asGuild().getMaxArchiveDuration()
-            )
+            when (this) {
+                is TextChannel -> startPublicThreadWithMessage(
+                    message.id,
+                    patchNote.title,
+                    guild.asGuild().getMaxArchiveDuration()
+                )
+
+                is NewsChannel -> startPublicThreadWithMessage(
+                    message.id,
+                    patchNote.title,
+                    guild.asGuild().getMaxArchiveDuration()
+                )
+            }
         }
     }
 
