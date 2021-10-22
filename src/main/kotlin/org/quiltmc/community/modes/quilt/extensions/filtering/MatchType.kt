@@ -7,5 +7,6 @@ import kotlinx.serialization.Serializable
 enum class MatchType(override val readableName: String) : ChoiceEnum {
     CONTAINS("Message contains this text"),
     EXACT("Message is exactly this text"),
-    REGEX("Message matches this regular expression"),
+    REGEX("Message exactly matches this regular expression"),
+    REGEX_CONTAINS("Message contains this regular expression")
 }

@@ -399,6 +399,7 @@ class FilterExtension : Extension() {
         MatchType.CONTAINS -> content.contains(match, ignoreCase = true)
         MatchType.EXACT -> content.equals(match, ignoreCase = true)
         MatchType.REGEX -> match.toRegex(RegexOption.IGNORE_CASE).matches(content)
+        MatchType.REGEX_CONTAINS -> content.contains(match.toRegex(RegexOption.IGNORE_CASE))
     }
 
     suspend fun Guild.getCozyLogChannel() =
