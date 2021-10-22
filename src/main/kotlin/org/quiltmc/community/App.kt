@@ -15,6 +15,7 @@ import dev.kord.gateway.PrivilegedIntent
 import org.quiltmc.community.modes.quilt.extensions.SubteamsExtension
 import org.quiltmc.community.modes.quilt.extensions.SyncExtension
 import org.quiltmc.community.modes.quilt.extensions.UtilityExtension
+import org.quiltmc.community.modes.quilt.extensions.filtering.FilterExtension
 import org.quiltmc.community.modes.quilt.extensions.messagelog.MessageLogExtension
 import org.quiltmc.community.modes.quilt.extensions.minecraft.MinecraftExtension
 import org.quiltmc.community.modes.quilt.extensions.suggestions.SuggestionsExtension
@@ -49,6 +50,7 @@ suspend fun setupQuilt() = ExtensibleBot(TOKEN) {
     }
 
     extensions {
+        add(::FilterExtension)
         add(::MessageLogExtension)
         add(::MinecraftExtension)
         add(::SubteamsExtension)

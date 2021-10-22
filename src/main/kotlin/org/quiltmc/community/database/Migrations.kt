@@ -5,10 +5,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.quiltmc.community.database.collections.MetaCollection
 import org.quiltmc.community.database.entities.Meta
-import org.quiltmc.community.database.migrations.v1
-import org.quiltmc.community.database.migrations.v2
-import org.quiltmc.community.database.migrations.v3
-import org.quiltmc.community.database.migrations.v4
+import org.quiltmc.community.database.migrations.*
 
 const val FILE_TEMPLATE = "migrations/v{VERSION}.bson"
 
@@ -42,6 +39,7 @@ object Migrations : KoinComponent {
                     2 -> ::v2
                     3 -> ::v3
                     4 -> ::v4
+                    5 -> ::v5
 
                     else -> break
                 }(db.mongo)
