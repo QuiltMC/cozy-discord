@@ -215,14 +215,17 @@ class FilterExtension : Extension() {
                         }
 
                         editingPaginator(locale = getLocale()) {
-                            filters.chunked(FILTERS_PER_PAGE).forEach { filters ->
-                                page {
-                                    color = DISCORD_BLURPLE
-                                    title = "Filters"
+                            filters
+                                .sortedByDescending { it.action?.severity ?: -1 }
+                                .chunked(FILTERS_PER_PAGE)
+                                .forEach { filters ->
+                                    page {
+                                        color = DISCORD_BLURPLE
+                                        title = "Filters"
 
-                                    filters.forEach { formatFilter(it) }
+                                        filters.forEach { formatFilter(it) }
+                                    }
                                 }
-                            }
                         }.send()
                     }
                 }
