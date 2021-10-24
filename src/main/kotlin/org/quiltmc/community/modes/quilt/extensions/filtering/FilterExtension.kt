@@ -1,5 +1,8 @@
 package org.quiltmc.community.modes.quilt.extensions.filtering
 
+import com.github.curiousoddman.rgxgen.RgxGen
+import com.github.curiousoddman.rgxgen.config.RgxGenOption
+import com.github.curiousoddman.rgxgen.config.RgxGenProperties
 import com.kotlindiscord.kord.extensions.*
 import com.kotlindiscord.kord.extensions.checks.isNotBot
 import com.kotlindiscord.kord.extensions.commands.Arguments
@@ -34,11 +37,18 @@ import org.quiltmc.community.database.entities.FilterEntry
 import java.util.*
 
 const val APPEALS_INVITE_CODE = "H32HVWw9Nu"
-const val FILTERS_PER_PAGE = 3
+const val FILTERS_PER_PAGE = 2
 
 class FilterExtension : Extension() {
     override val name: String = "filter"
     private val logger = KotlinLogging.logger { }
+
+    private val rgxProperties = RgxGenProperties()
+
+    init {
+        RgxGenOption.INFINITE_PATTERN_REPETITION.setInProperties(rgxProperties, 2)
+        RgxGen.setDefaultProperties(rgxProperties)
+    }
 
     val filters: FilterCollection by inject()
     val filterCache: MutableMap<UUID, FilterEntry> = mutableMapOf()
@@ -414,19 +424,48 @@ class FilterExtension : Extension() {
         }
     }
 
+    @Suppress("TooGenericExceptionCaught")
     fun EmbedBuilder.formatFilter(filter: FilterEntry) {
         if (description == null) {
             description = ""
         }
 
-        description += "**ID:** `${filter._id}`\n" +
+        description += "__**${filter._id}**__\n\n" +
                 "**Action:** ${filter.action?.readableName ?: "Log only"}\n" +
                 "**Match type:** ${filter.matchType.readableName}\n" +
                 "**Ping staff:** ${if (filter.pingStaff) "Yes" else "No"}\n\n" +
 
+                "__**Match**__\n\n" +
                 "```\n" +
                 "${filter.match}\n" +
-                "```\n\n"
+                "```\n"
+
+        if (filter.matchType == MatchType.REGEX || filter.matchType == MatchType.REGEX_CONTAINS) {
+            try {
+                val generator = RgxGen(filter.match)
+                val examples = mutableSetOf<String>()
+
+                repeat(FILTERS_PER_PAGE * 2) {
+                    examples.add(generator.generate())
+                }
+
+                if (examples.isNotEmpty()) {
+                    description += "__**Examples**__\n\n" +
+
+                            "```\n" +
+                            examples.joinToString("\n") +
+                            "```\n"
+                }
+            } catch (t: Throwable) {
+                logger.error(t) { "Failed to generate examples for regular expression: ${filter.match}" }
+
+                description += "__**Examples**__\n\n" +
+
+                        "**Failed to generate examples: `${t.message}`\n"
+            }
+
+            description += "\n"
+        }
     }
 
     @Suppress("TooGenericExceptionCaught")
