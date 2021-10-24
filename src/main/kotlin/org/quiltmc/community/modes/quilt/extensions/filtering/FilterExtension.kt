@@ -358,7 +358,7 @@ class FilterExtension : Extension() {
                 field {
                     inline = true
                     name = "Channel"
-                    value = "${message.channel.mention}"
+                    value = message.channel.mention
                 }
 
                 field {
@@ -417,16 +417,16 @@ class FilterExtension : Extension() {
     fun EmbedBuilder.formatFilter(filter: FilterEntry) {
         if (description == null) {
             description = ""
-
-            description += "**ID:** `${filter._id}`\n" +
-                    "**Action:** ${filter.action?.readableName ?: "Log only"}\n" +
-                    "**Match type:** ${filter.matchType.readableName}\n" +
-                    "**Ping staff:** ${if (filter.pingStaff) "Yes" else "No"}\n\n" +
-
-                    "```\n" +
-                    "${filter.match}\n" +
-                    "```\n\n"
         }
+
+        description += "**ID:** `${filter._id}`\n" +
+                "**Action:** ${filter.action?.readableName ?: "Log only"}\n" +
+                "**Match type:** ${filter.matchType.readableName}\n" +
+                "**Ping staff:** ${if (filter.pingStaff) "Yes" else "No"}\n\n" +
+
+                "```\n" +
+                "${filter.match}\n" +
+                "```\n\n"
     }
 
     @Suppress("TooGenericExceptionCaught")
