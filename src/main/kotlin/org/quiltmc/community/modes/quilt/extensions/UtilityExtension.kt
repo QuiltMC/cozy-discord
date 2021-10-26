@@ -81,7 +81,7 @@ class UtilityExtension : Extension() {
                 }
 
                 val message = event.channel.createMessage {
-                    content = "Oh hey, that's a nice thread you've got there! Let me just get the mods in on this" +
+                    content = "Oh hey, that's a nice thread you've got there! Let me just get the mods in on this " +
                             "sweet discussion..."
                 }
 
