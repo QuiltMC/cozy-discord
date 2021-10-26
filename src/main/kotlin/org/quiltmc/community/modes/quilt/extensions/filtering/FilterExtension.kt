@@ -18,6 +18,7 @@ import com.kotlindiscord.kord.extensions.types.editingPaginator
 import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.deleteIgnoringNotFound
 import com.kotlindiscord.kord.extensions.utils.dm
+import com.kotlindiscord.kord.extensions.utils.getJumpUrl
 import dev.kord.core.behavior.ban
 import dev.kord.core.behavior.channel.createEmbed
 import dev.kord.core.behavior.channel.createMessage
@@ -365,7 +366,7 @@ class FilterExtension : Extension() {
                 field {
                     inline = true
                     name = "Author"
-                    value = "`${message.author!!.id.value}`"
+                    value = "${message.author!!.mention} (`${message.author!!.id.value}` / `${message.author!!.tag}`)"
                 }
 
                 field {
@@ -377,11 +378,11 @@ class FilterExtension : Extension() {
                 field {
                     inline = true
                     name = "Message"
-                    value = "`${message.id.value}`"
+                    value = "[`${message.id.value}`](${message.getJumpUrl()})"
                 }
 
                 field {
-                    inline = true
+                    inline = false
                     name = "Filter ID"
                     value = "`$_id`"
                 }
