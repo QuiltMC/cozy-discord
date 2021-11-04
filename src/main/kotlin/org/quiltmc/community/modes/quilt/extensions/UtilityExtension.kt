@@ -39,6 +39,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.toList
 import kotlinx.datetime.Clock
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import mu.KotlinLogging
 import org.koin.core.component.inject
 import org.quiltmc.community.*
@@ -61,6 +64,14 @@ class UtilityExtension : Extension() {
     private val threads: OwnedThreadCollection by inject()
 
     private val guildCache: MutableMap<Snowflake, Guild> = mutableMapOf()
+
+    @OptIn(ExperimentalSerializationApi::class)
+    private val json = Json {
+        prettyPrint = true
+        prettyPrintIndent = "    "
+
+        encodeDefaults = false
+    }
 
     override suspend fun setup() {
         event<TextChannelThreadCreateEvent> {
@@ -144,6 +155,25 @@ class UtilityExtension : Extension() {
         }
 
         GUILDS.forEach { guildId ->
+            ephemeralMessageCommand {
+                name = "Raw JSON"
+
+                guild(guildId)
+
+                check { hasBaseModeratorRole() }
+
+                action {
+                    val messages = targetMessages.map { it.data }
+                    val data = json.encodeToString(messages)
+
+                    respond {
+                        content = "Raw message data attached below."
+
+                        addFile("message.json", data.byteInputStream())
+                    }
+                }
+            }
+
             ephemeralSlashCommand(::SayArguments) {
                 name = "say"
                 description = "Send a message."
