@@ -22,7 +22,7 @@ import org.quiltmc.community.modes.quilt.extensions.suggestions.SuggestionsExten
 
 val MODE = envOrNull("MODE")?.lowercase() ?: "quilt"
 
-suspend fun setupCollab() = ExtensibleBot(TOKEN) {
+suspend fun setupCollab() = ExtensibleBot(DISCORD_TOKEN) {
     common()
     database()
 
@@ -33,7 +33,7 @@ suspend fun setupCollab() = ExtensibleBot(TOKEN) {
     }
 }
 
-suspend fun setupQuilt() = ExtensibleBot(TOKEN) {
+suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
     common()
     database(true)
 
@@ -78,7 +78,7 @@ suspend fun setupQuilt() = ExtensibleBot(TOKEN) {
     }
 }
 
-suspend fun setupShowcase() = ExtensibleBot(TOKEN) {
+suspend fun setupShowcase() = ExtensibleBot(DISCORD_TOKEN) {
     common()
     database()
 
