@@ -74,7 +74,7 @@ dependencies {
 graphql {
     client {
         sdlEndpoint = "https://docs.github.com/public/schema.docs.graphql"
-        packageName = "org.quiltmc.community.github.generated"
+        packageName = "quilt.ghgen"
         serializer = com.expediagroup.graphql.plugin.gradle.config.GraphQLSerializer.KOTLINX
     }
 

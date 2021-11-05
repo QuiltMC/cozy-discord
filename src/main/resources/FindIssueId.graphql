@@ -1,6 +1,31 @@
 query FindIssueId($repo:String!, $issue:Int!) {
   repository(owner:"QuiltMC", name:$repo) {
     issue(number:$issue) {
+      title
+      author {
+        __typename
+        ... on EnterpriseUserAccount {
+          login
+          id
+        }
+        ... on Organization {
+          login
+          id
+        }
+        ... on Bot {
+          login
+          id
+        }
+        ... on Mannequin {
+          login
+          id
+        }
+        ... on User {
+          login
+          id
+        }
+      }
+      body
       id
     }
     pullRequest(number:$issue) {

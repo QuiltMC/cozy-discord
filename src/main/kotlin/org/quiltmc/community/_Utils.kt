@@ -1,11 +1,18 @@
 package org.quiltmc.community
 
 import com.kotlindiscord.kord.extensions.builders.ExtensibleBotBuilder
+import com.kotlindiscord.kord.extensions.commands.Arguments
+import com.kotlindiscord.kord.extensions.commands.application.slash.SlashCommandContext
 import com.kotlindiscord.kord.extensions.utils.env
 import com.kotlindiscord.kord.extensions.utils.envOrNull
 import com.kotlindiscord.kord.extensions.utils.loadModule
 import dev.kord.common.entity.ArchiveDuration
+import dev.kord.core.Kord
+import dev.kord.core.behavior.UserBehavior
 import dev.kord.core.entity.Guild
+import dev.kord.core.entity.channel.GuildMessageChannel
+import dev.kord.rest.builder.message.EmbedBuilder
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.koin.dsl.bind
 import org.quiltmc.community.database.Database
@@ -129,5 +136,27 @@ fun Guild.getMaxArchiveDuration(): ArchiveDuration {
         features.contains("THREE_DAY_THREAD_ARCHIVE") -> ArchiveDuration.ThreeDays
 
         else -> ArchiveDuration.Day
+    }
+}
+
+// Logging-related extensions
+
+suspend fun <C : SlashCommandContext<C, A>, A : Arguments> SlashCommandContext<C, A>.getGithubLogChannel() =
+    this.guild?.kord.getGithubLogChannel()
+
+suspend fun Kord?.getGithubLogChannel() =
+    this
+    ?.getGuild(TOOLCHAIN_GUILD)
+    ?.channels
+    ?.first {
+        it.id == GITHUB_LOG_CHANNEL
+    }
+    ?.asChannelOrNull() as? GuildMessageChannel
+
+suspend fun EmbedBuilder.userField(user: UserBehavior, role: String, inline: Boolean = false) {
+    field {
+        name = role
+        this.inline = inline
+        value = "${user.mention} (`${user.id.value}` / `${user.asUser().tag}`)"
     }
 }

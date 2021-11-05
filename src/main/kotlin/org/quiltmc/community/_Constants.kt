@@ -49,3 +49,7 @@ internal val SUGGESTION_CHANNEL = Snowflake(
 internal val SUGGESTION_LOG_CHANNEL = Snowflake(
     envOrNull("SUGGESTION_LOG_CHANNEL_ID")?.toLong() ?: 858693117645422622
 )
+
+internal val GITHUB_LOG_CHANNEL = Snowflake(
+    envOrNull("GITHUB_LOG_CHANNEL_ID")?.toLong() ?: 906285091481849876
+)
