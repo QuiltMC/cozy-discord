@@ -16,6 +16,7 @@ import org.quiltmc.community.modes.quilt.extensions.SubteamsExtension
 import org.quiltmc.community.modes.quilt.extensions.SyncExtension
 import org.quiltmc.community.modes.quilt.extensions.UtilityExtension
 import org.quiltmc.community.modes.quilt.extensions.filtering.FilterExtension
+import org.quiltmc.community.modes.quilt.extensions.github.GithubExtension
 import org.quiltmc.community.modes.quilt.extensions.messagelog.MessageLogExtension
 import org.quiltmc.community.modes.quilt.extensions.minecraft.MinecraftExtension
 import org.quiltmc.community.modes.quilt.extensions.suggestions.SuggestionsExtension
@@ -57,6 +58,10 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
         add(::SuggestionsExtension)
         add(::SyncExtension)
         add(::UtilityExtension)
+
+        if (GITHUB_TOKEN != null) {
+            add(::GithubExtension)
+        }
 
         extMappings { }
 

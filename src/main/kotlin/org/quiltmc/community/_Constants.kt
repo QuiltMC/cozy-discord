@@ -10,7 +10,7 @@ import com.kotlindiscord.kord.extensions.utils.envOrNull
 import dev.kord.common.entity.Snowflake
 
 internal val DISCORD_TOKEN = env("TOKEN")
-internal val GITHUB_TOKEN = env("GITHUB_TOKEN")
+internal val GITHUB_TOKEN = envOrNull("GITHUB_TOKEN")
 
 internal val MESSAGE_LOG_CATEGORIES = envOrNull("MESSAGE_LOG_CATEGORIES")?.split(',')
     ?.map { Snowflake(it.trim()) } ?: listOf()
