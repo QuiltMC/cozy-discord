@@ -34,6 +34,7 @@ import mu.KotlinLogging
 import org.koin.core.component.inject
 import org.quiltmc.community.*
 import org.quiltmc.community.database.collections.FilterCollection
+import org.quiltmc.community.database.collections.FilterEventCollection
 import org.quiltmc.community.database.entities.FilterEntry
 import java.util.*
 
@@ -53,6 +54,7 @@ class FilterExtension : Extension() {
 
     val filters: FilterCollection by inject()
     val filterCache: MutableMap<UUID, FilterEntry> = mutableMapOf()
+    val filterEvents: FilterEventCollection by inject()
 
     override suspend fun setup() {
         reloadFilters()
@@ -344,6 +346,10 @@ class FilterExtension : Extension() {
                 }
             }
         }
+
+        filterEvents.add(
+            this, message.getGuild(), message.author!!, message.channel, message
+        )
 
         guild.getCozyLogChannel()?.createMessage {
             if (pingStaff) {

@@ -72,6 +72,7 @@ suspend fun ExtensibleBotBuilder.database(migrate: Boolean = false) {
 
             loadModule {
                 single { FilterCollection() } bind FilterCollection::class
+                single { FilterEventCollection() } bind FilterEventCollection::class
                 single { MetaCollection() } bind MetaCollection::class
                 single { OwnedThreadCollection() } bind OwnedThreadCollection::class
                 single { ServerSettingsCollection() } bind ServerSettingsCollection::class
