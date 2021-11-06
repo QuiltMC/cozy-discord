@@ -45,13 +45,13 @@ class GithubExtension : Extension() {
                     name = "issue"
                     description = "Manage issues on GitHub"
 
+                    when (guildId) {
+                        COMMUNITY_GUILD -> check { hasRole(COMMUNITY_MODERATOR_ROLE) }
+                        TOOLCHAIN_GUILD -> check { hasRole(TOOLCHAIN_MODERATOR_ROLE) }
+                    }
+
                     ephemeralSubCommand(::DeleteIssueArgs) {
                         name = "delete"
-
-                        when (guildId) {
-                            COMMUNITY_GUILD -> check { hasRole(COMMUNITY_MODERATOR_ROLE) }
-                            TOOLCHAIN_GUILD -> check { hasRole(TOOLCHAIN_MODERATOR_ROLE) }
-                        }
 
                         action {
                             val repo = client
@@ -137,7 +137,7 @@ class GithubExtension : Extension() {
             is Organization -> Pair(actor.login, actor.id)
             is Bot -> Pair(actor.login, actor.id)
             is Mannequin -> Pair(actor.login, actor.id)
-            is quilt.ghgen.findissueid.User -> Pair(actor.login, actor.id)
+            is User -> Pair(actor.login, actor.id)
         }
     }
 
