@@ -10,6 +10,7 @@ plugins {
     id("com.github.jakemarsden.git-hooks")
     id("com.github.johnrengelman.shadow")
     id("io.gitlab.arturbosch.detekt")
+    id("com.expediagroup.graphql") version "5.2.0"
 }
 
 group = "org.quiltmc.community"
@@ -67,6 +68,16 @@ dependencies {
     implementation(platform(libs.kotlin.bom))
     implementation(libs.kotlin.stdlib)
     implementation(libs.kx.ser)
+    implementation(libs.graphql)
+}
+
+graphql {
+    client {
+        sdlEndpoint = "https://docs.github.com/public/schema.docs.graphql"
+        packageName = "quilt.ghgen"
+        serializer = com.expediagroup.graphql.plugin.gradle.config.GraphQLSerializer.KOTLINX
+    }
+
 }
 
 configurations.all {

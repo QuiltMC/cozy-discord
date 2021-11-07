@@ -9,7 +9,8 @@ import com.kotlindiscord.kord.extensions.utils.env
 import com.kotlindiscord.kord.extensions.utils.envOrNull
 import dev.kord.common.entity.Snowflake
 
-internal val TOKEN = env("TOKEN")
+internal val DISCORD_TOKEN = env("TOKEN")
+internal val GITHUB_TOKEN = envOrNull("GITHUB_TOKEN")
 
 internal val MESSAGE_LOG_CATEGORIES = envOrNull("MESSAGE_LOG_CATEGORIES")?.split(',')
     ?.map { Snowflake(it.trim()) } ?: listOf()
@@ -47,4 +48,8 @@ internal val SUGGESTION_CHANNEL = Snowflake(
 
 internal val SUGGESTION_LOG_CHANNEL = Snowflake(
     envOrNull("SUGGESTION_LOG_CHANNEL_ID")?.toLong() ?: 858693117645422622
+)
+
+internal val GITHUB_LOG_CHANNEL = Snowflake(
+    envOrNull("GITHUB_LOG_CHANNEL_ID")?.toLong() ?: 906285091481849876
 )
