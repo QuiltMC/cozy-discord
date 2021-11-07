@@ -10,7 +10,7 @@ plugins {
     id("com.github.jakemarsden.git-hooks")
     id("com.github.johnrengelman.shadow")
     id("io.gitlab.arturbosch.detekt")
-    id("com.expediagroup.graphql") version "5.2.0"
+    id("com.expediagroup.graphql")
 }
 
 group = "org.quiltmc.community"
