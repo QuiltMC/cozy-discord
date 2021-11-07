@@ -25,7 +25,8 @@ import java.net.URL
 class GithubExtension : Extension() {
     override val name = "github"
 
-    private val client = GraphQLKtorClient(URL("https://api.github.com/graphql"),
+    private val client = GraphQLKtorClient(
+        URL("https://api.github.com/graphql"),
         HttpClient(engineFactory = CIO, block = {
             defaultRequest {
                 header("Authorization", "bearer $GITHUB_TOKEN")
@@ -36,92 +37,87 @@ class GithubExtension : Extension() {
     override suspend fun setup() {
         for (guildId in GUILDS) {
             ephemeralSlashCommand() {
-                name = "github"
-                description = "Perform privileged actions on the Quilt Github organization"
+                name = "github-issue"
+                description = "Manage issues on GitHub"
 
                 guild(guildId)
 
-                ephemeralSubCommand() {
-                    name = "issue"
-                    description = "Manage issues on GitHub"
+                when (guildId) {
+                    COMMUNITY_GUILD -> check { hasRole(COMMUNITY_MODERATOR_ROLE) }
+                    TOOLCHAIN_GUILD -> check { hasRole(TOOLCHAIN_MODERATOR_ROLE) }
+                }
 
-                    when (guildId) {
-                        COMMUNITY_GUILD -> check { hasRole(COMMUNITY_MODERATOR_ROLE) }
-                        TOOLCHAIN_GUILD -> check { hasRole(TOOLCHAIN_MODERATOR_ROLE) }
-                    }
+                ephemeralSubCommand(::DeleteIssueArgs) {
+                    name = "delete"
 
-                    ephemeralSubCommand(::DeleteIssueArgs) {
-                        name = "delete"
+                    action {
+                        val repo = client
+                            .execute(FindIssueId(FindIssueId.Variables(arguments.repo, arguments.issue)))
+                            .data
+                            ?.repository
 
-                        action {
-                            val repo = client
-                                .execute(FindIssueId(FindIssueId.Variables(arguments.repo, arguments.issue)))
-                                .data
-                                ?.repository
+                        when {
+                            repo == null -> respond {
+                                content = "Repository ${arguments.repo} not found!"
+                            }
 
-                            when {
-                                repo == null -> respond {
-                                    content = "Repository ${arguments.repo} not found!"
-                                }
+                            repo.pullRequest != null -> respond {
+                                content = "#${arguments.issue} appears to be a pull request. " +
+                                        "Github does not allow deleting pull requests! " +
+                                        "Please contact Github Support."
+                            }
 
-                                repo.pullRequest != null -> respond {
-                                    content = "#${arguments.issue} appears to be a pull request. " +
-                                            "Github does not allow deleting pull requests! " +
-                                            "Please contact Github Support."
-                                }
+                            repo.issue != null -> {
+                                // try to delete the issue
+                                val response = client.execute(DeleteIssue(DeleteIssue.Variables(repo.issue.id)))
 
-                                repo.issue != null -> {
-                                    // try to delete the issue
-                                    val response = client.execute(DeleteIssue(DeleteIssue.Variables(repo.issue.id)))
+                                if (response.errors.isNullOrEmpty()) {
+                                    respond {
+                                        content = "Issue #${arguments.issue} in repository ${arguments.repo}" +
+                                                " deleted successfully!"
+                                    }
 
-                                    if (response.errors.isNullOrEmpty()) {
-                                        respond {
-                                            content = "Issue #${arguments.issue} in repository ${arguments.repo}" +
-                                                    " deleted successfully!"
+                                    // log the deletion
+                                    // TODO: Github's webhooks do provide a way to automatically log all deletions
+                                    //      through a webhook, but there is no filter.
+                                    //      In the future, we could set something up on Cozy to automatically
+                                    //      filter the github webhook to create an action log.
+                                    getGithubLogChannel()?.createEmbed {
+                                        val issue = repo.issue
+
+                                        title = "Issue Deleted: ${issue.title}"
+                                        color = DISCORD_RED
+                                        description = issue.body
+
+                                        field {
+                                            val loginAndId = getActorLoginAndId(issue.author!!)
+
+                                            name = "Issue Author"
+                                            value = "${loginAndId.first} (${loginAndId.second})"
                                         }
 
-                                        // log the deletion
-                                        // TODO: Github's webhooks do provide a way to automatically log all deletions
-                                        //      through a webhook, but there is no filter.
-                                        //      In the future, we could set something up on Cozy to automatically
-                                        //      filter the github webhook to create an action log.
-                                        getGithubLogChannel()?.createEmbed {
-                                            val issue = repo.issue
+                                        userField(user, "Moderator")
 
-                                            title = "Issue Deleted: ${issue.title}"
-                                            color = DISCORD_RED
-                                            description = issue.body
-
+                                        if (arguments.reason != null) {
                                             field {
-                                                val loginAndId = getActorLoginAndId(issue.author!!)
-
-                                                name = "Issue Author"
-                                                value =  "${loginAndId.first} (${loginAndId.second})"
-                                            }
-
-                                            userField(user, "Moderator")
-
-                                            if (arguments.reason != null) {
-                                                field {
-                                                    name = "Reason"
-                                                    value = arguments.reason!!
-                                                }
-                                            }
-                                        }
-                                    } else {
-                                        respond {
-                                            // TODO: need a prettier way to report errors
-                                            content = "Could not delete issue due to errors:"
-                                            response.errors!!.forEach {
-                                                content += "\n" + it.message
+                                                name = "Reason"
+                                                value = arguments.reason!!
                                             }
                                         }
                                     }
+                                } else {
+                                    respond {
+                                        // TODO: need a prettier way to report errors
+                                        content = "Could not delete issue due to errors:"
+                                        response.errors!!.forEach {
+                                            content += "\n" + it.message
+                                        }
+                                    }
                                 }
+                            }
 
-                                else -> respond {
-                                    content = "Could not find issue #${arguments.issue} in repository ${arguments.repo}"
-                                }
+                            else -> respond {
+                                content = "Could not find issue #${arguments.issue} in repository ${arguments.repo}"
                             }
                         }
                     }
