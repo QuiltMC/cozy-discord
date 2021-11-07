@@ -2,7 +2,6 @@ package org.quiltmc.community.modes.quilt.extensions.github
 
 import com.expediagroup.graphql.client.ktor.GraphQLKtorClient
 import com.kotlindiscord.kord.extensions.DISCORD_RED
-import com.kotlindiscord.kord.extensions.checks.hasRole
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
 import com.kotlindiscord.kord.extensions.commands.converters.impl.int
@@ -12,10 +11,10 @@ import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.core.behavior.channel.createEmbed
-import io.ktor.client.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.features.*
-import io.ktor.client.request.*
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO
+import io.ktor.client.features.defaultRequest
+import io.ktor.client.request.header
 import org.quiltmc.community.*
 import quilt.ghgen.DeleteIssue
 import quilt.ghgen.FindIssueId
@@ -36,19 +35,17 @@ class GithubExtension : Extension() {
 
     override suspend fun setup() {
         for (guildId in GUILDS) {
-            ephemeralSlashCommand() {
+            ephemeralSlashCommand {
                 name = "github-issue"
                 description = "Manage issues on GitHub"
 
                 guild(guildId)
 
-                when (guildId) {
-                    COMMUNITY_GUILD -> check { hasRole(COMMUNITY_MODERATOR_ROLE) }
-                    TOOLCHAIN_GUILD -> check { hasRole(TOOLCHAIN_MODERATOR_ROLE) }
-                }
+                check { hasBaseModeratorRole() }
 
                 ephemeralSubCommand(::DeleteIssueArgs) {
                     name = "delete"
+                    description = "Delete the given issue"
 
                     action {
                         val repo = client
