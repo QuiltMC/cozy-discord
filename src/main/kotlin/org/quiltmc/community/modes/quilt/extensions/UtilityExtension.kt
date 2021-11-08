@@ -12,21 +12,17 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingBool
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalChannel
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalRole
 import com.kotlindiscord.kord.extensions.commands.converters.impl.string
-import com.kotlindiscord.kord.extensions.extensions.Extension
-import com.kotlindiscord.kord.extensions.extensions.ephemeralMessageCommand
-import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
-import com.kotlindiscord.kord.extensions.extensions.event
+import com.kotlindiscord.kord.extensions.extensions.*
 import com.kotlindiscord.kord.extensions.types.edit
 import com.kotlindiscord.kord.extensions.types.respond
+import com.kotlindiscord.kord.extensions.types.respondEphemeral
 import dev.kord.common.annotation.KordPreview
+import dev.kord.common.entity.MessageType
 import dev.kord.common.entity.Permission
 import dev.kord.common.entity.Permissions
 import dev.kord.common.entity.Snowflake
-import dev.kord.core.behavior.channel.createEmbed
-import dev.kord.core.behavior.channel.createMessage
-import dev.kord.core.behavior.channel.editRolePermission
+import dev.kord.core.behavior.channel.*
 import dev.kord.core.behavior.channel.threads.edit
-import dev.kord.core.behavior.channel.withTyping
 import dev.kord.core.behavior.edit
 import dev.kord.core.entity.Guild
 import dev.kord.core.entity.channel.GuildMessageChannel
@@ -36,9 +32,13 @@ import dev.kord.core.event.channel.thread.TextChannelThreadCreateEvent
 import dev.kord.core.event.guild.GuildCreateEvent
 import dev.kord.core.event.guild.GuildUpdateEvent
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.toList
 import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toJavaLocalDateTime
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -46,6 +46,7 @@ import mu.KotlinLogging
 import org.koin.core.component.inject
 import org.quiltmc.community.*
 import org.quiltmc.community.database.collections.OwnedThreadCollection
+import java.time.format.DateTimeFormatter
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 
@@ -170,6 +171,139 @@ class UtilityExtension : Extension() {
                         content = "Raw message data attached below."
 
                         addFile("message.json", data.byteInputStream())
+                    }
+                }
+            }
+
+            publicSlashCommand {
+                name = "backup-thread"
+                description = "Get all messages in the current thread, saving them into a Markdown file."
+
+                guild(guildId)
+
+                check { hasBaseModeratorRole() }
+
+                action {
+                    val thread = channel.ofOrNull<ThreadChannel>()
+
+                    if (thread == null) {
+                        respondEphemeral {
+                            content = "This channel isn't a thread!"
+                        }
+
+                        return@action
+                    }
+
+                    val messageBuilder = StringBuilder()
+                    val formatter = DateTimeFormatter.ofPattern("dd LL, yyyy -  kk:mm:ss")
+
+                    if (thread.lastMessageId == null) {
+                        respond {
+                            content = "This thread has no messages!"
+                        }
+
+                        return@action
+                    }
+
+                    val messages = thread.getMessagesBefore(thread.lastMessageId!!)
+                    val lastMessage = thread.getLastMessage()!!
+
+                    val parent = thread.parent.asChannel()
+
+                    messageBuilder.append("# Thread: ${thread.name}\n\n")
+                    messageBuilder.append("* **ID:** `${thread.id.value}`\n")
+                    messageBuilder.append("* **Parent:** #${parent.name} (`${parent.id.value}`)\n\n")
+
+                    val messageStrings: MutableList<String> = mutableListOf()
+
+                    messages.collect { msg ->
+                        val author = msg.author
+                        val builder = StringBuilder()
+                        val timestamp = formatter.format(
+                            msg.id.timestamp.toLocalDateTime(TimeZone.UTC).toJavaLocalDateTime()
+                        )
+
+                        if (msg.content.isNotEmpty() || msg.attachments.isNotEmpty()) {
+                            val authorName = author?.tag ?: msg.data.author.username
+
+                            this@UtilityExtension.logger.debug { "\nAuthor name: `$authorName`\n${msg.content}\n" }
+
+                            if (msg.type == MessageType.ApplicationCommand) {
+                                builder.append("🖥️ ")
+                            } else if (author == null) {
+                                builder.append("🌐 ")
+                            } else if (author.isBot) {
+                                builder.append("🤖 ")
+                            } else {
+                                builder.append("💬 ")
+                            }
+
+                            builder.append("**$authorName** at $timestamp (UTC)\n\n")
+
+                            if (msg.content.isNotEmpty()) {
+                                builder.append(msg.content.lines().joinToString("\n") { line -> "> $line" })
+                                builder.append("\n\n")
+                            }
+
+                            if (msg.attachments.isNotEmpty()) {
+                                msg.attachments.forEach { att ->
+                                    builder.append("* 📄 [${att.filename}](${att.url})\n")
+                                }
+
+                                builder.append("\n")
+                            }
+
+                            messageStrings.add(builder.toString())
+                        }
+                    }
+
+                    messageStrings.reverse()
+
+                    lastMessage.let { msg ->
+                        val author = msg.author
+                        val builder = StringBuilder()
+                        val timestamp = formatter.format(
+                            msg.id.timestamp.toLocalDateTime(TimeZone.UTC).toJavaLocalDateTime()
+                        )
+
+                        if (msg.content.isNotEmpty() || msg.attachments.isNotEmpty()) {
+                            val authorName = author?.tag ?: msg.data.author.username
+
+                            if (msg.type == MessageType.ApplicationCommand) {
+                                builder.append("🖥️ ")
+                            } else if (author == null) {
+                                builder.append("🌐 ")
+                            } else if (author.isBot) {
+                                builder.append("🤖 ")
+                            } else {
+                                builder.append("💬 ")
+                            }
+
+                            builder.append("**$authorName** at $timestamp (UTC)\n\n")
+
+                            if (msg.content.isNotEmpty()) {
+                                builder.append(msg.content.lines().joinToString("\n") { line -> "> $line" })
+                                builder.append("\n\n")
+                            }
+
+                            if (msg.attachments.isNotEmpty()) {
+                                msg.attachments.forEach { att ->
+                                    builder.append("* 📄 [${att.filename}](${att.url})\n")
+                                }
+
+                                builder.append("\n")
+                            }
+
+                            messageStrings.add(builder.toString())
+                        }
+                    }
+
+                    messageStrings.forEach(messageBuilder::append)
+
+                    respond {
+                        content = "**Thread backup created by ${user.mention}.**"
+
+                        addFile("thread.md", messageBuilder.toString().byteInputStream())
                     }
                 }
             }
