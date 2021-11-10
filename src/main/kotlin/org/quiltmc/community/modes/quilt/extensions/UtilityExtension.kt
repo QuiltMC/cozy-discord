@@ -16,6 +16,8 @@ import com.kotlindiscord.kord.extensions.extensions.*
 import com.kotlindiscord.kord.extensions.types.edit
 import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.types.respondEphemeral
+import com.kotlindiscord.kord.extensions.utils.authorId
+import com.kotlindiscord.kord.extensions.utils.deleteIgnoringNotFound
 import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.MessageType
 import dev.kord.common.entity.Permission
@@ -31,6 +33,7 @@ import dev.kord.core.entity.channel.thread.ThreadChannel
 import dev.kord.core.event.channel.thread.TextChannelThreadCreateEvent
 import dev.kord.core.event.guild.GuildCreateEvent
 import dev.kord.core.event.guild.GuildUpdateEvent
+import dev.kord.core.event.message.MessageCreateEvent
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.firstOrNull
@@ -58,6 +61,8 @@ val SPEAKING_PERMISSIONS: Array<Permission> = arrayOf(
     Permission.SendMessagesInThreads,
 )
 
+val DELETE_DELAY = Duration.seconds(10)  // Seconds
+
 class UtilityExtension : Extension() {
     override val name: String = "utility"
 
@@ -75,6 +80,18 @@ class UtilityExtension : Extension() {
     }
 
     override suspend fun setup() {
+        event<MessageCreateEvent> {
+            check { inQuiltGuild() }
+            check { failIf { event.message.type != MessageType.ChannelPinnedMessage } }
+            check { failIf { event.message.data.authorId != event.kord.selfId } }
+
+            action {
+                delay(DELETE_DELAY)
+
+                event.message.deleteIgnoringNotFound()
+            }
+        }
+
         event<TextChannelThreadCreateEvent> {
             check { inQuiltGuild() }
             check { failIf(event.channel.ownerId == kord.selfId) }
