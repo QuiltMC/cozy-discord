@@ -86,8 +86,15 @@ class SuggestionsExtension : Extension() {
         // region: Events
 
         event<MessageCreateEvent> {
+            check {
+                failIfNot {
+                    event.message.type == MessageType.Default ||
+                            event.message.type == MessageType.Reply
+                }
+            }
+
+            check { failIf(event.message.data.authorId == event.kord.selfId) }
             check { failIf(event.message.author?.isBot == true) }
-            check { failIf(event.message.type == MessageType.ThreadCreated) }
             check { failIf(event.message.content.trim().isEmpty()) }
             check { failIf(event.message.interaction != null) }
 
