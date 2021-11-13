@@ -2,9 +2,98 @@ package org.quiltmc.community
 
 import com.kotlindiscord.kord.extensions.checks.*
 import com.kotlindiscord.kord.extensions.checks.types.CheckContext
+import com.kotlindiscord.kord.extensions.utils.hasPermission
+import com.kotlindiscord.kord.extensions.utils.translate
+import dev.kord.common.entity.Permission
 import mu.KotlinLogging
+import org.quiltmc.community.database.collections.ServerSettingsCollection
+
+suspend fun CheckContext<*>.inCommunity() {
+    anyGuild()
+
+    if (!passed) {
+        return
+    }
+
+    val logger = KotlinLogging.logger("org.quiltmc.community.inCommunity")
+
+    val collection = getKoin().get<ServerSettingsCollection>()
+    val settings = collection.getCommunity()
+
+    if (settings == null) {
+        logger.failed("Community server hasn't been configured yet.")
+        fail("Community server hasn't been configured yet.")
+    } else {
+        inGuild(settings._id)
+    }
+}
+
+suspend fun CheckContext<*>.inToolchain() {
+    anyGuild()
+
+    if (!passed) {
+        return
+    }
+
+    val logger = KotlinLogging.logger("org.quiltmc.community.inCommunity")
+
+    val collection = getKoin().get<ServerSettingsCollection>()
+    val settings = collection.getToolchain()
+
+    if (settings == null) {
+        logger.failed("Toolchain server hasn't been configured yet.")
+        fail("Toolchain server hasn't been configured yet.")
+    } else {
+        inGuild(settings._id)
+    }
+}
+
+suspend fun CheckContext<*>.hasPermissionInMainGuild(perm: Permission) {
+    anyGuild()
+
+    if (!passed) {
+        return
+    }
+
+    val logger = KotlinLogging.logger("org.quiltmc.community.hasPermissionInMainGuild")
+    val user = userFor(event)
+
+    if (user == null) {
+        logger.failed("Event did not concern a user.")
+        fail()
+
+        return
+    }
+
+    val guild = event.kord.getGuild(MAIN_GUILD)!!
+    val member = guild.getMemberOrNull(user.id)
+
+    if (member == null) {
+        logger.failed("User is not on the main guild.")
+
+        fail(
+            translate(
+                "checks.inGuild.failed",
+                replacements = arrayOf(guild.name),
+            )
+        )
+
+        return
+    }
+
+    if (member.hasPermission(perm)) {
+        logger.passed()
+    } else {
+        logger.failed("User does not have permission: $perm")
+        fail("Must have permission **${perm.translate(locale)}** on **${guild.name}**")
+    }
+}
 
 suspend fun CheckContext<*>.inQuiltGuild() {
+    if (!passed) {
+        return
+    }
+
     val logger = KotlinLogging.logger("org.quiltmc.community.inQuiltGuild")
     val guild = guildFor(event)
 
@@ -20,6 +109,10 @@ suspend fun CheckContext<*>.inQuiltGuild() {
 }
 
 suspend fun CheckContext<*>.hasBaseModeratorRole() {
+    if (!passed) {
+        return
+    }
+
     inQuiltGuild()
 
     if (this.passed) {  // They're on a Quilt guild
@@ -41,6 +134,10 @@ suspend fun CheckContext<*>.hasBaseModeratorRole() {
 }
 
 suspend fun CheckContext<*>.notHasBaseModeratorRole() {
+    if (!passed) {
+        return
+    }
+
     val logger = KotlinLogging.logger("org.quiltmc.community.notHasBaseModeratorRole")
     val member = memberFor(event)?.asMemberOrNull()
 

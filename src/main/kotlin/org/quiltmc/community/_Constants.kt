@@ -12,6 +12,12 @@ import dev.kord.common.entity.Snowflake
 internal val DISCORD_TOKEN = env("TOKEN")
 internal val GITHUB_TOKEN = envOrNull("GITHUB_TOKEN")
 
+internal val MAIN_GUILD = Snowflake(
+    envOrNull("MAIN_GUILD_ID")?.toULong()
+        ?: envOrNull("COMMUNITY_GUILD_ID")?.toULong()
+        ?: 817576132726620200U
+)
+
 internal val MESSAGE_LOG_CATEGORIES = envOrNull("MESSAGE_LOG_CATEGORIES")?.split(',')
     ?.map { Snowflake(it.trim()) } ?: listOf()
 
@@ -44,10 +50,6 @@ internal val GUILDS = envOrNull("GUILDS")?.split(',')?.map { Snowflake(it.trim()
 
 internal val SUGGESTION_CHANNEL = Snowflake(
     envOrNull("SUGGESTION_CHANNEL_ID")?.toLong() ?: 832353359074689084
-)
-
-internal val SUGGESTION_LOG_CHANNEL = Snowflake(
-    envOrNull("SUGGESTION_LOG_CHANNEL_ID")?.toLong() ?: 858693117645422622
 )
 
 internal val GITHUB_LOG_CHANNEL = Snowflake(

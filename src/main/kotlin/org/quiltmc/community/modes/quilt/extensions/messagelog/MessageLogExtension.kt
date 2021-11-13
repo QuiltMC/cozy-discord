@@ -432,6 +432,9 @@ class MessageLogExtension : Extension() {
         rotator.start()
     }
 
+    fun getRotator(guildId: Snowflake) =
+        rotators[guildId]
+
     override suspend fun unload() {
         stop()
         rotators.clear()

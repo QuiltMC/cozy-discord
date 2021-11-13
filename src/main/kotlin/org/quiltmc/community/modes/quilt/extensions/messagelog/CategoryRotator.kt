@@ -67,7 +67,7 @@ class CategoryRotator(private val category: Category, private val modLog: GuildM
         }
     }
 
-    private suspend fun populate() {
+    suspend fun populate() {
         rotationLock.withLock {
             @Suppress("TooGenericExceptionCaught")  // Anything could happen, really
             try {
