@@ -73,8 +73,6 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
 
             check { inQuiltGuild() }
             check { notHasBaseModeratorRole() }
-
-            regex("([^\\s</]+\\s*(?:\\.|dot)+\\s*[^\\s>/]+)")
         }
 
         sentry {
