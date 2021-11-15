@@ -60,9 +60,9 @@ private const val ACTION_REMOVE = "remove"
 private const val ACTION_UP = "up"
 
 private const val THREAD_INTRO = "This message is at the top of the thread.\n\n" +
-        "If this is your suggestion, feel free to use **/rename** to change the " +
-        "name of the thread! You can also use **/archive** to archive it when the suggestion has " +
-        "been addressed, but do note that you will not be able to lock the thread."
+        "If this is your suggestion, **please** use `/thread rename` to change the " +
+        "name of the thread! You're also welcome to use the other `/thread` commands to manage " +
+        "your suggestion thread as needed."
 
 private const val COMMENT_SIZE_LIMIT: Long = 800
 private const val MESSAGE_CACHE_SIZE = 10
