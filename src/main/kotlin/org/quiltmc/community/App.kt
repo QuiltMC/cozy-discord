@@ -34,9 +34,27 @@ suspend fun setupCollab() = ExtensibleBot(DISCORD_TOKEN) {
     }
 }
 
+suspend fun setupDev() = ExtensibleBot(DISCORD_TOKEN) {
+    common()
+    database()
+
+    extensions {
+        add(::SubteamsExtension)
+
+        if (GITHUB_TOKEN != null) {
+            add(::GithubExtension)
+        }
+
+        sentry {
+            distribution = "dev"
+        }
+    }
+}
+
 suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
     common()
     database(true)
+    settings()
 
     chatCommands {
         enabled = true
@@ -54,14 +72,9 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
         add(::FilterExtension)
         add(::MessageLogExtension)
         add(::MinecraftExtension)
-        add(::SubteamsExtension)
         add(::SuggestionsExtension)
         add(::SyncExtension)
         add(::UtilityExtension)
-
-        if (GITHUB_TOKEN != null) {
-            add(::GithubExtension)
-        }
 
         extMappings { }
 
@@ -84,6 +97,7 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
 suspend fun setupShowcase() = ExtensibleBot(DISCORD_TOKEN) {
     common()
     database()
+    settings()
 
     extensions {
         sentry {
@@ -94,6 +108,7 @@ suspend fun setupShowcase() = ExtensibleBot(DISCORD_TOKEN) {
 
 suspend fun main() {
     val bot = when (MODE) {
+        "dev" -> setupDev()
         "collab" -> setupCollab()
         "quilt" -> setupQuilt()
         "showcase" -> setupShowcase()
