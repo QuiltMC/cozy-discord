@@ -93,17 +93,17 @@ data class ServerSettings(
             }
 
             builder.append("\n")
-            builder.append("**Leave Server Automatically:** ")
-
-            if (leaveServer) {
-                builder.append("Yes")
-            } else {
-                builder.append("No")
-            }
-
-            builder.append("\n\n")
         }
 
+        builder.append("**Leave Server Automatically:** ")
+
+        if (leaveServer) {
+            builder.append("Yes")
+        } else {
+            builder.append("No")
+        }
+
+        builder.append("\n\n")
         builder.append("**__Moderator Roles__**\n")
 
         if (moderatorRoles.isNotEmpty()) {
