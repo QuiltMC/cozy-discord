@@ -15,6 +15,7 @@ import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.extensions.event
 import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.common.entity.Permission
+import dev.kord.core.Kord
 import dev.kord.core.entity.channel.Category
 import dev.kord.core.entity.channel.TopGuildMessageChannel
 import dev.kord.core.event.guild.GuildCreateEvent
@@ -473,7 +474,7 @@ class SettingsExtension : Extension() {
                         return@action
                     }
 
-                    val channel = arguments.channel as TopGuildMessageChannel
+                    val channel = event.kord.getChannelOf<TopGuildMessageChannel>(arguments.channel!!.id)!!
 
                     if (channel.guildId != settings._id) {
                         respond {
@@ -649,16 +650,24 @@ class SettingsExtension : Extension() {
 
     inner class TopMessageChannelArg : Arguments() {
         val channel by optionalChannel("channel", "Channel to use") { _, channel ->
-            if (channel != null && channel !is TopGuildMessageChannel) {
-                throw DiscordRelayedException("${channel.mention} isn't a guild message channel")
+            if (channel != null) {
+                val kord = getKoin().get<Kord>()
+
+                if (kord.getChannelOf<TopGuildMessageChannel>(channel.id) == null) {
+                    throw DiscordRelayedException("${channel.mention} isn't a guild message channel")
+                }
             }
         }
     }
 
     inner class TopMessageChannelGuildArg : Arguments() {
         val channel by optionalChannel("channel", "Channel to use") { _, channel ->
-            if (channel != null && channel !is TopGuildMessageChannel) {
-                throw DiscordRelayedException("${channel.mention} isn't a guild message channel")
+            if (channel != null) {
+                val kord = getKoin().get<Kord>()
+
+                if (kord.getChannelOf<TopGuildMessageChannel>(channel.id) == null) {
+                    throw DiscordRelayedException("${channel.mention} isn't a guild message channel")
+                }
             }
         }
 
