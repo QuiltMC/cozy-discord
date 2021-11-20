@@ -86,7 +86,7 @@ data class ServerSettings(
         if (showQuiltSettings) {
             builder.append("**Quilt Server Type:** ")
 
-            if (cozyLogChannel != null) {
+            if (quiltServerType != null) {
                 builder.append(quiltServerType!!.readableName)
             } else {
                 builder.append(":x: Not configured")
