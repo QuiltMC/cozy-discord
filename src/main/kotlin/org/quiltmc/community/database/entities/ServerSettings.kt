@@ -111,7 +111,7 @@ data class ServerSettings(
                 val role = guild?.getRoleOrNull(it)
 
                 if (role != null) {
-                    builder.append("**»** **${role.name} (`${it.value}`)\n")
+                    builder.append("**»** **${role.name}** (`${it.value}`)\n")
                 } else {
                     builder.append("**»** `${it.value}`\n")
                 }
