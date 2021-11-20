@@ -468,7 +468,7 @@ class SettingsExtension : Extension() {
 
                     if (arguments.channel == null) {
                         respond {
-                            "**Current Cozy logging channel:** <#${settings.cozyLogChannel?.value}>"
+                            content = "**Current Cozy logging channel:** <#${settings.cozyLogChannel?.value}>"
                         }
 
                         return@action
@@ -488,7 +488,7 @@ class SettingsExtension : Extension() {
                     settings.save()
 
                     respond {
-                        "**Cozy logging channel set:** ${channel.mention}"
+                        content = "**Cozy logging channel set:** ${channel.mention}"
                     }
                 }
             }
@@ -528,7 +528,7 @@ class SettingsExtension : Extension() {
 
                     if (arguments.category == null) {
                         respond {
-                            "**Current message log category:** <#${settings.messageLogCategory?.value}>"
+                            content = "**Current message log category:** <#${settings.messageLogCategory?.value}>"
                         }
 
                         return@action
@@ -548,7 +548,7 @@ class SettingsExtension : Extension() {
                     settings.save()
 
                     respond {
-                        "**Message log category set:** ${category.mention}"
+                        content = "**Message log category set:** ${category.mention}"
                     }
 
                     event.kord.launch {
