@@ -534,7 +534,7 @@ class SettingsExtension : Extension() {
                         return@action
                     }
 
-                    val category = arguments.category as Category
+                    val category = event.kord.getChannelOf<Category>(arguments.category!!.id)!!
 
                     if (category.guildId != settings._id) {
                         respond {
@@ -688,8 +688,12 @@ class SettingsExtension : Extension() {
 
     inner class CategoryGuildArg : Arguments() {
         val category by optionalChannel("category", "Category to use") { _, channel ->
-            if (channel != null && channel !is Category) {
-                throw DiscordRelayedException("${channel.mention} isn't a category")
+            if (channel != null) {
+                val kord = getKoin().get<Kord>()
+
+                if (kord.getChannelOf<Category>(channel.id) == null) {
+                    throw DiscordRelayedException("${channel.mention} isn't a category")
+                }
             }
         }
 
