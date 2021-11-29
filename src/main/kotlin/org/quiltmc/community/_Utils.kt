@@ -5,13 +5,16 @@ import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.SlashCommandContext
 import com.kotlindiscord.kord.extensions.utils.env
 import com.kotlindiscord.kord.extensions.utils.envOrNull
+import com.kotlindiscord.kord.extensions.utils.getKoin
 import com.kotlindiscord.kord.extensions.utils.loadModule
 import dev.kord.common.entity.ArchiveDuration
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
 import dev.kord.core.behavior.UserBehavior
 import dev.kord.core.entity.Guild
+import dev.kord.core.entity.channel.Channel
 import dev.kord.core.entity.channel.GuildMessageChannel
+import dev.kord.core.entity.channel.TextChannel
 import dev.kord.rest.builder.message.EmbedBuilder
 import dev.kord.rest.request.RestRequestException
 import kotlinx.coroutines.flow.first
@@ -164,22 +167,23 @@ fun Guild.getMaxArchiveDuration(): ArchiveDuration {
 
 // Logging-related extensions
 
-suspend fun <C : SlashCommandContext<C, A>, A : Arguments> SlashCommandContext<C, A>.getGithubLogChannel() =
-    this.guild?.kord.getGithubLogChannel()
+suspend fun <C : SlashCommandContext<C, A>, A : Arguments> SlashCommandContext<C, A>.getGithubLogChannel(): GuildMessageChannel? {
+    val channelId = getKoin().get<GlobalSettingsCollection>().get()?.githubLogChannel ?: return null
 
-suspend fun Kord?.getGithubLogChannel() =
-    this
-        ?.getGuild(TOOLCHAIN_GUILD)
-        ?.channels
-        ?.first {
-            it.id == GITHUB_LOG_CHANNEL
-        }
-        ?.asChannelOrNull() as? GuildMessageChannel
+    return event.kord.getChannelOf<GuildMessageChannel>(channelId)
+}
+
+suspend fun Kord?.getGithubLogChannel(): GuildMessageChannel? {
+    val channelId = getKoin().get<GlobalSettingsCollection>().get()?.githubLogChannel ?: return null
+
+    return this?.getChannelOf<GuildMessageChannel>(channelId)
+}
 
 suspend fun EmbedBuilder.userField(user: UserBehavior, role: String, inline: Boolean = false) {
     field {
         name = role
-        this.inline = inline
         value = "${user.mention} (`${user.id.value}` / `${user.asUser().tag}`)"
+
+        this.inline = inline
     }
 }
