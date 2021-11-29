@@ -12,12 +12,9 @@ import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
 import dev.kord.core.behavior.UserBehavior
 import dev.kord.core.entity.Guild
-import dev.kord.core.entity.channel.Channel
 import dev.kord.core.entity.channel.GuildMessageChannel
-import dev.kord.core.entity.channel.TextChannel
 import dev.kord.rest.builder.message.EmbedBuilder
 import dev.kord.rest.request.RestRequestException
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.koin.dsl.bind
 import org.quiltmc.community.database.Database
@@ -27,15 +24,15 @@ import org.quiltmc.community.modes.quilt.extensions.settings.SettingsExtension
 
 @Suppress("MagicNumber")  // It's the status code...
 suspend fun Kord.getGuildIgnoring403(id: Snowflake) =
-    try {
-        getGuild(id)
-    } catch (e: RestRequestException) {
-        if (e.status.code != 403) {
-            throw(e)
-        }
+        try {
+            getGuild(id)
+        } catch (e: RestRequestException) {
+            if (e.status.code != 403) {
+                throw(e)
+            }
 
-        null
-    }
+            null
+        }
 
 fun String.chunkByWhitespace(length: Int): List<String> {
     if (length <= 0) {
@@ -167,7 +164,8 @@ fun Guild.getMaxArchiveDuration(): ArchiveDuration {
 
 // Logging-related extensions
 
-suspend fun <C : SlashCommandContext<C, A>, A : Arguments> SlashCommandContext<C, A>.getGithubLogChannel(): GuildMessageChannel? {
+suspend fun <C : SlashCommandContext<C, A>, A : Arguments>
+        SlashCommandContext<C, A>.getGithubLogChannel(): GuildMessageChannel? {
     val channelId = getKoin().get<GlobalSettingsCollection>().get()?.githubLogChannel ?: return null
 
     return event.kord.getChannelOf<GuildMessageChannel>(channelId)
