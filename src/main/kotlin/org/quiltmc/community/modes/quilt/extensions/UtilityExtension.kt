@@ -273,7 +273,7 @@ class UtilityExtension : Extension() {
                     check { hasBaseModeratorRole() }
 
                     action {
-                        val thread = channel.asChannelOrNull()<ThreadChannel>()
+                        val thread = channel.asChannelOfOrNull<ThreadChannel>()
 
                         if (thread == null) {
                             respondEphemeral {
