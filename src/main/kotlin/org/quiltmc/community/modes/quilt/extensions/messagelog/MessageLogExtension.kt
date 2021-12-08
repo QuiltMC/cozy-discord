@@ -481,7 +481,7 @@ class MessageLogExtension : Extension() {
         val author = message.author
 
         footer {
-            text = message.id.asString
+            text = message.id.toString()
         }
 
         field {
@@ -510,7 +510,7 @@ class MessageLogExtension : Extension() {
 
             field {
                 name = "Webhook ID"
-                value = message.webhookId?.asString ?: "N/A"
+                value = message.webhookId?.toString() ?: "N/A"
                 inline = true
             }
         }

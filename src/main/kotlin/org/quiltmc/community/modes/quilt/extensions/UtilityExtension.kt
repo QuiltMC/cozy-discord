@@ -273,7 +273,7 @@ class UtilityExtension : Extension() {
                     check { hasBaseModeratorRole() }
 
                     action {
-                        val thread = channel.ofOrNull<ThreadChannel>()
+                        val thread = channel.asChannelOrNull()<ThreadChannel>()
 
                         if (thread == null) {
                             respondEphemeral {
@@ -681,7 +681,7 @@ class UtilityExtension : Extension() {
                             color = DISCORD_BLURPLE
 
                             description =
-                                "Mute role (${role.mention} / `${role.id.asString}`) permissions updated by " +
+                                "Mute role (${role.mention} / `${role.id}`) permissions updated by " +
                                         "${user.mention}."
 
                             timestamp = Clock.System.now()

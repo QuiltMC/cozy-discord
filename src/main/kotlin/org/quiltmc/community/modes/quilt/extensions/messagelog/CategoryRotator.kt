@@ -196,13 +196,13 @@ class CategoryRotator(private val category: Category, private val modLog: GuildM
         title = "Message log rotation"
         color = COLOUR_POSITIVE
 
-        description = "Channel created: **#${channel.name} (`${channel.id.asString}`)**"
+        description = "Channel created: **#${channel.name} (`${channel.id}`)**"
     }
 
     private suspend fun logDeletion(channel: GuildMessageChannel) = modLog.createEmbed {
         title = "Message log rotation"
         color = COLOUR_NEGATIVE
 
-        description = "Channel removed: **#${channel.name} (`${channel.id.asString}`)**"
+        description = "Channel removed: **#${channel.name} (`${channel.id}`)**"
     }
 }

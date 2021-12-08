@@ -9,6 +9,7 @@ import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.converters.impl.enumChoice
 import com.kotlindiscord.kord.extensions.commands.application.slash.converters.impl.optionalEnumChoice
 import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
+import com.kotlindiscord.kord.extensions.commands.converters.impl.boolean
 import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingBoolean
 import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.extensions.Extension
@@ -89,6 +90,178 @@ class FilterExtension : Extension() {
                 check { hasBaseModeratorRole() }
 
                 guild(guildId)
+
+                ephemeralSubCommand(::FilterEditMatchArgs) {
+                    name = "edit_match"
+                    description = "Update the match for a given filter"
+
+                    action {
+                        val filter = filters.get(UUID.fromString(arguments.uuid))
+
+                        if (filter == null) {
+                            respond {
+                                content = "No such filter: `${arguments.uuid}`"
+                            }
+
+                            return@action
+                        }
+
+                        filter.match = arguments.match
+                        filters.set(filter)
+
+                        this@FilterExtension.kord.getGuild(COMMUNITY_GUILD)
+                            ?.getCozyLogChannel()
+                            ?.createEmbed {
+                                color = DISCORD_GREEN
+                                title = "Filter match updated"
+
+                                formatFilter(filter)
+
+                                field {
+                                    name = "Moderator"
+                                    value = "${user.mention} (`${user.id.value}` / `${user.asUser().tag}`)"
+                                }
+                            }
+
+                        respond {
+                            embed {
+                                color = DISCORD_GREEN
+                                title = "Filter match updated"
+
+                                formatFilter(filter)
+                            }
+                        }
+                    }
+                }
+
+                ephemeralSubCommand(::FilterEditMatchTypeArgs) {
+                    name = "edit_match_type"
+                    description = "Update the match type for a given filter"
+
+                    action {
+                        val filter = filters.get(UUID.fromString(arguments.uuid))
+
+                        if (filter == null) {
+                            respond {
+                                content = "No such filter: `${arguments.uuid}`"
+                            }
+
+                            return@action
+                        }
+
+                        filter.matchType = arguments.matchType
+                        filters.set(filter)
+
+                        this@FilterExtension.kord.getGuild(COMMUNITY_GUILD)
+                            ?.getCozyLogChannel()
+                            ?.createEmbed {
+                                color = DISCORD_GREEN
+                                title = "Filter match type updated"
+
+                                formatFilter(filter)
+
+                                field {
+                                    name = "Moderator"
+                                    value = "${user.mention} (`${user.id.value}` / `${user.asUser().tag}`)"
+                                }
+                            }
+
+                        respond {
+                            embed {
+                                color = DISCORD_GREEN
+                                title = "Filter match type updated"
+
+                                formatFilter(filter)
+                            }
+                        }
+                    }
+                }
+
+                ephemeralSubCommand(::FilterEditActionArgs) {
+                    name = "edit_action"
+                    description = "Update the action for a given filter"
+
+                    action {
+                        val filter = filters.get(UUID.fromString(arguments.uuid))
+
+                        if (filter == null) {
+                            respond {
+                                content = "No such filter: `${arguments.uuid}`"
+                            }
+
+                            return@action
+                        }
+
+                        filter.action = arguments.action
+                        filters.set(filter)
+
+                        this@FilterExtension.kord.getGuild(COMMUNITY_GUILD)
+                            ?.getCozyLogChannel()
+                            ?.createEmbed {
+                                color = DISCORD_GREEN
+                                title = "Filter action updated"
+
+                                formatFilter(filter)
+
+                                field {
+                                    name = "Moderator"
+                                    value = "${user.mention} (`${user.id.value}` / `${user.asUser().tag}`)"
+                                }
+                            }
+
+                        respond {
+                            embed {
+                                color = DISCORD_GREEN
+                                title = "Filter action updated"
+
+                                formatFilter(filter)
+                            }
+                        }
+                    }
+                }
+
+                ephemeralSubCommand(::FilterEditPingArgs) {
+                    name = "edit_ping"
+                    description = "Update the ping setting for a given filter"
+
+                    action {
+                        val filter = filters.get(UUID.fromString(arguments.uuid))
+
+                        if (filter == null) {
+                            respond {
+                                content = "No such filter: `${arguments.uuid}`"
+                            }
+
+                            return@action
+                        }
+
+                        filter.pingStaff = arguments.ping
+                        filters.set(filter)
+
+                        this@FilterExtension.kord.getGuild(COMMUNITY_GUILD)
+                            ?.getCozyLogChannel()
+                            ?.createEmbed {
+                                color = DISCORD_GREEN
+                                title = "Filter ping setting updated"
+
+                                formatFilter(filter)
+
+                                field {
+                                    name = "Moderator"
+                                    value = "${user.mention} (`${user.id.value}` / `${user.asUser().tag}`)"
+                                }
+                            }
+
+                        respond {
+                            embed {
+                                color = DISCORD_GREEN
+                                title = "Filter ping setting updated"
+
+                                formatFilter(filter)
+                            }
+                        }
+                    }
+                }
 
                 ephemeralSubCommand(::FilterCreateArgs) {
                     name = "create"
@@ -286,7 +459,7 @@ class FilterExtension : Extension() {
 
                         field {
                             name = "Message ID"
-                            value = "`${message.id.asString}`"
+                            value = "`${message.id}`"
                         }
                     }
                 }
@@ -310,7 +483,7 @@ class FilterExtension : Extension() {
 
                         field {
                             name = "Message ID"
-                            value = "`${message.id.asString}`"
+                            value = "`${message.id}`"
                         }
                     }
                 }
@@ -336,7 +509,7 @@ class FilterExtension : Extension() {
 
                         field {
                             name = "Message ID"
-                            value = "`${message.id.asString}`"
+                            value = "`${message.id}`"
                         }
                     }
                 }
@@ -495,5 +668,57 @@ class FilterExtension : Extension() {
 
         val action by optionalEnumChoice<FilterAction>("action", "Action to take", "action")
         val ping by defaultingBoolean("ping", "Whether to ping the moderators", false)
+    }
+
+    @Suppress("TooGenericExceptionCaught")
+    inner class FilterEditMatchArgs : Arguments() {
+        val uuid by string("uuid", "Filter ID") { _, value ->
+            try {
+                UUID.fromString(value)
+            } catch (t: Throwable) {
+                throw DiscordRelayedException("Please provide a valid UUID.")
+            }
+        }
+
+        val match by string("match", "Text to match on")
+    }
+
+    @Suppress("TooGenericExceptionCaught")
+    inner class FilterEditMatchTypeArgs : Arguments() {
+        val uuid by string("uuid", "Filter ID") { _, value ->
+            try {
+                UUID.fromString(value)
+            } catch (t: Throwable) {
+                throw DiscordRelayedException("Please provide a valid UUID.")
+            }
+        }
+
+        val matchType by enumChoice<MatchType>("match-type", "Type of match", "match type`")
+    }
+
+    @Suppress("TooGenericExceptionCaught")
+    inner class FilterEditActionArgs : Arguments() {
+        val uuid by string("uuid", "Filter ID") { _, value ->
+            try {
+                UUID.fromString(value)
+            } catch (t: Throwable) {
+                throw DiscordRelayedException("Please provide a valid UUID.")
+            }
+        }
+
+        val action by optionalEnumChoice<FilterAction>("action", "Action to take", "action")
+    }
+
+    @Suppress("TooGenericExceptionCaught")
+    inner class FilterEditPingArgs : Arguments() {
+        val uuid by string("uuid", "Filter ID") { _, value ->
+            try {
+                UUID.fromString(value)
+            } catch (t: Throwable) {
+                throw DiscordRelayedException("Please provide a valid UUID.")
+            }
+        }
+
+        val ping by boolean("ping", "Whether to ping the moderators")
     }
 }
