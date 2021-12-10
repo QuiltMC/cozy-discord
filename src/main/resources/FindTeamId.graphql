@@ -1,0 +1,8 @@
+query FindTeamById($slug:String!) {
+  organization(login:"QuiltMC") {
+     team(slug:$slug) {
+      id
+      viewerCanAdminister
+    }
+  }
+}
