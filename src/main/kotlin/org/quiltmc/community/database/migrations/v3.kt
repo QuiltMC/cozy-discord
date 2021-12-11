@@ -29,7 +29,8 @@ suspend fun v3(db: CoroutineDatabase) {
                     OwnedThread(
                         it.thread!!,
                         it.owner,
-                        COMMUNITY_GUILD
+                        COMMUNITY_GUILD,
+                        false
                     ),
 
                     replaceUpsert()

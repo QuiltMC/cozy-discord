@@ -33,6 +33,7 @@ import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.entity.channel.thread.ThreadChannel
 import dev.kord.core.event.channel.thread.TextChannelThreadCreateEvent
+import dev.kord.core.event.channel.thread.ThreadUpdateEvent
 import dev.kord.core.event.guild.GuildCreateEvent
 import dev.kord.core.event.guild.GuildUpdateEvent
 import dev.kord.core.event.message.MessageCreateEvent
@@ -51,6 +52,7 @@ import mu.KotlinLogging
 import org.koin.core.component.inject
 import org.quiltmc.community.*
 import org.quiltmc.community.database.collections.OwnedThreadCollection
+import org.quiltmc.community.database.entities.OwnedThread
 import java.time.format.DateTimeFormatter
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
@@ -104,6 +106,15 @@ class UtilityExtension : Extension() {
 
                 logger.info { "Thread created by ${owner.tag}" }
 
+                threads.set(
+                    OwnedThread(
+                        event.channel.id,
+                        owner.id,
+                        event.channel.guildId,
+                        false
+                    )
+                )
+
                 val role = when (event.channel.guildId) {
                     COMMUNITY_GUILD -> event.channel.guild.getRole(COMMUNITY_MODERATOR_ROLE)
                     TOOLCHAIN_GUILD -> event.channel.guild.getRole(TOOLCHAIN_MODERATOR_ROLE)
@@ -135,6 +146,19 @@ class UtilityExtension : Extension() {
                 }
 
                 message.pin("First message in the thread.")
+            }
+        }
+
+        event<ThreadUpdateEvent> {
+            action {
+                val channel = event.channel
+
+                if (channel.isArchived && threads.get(channel) != null && threads.get(channel)!!.save) {
+                    channel.edit {
+                        archived = false
+                        reason = "Preventing thread from being archived."
+                    }
+                }
             }
         }
 
@@ -444,6 +468,13 @@ class UtilityExtension : Extension() {
                         val roles = member.roles.toList().map { it.id }
 
                         if (MODERATOR_ROLES.any { it in roles }) {
+                            val thread = threads.get(channel)
+
+                            if (thread != null) {
+                                thread.save = false
+                                threads.set(thread)
+                            }
+
                             channel.edit {
                                 this.archived = true
                                 this.locked = arguments.lock
@@ -478,6 +509,14 @@ class UtilityExtension : Extension() {
 
                         if (arguments.lock) {
                             edit { content = "**Error:** Only members of the community team may lock threads." }
+
+                            return@action
+                        }
+
+                        if (threads.get(channel) != null && threads.get(channel)!!.save) {
+                            edit {
+                                content = "**Error:** Only moderators can archive threads that have been set to save."
+                            }
 
                             return@action
                         }
@@ -561,6 +600,56 @@ class UtilityExtension : Extension() {
                         arguments.message.unpin("Unpinned by ${member.tag}")
 
                         edit { content = "Message unpinned." }
+                    }
+                }
+
+                ephemeralSubCommand {
+                    name = "save"
+                    description = "Prevent the current thread from archiving, if you have permission"
+
+                    guild(guildId)
+
+                    check {
+                        hasBaseModeratorRole()
+                        isInThread()
+                    }
+
+                    action {
+                        val channel = channel.asChannel() as ThreadChannel
+                        val member = user.asMember(guild!!.id)
+
+                        if (channel.isArchived) {
+                            channel.edit {
+                                archived = false
+                                reason = "Unarchived by Cozy for `/thread save` run by ${member.tag}"
+                            }
+                        }
+
+                        val thread = threads.get(channel)
+
+                        if (thread != null) {
+                            if (thread.save) {
+                                edit {
+                                    content = "**Error:** This thread is already saved."
+                                }
+
+                                return@action
+                            }
+
+                            thread.save = true
+                            threads.set(thread)
+                        } else {
+                            threads.set(
+                                OwnedThread(
+                                    channel.id,
+                                    channel.owner.id,
+                                    channel.guild.id,
+                                    true
+                                )
+                            )
+                        }
+
+                        edit { content = "Thread will no longer archive." }
                     }
                 }
             }
