@@ -143,8 +143,8 @@ class UtilityExtension : Extension() {
         event<ThreadUpdateEvent> {
             action {
                 val channel = event.channel
-
                 val ownedThread = threads.get(channel)
+
                 if (channel.isArchived && ownedThread != null && ownedThread.preventArchiving) {
                     channel.edit {
                         archived = false
@@ -640,7 +640,7 @@ class UtilityExtension : Extension() {
                             )
                         }
 
-                        edit { content = "Thread will no longer archive." }
+                        edit { content = "Thread will no longer be archived." }
                     }
                 }
             }
