@@ -106,15 +106,6 @@ class UtilityExtension : Extension() {
 
                 logger.info { "Thread created by ${owner.tag}" }
 
-                threads.set(
-                    OwnedThread(
-                        event.channel.id,
-                        owner.id,
-                        event.channel.guildId,
-                        false
-                    )
-                )
-
                 val role = when (event.channel.guildId) {
                     COMMUNITY_GUILD -> event.channel.guild.getRole(COMMUNITY_MODERATOR_ROLE)
                     TOOLCHAIN_GUILD -> event.channel.guild.getRole(TOOLCHAIN_MODERATOR_ROLE)
@@ -153,7 +144,8 @@ class UtilityExtension : Extension() {
             action {
                 val channel = event.channel
 
-                if (channel.isArchived && threads.get(channel) != null && threads.get(channel)!!.save) {
+                val ownedThread = threads.get(channel);
+                if (channel.isArchived && ownedThread != null && ownedThread.preventArchiving) {
                     channel.edit {
                         archived = false
                         reason = "Preventing thread from being archived."
@@ -466,13 +458,12 @@ class UtilityExtension : Extension() {
                         val channel = channel.asChannel() as ThreadChannel
                         val member = user.asMember(guild!!.id)
                         val roles = member.roles.toList().map { it.id }
+                        val ownedThread = threads.get(channel)
 
                         if (MODERATOR_ROLES.any { it in roles }) {
-                            val thread = threads.get(channel)
-
-                            if (thread != null) {
-                                thread.save = false
-                                threads.set(thread)
+                            if (ownedThread != null) {
+                                ownedThread.preventArchiving = false
+                                threads.set(ownedThread)
                             }
 
                             channel.edit {
@@ -513,9 +504,9 @@ class UtilityExtension : Extension() {
                             return@action
                         }
 
-                        if (threads.get(channel) != null && threads.get(channel)!!.save) {
+                        if (ownedThread != null && ownedThread.preventArchiving) {
                             edit {
-                                content = "**Error:** Only moderators can archive threads that have been set to save."
+                                content = "**Error:** This thread can only be archived by a moderator."
                             }
 
                             return@action
@@ -604,7 +595,7 @@ class UtilityExtension : Extension() {
                 }
 
                 ephemeralSubCommand {
-                    name = "save"
+                    name = "prevent-archiving"
                     description = "Prevent the current thread from archiving, if you have permission"
 
                     guild(guildId)
@@ -621,22 +612,22 @@ class UtilityExtension : Extension() {
                         if (channel.isArchived) {
                             channel.edit {
                                 archived = false
-                                reason = "Unarchived by Cozy for `/thread save` run by ${member.tag}"
+                                reason = "`/thread prevent-archiving` run by ${member.tag}"
                             }
                         }
 
                         val thread = threads.get(channel)
 
                         if (thread != null) {
-                            if (thread.save) {
+                            if (thread.preventArchiving) {
                                 edit {
-                                    content = "**Error:** This thread is already saved."
+                                    content = "I'm already stopping this thread from being archived."
                                 }
 
                                 return@action
                             }
 
-                            thread.save = true
+                            thread.preventArchiving = true
                             threads.set(thread)
                         } else {
                             threads.set(

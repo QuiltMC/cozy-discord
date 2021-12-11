@@ -9,8 +9,8 @@ import org.quiltmc.community.database.entities.OwnedThread
 suspend fun v8(db: CoroutineDatabase) {
     with(db.getCollection<OwnedThread>(OwnedThreadCollection.name)) {
         updateMany(
-            OwnedThread::save exists false,
-            setValue(OwnedThread::save, false),
+            OwnedThread::preventArchiving exists false,
+            setValue(OwnedThread::preventArchiving, false),
         )
     }
 }

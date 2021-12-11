@@ -411,8 +411,7 @@ class SuggestionsExtension : Extension() {
                     OwnedThread(
                         thread.id,
                         suggestion.owner,
-                        thread.guildId,
-                        false
+                        thread.guildId
                     )
                 )
 
