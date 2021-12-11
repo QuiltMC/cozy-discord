@@ -144,7 +144,7 @@ class UtilityExtension : Extension() {
             action {
                 val channel = event.channel
 
-                val ownedThread = threads.get(channel);
+                val ownedThread = threads.get(channel)
                 if (channel.isArchived && ownedThread != null && ownedThread.preventArchiving) {
                     channel.edit {
                         archived = false
