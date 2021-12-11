@@ -13,4 +13,5 @@ data class OwnedThread(
 
     val owner: Snowflake,
     val guild: Snowflake,
+    var preventArchiving: Boolean = false,
 ) : Entity<Snowflake>
