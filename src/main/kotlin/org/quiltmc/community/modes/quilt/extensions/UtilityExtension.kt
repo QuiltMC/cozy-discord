@@ -700,56 +700,6 @@ class UtilityExtension : Extension() {
                         }
                     }
                 }
-
-                ephemeralSubCommand {
-                    name = "prevent-archiving"
-                    description = "Prevent the current thread from archiving, if you have permission"
-
-                    guild(guildId)
-
-                    check {
-                        hasBaseModeratorRole()
-                        isInThread()
-                    }
-
-                    action {
-                        val channel = channel.asChannel() as ThreadChannel
-                        val member = user.asMember(guild!!.id)
-
-                        if (channel.isArchived) {
-                            channel.edit {
-                                archived = false
-                                reason = "`/thread prevent-archiving` run by ${member.tag}"
-                            }
-                        }
-
-                        val thread = threads.get(channel)
-
-                        if (thread != null) {
-                            if (thread.preventArchiving) {
-                                edit {
-                                    content = "I'm already stopping this thread from being archived."
-                                }
-
-                                return@action
-                            }
-
-                            thread.preventArchiving = true
-                            threads.set(thread)
-                        } else {
-                            threads.set(
-                                OwnedThread(
-                                    channel.id,
-                                    channel.owner.id,
-                                    channel.guild.id,
-                                    true
-                                )
-                            )
-                        }
-
-                        edit { content = "Thread will no longer be archived." }
-                    }
-                }
             }
 
             ephemeralSlashCommand(::SayArguments) {
