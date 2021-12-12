@@ -666,9 +666,10 @@ class UtilityExtension : Extension() {
                             val previousOwner = thread.owner
 
                             if ((thread.owner != user.id && threads.isOwner(channel, user) != true) &&
-                                !MODERATOR_ROLES.any { it in roles }) {
-                                    edit { content = "**Error:** This is not your thread." }
-                                    return@action
+                                !MODERATOR_ROLES.any { it in roles }
+                            ) {
+                                edit { content = "**Error:** This is not your thread." }
+                                return@action
                             }
 
                             if (thread.owner == arguments.user.id) {
