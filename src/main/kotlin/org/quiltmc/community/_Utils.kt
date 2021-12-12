@@ -11,6 +11,7 @@ import dev.kord.common.entity.ArchiveDuration
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
 import dev.kord.core.behavior.UserBehavior
+import dev.kord.core.behavior.channel.MessageChannelBehavior
 import dev.kord.core.entity.Guild
 import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.rest.builder.message.EmbedBuilder
@@ -24,15 +25,15 @@ import org.quiltmc.community.modes.quilt.extensions.settings.SettingsExtension
 
 @Suppress("MagicNumber")  // It's the status code...
 suspend fun Kord.getGuildIgnoring403(id: Snowflake) =
-        try {
-            getGuild(id)
-        } catch (e: RestRequestException) {
-            if (e.status.code != 403) {
-                throw(e)
-            }
-
-            null
+    try {
+        getGuild(id)
+    } catch (e: RestRequestException) {
+        if (e.status.code != 403) {
+            throw(e)
         }
+
+        null
+    }
 
 fun String.chunkByWhitespace(length: Int): List<String> {
     if (length <= 0) {
@@ -180,7 +181,16 @@ suspend fun Kord?.getGithubLogChannel(): GuildMessageChannel? {
 suspend fun EmbedBuilder.userField(user: UserBehavior, role: String, inline: Boolean = false) {
     field {
         name = role
-        value = "${user.mention} (`${user.id.value}` / `${user.asUser().tag}`)"
+        value = "${user.mention} (`${user.id}` / `${user.asUser().tag}`)"
+
+        this.inline = inline
+    }
+}
+
+fun EmbedBuilder.channelField(channel: MessageChannelBehavior, title: String, inline: Boolean = false) {
+    field {
+        this.name = title
+        this.value = "${channel.mention} (`${channel.id}`)"
 
         this.inline = inline
     }

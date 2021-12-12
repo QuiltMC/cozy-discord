@@ -643,11 +643,11 @@ class UtilityExtension : Extension() {
                         edit { content = "Thread will no longer be archived." }
 
                         guild!!.asGuild().getModLogChannel()?.createEmbed {
+                            title = "Thread Persistence Enabled"
                             color = DISCORD_BLURPLE
-                            timestamp = Clock.System.now()
-                            title = "Thread Prevented from Archiving"
-                            description = "Thread ${channel.mention} will no longer be archived - " +
-                                    "requested by ${member.tag}"
+
+                            userField(member.asUser(), "Moderator")
+                            channelField(channel, "Thread")
                         }
                     }
                 }
@@ -686,12 +686,13 @@ class UtilityExtension : Extension() {
                             edit { content = "Updated thread owner to ${arguments.user.mention}" }
 
                             guild!!.asGuild().getModLogChannel()?.createEmbed {
-                                color = DISCORD_BLURPLE
-                                timestamp = Clock.System.now()
                                 title = "Thread Owner Updated"
-                                description = "Owner of ${channel.mention} updated to ${arguments.user.mention}" +
-                                        " from ${guild!!.getMember(previousOwner).mention} - " +
-                                        "requested by ${member.tag}"
+                                color = DISCORD_BLURPLE
+
+                                userField(member.asUser(), "Moderator")
+                                userField(guild!!.getMember(previousOwner).asUser(), "Previous Owner")
+                                userField(arguments.user, "New Owner")
+                                channelField(channel, "Thread")
                             }
                         } else {
                             respond {
