@@ -646,7 +646,56 @@ class UtilityExtension : Extension() {
                             color = DISCORD_BLURPLE
                             timestamp = Clock.System.now()
                             title = "Thread Prevented from Archiving"
-                            description = "Thread ${channel.mention} will no longer be archived - requested by ${member.tag}"
+                            description = "Thread ${channel.mention} will no longer be archived - " +
+                                    "requested by ${member.tag}"
+                        }
+                    }
+                }
+
+                ephemeralSubCommand(::SetOwnerArguments) {
+                    name = "set-owner"
+                    description = "Change the owner of the thread, if you have permission"
+
+                    action {
+                        val channel = channel.asChannel() as ThreadChannel
+                        val member = user.asMember(guild!!.id)
+                        val roles = member.roles.toList().map { it.id }
+                        val thread = threads.get(channel)
+
+                        if (thread != null) {
+                            val previousOwner = thread.owner
+
+                            if ((thread.owner != user.id && threads.isOwner(channel, user) != true) &&
+                                !MODERATOR_ROLES.any { it in roles }) {
+                                    edit { content = "**Error:** This is not your thread." }
+                                    return@action
+                            }
+
+                            if (thread.owner == arguments.user.id) {
+                                edit {
+                                    content = "That user already owns this thread."
+                                }
+
+                                return@action
+                            }
+
+                            thread.owner = arguments.user.id
+                            threads.set(thread)
+
+                            edit { content = "Updated thread owner to ${arguments.user.mention}" }
+
+                            guild!!.asGuild().getModLogChannel()?.createEmbed {
+                                color = DISCORD_BLURPLE
+                                timestamp = Clock.System.now()
+                                title = "Thread Owner Updated"
+                                description = "Owner of ${channel.mention} updated to ${arguments.user.mention}" +
+                                        " from ${guild!!.getMember(previousOwner).mention} - " +
+                                        "requested by ${member.tag}"
+                            }
+                        } else {
+                            respond {
+                                content = "That thread doesn't exist within my database."
+                            }
                         }
                     }
                 }
@@ -1031,6 +1080,10 @@ class UtilityExtension : Extension() {
             "Whether to lock the thread, if you're staff - defaults to false",
             false
         )
+    }
+
+    inner class SetOwnerArguments : Arguments() {
+        val user by user("user", "User to set as the owner of the thread")
     }
 
     inner class LockArguments : Arguments() {

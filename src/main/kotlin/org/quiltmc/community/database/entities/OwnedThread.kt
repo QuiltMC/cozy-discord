@@ -11,7 +11,7 @@ import org.quiltmc.community.database.Entity
 data class OwnedThread(
     override val _id: Snowflake,
 
-    val owner: Snowflake,
+    var owner: Snowflake,
     val guild: Snowflake,
     var preventArchiving: Boolean = false,
 ) : Entity<Snowflake>
