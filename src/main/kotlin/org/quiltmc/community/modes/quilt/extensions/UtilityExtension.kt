@@ -641,6 +641,13 @@ class UtilityExtension : Extension() {
                         }
 
                         edit { content = "Thread will no longer be archived." }
+
+                        guild!!.asGuild().getModLogChannel()?.createEmbed {
+                            color = DISCORD_BLURPLE
+                            timestamp = Clock.System.now()
+                            title = "Thread Prevented from Archiving"
+                            description = "Thread ${channel.mention} will no longer be archived - requested by ${member.tag}"
+                        }
                     }
                 }
             }
