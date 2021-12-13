@@ -4,6 +4,7 @@ import dev.kord.common.entity.Snowflake
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.litote.kmongo.eq
+import org.litote.kmongo.ne
 import org.quiltmc.community.database.Collection
 import org.quiltmc.community.database.Database
 import org.quiltmc.community.database.entities.ServerSettings
@@ -16,7 +17,10 @@ class ServerSettingsCollection : KoinComponent {
     suspend fun get(id: Snowflake) =
         col.findOne(ServerSettings::_id eq id)
 
-    suspend fun getByServerType(type: QuiltServerType?) =
+    fun getByQuiltServers() =
+        col.find(ServerSettings::quiltServerType ne null)
+
+    fun getByServerType(type: QuiltServerType?) =
         col.find(ServerSettings::quiltServerType eq type)
 
     suspend fun getCommunity() =
