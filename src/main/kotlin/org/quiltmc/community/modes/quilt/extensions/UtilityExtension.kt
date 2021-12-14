@@ -703,7 +703,7 @@ class UtilityExtension : Extension() {
                             title = "Thread Persistence Enabled"
                             color = DISCORD_BLURPLE
 
-                            userField(member.asUser(), "Moderator")
+                            userField(member, "Moderator")
                             channelField(channel, "Thread")
                         }
                     }
@@ -748,7 +748,7 @@ class UtilityExtension : Extension() {
                                     color = DISCORD_BLURPLE
 
                                     userField(member.asUser(), "Moderator")
-                                    userField(guild!!.getMember(previousOwner).asUser(), "Previous Owner")
+                                    userField(guild!!.getMember(previousOwner), "Previous Owner")
                                     userField(arguments.user, "New Owner")
                                     channelField(channel, "Thread")
                                 }
