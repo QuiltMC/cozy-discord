@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.toList
 import kotlinx.datetime.Clock
 import org.koin.core.component.inject
+import org.quiltmc.community.GUILDS
 import org.quiltmc.community.database.collections.ServerSettingsCollection
 import org.quiltmc.community.hasPermissionInMainGuild
 import kotlin.time.Duration
@@ -33,17 +34,21 @@ class UserCleanupExtension : Extension() {
     override suspend fun setup() {
         task = scheduler.schedule(TASK_DELAY, pollingSeconds = 60, callback = ::taskRun)
 
-        ephemeralSlashCommand {
-            name = "cleanup-users"
-            description = "Clean up likely bot accounts"
+        GUILDS.forEach { guildId ->
+            ephemeralSlashCommand {
+                name = "cleanup-users"
+                description = "Clean up likely bot accounts"
 
-            check { hasPermissionInMainGuild(Permission.Administrator) }
+                guild(guildId)
 
-            action {
-                val removed = taskRun()
+                check { hasPermissionInMainGuild(Permission.Administrator) }
 
-                respond {
-                    content = "Kicked $removed accounts across all Quilt servers."
+                action {
+                    val removed = taskRun()
+
+                    respond {
+                        content = "Kicked $removed accounts across all Quilt servers."
+                    }
                 }
             }
         }

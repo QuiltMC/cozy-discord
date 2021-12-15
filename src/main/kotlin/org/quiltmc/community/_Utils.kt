@@ -101,6 +101,7 @@ suspend fun ExtensibleBotBuilder.database(migrate: Boolean = false) {
                 single { ServerSettingsCollection() } bind ServerSettingsCollection::class
                 single { SuggestionsCollection() } bind SuggestionsCollection::class
                 single { TeamCollection() } bind TeamCollection::class
+                single { UserFlagsCollection() } bind UserFlagsCollection::class
             }
 
             if (migrate) {
@@ -174,13 +175,13 @@ suspend fun <C : SlashCommandContext<C, A>, A : Arguments>
 suspend fun Kord?.getGithubLogChannel(): GuildMessageChannel? {
     val channelId = getKoin().get<GlobalSettingsCollection>().get()?.githubLogChannel ?: return null
 
-    return this?.getChannelOf<GuildMessageChannel>(channelId)
+    return this?.getChannelOf(channelId)
 }
 
 suspend fun EmbedBuilder.userField(user: UserBehavior, role: String, inline: Boolean = false) {
     field {
         name = role
-        value = "${user.mention} (`${user.id.value}` / `${user.asUser().tag}`)"
+        value = "${user.mention} (`${user.id}` / `${user.asUser().tag}`)"
 
         this.inline = inline
     }
