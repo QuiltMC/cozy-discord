@@ -24,7 +24,7 @@ class PKExtension : Extension() {
 
     override suspend fun setup() {
         event<MessageCreateEvent> {
-            check { failIf(event.message.data.webhookId.value != null) }
+            check { failIf(event.message.data.webhookId.value == null) }
             check { failIf(event.message.interaction != null) }
 
             action {
