@@ -7,12 +7,15 @@ import com.kotlindiscord.kord.extensions.utils.getJumpUrl
 import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.event.message.MessageCreateEvent
 import dev.kord.rest.builder.message.create.embed
+import kotlinx.coroutines.delay
 import org.koin.core.component.inject
 import org.quiltmc.community.api.pluralkit.PluralKit
 import org.quiltmc.community.database.collections.ServerSettingsCollection
 import org.quiltmc.community.database.collections.UserFlagsCollection
 import org.quiltmc.community.database.entities.UserFlags
 import org.quiltmc.community.userField
+
+private const val PK_DELAY_MILLIS: Long = 500
 
 class PKExtension : Extension() {
     override val name: String = "pluralkit"
@@ -28,6 +31,8 @@ class PKExtension : Extension() {
             check { failIf(event.message.interaction != null) }
 
             action {
+                delay(PK_DELAY_MILLIS)  // To allow the PK API to catch up
+
                 val pkMessage = pluralKit.getMessageOrNull(event.message.id) ?: return@action
                 val flags = userFlags.get(pkMessage.sender) ?: UserFlags(pkMessage.sender, false)
 
