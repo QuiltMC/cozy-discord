@@ -3,9 +3,7 @@ package org.quiltmc.community.modes.quilt.extensions
 import com.kotlindiscord.kord.extensions.DISCORD_FUCHSIA
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.event
-import com.kotlindiscord.kord.extensions.utils.authorId
 import com.kotlindiscord.kord.extensions.utils.getJumpUrl
-import dev.kord.common.entity.MessageType
 import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.event.message.MessageCreateEvent
 import dev.kord.rest.builder.message.create.embed
@@ -26,9 +24,6 @@ class PKExtension : Extension() {
 
     override suspend fun setup() {
         event<MessageCreateEvent> {
-            check { failIfNot(event.message.type == MessageType.Default) }
-            check { failIf(event.message.data.authorId == event.kord.selfId) }
-            check { failIf(event.message.author?.isBot == true) }
             check { failIf(event.message.data.webhookId.value != null) }
             check { failIf(event.message.interaction != null) }
 
