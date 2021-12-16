@@ -5,8 +5,10 @@
 package org.quiltmc.community.modes.quilt.extensions
 
 import com.kotlindiscord.kord.extensions.*
+import com.kotlindiscord.kord.extensions.checks.channelType
 import com.kotlindiscord.kord.extensions.checks.hasPermission
 import com.kotlindiscord.kord.extensions.checks.isInThread
+import com.kotlindiscord.kord.extensions.checks.isNotBot
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
 import com.kotlindiscord.kord.extensions.commands.application.slash.publicSubCommand
@@ -21,10 +23,7 @@ import com.kotlindiscord.kord.extensions.types.respondEphemeral
 import com.kotlindiscord.kord.extensions.utils.authorId
 import com.kotlindiscord.kord.extensions.utils.deleteIgnoringNotFound
 import dev.kord.common.annotation.KordPreview
-import dev.kord.common.entity.MessageType
-import dev.kord.common.entity.Permission
-import dev.kord.common.entity.Permissions
-import dev.kord.common.entity.Snowflake
+import dev.kord.common.entity.*
 import dev.kord.core.behavior.channel.*
 import dev.kord.core.behavior.channel.threads.edit
 import dev.kord.core.behavior.edit
@@ -52,7 +51,9 @@ import mu.KotlinLogging
 import org.koin.core.component.inject
 import org.quiltmc.community.*
 import org.quiltmc.community.database.collections.OwnedThreadCollection
+import org.quiltmc.community.database.collections.UserFlagsCollection
 import org.quiltmc.community.database.entities.OwnedThread
+import org.quiltmc.community.database.entities.UserFlags
 import java.time.format.DateTimeFormatter
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
@@ -74,6 +75,7 @@ class UtilityExtension : Extension() {
     private val threads: OwnedThreadCollection by inject()
 
     private val guildCache: MutableMap<Snowflake, Guild> = mutableMapOf()
+    private val userFlags: UserFlagsCollection by inject()
 
     @OptIn(ExperimentalSerializationApi::class)
     private val json = Json {
@@ -84,6 +86,21 @@ class UtilityExtension : Extension() {
     }
 
     override suspend fun setup() {
+        event<MessageCreateEvent> {
+            check { inQuiltGuild() }
+            check { isNotBot() }
+            check { channelType(ChannelType.GuildNews) }
+            check { failIf(event.message.author == null) }
+
+            action {
+                val flags = userFlags.get(event.message.author!!.id) ?: UserFlags(event.message.author!!.id)
+
+                if (flags.autoPublish) {
+                    event.message.publish()
+                }
+            }
+        }
+
         event<MessageCreateEvent> {
             check { inQuiltGuild() }
             check { failIf { event.message.type != MessageType.ChannelPinnedMessage } }

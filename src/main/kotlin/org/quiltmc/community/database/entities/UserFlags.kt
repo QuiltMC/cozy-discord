@@ -12,7 +12,8 @@ import org.quiltmc.community.database.collections.UserFlagsCollection
 data class UserFlags(
     override val _id: Snowflake,
 
-    var hasUsedPK: Boolean = false
+    var hasUsedPK: Boolean = false,
+    var autoPublish: Boolean = true,
 ) : Entity<Snowflake> {
     suspend fun save() {
         val collection = getKoin().get<UserFlagsCollection>()
