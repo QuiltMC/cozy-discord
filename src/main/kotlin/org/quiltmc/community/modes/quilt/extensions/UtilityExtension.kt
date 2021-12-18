@@ -691,7 +691,7 @@ class UtilityExtension : Extension() {
                                 edit { content = "Updated thread owner to ${arguments.user.mention}" }
 
                                 guild!!.asGuild().getModLogChannel()?.createEmbed {
-                                    title = "Thread Owner Updated"
+                                    title = "Thread Owner Updated (Moderator)"
                                     color = DISCORD_BLURPLE
 
                                     userField(member.asUser(), "Moderator")
@@ -744,11 +744,10 @@ class UtilityExtension : Extension() {
                                                 }
 
                                                 guild!!.asGuild().getModLogChannel()?.createEmbed {
-                                                    title = "Thread Owner Updated"
+                                                    title = "Thread Owner Updated (User)"
                                                     color = DISCORD_BLURPLE
 
-                                                    userField(member.asUser(), "Moderator")
-                                                    userField(guild!!.getMember(previousOwner), "Previous Owner")
+                                                    userField(member.asUser(), "Previous Owner")
                                                     userField(arguments.user, "New Owner")
                                                     channelField(channel, "Thread")
                                                 }
