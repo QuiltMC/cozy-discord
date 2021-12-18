@@ -11,6 +11,8 @@ import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
 import com.kotlindiscord.kord.extensions.commands.application.slash.publicSubCommand
 import com.kotlindiscord.kord.extensions.commands.converters.impl.*
+import com.kotlindiscord.kord.extensions.components.components
+import com.kotlindiscord.kord.extensions.components.ephemeralButton
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralMessageCommand
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
@@ -18,29 +20,27 @@ import com.kotlindiscord.kord.extensions.extensions.event
 import com.kotlindiscord.kord.extensions.types.edit
 import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.types.respondEphemeral
-import com.kotlindiscord.kord.extensions.utils.ackEphemeral
 import com.kotlindiscord.kord.extensions.utils.authorId
 import com.kotlindiscord.kord.extensions.utils.deleteIgnoringNotFound
 import dev.kord.common.annotation.KordPreview
-import dev.kord.common.entity.*
+import dev.kord.common.entity.MessageType
+import dev.kord.common.entity.Permission
+import dev.kord.common.entity.Permissions
+import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.channel.*
 import dev.kord.core.behavior.channel.threads.edit
 import dev.kord.core.behavior.edit
-import dev.kord.core.behavior.interaction.edit
 import dev.kord.core.entity.Guild
 import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.entity.channel.thread.ThreadChannel
-import dev.kord.core.entity.interaction.ButtonInteraction
 import dev.kord.core.event.channel.thread.TextChannelThreadCreateEvent
 import dev.kord.core.event.channel.thread.ThreadUpdateEvent
 import dev.kord.core.event.guild.GuildCreateEvent
 import dev.kord.core.event.guild.GuildUpdateEvent
-import dev.kord.core.event.interaction.InteractionCreateEvent
 import dev.kord.core.event.message.MessageCreateEvent
-import dev.kord.core.supplier.EntitySupplyStrategy
-import dev.kord.rest.builder.message.create.actionRow
 import dev.kord.rest.builder.message.create.embed
+import dev.kord.rest.builder.message.modify.embed
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.firstOrNull
@@ -70,8 +70,6 @@ val SPEAKING_PERMISSIONS: Array<Permission> = arrayOf(
 )
 
 val DELETE_DELAY = Duration.seconds(10)  // Seconds
-
-const val SET_OWNER = "set-owner"
 
 class UtilityExtension : Extension() {
     override val name: String = "utility"
@@ -155,57 +153,6 @@ class UtilityExtension : Extension() {
                     channel.edit {
                         archived = false
                         reason = "Preventing thread from being archived."
-                    }
-                }
-            }
-        }
-
-        event<InteractionCreateEvent> {
-            check { failIfNot(event.interaction is ButtonInteraction) }
-            check { isInThread() }
-
-            action {
-                val interaction = event.interaction as ButtonInteraction
-                val response = interaction.ackEphemeral(false)
-
-                if ("/" !in interaction.componentId) {
-                    return@action
-                }
-
-                val split = interaction.componentId.split('/', limit = 3)
-
-                if (split[1] != SET_OWNER) {
-                    return@action
-                }
-
-                val guild = event.kord.getGuild(interaction.data.guildId.value!!, EntitySupplyStrategy.cache)
-
-                if (guild != null) {
-                    val channel = guild.getChannel(Snowflake(split[0])) as ThreadChannel
-                    val newOwner = guild.getMember(Snowflake(split[2]))
-                    // If the interaction has reached this point, we already know the OwnedThread exists
-                    val thread = threads.get(channel)!!
-
-                    if (newOwner.id == thread.owner) { // We've already handled this button before.
-                        response.edit {
-                            content = "You've already confirmed this action."
-                        }
-                    } else {
-                        thread.owner = newOwner.id
-                        threads.set(thread)
-
-                        response.edit {
-                            content = "Updated thread owner to ${newOwner.mention}"
-                        }
-
-                        guild.getModLogChannel()?.createEmbed {
-                            title = "Thread Owner Updated"
-                            color = DISCORD_BLURPLE
-
-                            userField(interaction.user, "Previous Owner")
-                            userField(newOwner, "New Owner")
-                            channelField(channel, "Thread")
-                        }
                     }
                 }
             }
@@ -762,12 +709,50 @@ class UtilityExtension : Extension() {
                                                     " transfer, simply ignore this message."
                                     }
 
-                                    actionRow {
-                                        interactionButton(
-                                            ButtonStyle.Primary,
-                                            "${channel.id}/$SET_OWNER/${arguments.user.id}"
-                                        ) {
+                                    components(Duration.seconds(15)) {
+                                        onTimeout {
+                                            edit {
+                                                embed {
+                                                    color = DISCORD_BLURPLE
+                                                    description =
+                                                        "Action timed out - no change performed"
+                                                }
+
+                                                components {
+                                                    removeAll()
+                                                }
+                                            }
+                                        }
+
+                                        ephemeralButton {
                                             label = "Yes"
+                                            action {
+                                                thread.owner = arguments.user.id
+                                                threads.set(thread)
+
+                                                edit {
+                                                    embed {
+                                                        color = DISCORD_BLURPLE
+                                                        description =
+                                                            "Updated thread owner to " +
+                                                                    arguments.user.mention
+                                                    }
+
+                                                    components {
+                                                        removeAll()
+                                                    }
+                                                }
+
+                                                guild!!.asGuild().getModLogChannel()?.createEmbed {
+                                                    title = "Thread Owner Updated"
+                                                    color = DISCORD_BLURPLE
+
+                                                    userField(member.asUser(), "Moderator")
+                                                    userField(guild!!.getMember(previousOwner), "Previous Owner")
+                                                    userField(arguments.user, "New Owner")
+                                                    channelField(channel, "Thread")
+                                                }
+                                            }
                                         }
                                     }
                                 }
