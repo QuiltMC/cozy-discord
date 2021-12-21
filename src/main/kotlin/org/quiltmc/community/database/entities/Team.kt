@@ -5,6 +5,7 @@ package org.quiltmc.community.database.entities
 import dev.kord.common.entity.Snowflake
 import kotlinx.serialization.Serializable
 import org.quiltmc.community.database.Entity
+import org.quiltmc.community.github.DatabaseId
 import org.quiltmc.community.github.NodeId
 
 @Serializable
@@ -15,12 +16,13 @@ data class Team(
 
     override val _id: Snowflake,
     /**
-     * The teams parents, which **may be different from its ancestors on GitHub**. The parents determine
-     * which teams may add and remove members from this team. A team may be a parent of itself, but this is not recommended.
+     * The team's managers, which **may be different from its ancestors on GitHub**. The managers determine
+     * which teams may add and remove members from this team. A team may be a manager of itself,
+     * but this is usually not recommended.
      */
-    val parents: Collection<Snowflake>,
+    val managers: Collection<Snowflake>,
     /**
-     * The node ID of this team on GitHub.
+     * The database ID of this team on GitHub.
      */
-    val nodeId: NodeId
+    val databaseId: DatabaseId
 ) : Entity<Snowflake>

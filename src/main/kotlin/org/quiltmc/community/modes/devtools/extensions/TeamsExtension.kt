@@ -6,20 +6,24 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.*
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
+import io.ktor.client.request.*
 import org.koin.core.component.inject
 import org.quiltmc.community.TOOLCHAIN_GUILD
-import org.quiltmc.community.database.collections.LinkedUserCollection
 import org.quiltmc.community.database.collections.TeamCollection
+import org.quiltmc.community.database.collections.UserFlagsCollection
 import org.quiltmc.community.database.entities.Team
-import org.quiltmc.community.graphQlClient
-import quilt.ghgen.FindTeamById
+import org.quiltmc.community.githubGraphQlClient
+import org.quiltmc.community.githubHttpClient
+import quilt.ghgen.FindTeamDatabaseId
 
 class TeamsExtension : Extension() {
     override val name: String = "teams"
 
-    private val userCollection: LinkedUserCollection by inject()
+    val QUILTMC_DATABASE_ID = 78571508
+    private val userFlagsCollection: UserFlagsCollection by inject()
     private val teamCollection: TeamCollection by inject()
 
+    // TODO: permissions, guards, etc, oh my!
     override suspend fun setup() {
         publicSlashCommand {
             name = "team"
@@ -33,7 +37,7 @@ class TeamsExtension : Extension() {
 
                 action {
                     // Find the team on gh
-                    val queriedTeam = graphQlClient.execute(FindTeamById(FindTeamById.Variables(arguments.slug)))
+                    val queriedTeam = githubGraphQlClient.execute(FindTeamDatabaseId(FindTeamDatabaseId.Variables(arguments.slug)))
                         .data
                         ?.organization
                         ?.team
@@ -53,7 +57,7 @@ class TeamsExtension : Extension() {
                         return@action
                     }
 
-                    teamCollection.set(Team(arguments.role.id, arguments.managers.map { role -> role.id }, queriedTeam.id))
+                    teamCollection.set(Team(arguments.role.id, arguments.managers.map { role -> role.id }, queriedTeam.databaseId!!))
 
                     respond {
                         // todo embed
@@ -72,6 +76,21 @@ class TeamsExtension : Extension() {
             publicSubCommand(::AddMemberArguments) {
                 name = "addMember"
                 description = "Add a a member to a team."
+
+                action {
+                    val team = teamCollection.get(arguments.team.id)
+
+                    if (team == null) {
+                        respond {
+                            content = "That role isn't a Cozy-managed team!"
+                        }
+
+                        return@action
+                    }
+
+                    // TODO: detect if pending
+                    this.githubHttpClient.put("https://api.github.com/orgs/$QUILTMC_DATABASE_ID/teams/${team.databaseId}")
+                }
             }
 
             publicSubCommand(::RemoveMemberArguments) {

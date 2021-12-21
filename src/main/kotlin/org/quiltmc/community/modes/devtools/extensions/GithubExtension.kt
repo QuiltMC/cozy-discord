@@ -1,6 +1,5 @@
 package org.quiltmc.community.modes.devtools.extensions
 
-import com.expediagroup.graphql.client.ktor.GraphQLKtorClient
 import com.kotlindiscord.kord.extensions.DISCORD_RED
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
@@ -11,25 +10,20 @@ import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.core.behavior.channel.createEmbed
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.cio.CIO
-import io.ktor.client.features.defaultRequest
-import io.ktor.client.request.header
 import org.koin.core.component.inject
 import org.quiltmc.community.*
-import org.quiltmc.community.database.collections.LinkedUserCollection
-import org.quiltmc.community.database.entities.LinkedUser
+import org.quiltmc.community.database.collections.UserFlagsCollection
 import org.quiltmc.community.github.NodeId
 import quilt.ghgen.DeleteIssue
 import quilt.ghgen.FindIssueId
 import quilt.ghgen.FindUserNodeId
 import quilt.ghgen.findissueid.*
-import java.net.URL
 
 class GithubExtension : Extension() {
     override val name = "github"
 
-    private val linkedUserCollection: LinkedUserCollection by inject()
+    private val userFlagsCollection: UserFlagsCollection by inject()
+
 
 
     override suspend fun setup() {
@@ -47,7 +41,7 @@ class GithubExtension : Extension() {
                 description = "Link your GitHub account to your Discord account. Used by Cozy for adding users to teams"
 
                 action {
-                    val userNodeId: NodeId? = graphQlClient
+                    val userNodeId: NodeId? = githubGraphQlClient
                         .execute(FindUserNodeId(FindUserNodeId.Variables(arguments.login)))
                         .data
                         ?.user
@@ -61,8 +55,9 @@ class GithubExtension : Extension() {
                         return@action
                     }
 
-                    linkedUserCollection.set(LinkedUser(this.user.id, userNodeId))
-
+                    val flags = userFlagsCollection.getOrCreate(this.user.id)
+                    flags.githubId = userNodeId
+                    flags.save()
                     respond {
                         // TODO: pull more from this query for an embed
                         // TODO: log this somewhere
@@ -77,22 +72,15 @@ class GithubExtension : Extension() {
 
                 action {
                     // I have no idea how this API works with deletions so I'm going to go the safe route.
-                    val linked = linkedUserCollection.get(user.id)
+                    val flags = userFlagsCollection.getOrCreate(this.user.id)
+                    flags.githubId = null
+                    flags.save()
 
-                    if (linked == null) {
-                        respond {
-                            content = "You don't have a GitHub account linked!"
-                        }
-
-                        return@action
-                    } else {
-                        linkedUserCollection.delete(user.id)
-
-                        // TODO: fancy stuff, log, etc
-                        respond {
-                            content = "Unlinked your GitHub account"
-                        }
+                    respond {
+                        // TODO: detect if one was actually removed or not
+                        content = "Unlinked your GitHub account, if one was linked."
                     }
+
                 }
             }
 
@@ -113,7 +101,7 @@ class GithubExtension : Extension() {
                     description = "Delete the given issue"
 
                     action {
-                        val repo = graphQlClient
+                        val repo = githubGraphQlClient
                             .execute(FindIssueId(FindIssueId.Variables(arguments.repo, arguments.issue)))
                             .data
                             ?.repository
@@ -131,7 +119,7 @@ class GithubExtension : Extension() {
 
                             repo.issue != null -> {
                                 // try to delete the issue
-                                val response = graphQlClient.execute(DeleteIssue(DeleteIssue.Variables(repo.issue.id)))
+                                val response = githubGraphQlClient.execute(DeleteIssue(DeleteIssue.Variables(repo.issue.id)))
 
                                 if (response.errors.isNullOrEmpty()) {
                                     respond {

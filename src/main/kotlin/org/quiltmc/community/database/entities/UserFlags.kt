@@ -7,6 +7,7 @@ import dev.kord.common.entity.Snowflake
 import kotlinx.serialization.Serializable
 import org.quiltmc.community.database.Entity
 import org.quiltmc.community.database.collections.UserFlagsCollection
+import org.quiltmc.community.github.NodeId
 
 @Serializable
 data class UserFlags(
@@ -14,6 +15,7 @@ data class UserFlags(
 
     var hasUsedPK: Boolean = false,
     var autoPublish: Boolean = true,
+    var githubId: NodeId? = null
 ) : Entity<Snowflake> {
     suspend fun save() {
         val collection = getKoin().get<UserFlagsCollection>()

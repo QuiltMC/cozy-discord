@@ -193,12 +193,15 @@ suspend fun EmbedBuilder.userField(user: UserBehavior, role: String, inline: Boo
     }
 }
 
-val <A : SlashCommandContext<A, B>, B : Arguments> SlashCommandContext<A, B>.graphQlClient
+val <A : SlashCommandContext<A, B>, B : Arguments> SlashCommandContext<A, B>.githubHttpClient
+    get() = HttpClient(engineFactory = CIO, block = {
+        defaultRequest {
+            header("Authorization", "bearer $GITHUB_TOKEN")
+        }
+    })
+
+val <A : SlashCommandContext<A, B>, B : Arguments> SlashCommandContext<A, B>.githubGraphQlClient
     get() = GraphQLKtorClient(
         URL("https://api.github.com/graphql"),
-        HttpClient(engineFactory = CIO, block = {
-            defaultRequest {
-                header("Authorization", "bearer $GITHUB_TOKEN")
-            }
-        })
+        this.githubHttpClient
     )

@@ -11,3 +11,4 @@ import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.serializer
 
 typealias NodeId = String
+typealias DatabaseId = Int
