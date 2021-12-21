@@ -12,9 +12,13 @@ import com.kotlindiscord.kord.extensions.modules.extra.phishing.extPhishing
 import com.kotlindiscord.kord.extensions.utils.envOrNull
 import dev.kord.gateway.Intents
 import dev.kord.gateway.PrivilegedIntent
-import org.quiltmc.community.modes.quilt.extensions.*
+import org.quiltmc.community.modes.quilt.extensions.SyncExtension
+import org.quiltmc.community.modes.quilt.extensions.UtilityExtension
 import org.quiltmc.community.modes.quilt.extensions.filtering.FilterExtension
-import org.quiltmc.community.modes.quilt.extensions.github.GithubExtension
+import org.quiltmc.community.modes.devtools.extensions.GithubExtension
+import org.quiltmc.community.modes.devtools.extensions.TeamsExtension
+import org.quiltmc.community.modes.quilt.extensions.PKExtension
+import org.quiltmc.community.modes.quilt.extensions.UserCleanupExtension
 import org.quiltmc.community.modes.quilt.extensions.messagelog.MessageLogExtension
 import org.quiltmc.community.modes.quilt.extensions.minecraft.MinecraftExtension
 import org.quiltmc.community.modes.quilt.extensions.suggestions.SuggestionsExtension
@@ -37,7 +41,7 @@ suspend fun setupDev() = ExtensibleBot(DISCORD_TOKEN) {
     database()
 
     extensions {
-        add(::SubteamsExtension)
+        add(::TeamsExtension)
 
         if (GITHUB_TOKEN != null) {
             add(::GithubExtension)

@@ -1,6 +1,8 @@
 package org.quiltmc.community.database.collections
 
 import dev.kord.common.entity.Snowflake
+import dev.kord.common.entity.optional.mapNotNull
+import dev.kord.common.entity.optional.optional
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.litote.kmongo.eq
@@ -14,6 +16,8 @@ class UserFlagsCollection : KoinComponent {
 
     suspend fun get(id: Snowflake) =
         col.findOne(UserFlags::_id eq id)
+
+    suspend fun getOrCreate(id: Snowflake) = col.findOne(UserFlags::_id eq id) ?: UserFlags(id)
 
     suspend fun set(userFlags: UserFlags) =
         col.save(userFlags)

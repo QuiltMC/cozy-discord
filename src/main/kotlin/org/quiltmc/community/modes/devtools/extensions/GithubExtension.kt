@@ -1,6 +1,5 @@
-package org.quiltmc.community.modes.quilt.extensions.github
+package org.quiltmc.community.modes.devtools.extensions
 
-import com.expediagroup.graphql.client.ktor.GraphQLKtorClient
 import com.kotlindiscord.kord.extensions.DISCORD_RED
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
@@ -11,29 +10,83 @@ import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.core.behavior.channel.createEmbed
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.cio.CIO
-import io.ktor.client.features.defaultRequest
-import io.ktor.client.request.header
+import org.koin.core.component.inject
 import org.quiltmc.community.*
+import org.quiltmc.community.database.collections.UserFlagsCollection
+import org.quiltmc.community.github.NodeId
 import quilt.ghgen.DeleteIssue
 import quilt.ghgen.FindIssueId
+import quilt.ghgen.FindUserNodeId
 import quilt.ghgen.findissueid.*
-import java.net.URL
 
 class GithubExtension : Extension() {
     override val name = "github"
 
-    private val client = GraphQLKtorClient(
-        URL("https://api.github.com/graphql"),
-        HttpClient(engineFactory = CIO, block = {
-            defaultRequest {
-                header("Authorization", "bearer $GITHUB_TOKEN")
-            }
-        })
-    )
+    private val userFlagsCollection: UserFlagsCollection by inject()
+
+
 
     override suspend fun setup() {
+        // toolchain only
+        ephemeralSlashCommand {
+            name = "github"
+            description = "Manage Cozy's GitHub and Discord integration"
+
+            guild(TOOLCHAIN_GUILD)
+
+            // anyone can use this command
+
+            ephemeralSubCommand(::LinkUserArgs) {
+                name = "link"
+                description = "Link your GitHub account to your Discord account. Used by Cozy for adding users to teams"
+
+                action {
+                    val userNodeId: NodeId? = githubGraphQlClient
+                        .execute(FindUserNodeId(FindUserNodeId.Variables(arguments.login)))
+                        .data
+                        ?.user
+                        ?.id
+
+                    if (userNodeId == null) {
+                        respond {
+                            content = "User with login `${arguments.login}` not found!"
+                        }
+
+                        return@action
+                    }
+
+                    val flags = userFlagsCollection.getOrCreate(this.user.id)
+                    flags.githubId = userNodeId
+                    flags.save()
+                    respond {
+                        // TODO: pull more from this query for an embed
+                        // TODO: log this somewhere
+                        content = "Linked your GitHub account with user login `${arguments.login}`"
+                    }
+                }
+            }
+
+            ephemeralSubCommand() {
+                name = "unlink"
+                description = "Unlink your GitHub account from your Discord user on Cozy"
+
+                action {
+                    // I have no idea how this API works with deletions so I'm going to go the safe route.
+                    val flags = userFlagsCollection.getOrCreate(this.user.id)
+                    flags.githubId = null
+                    flags.save()
+
+                    respond {
+                        // TODO: detect if one was actually removed or not
+                        content = "Unlinked your GitHub account, if one was linked."
+                    }
+
+                }
+            }
+
+        }
+
+        // both guilds
         for (guildId in GUILDS) {
             ephemeralSlashCommand {
                 name = "github-issue"
@@ -48,7 +101,7 @@ class GithubExtension : Extension() {
                     description = "Delete the given issue"
 
                     action {
-                        val repo = client
+                        val repo = githubGraphQlClient
                             .execute(FindIssueId(FindIssueId.Variables(arguments.repo, arguments.issue)))
                             .data
                             ?.repository
@@ -60,13 +113,13 @@ class GithubExtension : Extension() {
 
                             repo.pullRequest != null -> respond {
                                 content = "#${arguments.issue} appears to be a pull request. " +
-                                        "Github does not allow deleting pull requests! " +
-                                        "Please contact Github Support."
+                                        "GitHub does not allow deleting pull requests! " +
+                                        "Please contact GitHub Support."
                             }
 
                             repo.issue != null -> {
                                 // try to delete the issue
-                                val response = client.execute(DeleteIssue(DeleteIssue.Variables(repo.issue.id)))
+                                val response = githubGraphQlClient.execute(DeleteIssue(DeleteIssue.Variables(repo.issue.id)))
 
                                 if (response.errors.isNullOrEmpty()) {
                                     respond {
@@ -75,11 +128,11 @@ class GithubExtension : Extension() {
                                     }
 
                                     // log the deletion
-                                    // TODO: Github's webhooks do provide a way to automatically log all deletions
+                                    // TODO: GitHub's webhooks do provide a way to automatically log all deletions
                                     //      through a webhook, but there is no filter.
                                     //      In the future, we could set something up on Cozy to automatically
                                     //      filter the github webhook to create an action log.
-                                    getGithubLogChannel()?.createEmbed {
+                                    getGitHubLogChannel()?.createEmbed {
                                         val issue = repo.issue
 
                                         title = "Issue Deleted: ${issue.title}"
@@ -141,5 +194,9 @@ class GithubExtension : Extension() {
             "reason",
             "A short explanation of why this issue is being deleted"
         )
+    }
+
+    inner class LinkUserArgs : Arguments() {
+        val login by string("slug", "The slug (username) of the GitHub account to link")
     }
 }

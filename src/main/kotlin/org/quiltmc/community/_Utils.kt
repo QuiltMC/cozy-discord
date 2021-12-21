@@ -1,5 +1,6 @@
 package org.quiltmc.community
 
+import com.expediagroup.graphql.client.ktor.GraphQLKtorClient
 import com.kotlindiscord.kord.extensions.builders.ExtensibleBotBuilder
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.SlashCommandContext
@@ -15,12 +16,17 @@ import dev.kord.core.entity.Guild
 import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.rest.builder.message.EmbedBuilder
 import dev.kord.rest.request.RestRequestException
+import io.ktor.client.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.features.*
+import io.ktor.client.request.*
 import kotlinx.coroutines.runBlocking
 import org.koin.dsl.bind
 import org.quiltmc.community.database.Database
 import org.quiltmc.community.database.collections.*
 import org.quiltmc.community.database.getSettings
 import org.quiltmc.community.modes.quilt.extensions.settings.SettingsExtension
+import java.net.URL
 
 @Suppress("MagicNumber")  // It's the status code...
 suspend fun Kord.getGuildIgnoring403(id: Snowflake) =
@@ -166,13 +172,13 @@ fun Guild.getMaxArchiveDuration(): ArchiveDuration {
 // Logging-related extensions
 
 suspend fun <C : SlashCommandContext<C, A>, A : Arguments>
-        SlashCommandContext<C, A>.getGithubLogChannel(): GuildMessageChannel? {
+        SlashCommandContext<C, A>.getGitHubLogChannel(): GuildMessageChannel? {
     val channelId = getKoin().get<GlobalSettingsCollection>().get()?.githubLogChannel ?: return null
 
     return event.kord.getChannelOf<GuildMessageChannel>(channelId)
 }
 
-suspend fun Kord?.getGithubLogChannel(): GuildMessageChannel? {
+suspend fun Kord?.getGitHubLogChannel(): GuildMessageChannel? {
     val channelId = getKoin().get<GlobalSettingsCollection>().get()?.githubLogChannel ?: return null
 
     return this?.getChannelOf(channelId)
@@ -186,3 +192,16 @@ suspend fun EmbedBuilder.userField(user: UserBehavior, role: String, inline: Boo
         this.inline = inline
     }
 }
+
+val <A : SlashCommandContext<A, B>, B : Arguments> SlashCommandContext<A, B>.githubHttpClient
+    get() = HttpClient(engineFactory = CIO, block = {
+        defaultRequest {
+            header("Authorization", "bearer $GITHUB_TOKEN")
+        }
+    })
+
+val <A : SlashCommandContext<A, B>, B : Arguments> SlashCommandContext<A, B>.githubGraphQlClient
+    get() = GraphQLKtorClient(
+        URL("https://api.github.com/graphql"),
+        this.githubHttpClient
+    )
