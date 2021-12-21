@@ -64,6 +64,8 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
 
     members {
         all()
+
+        fillPresences = true
     }
 
     extensions {
