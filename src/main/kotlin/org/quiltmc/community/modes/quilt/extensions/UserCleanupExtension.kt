@@ -93,10 +93,10 @@ class UserCleanupExtension : Extension() {
                                         title += " (dry-run)"
                                     }
 
-                                    description = "**Member** | **Join date**\n\n"
+                                    description = "**Mention** | **Tag** | **Join date**\n\n"
 
                                     chunk.forEach { member ->
-                                        description += "${member.mention} | " +
+                                        description += "${member.mention} | ${member.tag} |" +
                                                 "${member.joinedAt.toDiscord(TimestampType.Default)}\n"
                                     }
                                 }
@@ -110,7 +110,7 @@ class UserCleanupExtension : Extension() {
 
     suspend fun taskRun(dryRun: Boolean = false): MutableList<Member> {
         val removed: MutableList<Member> = mutableListOf()
-        val cutoff = Clock.System.now() - MAX_PENDING_DURATION
+        val now = Clock.System.now()
 
         try {
             val guilds = servers
@@ -120,7 +120,7 @@ class UserCleanupExtension : Extension() {
 
             guilds.forEach { guild ->
                 guild.members
-                    .filter { it.isPending && it.joinedAt <= cutoff }
+                    .filter { it.isPending && (it.joinedAt + MAX_PENDING_DURATION) <= now }
                     .toList()
                     .forEach {
                         if (!dryRun) {
