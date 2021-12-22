@@ -56,6 +56,7 @@ import mu.KotlinLogging
 import org.koin.core.component.inject
 import org.quiltmc.community.*
 import org.quiltmc.community.database.collections.OwnedThreadCollection
+import org.quiltmc.community.database.collections.ServerSettingsCollection
 import org.quiltmc.community.database.entities.OwnedThread
 import java.time.format.DateTimeFormatter
 import kotlin.time.Duration
@@ -76,6 +77,7 @@ class UtilityExtension : Extension() {
 
     private val logger = KotlinLogging.logger { }
     private val threads: OwnedThreadCollection by inject()
+    private val serverSettings: ServerSettingsCollection by inject()
 
     private val guildCache: MutableMap<Snowflake, Guild> = mutableMapOf()
 
@@ -690,7 +692,7 @@ class UtilityExtension : Extension() {
 
                                 edit { content = "Updated thread owner to ${arguments.user.mention}" }
 
-                                guild!!.asGuild().getModLogChannel()?.createEmbed {
+                                serverSettings.get(guild!!.id)?.getConfiguredLogChannel()?.createEmbed {
                                     title = "Thread Owner Updated (Moderator)"
                                     color = DISCORD_BLURPLE
 
@@ -743,7 +745,7 @@ class UtilityExtension : Extension() {
                                                     }
                                                 }
 
-                                                guild!!.asGuild().getModLogChannel()?.createEmbed {
+                                                serverSettings.get(guild!!.id)?.getConfiguredLogChannel()?.createEmbed {
                                                     title = "Thread Owner Updated (User)"
                                                     color = DISCORD_BLURPLE
 
