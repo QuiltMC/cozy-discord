@@ -56,7 +56,6 @@ import mu.KotlinLogging
 import org.koin.core.component.inject
 import org.quiltmc.community.*
 import org.quiltmc.community.database.collections.OwnedThreadCollection
-import org.quiltmc.community.database.collections.ServerSettingsCollection
 import org.quiltmc.community.database.entities.OwnedThread
 import java.time.format.DateTimeFormatter
 import kotlin.time.Duration
@@ -77,7 +76,6 @@ class UtilityExtension : Extension() {
 
     private val logger = KotlinLogging.logger { }
     private val threads: OwnedThreadCollection by inject()
-    private val serverSettings: ServerSettingsCollection by inject()
 
     private val guildCache: MutableMap<Snowflake, Guild> = mutableMapOf()
 
@@ -648,7 +646,7 @@ class UtilityExtension : Extension() {
 
                         edit { content = "Thread will no longer be archived." }
 
-                        guild!!.asGuild().getModLogChannel()?.createEmbed {
+                        guild?.asGuild()?.getCozyLogChannel()?.createEmbed {
                             title = "Thread Persistence Enabled"
                             color = DISCORD_BLURPLE
 
@@ -692,7 +690,7 @@ class UtilityExtension : Extension() {
 
                                 edit { content = "Updated thread owner to ${arguments.user.mention}" }
 
-                                serverSettings.get(guild!!.id)?.getConfiguredLogChannel()?.createEmbed {
+                                guild?.asGuild()?.getCozyLogChannel()?.createEmbed {
                                     title = "Thread Owner Updated (Moderator)"
                                     color = DISCORD_BLURPLE
 
@@ -745,7 +743,7 @@ class UtilityExtension : Extension() {
                                                     }
                                                 }
 
-                                                serverSettings.get(guild!!.id)?.getConfiguredLogChannel()?.createEmbed {
+                                                guild?.asGuild()?.getCozyLogChannel()?.createEmbed {
                                                     title = "Thread Owner Updated (User)"
                                                     color = DISCORD_BLURPLE
 
