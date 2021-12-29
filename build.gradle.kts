@@ -61,6 +61,7 @@ dependencies {
     implementation(libs.kordex.phishing)
 
     implementation(libs.commons.text)
+    implementation(libs.jansi)
     implementation(libs.logback)
     implementation(libs.logging)
     implementation(libs.groovy)
