@@ -15,7 +15,7 @@ if (environment == "dev") {
 
 appender("CONSOLE", ConsoleAppender) {
     encoder(PatternLayoutEncoder) {
-        pattern = "%boldGreen(%d{yyyy-MM-dd HH:mm:ss}) %boldWhite(|) %highlight(%5level) %boldWhite(|) %boldCyan(%25.25logger{25}) %boldWhite(| %msg%n)"
+        pattern = "%boldGreen(%d{yyyy-MM-dd}) %boldYellow(%d{HH:mm:ss}) %gray(|) %highlight(%5level) %gray(|) %boldMagenta(%40.40logger{40}) %gray(|) %msg%n"
 
         withJansi = true
     }
