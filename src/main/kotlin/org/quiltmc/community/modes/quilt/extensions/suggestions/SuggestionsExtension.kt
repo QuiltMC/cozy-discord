@@ -8,7 +8,6 @@ import com.kotlindiscord.kord.extensions.DiscordRelayedException
 import com.kotlindiscord.kord.extensions.checks.hasRole
 import com.kotlindiscord.kord.extensions.checks.inChannel
 import com.kotlindiscord.kord.extensions.checks.inTopChannel
-import com.kotlindiscord.kord.extensions.checks.isNotBot
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.converters.impl.enumChoice
 import com.kotlindiscord.kord.extensions.commands.converters.impl.coalescedString
@@ -37,7 +36,6 @@ import dev.kord.core.entity.interaction.ButtonInteraction
 import dev.kord.core.event.channel.thread.ThreadChannelCreateEvent
 import dev.kord.core.event.interaction.InteractionCreateEvent
 import dev.kord.core.event.message.MessageCreateEvent
-import dev.kord.core.event.message.MessageDeleteEvent
 import dev.kord.rest.builder.message.create.MessageCreateBuilder
 import dev.kord.rest.builder.message.create.actionRow
 import dev.kord.rest.builder.message.create.embed
@@ -48,6 +46,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.toList
 import org.koin.core.component.inject
 import org.quiltmc.community.*
+import org.quiltmc.community.api.pluralkit.PluralKit
 import org.quiltmc.community.database.collections.OwnedThreadCollection
 import org.quiltmc.community.database.collections.SuggestionsCollection
 import org.quiltmc.community.database.entities.OwnedThread
@@ -65,7 +64,6 @@ private const val THREAD_INTRO = "This message is at the top of the thread.\n\n"
         "your suggestion thread as needed."
 
 private const val COMMENT_SIZE_LIMIT: Long = 800
-private const val MESSAGE_CACHE_SIZE = 10
 private const val SUGGESTION_SIZE_LIMIT: Long = 1000
 private const val THIRTY_SECONDS: Long = 30_000
 private const val TUPPERBOX_DELAY: Long = 5
@@ -80,7 +78,7 @@ class SuggestionsExtension : Extension() {
     private val suggestions: SuggestionsCollection by inject()
     private val threads: OwnedThreadCollection by inject()
 
-    private val messageCache: MutableList<Pair<String, Snowflake>> = mutableListOf()
+    private val pluralKit = PluralKit()
 
     override suspend fun setup() {
         // region: Events
@@ -111,22 +109,20 @@ class SuggestionsExtension : Extension() {
                 val id = event.message.id
 
                 val suggestion = if (event.message.webhookId != null) {
-                    val cachedEntry = messageCache.firstOrNull { event.message.content in it.first }
+                    val pkMessage = pluralKit.getMessageOrNull(event.message.id)
 
-                    if (cachedEntry != null) {
-                        messageCache.remove(cachedEntry)
-
+                    if (pkMessage != null) {
                         Suggestion(
                             _id = id,
                             text = event.message.content,
 
-                            owner = cachedEntry.second,
+                            owner = pkMessage.sender,
                             ownerAvatar = "https://cdn.discordapp.com/avatars/" +
                                     "${event.message.data.author.id.value}/" +
-                                    "${event.message.data.author.avatar}.png",
+                                    "${event.message.data.author.avatar}.webp",
                             ownerName = event.message.data.author.username,
 
-                            positiveVoters = mutableListOf(cachedEntry.second),
+                            positiveVoters = mutableListOf(pkMessage.sender),
 
                             isTupper = true
                         )
@@ -134,16 +130,22 @@ class SuggestionsExtension : Extension() {
                         null
                     }
                 } else {
-                    Suggestion(
-                        _id = id,
-                        text = event.message.content,
+                    val pkMessage = pluralKit.getMessageOrNull(event.message.id)
 
-                        owner = event.message.author!!.id,
-                        ownerAvatar = event.message.author!!.avatar?.url,
-                        ownerName = event.message.author!!.asMember(event.message.getGuild().id).displayName,
+                    if (pkMessage == null) {
+                        Suggestion(
+                            _id = id,
+                            text = event.message.content,
 
-                        positiveVoters = mutableListOf(event.message.author!!.id)
-                    )
+                            owner = event.message.author!!.id,
+                            ownerAvatar = event.message.author!!.avatar?.url,
+                            ownerName = event.message.author!!.asMember(event.message.getGuild().id).displayName,
+
+                            positiveVoters = mutableListOf(event.message.author!!.id)
+                        )
+                    } else {
+                        null
+                    }
                 } ?: return@action
 
                 if (suggestion.text.length > SUGGESTION_SIZE_LIMIT) {
@@ -187,24 +189,6 @@ class SuggestionsExtension : Extension() {
 
             action {
                 event.message.deleteIgnoringNotFound()
-            }
-        }
-
-        event<MessageDeleteEvent> {
-            check { inChannel(SUGGESTION_CHANNEL) }
-            check { isNotBot() }
-
-            check { failIf(event.message?.author == null) }
-            check { failIf(event.message?.webhookId != null) }
-            check { failIf(event.message?.content?.trim()?.isEmpty() == true) }
-            check { failIf(event.message?.interaction != null) }
-
-            action {
-                messageCache.add(event.message!!.content to event.message!!.author!!.id)
-
-                while (messageCache.size > MESSAGE_CACHE_SIZE) {
-                    messageCache.removeFirst()
-                }
             }
         }
 

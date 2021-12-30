@@ -2,6 +2,7 @@
 
 package org.quiltmc.community.modes.quilt.extensions.settings
 
+import com.kotlindiscord.kord.extensions.DISCORD_BLURPLE
 import com.kotlindiscord.kord.extensions.DiscordRelayedException
 import com.kotlindiscord.kord.extensions.checks.anyGuild
 import com.kotlindiscord.kord.extensions.checks.hasPermission
@@ -24,14 +25,16 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import org.koin.core.component.inject
+import org.quiltmc.community.*
+import org.quiltmc.community.GUILDS
 import org.quiltmc.community.MAIN_GUILD
 import org.quiltmc.community.database.collections.GlobalSettingsCollection
 import org.quiltmc.community.database.collections.ServerSettingsCollection
+import org.quiltmc.community.database.collections.UserFlagsCollection
 import org.quiltmc.community.database.entities.GlobalSettings
 import org.quiltmc.community.database.entities.ServerSettings
+import org.quiltmc.community.database.entities.UserFlags
 import org.quiltmc.community.database.enums.QuiltServerType
-import org.quiltmc.community.hasPermissionInMainGuild
-import org.quiltmc.community.inToolchain
 import org.quiltmc.community.modes.quilt.extensions.messagelog.MessageLogExtension
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
@@ -45,6 +48,7 @@ class SettingsExtension : Extension() {
 
     private val globalSettings: GlobalSettingsCollection by inject()
     private val serverSettings: ServerSettingsCollection by inject()
+    private val userFlags: UserFlagsCollection by inject()
 
     private val messageLogExtension get() = bot.findExtension<MessageLogExtension>()
 
@@ -69,6 +73,57 @@ class SettingsExtension : Extension() {
                     delay(Duration.seconds(2))
 
                     event.guild.leave()
+                }
+            }
+        }
+
+        GUILDS.forEach { guildId ->
+            ephemeralSlashCommand {
+                name = "config"
+                description = "Manage your bot settings"
+
+                guild(guildId)
+
+                ephemeralSubCommand {
+                    name = "get"
+                    description = "Show your settings"
+
+                    action {
+                        val flags = userFlags.get(user.id) ?: UserFlags(user.id)
+
+                        respond {
+                            embed {
+                                title = "Your Settings"
+                                color = DISCORD_BLURPLE
+
+                                description = "**Auto publish:** " + if (flags.autoPublish) {
+                                    "Enabled"
+                                } else {
+                                    "Disabled"
+                                }
+                            }
+                        }
+                    }
+                }
+
+                ephemeralSubCommand(booleanFlag("auto-publish announcement messages")) {
+                    name = "auto-publish"
+                    description = "Configure the automatic publishing of announcement messages"
+
+                    action {
+                        val flags = userFlags.get(user.id) ?: UserFlags(user.id)
+
+                        flags.autoPublish = arguments.value
+                        flags.save()
+
+                        respond {
+                            content = "Auto-publishing **" + if (flags.autoPublish) {
+                                "enabled"
+                            } else {
+                                "disabled"
+                            } + "**."
+                        }
+                    }
                 }
             }
         }
@@ -638,6 +693,14 @@ class SettingsExtension : Extension() {
                 }
             }
         }
+    }
+
+    fun booleanFlag(desc: String): () -> BooleanFlag = {
+        BooleanFlag(desc)
+    }
+
+    inner class BooleanFlag(desc: String) : Arguments() {
+        val value by boolean("value", "Whether to $desc")
     }
 
     inner class InviteArg : Arguments() {

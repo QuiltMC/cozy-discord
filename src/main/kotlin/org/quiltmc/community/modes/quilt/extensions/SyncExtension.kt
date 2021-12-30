@@ -7,9 +7,7 @@ import com.kotlindiscord.kord.extensions.checks.types.CheckContext
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.chatGroupCommand
 import com.kotlindiscord.kord.extensions.extensions.event
-import com.kotlindiscord.kord.extensions.utils.deltas.MemberDelta
 import com.kotlindiscord.kord.extensions.utils.hasPermission
-import com.kotlindiscord.kord.extensions.utils.hasRole
 import com.kotlindiscord.kord.extensions.utils.respond
 import com.kotlindiscord.kord.extensions.utils.translate
 import dev.kord.common.entity.Permission
@@ -20,9 +18,7 @@ import dev.kord.core.entity.Guild
 import dev.kord.core.event.Event
 import dev.kord.core.event.guild.BanAddEvent
 import dev.kord.core.event.guild.BanRemoveEvent
-import dev.kord.core.event.guild.MemberUpdateEvent
 import dev.kord.rest.builder.message.create.embed
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.toList
 import mu.KotlinLogging
 import org.quiltmc.community.GUILDS
@@ -30,8 +26,6 @@ import org.quiltmc.community.inQuiltGuild
 
 private val BAN_PERMS: Array<Permission> = arrayOf(Permission.BanMembers, Permission.Administrator)
 private val ROLE_PERMS: Array<Permission> = arrayOf(Permission.ManageRoles, Permission.Administrator)
-
-private const val TUPPER_ROLE_NAME: String = "Tupperbox Access"
 
 class SyncExtension : Extension() {
     override val name: String = "sync"
@@ -46,25 +40,6 @@ class SyncExtension : Extension() {
         )
 
         BAN_PERMS.forEach {
-            val innerCheck = CheckContext(event, locale)
-            innerCheck.hasPermission(it)
-
-            if (innerCheck.passed) {
-                pass()
-
-                return
-            }
-        }
-    }
-
-    private suspend fun <T : Event> CheckContext<T>.hasRolePerms() {
-        fail(
-            "Must have at least one of these permissions: " + ROLE_PERMS.joinToString { perm ->
-                "**${perm.translate(locale)}**"
-            }
-        )
-
-        ROLE_PERMS.forEach {
             val innerCheck = CheckContext(event, locale)
             innerCheck.hasPermission(it)
 
@@ -170,109 +145,6 @@ class SyncExtension : Extension() {
                     }
                 }
             }
-
-            chatCommand {
-                name = "roles"
-                description = "Additively synchronise roles between all servers, so that everything matches."
-
-                check { inQuiltGuild() }
-                check { hasRolePerms() }
-
-                requireBotPermissions(Permission.ManageRoles)
-
-                action {
-                    val guilds = getGuilds()
-
-                    logger.info { "Syncing roles for ${guilds.size} guilds." }
-
-                    guilds.forEach {
-                        logger.debug { "${it.id.value} -> ${it.name}" }
-
-                        val member = it.getMember(this@SyncExtension.kord.selfId)
-
-                        if (!ROLE_PERMS.any { perm -> member.hasPermission(perm) }) {
-                            message.respond(
-                                "I don't have permission to manage roles on ${it.name} (`${it.id.value}`)"
-                            )
-
-                            return@action
-                        }
-                    }
-
-                    val membersWithRole: MutableSet<Snowflake> = mutableSetOf()
-                    var newAssignments = 0L
-
-                    message.channel.withTyping {
-                        for (guild in guilds) {
-                            val role = guild.roles.toList().firstOrNull {
-                                it.name.equals(TUPPER_ROLE_NAME, true)
-                            }
-
-                            if (role == null) {
-                                logger.debug {
-                                    "Guild ${guild.name} seems to be missing a $TUPPER_ROLE_NAME role"
-                                }
-
-                                continue
-                            }
-
-                            guild.members.collect { member ->
-                                if (member.hasRole(role)) {
-                                    logger.debug { "Member ${member.id.value} has role on guild: ${guild.name}" }
-
-                                    membersWithRole.add(member.id)
-                                }
-                            }
-                        }
-
-                        if (membersWithRole.isEmpty()) {
-                            message.respond {
-                                content = "Nobody seems to have the `$TUPPER_ROLE_NAME` role."
-                            }
-
-                            return@action
-                        }
-
-                        for (guild in guilds) {
-                            val role = guild.roles.toList().firstOrNull {
-                                it.name.equals(TUPPER_ROLE_NAME, true)
-                            }
-
-                            if (role == null) {
-                                message.respond(pingInReply = false) {
-                                    content = "**Note:** Guild `${guild.name}` seems to be missing a " +
-                                            "`$TUPPER_ROLE_NAME` role."
-                                }
-
-                                continue
-                            }
-
-                            logger.debug { "Role ${role.id.value} found on guild ${guild.name}" }
-
-                            for (id in membersWithRole) {
-                                val member = guild.getMemberOrNull(id) ?: continue
-
-                                if (!member.hasRole(role)) {
-                                    logger.debug { "Adding role for member: ${member.id.value} / ${member.tag}" }
-
-                                    member.addRole(role.id, "Synchronised from another server.")
-                                    newAssignments += 1
-                                } else {
-                                    logger.debug { "Member already has role: ${member.id.value} / ${member.tag}" }
-                                }
-                            }
-                        }
-
-                        message.respond {
-                            embed {
-                                title = "Roles synced"
-
-                                description = "Added $newAssignments missing roles."
-                            }
-                        }
-                    }
-                }
-            }
         }
 
         event<BanAddEvent> {
@@ -301,72 +173,6 @@ class SyncExtension : Extension() {
                 guilds.forEach {
                     if (it.getBanOrNull(event.user.id) != null) {
                         it.unban(event.user.id)
-                    }
-                }
-            }
-        }
-
-        event<MemberUpdateEvent> {
-            check { inQuiltGuild() }
-
-            action {
-                val delta = MemberDelta.from(event.old, event.member) ?: return@action
-                val roles = delta.roles.value
-
-                val addedRole = roles?.added?.firstOrNull { it.name.equals(TUPPER_ROLE_NAME, true) }
-                val removedRole = roles?.removed?.firstOrNull { it.name.equals(TUPPER_ROLE_NAME, true) }
-
-                val guilds = getGuilds().filter { it.id != event.guildId }
-
-                if (addedRole != null) {
-                    logger.debug { "Syncing role addition for user: ${event.member.id.value} / ${event.member.tag}" }
-
-                    for (guild in guilds) {
-                        val member = guild.getMemberOrNull(event.member.id) ?: continue
-
-                        val role = guild.roles.toList().firstOrNull {
-                            it.name.equals(TUPPER_ROLE_NAME, true)
-                        }
-
-                        if (role == null) {
-                            logger.debug {
-                                "Guild ${guild.name} seems to be missing a $TUPPER_ROLE_NAME role"
-                            }
-
-                            continue
-                        }
-
-                        if (!member.hasRole(role)) {
-                            logger.debug { "Member doesn't have the role, adding..." }
-                            member.addRole(role.id, "Synchronised from ${event.guild.asGuild().name}.")
-                        } else {
-                            logger.debug { "Member already has the role" }
-                        }
-                    }
-                } else if (removedRole != null) {
-                    logger.debug { "Syncing role removal for user: ${event.member.id.value} / ${event.member.tag}" }
-
-                    for (guild in guilds) {
-                        val member = guild.getMemberOrNull(event.member.id) ?: continue
-
-                        val role = guild.roles.toList().firstOrNull {
-                            it.name.equals(TUPPER_ROLE_NAME, true)
-                        }
-
-                        if (role == null) {
-                            logger.debug {
-                                "Guild ${guild.name} seems to be missing a $TUPPER_ROLE_NAME role"
-                            }
-
-                            continue
-                        }
-
-                        if (member.hasRole(role)) {
-                            logger.debug { "Member has the role, removing..." }
-                            member.removeRole(role.id, "Synchronised from ${event.guild.asGuild().name}.")
-                        } else {
-                            logger.debug { "Member doesn't have the role" }
-                        }
                     }
                 }
             }
