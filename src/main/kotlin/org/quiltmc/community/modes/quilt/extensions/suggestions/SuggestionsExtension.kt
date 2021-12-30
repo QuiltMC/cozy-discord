@@ -61,12 +61,13 @@ private const val ACTION_UP = "up"
 private const val THREAD_INTRO = "This message is at the top of the thread.\n\n" +
         "If this is your suggestion, **please** use `/thread rename` to change the " +
         "name of the thread! You're also welcome to use the other `/thread` commands to manage " +
-        "your suggestion thread as needed."
+        "your suggestion thread as needed. Additionally, the `/suggestion edit` command exists " +
+        "to, well, edit your suggestion."
 
 private const val COMMENT_SIZE_LIMIT: Long = 800
 private const val SUGGESTION_SIZE_LIMIT: Long = 1000
 private const val THIRTY_SECONDS: Long = 30_000
-private const val TUPPERBOX_DELAY: Long = 5
+private const val PLURALKIT_DELAY: Long = 5
 
 private val EMOTE_DOWNVOTE = ReactionEmoji.Unicode("⬇️")
 private val EMOTE_REMOVE = ReactionEmoji.Unicode("\uD83D\uDDD1️")
@@ -102,7 +103,7 @@ class SuggestionsExtension : Extension() {
 
             action {
                 event.message.channel.withTyping {
-                    delay(Duration.seconds(TUPPERBOX_DELAY))
+                    delay(Duration.seconds(PLURALKIT_DELAY))
 
                     // If it's been yeeted, it's probably been moderated or proxied
                     event.message.channel.getMessageOrNull(event.message.id) ?: return@action
@@ -304,13 +305,16 @@ class SuggestionsExtension : Extension() {
         // region: Commands
 
         ephemeralSlashCommand(::SuggestionEditArguments) {
-            name = "edit-suggestion"
+            name = "suggestion edit"
             description = "Edit one of your suggestions"
 
             guild(COMMUNITY_GUILD)
 
             action {
-                if (arguments.suggestion.owner != user.id) {
+                val roles = user.asMember(guild!!.id).roles.toList().map { it.id }
+
+                if (arguments.suggestion.owner != user.id &&
+                        !MODERATOR_ROLES.any { it in roles }) {
                     respond {
                         content = "**Error:** You don't own that suggestion."
                     }
@@ -330,7 +334,7 @@ class SuggestionsExtension : Extension() {
         }
 
         ephemeralSlashCommand(::SuggestionStateArguments) {
-            name = "suggestion"
+            name = "suggestion set-state"
             description = "Suggestion state change command; \"clear\" to remove comment"
 
             guild(COMMUNITY_GUILD)
