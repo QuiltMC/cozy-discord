@@ -13,6 +13,8 @@ import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
 import com.kotlindiscord.kord.extensions.commands.application.slash.publicSubCommand
 import com.kotlindiscord.kord.extensions.commands.converters.impl.*
+import com.kotlindiscord.kord.extensions.components.components
+import com.kotlindiscord.kord.extensions.components.ephemeralButton
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralMessageCommand
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
@@ -36,6 +38,8 @@ import dev.kord.core.event.channel.thread.ThreadUpdateEvent
 import dev.kord.core.event.guild.GuildCreateEvent
 import dev.kord.core.event.guild.GuildUpdateEvent
 import dev.kord.core.event.message.MessageCreateEvent
+import dev.kord.rest.builder.message.create.embed
+import dev.kord.rest.builder.message.modify.embed
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.firstOrNull
@@ -658,6 +662,122 @@ class UtilityExtension : Extension() {
                         }
 
                         edit { content = "Thread will no longer be archived." }
+
+                        guild?.asGuild()?.getCozyLogChannel()?.createEmbed {
+                            title = "Thread Persistence Enabled"
+                            color = DISCORD_BLURPLE
+
+                            userField(member, "Moderator")
+                            channelField(channel, "Thread")
+                        }
+                    }
+                }
+
+                ephemeralSubCommand(::SetOwnerArguments) {
+                    name = "set-owner"
+                    description = "Change the owner of the thread, if you have permission"
+
+                    action {
+                        val channel = channel.asChannel() as ThreadChannel
+                        val member = user.asMember(guild!!.id)
+                        val roles = member.roles.toList().map { it.id }
+                        val thread = threads.get(channel)
+
+                        if (thread != null) {
+                            val previousOwner = thread.owner
+
+                            if ((thread.owner != user.id && threads.isOwner(channel, user) != true) &&
+                                !MODERATOR_ROLES.any { it in roles }
+                            ) {
+                                edit { content = "**Error:** This is not your thread." }
+                                return@action
+                            }
+
+                            if (thread.owner == arguments.user.id) {
+                                edit {
+                                    content = "That user already owns this thread."
+                                }
+
+                                return@action
+                            }
+
+                            if (MODERATOR_ROLES.any { it in roles }) {
+                                thread.owner = arguments.user.id
+                                threads.set(thread)
+
+                                edit { content = "Updated thread owner to ${arguments.user.mention}" }
+
+                                guild?.asGuild()?.getCozyLogChannel()?.createEmbed {
+                                    title = "Thread Owner Updated (Moderator)"
+                                    color = DISCORD_BLURPLE
+
+                                    userField(member.asUser(), "Moderator")
+                                    userField(guild!!.getMember(previousOwner), "Previous Owner")
+                                    userField(arguments.user, "New Owner")
+                                    channelField(channel, "Thread")
+                                }
+                            } else {
+                                respond {
+                                    embed {
+                                        color = DISCORD_BLURPLE
+                                        description =
+                                            "Are you sure you want to transfer ownership to " +
+                                                    "${arguments.user.mention}? To cancel the" +
+                                                    " transfer, simply ignore this message."
+                                    }
+
+                                    components(Duration.seconds(15)) {
+                                        onTimeout {
+                                            edit {
+                                                embed {
+                                                    color = DISCORD_BLURPLE
+                                                    description =
+                                                        "Action timed out - no change performed"
+                                                }
+
+                                                components {
+                                                    removeAll()
+                                                }
+                                            }
+                                        }
+
+                                        ephemeralButton {
+                                            label = "Yes"
+                                            action {
+                                                thread.owner = arguments.user.id
+                                                threads.set(thread)
+
+                                                edit {
+                                                    embed {
+                                                        color = DISCORD_BLURPLE
+                                                        description =
+                                                            "Updated thread owner to " +
+                                                                    arguments.user.mention
+                                                    }
+
+                                                    components {
+                                                        removeAll()
+                                                    }
+                                                }
+
+                                                guild?.asGuild()?.getCozyLogChannel()?.createEmbed {
+                                                    title = "Thread Owner Updated (User)"
+                                                    color = DISCORD_BLURPLE
+
+                                                    userField(member.asUser(), "Previous Owner")
+                                                    userField(arguments.user, "New Owner")
+                                                    channelField(channel, "Thread")
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            respond {
+                                content = "That thread doesn't exist within my database."
+                            }
+                        }
                     }
                 }
             }
@@ -1041,6 +1161,10 @@ class UtilityExtension : Extension() {
             "Whether to lock the thread, if you're staff - defaults to false",
             false
         )
+    }
+
+    inner class SetOwnerArguments : Arguments() {
+        val user by user("user", "User to set as the owner of the thread")
     }
 
     inner class LockArguments : Arguments() {
