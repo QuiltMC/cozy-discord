@@ -72,6 +72,8 @@ private val EMOTE_DOWNVOTE = ReactionEmoji.Unicode("⬇️")
 private val EMOTE_REMOVE = ReactionEmoji.Unicode("\uD83D\uDDD1️")
 private val EMOTE_UPVOTE = ReactionEmoji.Unicode("⬆️")
 
+private val CLEAR_WORDS = arrayOf("clear", "null")
+
 class SuggestionsExtension : Extension() {
     override val name: String = "suggestions"
 
@@ -329,7 +331,7 @@ class SuggestionsExtension : Extension() {
 
         ephemeralSlashCommand(::SuggestionStateArguments) {
             name = "suggestion"
-            description = "Suggestion state change commands"
+            description = "Suggestion state change command; \"clear\" to remove comment"
 
             guild(COMMUNITY_GUILD)
 
@@ -341,7 +343,14 @@ class SuggestionsExtension : Extension() {
                 val status = arguments.status
 
                 arguments.suggestion.status = status
-                arguments.suggestion.comment = arguments.comment ?: arguments.suggestion.comment
+
+                if (arguments.comment != null) {
+                    arguments.suggestion.comment = if (arguments.comment!!.lowercase() in CLEAR_WORDS) {
+                        null
+                    } else {
+                        arguments.comment
+                    }
+                }
 
                 suggestions.set(arguments.suggestion)
                 sendSuggestion(arguments.suggestion)
