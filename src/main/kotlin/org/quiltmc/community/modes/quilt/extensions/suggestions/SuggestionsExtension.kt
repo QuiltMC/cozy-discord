@@ -61,7 +61,7 @@ private const val ACTION_UP = "up"
 private const val THREAD_INTRO = "This message is at the top of the thread.\n\n" +
         "If this is your suggestion, **please** use `/thread rename` to change the " +
         "name of the thread! You're also welcome to use the other `/thread` commands to manage " +
-        "your suggestion thread as needed. You can edit your suggestion at any time using the `/edit-suggestion`"" +
+        "your suggestion thread as needed. You can edit your suggestion at any time using the `/edit-suggestion`" +
         " command."
 
 private const val COMMENT_SIZE_LIMIT: Long = 800
