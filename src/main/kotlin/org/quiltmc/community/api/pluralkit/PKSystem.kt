@@ -18,6 +18,6 @@ data class PKSystem(
     val banner: String?,
     val color: String?, // PK docs are wrong
     val created: Instant,
-    val timezone: String,
+    val timezone: String? = null,
     val privacy: PKSystemPrivacy?
 )
