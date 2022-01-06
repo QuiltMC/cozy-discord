@@ -68,6 +68,7 @@ class FilterExtension : Extension() {
     private val logger = KotlinLogging.logger { }
 
     private val rgxProperties = RgxGenProperties()
+    private val inviteCache: MutableMap<String, Snowflake> = mutableMapOf()
 
     init {
         RgxGenOption.INFINITE_PATTERN_REPETITION.setInProperties(rgxProperties, 2)
@@ -676,12 +677,25 @@ class FilterExtension : Extension() {
     }
 
     suspend fun String.containsInviteFor(guild: Snowflake): Boolean {
-        val invites = INVITE_REGEX.findAll(this)
+        val inviteMatches = INVITE_REGEX.findAll(this)
 
-        invites.forEach {
-            val invite = kord.getInvite(it.groups["invite"]!!.value, false)
+        for (match in inviteMatches) {
+            val code = match.groups["invite"]!!.value
 
-            if (invite?.partialGuild?.id == guild) {
+            if (code in inviteCache) {
+                if (guild == inviteCache[code]) {
+                    return true
+                } else {
+                    continue
+                }
+            }
+
+            val invite = kord.getInvite(code, false)
+            val inviteGuild = invite?.partialGuild?.id ?: continue
+
+            inviteCache[code] = inviteGuild
+
+            if (inviteGuild == guild) {
                 return true
             }
         }
