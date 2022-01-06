@@ -25,7 +25,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import org.koin.core.component.inject
-import org.quiltmc.community.*
 import org.quiltmc.community.GUILDS
 import org.quiltmc.community.MAIN_GUILD
 import org.quiltmc.community.database.collections.GlobalSettingsCollection
@@ -35,6 +34,8 @@ import org.quiltmc.community.database.entities.GlobalSettings
 import org.quiltmc.community.database.entities.ServerSettings
 import org.quiltmc.community.database.entities.UserFlags
 import org.quiltmc.community.database.enums.QuiltServerType
+import org.quiltmc.community.hasPermissionInMainGuild
+import org.quiltmc.community.inToolchain
 import org.quiltmc.community.modes.quilt.extensions.messagelog.MessageLogExtension
 import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
@@ -544,6 +545,66 @@ class SettingsExtension : Extension() {
 
                     respond {
                         content = "**Cozy logging channel set:** ${channel.mention}"
+                    }
+                }
+            }
+
+            ephemeralSubCommand(::TopMessageChannelGuildArg) {
+                name = "filter-log-channel"
+                description = "Configure the channel Cozy should send filter log messages to"
+
+                action {
+                    val context = CheckContext(event, getLocale())
+
+                    if (arguments.serverId != null) {
+                        context.hasPermissionInMainGuild(Permission.Administrator)
+
+                        if (!context.passed) {
+                            respond {
+                                content = ":x: Only Quilt community managers can modify settings for other servers."
+                            }
+
+                            return@action
+                        }
+                    }
+
+                    val settings = if (arguments.serverId == null) {
+                        serverSettings.get(guild!!.id)
+                    } else {
+                        serverSettings.get(arguments.serverId!!)
+                    }
+
+                    if (settings == null) {
+                        respond {
+                            content = ":x: Unknown guild ID: `${arguments.serverId?.value}`"
+                        }
+
+                        return@action
+                    }
+
+                    if (arguments.channel == null) {
+                        respond {
+                            content = "**Current Cozy filter logging channel:** <#${settings.filterLogChannel?.value}>"
+                        }
+
+                        return@action
+                    }
+
+                    val channel = event.kord.getChannelOf<TopGuildMessageChannel>(arguments.channel!!.id)!!
+
+                    if (channel.guildId != settings._id) {
+                        respond {
+                            content = ":x: That channel doesn't belong to the guild with ID: `${settings._id.value}`"
+                        }
+
+                        return@action
+                    }
+
+                    settings.filterLogChannel = channel.id
+                    settings.save()
+
+                    respond {
+                        content = "**Cozy filter logging channel set:** ${channel.mention}"
                     }
                 }
             }

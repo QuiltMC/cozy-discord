@@ -27,14 +27,11 @@ import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.ban
 import dev.kord.core.behavior.channel.createEmbed
 import dev.kord.core.behavior.channel.createMessage
-import dev.kord.core.entity.Guild
 import dev.kord.core.entity.Message
-import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.core.event.message.MessageCreateEvent
 import dev.kord.core.event.message.MessageUpdateEvent
 import dev.kord.rest.builder.message.EmbedBuilder
 import dev.kord.rest.builder.message.create.embed
-import kotlinx.coroutines.flow.firstOrNull
 import mu.KotlinLogging
 import org.koin.core.component.inject
 import org.quiltmc.community.*
@@ -591,7 +588,7 @@ class FilterExtension : Extension() {
             this, message.getGuild(), message.author!!, message.channel, message
         )
 
-        guild.getCozyLogChannel()?.createMessage {
+        guild.getFilterLogChannel()?.createMessage {
             if (pingStaff) {
                 val modRole = when (guild.id) {
                     COMMUNITY_GUILD -> guild.getRole(COMMUNITY_MODERATOR_ROLE)
@@ -702,10 +699,6 @@ class FilterExtension : Extension() {
 
         return false
     }
-
-    suspend fun Guild.getCozyLogChannel() =
-        channels.firstOrNull { it.name == "cozy-logs" }
-            ?.asChannelOrNull() as? GuildMessageChannel
 
     suspend fun reloadFilters() {
         filterCache.clear()

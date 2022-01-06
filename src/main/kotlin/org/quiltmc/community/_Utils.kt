@@ -12,6 +12,7 @@ import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
 import dev.kord.core.behavior.UserBehavior
 import dev.kord.core.behavior.channel.MessageChannelBehavior
+import dev.kord.core.behavior.getChannelOf
 import dev.kord.core.entity.Guild
 import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.rest.builder.message.EmbedBuilder
@@ -177,6 +178,18 @@ suspend fun Kord?.getGithubLogChannel(): GuildMessageChannel? {
     val channelId = getKoin().get<GlobalSettingsCollection>().get()?.githubLogChannel ?: return null
 
     return this?.getChannelOf(channelId)
+}
+
+suspend fun Guild.getCozyLogChannel(): GuildMessageChannel? {
+    val channelId = getKoin().get<ServerSettingsCollection>().get(id)?.cozyLogChannel ?: return null
+
+    return getChannelOf(channelId)
+}
+
+suspend fun Guild.getFilterLogChannel(): GuildMessageChannel? {
+    val channelId = getKoin().get<ServerSettingsCollection>().get(id)?.filterLogChannel ?: return null
+
+    return getChannelOf(channelId)
 }
 
 suspend fun EmbedBuilder.userField(user: UserBehavior, role: String, inline: Boolean = false) {
