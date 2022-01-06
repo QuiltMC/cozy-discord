@@ -1,3 +1,5 @@
+@file:Suppress("CommentSpacing")  // I have no idea what you want from me
+
 package org.quiltmc.community.modes.quilt.extensions.filtering
 
 import com.github.curiousoddman.rgxgen.RgxGen
@@ -11,6 +13,7 @@ import com.kotlindiscord.kord.extensions.commands.application.slash.converters.i
 import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
 import com.kotlindiscord.kord.extensions.commands.converters.impl.boolean
 import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingBoolean
+import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalString
 import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
@@ -20,6 +23,7 @@ import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.deleteIgnoringNotFound
 import com.kotlindiscord.kord.extensions.utils.dm
 import com.kotlindiscord.kord.extensions.utils.getJumpUrl
+import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.ban
 import dev.kord.core.behavior.channel.createEmbed
 import dev.kord.core.behavior.channel.createMessage
@@ -41,6 +45,23 @@ import java.util.*
 
 const val APPEALS_INVITE_CODE = "H32HVWw9Nu"
 const val FILTERS_PER_PAGE = 2
+
+// Regex adapted by the regex used in the Python Discord bot, which is MIT-licensed.
+// See LICENSE-python-discord for the license and copyright notice.
+
+val INVITE_REGEX = (
+        "(" +
+                "discord(?:[\\.,]|dot)gg|" +  // discord.gg
+                "discord(?:[\\.,]|dot)com(\\/|slash)invite|" +  // discord.com/invite/
+                "discordapp(?:[\\.,]|dot)com(\\/|slash)invite|" +  //discordapp.com/invite/
+                "discord(?:[\\.,]|dot)me|" +  // discord.me
+                "discord(?:[\\.,]|dot)li|" +  // discord.li
+                "discord(?:[\\.,]|dot)io|" +  // discord.io
+                "(?:(?<!\\w)(?:[\\.,]|dot))gg" +  // discord.gg
+                ")(?:[\\/]|slash)" +  // ... / or "slash"
+                "(?<invite>[a-zA-Z0-9\\-]+)" +  // invite code
+                ""
+        ).toRegex(RegexOption.IGNORE_CASE)
 
 class FilterExtension : Extension() {
     override val name: String = "filter"
@@ -263,6 +284,49 @@ class FilterExtension : Extension() {
                     }
                 }
 
+                ephemeralSubCommand(::FilterEditNoteArgs) {
+                    name = "edit_note"
+                    description = "Update the note for a given filter"
+
+                    action {
+                        val filter = filters.get(UUID.fromString(arguments.uuid))
+
+                        if (filter == null) {
+                            respond {
+                                content = "No such filter: `${arguments.uuid}`"
+                            }
+
+                            return@action
+                        }
+
+                        filter.note = arguments.note
+                        filters.set(filter)
+
+                        this@FilterExtension.kord.getGuild(COMMUNITY_GUILD)
+                            ?.getCozyLogChannel()
+                            ?.createEmbed {
+                                color = DISCORD_GREEN
+                                title = "Filter note updated"
+
+                                formatFilter(filter)
+
+                                field {
+                                    name = "Moderator"
+                                    value = "${user.mention} (`${user.id.value}` / `${user.asUser().tag}`)"
+                                }
+                            }
+
+                        respond {
+                            embed {
+                                color = DISCORD_GREEN
+                                title = "Filter note updated"
+
+                                formatFilter(filter)
+                            }
+                        }
+                    }
+                }
+
                 ephemeralSubCommand(::FilterCreateArgs) {
                     name = "create"
                     description = "Create a new filter"
@@ -275,7 +339,9 @@ class FilterExtension : Extension() {
                             pingStaff = arguments.ping,
 
                             match = arguments.match,
-                            matchType = arguments.matchType
+                            matchType = arguments.matchType,
+
+                            note = arguments.note
                         )
 
                         filters.set(filter)
@@ -561,7 +627,6 @@ class FilterExtension : Extension() {
                 }
 
                 field {
-                    inline = false
                     name = "Filter ID"
                     value = "`$_id`"
                 }
@@ -578,21 +643,50 @@ class FilterExtension : Extension() {
                     value = matchType.readableName
                 }
 
+                if (note != null) {
+                    field {
+                        name = "Filter Note"
+                        value = note!!
+                    }
+                }
+
                 field {
                     name = "Match String"
+
                     value = "```\n" +
-                            "$match\n" +
+
+                            if (matchType == MatchType.INVITE) {
+                                "Suild ID: $match\n"
+                            } else {
+                                "$match\n"
+                            } +
+
                             "```"
                 }
             }
         }
     }
 
-    fun FilterEntry.matches(content: String): Boolean = when (matchType) {
+    suspend fun FilterEntry.matches(content: String): Boolean = when (matchType) {
         MatchType.CONTAINS -> content.contains(match, ignoreCase = true)
         MatchType.EXACT -> content.equals(match, ignoreCase = true)
         MatchType.REGEX -> match.toRegex(RegexOption.IGNORE_CASE).matches(content)
         MatchType.REGEX_CONTAINS -> content.contains(match.toRegex(RegexOption.IGNORE_CASE))
+        MatchType.INVITE -> content.containsInviteFor(Snowflake(match))
+    }
+
+    suspend fun String.containsInviteFor(guild: Snowflake): Boolean {
+        val invites = INVITE_REGEX.findAll(this)
+
+        invites.forEach {
+            val invite = kord.getInvite(it.groups["invite"]!!.value, false)
+
+            if (invite?.partialGuild?.id == guild) {
+                return true
+            }
+        }
+
+        return false
     }
 
     suspend fun Guild.getCozyLogChannel() =
@@ -618,7 +712,14 @@ class FilterExtension : Extension() {
                 "**Match type:** ${filter.matchType.readableName}\n" +
                 "**Ping staff:** ${if (filter.pingStaff) "Yes" else "No"}\n\n" +
 
+                if (filter.note != null) {
+                    "**__Staff Note__**\n${filter.note}\n\n"
+                } else {
+                    ""
+                } +
+
                 "__**Match**__\n\n" +
+
                 "```\n" +
                 "${filter.match}\n" +
                 "```\n"
@@ -668,6 +769,7 @@ class FilterExtension : Extension() {
 
         val action by optionalEnumChoice<FilterAction>("action", "Action to take", "action")
         val ping by defaultingBoolean("ping", "Whether to ping the moderators", false)
+        val note by optionalString("note", "Note explaining what this filter is for")
     }
 
     @Suppress("TooGenericExceptionCaught")
@@ -720,5 +822,18 @@ class FilterExtension : Extension() {
         }
 
         val ping by boolean("ping", "Whether to ping the moderators")
+    }
+
+    @Suppress("TooGenericExceptionCaught")
+    inner class FilterEditNoteArgs : Arguments() {
+        val uuid by string("uuid", "Filter ID") { _, value ->
+            try {
+                UUID.fromString(value)
+            } catch (t: Throwable) {
+                throw DiscordRelayedException("Please provide a valid UUID.")
+            }
+        }
+
+        val note by string("note", "Note explaining what this filter is for")
     }
 }

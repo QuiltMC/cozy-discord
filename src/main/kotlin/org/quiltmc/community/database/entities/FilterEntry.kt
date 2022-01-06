@@ -22,4 +22,6 @@ data class FilterEntry(
 
     var match: String,
     var matchType: MatchType,
+
+    var note: String? = null,
 ) : Entity<UUID>
