@@ -10,7 +10,7 @@ import org.quiltmc.community.github.NodeId
 
 @Serializable
 /**
- * A team with both a Discord role and a GitHub presence. The documentation for this class uses the GitHub v4 (GraphQL) API terminology.
+ * A team with both a Discord role and a GitHub presence.
  */
 data class Team(
 

@@ -2,30 +2,30 @@ package org.quiltmc.community.modes.devtools.extensions
 
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.publicSubCommand
-import com.kotlindiscord.kord.extensions.commands.converters.impl.*
+import com.kotlindiscord.kord.extensions.commands.converters.impl.role
+import com.kotlindiscord.kord.extensions.commands.converters.impl.roleList
+import com.kotlindiscord.kord.extensions.commands.converters.impl.string
+import com.kotlindiscord.kord.extensions.commands.converters.impl.user
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
-import io.ktor.client.call.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
+import com.kotlindiscord.kord.extensions.types.respondEphemeral
+import dev.kord.core.behavior.MemberBehavior
+import dev.kord.rest.builder.message.create.allowedMentions
 import org.koin.core.component.inject
 import org.quiltmc.community.TOOLCHAIN_GUILD
 import org.quiltmc.community.database.collections.TeamCollection
 import org.quiltmc.community.database.collections.UserFlagsCollection
 import org.quiltmc.community.database.entities.Team
-import org.quiltmc.community.githubGraphQlClient
-import org.quiltmc.community.githubHttpClient
-import quilt.ghgen.FindTeamDatabaseId
+import org.quiltmc.community.github.GhTeam
+import org.quiltmc.community.github.GhUser
 
 class TeamsExtension : Extension() {
     override val name: String = "teams"
 
-    private val QUILTMC_DATABASE_ID = 78571508
     private val userFlagsCollection: UserFlagsCollection by inject()
     private val teamCollection: TeamCollection by inject()
 
-    // TODO: permissions, guards, etc, oh my!
     override suspend fun setup() {
         publicSlashCommand {
             name = "team"
@@ -39,10 +39,7 @@ class TeamsExtension : Extension() {
 
                 action {
                     // Find the team on gh
-                    val queriedTeam = githubGraphQlClient.execute(FindTeamDatabaseId(FindTeamDatabaseId.Variables(arguments.slug)))
-                        .data
-                        ?.organization
-                        ?.team
+                    val queriedTeam = GhTeam.get(arguments.slug)
 
                     if (queriedTeam == null) {
                         respond {
@@ -50,7 +47,7 @@ class TeamsExtension : Extension() {
                         }
 
                         return@action
-                    } else if (!queriedTeam.viewerCanAdminister) {
+                    } else if (queriedTeam.permission != "admin") {
                         respond {
                             content = "Cozy does not have permission to administrate the `${arguments.slug}` team! " +
                                     "You can only link teams that Cozy has sufficient permissions to manage."
@@ -59,7 +56,7 @@ class TeamsExtension : Extension() {
                         return@action
                     }
 
-                    teamCollection.set(Team(arguments.role.id, arguments.managers.map { role -> role.id }, queriedTeam.databaseId!!))
+                    teamCollection.set(Team(arguments.role.id, arguments.managers.map { role -> role.id }, queriedTeam.id))
 
                     respond {
                         // todo embed
@@ -83,17 +80,60 @@ class TeamsExtension : Extension() {
                     val team = teamCollection.get(arguments.team.id)
 
                     if (team == null) {
-                        respond {
+                        respondEphemeral {
                             content = "That role isn't a Cozy-managed team!"
                         }
 
                         return@action
                     }
 
+                    if (!isManager(team, user.asMember(guild!!.id))) {
+                        respondEphemeral {
+                           content = "You must be a manager of ${arguments.team.mention} to add or remove its members!"
+                            allowedMentions { }
+                        }
 
-                    val response: HttpResponse =  this.githubHttpClient.put("https://api.github.com/orgs/$QUILTMC_DATABASE_ID/teams/${team.databaseId}")
-                    val body: String = response.receive()
+                        return@action
+                    }
 
+                    val userGhId = userFlagsCollection.get(arguments.user.id)?.githubId
+                    val userGhLogin = userGhId?.let { GhUser.get(it)?.login }
+
+                    if (userGhId == null || userGhLogin == null) {
+                        respond {
+                           content = "${arguments.user.mention} needs to link their Github account using `/github link` " +
+                                   "before they can be added to a team!"
+                            // user is intentionally pinged so they link their GH account
+                        }
+
+                        return@action
+                    }
+
+
+                    val result = GhTeam.addMember(team.databaseId, userGhLogin)
+
+                    if (!result.added) {
+                        respond {
+                            content = "Unable to add user: ${result.statusCode}"
+                        }
+                    } else {
+                        if (result.pending) {
+                            respond {
+                                content = "${arguments.user.mention} was successfully invited to join ${arguments.team.mention}. " +
+                                        "They can accept the invitation here: https://github.com/quiltmc/invitation"
+
+                                allowedMentions {
+                                    // intentionally ping the user so that they know to accept the invite
+                                    users.add(arguments.user.id)
+                                }
+                            }
+                        } else {
+                            respond {
+                               content = "Successfully added ${arguments.user.mention} to ${arguments.team.mention}."
+                                allowedMentions { }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -111,6 +151,12 @@ class TeamsExtension : Extension() {
                 name = "removeManagers"
                 description = "Remove teams that can add/remove members from a specific team"
             }
+        }
+    }
+
+    private suspend fun isManager(team: Team, member: MemberBehavior) : Boolean {
+        return member.asMember().roleIds.any {
+            it in team.managers
         }
     }
 

@@ -5,6 +5,9 @@ import com.kotlindiscord.kord.extensions.checks.types.CheckContext
 import com.kotlindiscord.kord.extensions.utils.hasPermission
 import com.kotlindiscord.kord.extensions.utils.translate
 import dev.kord.common.entity.Permission
+import dev.kord.common.entity.Snowflake
+import dev.kord.core.behavior.MemberBehavior
+import dev.kord.core.event.Event
 import mu.KotlinLogging
 import org.quiltmc.community.database.collections.ServerSettingsCollection
 

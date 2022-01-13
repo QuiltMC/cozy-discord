@@ -1,7 +1,6 @@
 [versions]
 detekt = "1.17.1"  # Note: Plugin versions must be updated in the settings.gradle.kts too
 kotlin = "1.5.30"  # Note: Plugin versions must be updated in the settings.gradle.kts too
-graphql = "5.2.0"  # Note: Plugin versions must be updated in the settings.gradle.kts too
 
 commons-text = "1.9"
 kmongo = "4.2.8"
@@ -28,4 +27,3 @@ kx-ser = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 logging = { module = "io.github.microutils:kotlin-logging", version.ref = "logging" }
 rgxgen = { module = "com.github.curious-odd-man:rgxgen", version.ref = "rgxgen" }
-graphql = {module = "com.expediagroup:graphql-kotlin-ktor-client", version.ref = "graphql"}

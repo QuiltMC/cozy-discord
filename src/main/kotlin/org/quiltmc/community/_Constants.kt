@@ -11,7 +11,8 @@ import dev.kord.common.entity.Snowflake
 
 internal val DISCORD_TOKEN = env("TOKEN")
 internal val GITHUB_TOKEN = envOrNull("GITHUB_TOKEN")
-
+internal const val GH_ORG_SLUG = "quiltmc"
+internal const val GH_ORG_ID = "78571508"
 internal val MAIN_GUILD = Snowflake(
     envOrNull("MAIN_GUILD_ID")?.toULong()
         ?: envOrNull("COMMUNITY_GUILD_ID")?.toULong()

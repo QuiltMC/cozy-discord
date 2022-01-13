@@ -1,5 +1,6 @@
 pluginManagement {
     repositories {
+        mavenCentral()
         google()
         gradlePluginPortal()
     }
@@ -12,7 +13,6 @@ pluginManagement {
         id("com.github.jakemarsden.git-hooks") version "0.0.1"
         id("com.github.johnrengelman.shadow") version "5.2.0"
         id("io.gitlab.arturbosch.detekt") version "1.17.1"
-        id("com.expediagroup.graphql") version "5.2.0"
     }
 }
 
