@@ -51,7 +51,3 @@ internal val GUILDS = envOrNull("GUILDS")?.split(',')?.map { Snowflake(it.trim()
 internal val SUGGESTION_CHANNEL = Snowflake(
     envOrNull("SUGGESTION_CHANNEL_ID")?.toLong() ?: 832353359074689084
 )
-
-internal val GITHUB_LOG_CHANNEL = Snowflake(
-    envOrNull("GITHUB_LOG_CHANNEL_ID")?.toLong() ?: 906285091481849876
-)
