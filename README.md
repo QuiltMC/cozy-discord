@@ -114,22 +114,22 @@ action {
 
 ```kotlin
 action {
-  if (this.member?.asMemberOrNull()?.mayManageRole(arguments.role) == true) {
-    arguments.targetUser.removeRole(arguments.role.id,
-      "${this.user.asUserOrNull()?.tag ?: this.user.id} used /team remove"
-    )
-    respond {
-      content = "Successfully removed ${arguments.targetUser.mention} from " +
-              "${arguments.role.mention}."
-      allowedMentions { }
+    if (this.member?.asMemberOrNull()?.mayManageRole(arguments.role) == true) {
+        arguments.targetUser.removeRole(arguments.role.id,
+            "${this.user.asUserOrNull()?.tag ?: this.user.id} used /team remove"
+        )
+        respond {
+            content = "Successfully removed ${arguments.targetUser.mention} from " +
+                    "${arguments.role.mention}."
+            allowedMentions { }
+        }
+    } else {
+        respond {
+            content = "Your team needs to be above ${arguments.role.mention} in order to remove " +
+                    "anyone from it."
+            allowedMentions { }
+        }
     }
-  } else {
-    respond {
-      content = "Your team needs to be above ${arguments.role.mention} in order to remove " +
-              "anyone from it."
-      allowedMentions { }
-    }
-  }
 }
 ```
 
@@ -172,30 +172,29 @@ action {
 
 ```kotlin
 action {
-  if (this.member?.asMemberOrNull()?.mayManageRole(arguments.role) == true) {
-    arguments.targetUser.removeRole(
-      arguments.role.id,
-
-      "${this.user.asUserOrNull()?.tag ?: this.user.id} used /team remove"
-    )
-
-    respond {
-      content = "Successfully removed ${arguments.targetUser.mention} from " +
-              "${arguments.role.mention}."
-
-      allowedMentions { }
+    if (this.member?.asMemberOrNull()?.mayManageRole(arguments.role) == true) {
+        arguments.targetUser.removeRole(
+            arguments.role.id,
+      
+            "${this.user.asUserOrNull()?.tag ?: this.user.id} used /team remove"
+        )
+    
+        respond {
+            content = "Successfully removed ${arguments.targetUser.mention} from " +
+                    "${arguments.role.mention}."
+      
+            allowedMentions { }
+        }
+    } else {
+        respond {
+            content = "Your team needs to be above ${arguments.role.mention} in order to remove " +
+                    "anyone from it."
+      
+            allowedMentions { }
+        }
     }
-  } else {
-    respond {
-      content = "Your team needs to be above ${arguments.role.mention} in order to remove " +
-              "anyone from it."
-
-      allowedMentions { }
-    }
-  }
 }
 ```
-
 
 Hopefully these examples help to make things clearer. Group similar types of statements together (variable assignments),
 separating them from other types (like function calls). If a statement takes up multiple lines, then it probably needs
