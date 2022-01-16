@@ -1,24 +1,29 @@
 package org.quiltmc.community.modes.devtools.extensions
 
 import com.kotlindiscord.kord.extensions.commands.Arguments
+import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
 import com.kotlindiscord.kord.extensions.commands.application.slash.publicSubCommand
 import com.kotlindiscord.kord.extensions.commands.converters.impl.role
-import com.kotlindiscord.kord.extensions.commands.converters.impl.roleList
 import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.commands.converters.impl.user
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.types.respondEphemeral
+import com.kotlindiscord.kord.extensions.types.respondPublic
 import dev.kord.core.behavior.MemberBehavior
 import dev.kord.rest.builder.message.create.allowedMentions
+import dev.kord.rest.builder.message.create.embed
 import org.koin.core.component.inject
+import org.quiltmc.community.GH_COZY_ID
+import org.quiltmc.community.TOOLCHAIN_ADMIN_ROLE
 import org.quiltmc.community.TOOLCHAIN_GUILD
 import org.quiltmc.community.database.collections.TeamCollection
 import org.quiltmc.community.database.collections.UserFlagsCollection
 import org.quiltmc.community.database.entities.Team
 import org.quiltmc.community.github.GhTeam
 import org.quiltmc.community.github.GhUser
+import org.quiltmc.community.hasAdminRole
 
 class TeamsExtension : Extension() {
     override val name: String = "teams"
@@ -33,10 +38,13 @@ class TeamsExtension : Extension() {
 
             guild(TOOLCHAIN_GUILD)
 
-            publicSubCommand(::LinkTeamArguments) {
+            ephemeralSubCommand(::LinkTeamArguments) {
                 name = "link"
-                description = "Link a team between Discord and GitHub, so that members can be added to it. Existing members will not be affected."
-
+                description = "Link a team between Discord and GitHub, allowing syncing of members."
+                guild(TOOLCHAIN_GUILD)
+                check {
+                    hasAdminRole()
+                }
                 action {
                     // Find the team on gh
                     val queriedTeam = GhTeam.get(arguments.slug)
@@ -47,22 +55,12 @@ class TeamsExtension : Extension() {
                         }
 
                         return@action
-                    } else if (queriedTeam.permission != "admin") {
-                        respond {
-                            content = "Cozy does not have permission to administrate the `${arguments.slug}` team! " +
-                                    "You can only link teams that Cozy has sufficient permissions to manage."
-                        }
-
-                        return@action
                     }
 
-                    teamCollection.set(Team(arguments.role.id, arguments.managers.map { role -> role.id }, queriedTeam.id))
+                    teamCollection.set(Team(arguments.role.id, ArrayList(), queriedTeam.id))
 
                     respond {
-                        // todo embed
-                        respond {
-                            content = "Linked successfully."
-                        }
+                       content = "Linked successfully"
                     }
                 }
             }
@@ -70,12 +68,58 @@ class TeamsExtension : Extension() {
             publicSubCommand(::ViewTeamArguments) {
                 name = "view"
                 description = "View a team, its linked and unlinked members, and the roles that can manage it"
+                guild(TOOLCHAIN_GUILD)
+                action {
+                    val team = teamCollection.get(arguments.role.id)
+
+                    if (team == null) {
+                        respondEphemeral {
+                            content = "That role isn't a Cozy-managed team!"
+                        }
+
+                        return@action
+                    }
+                    val ghTeam = GhTeam.get(team.databaseId)
+                    if (ghTeam == null) {
+                        respond {
+                            content = "Unable to get that team's Github information!"
+                        }
+                        return@action
+                    }
+
+                    val ghMembers = ghTeam.members().filter { it.id.toString() != GH_COZY_ID }
+
+                    val list = StringBuilder()
+
+                    for (ghMember in ghMembers) {
+                        val snowflake = userFlagsCollection.getByGithubId(ghMember.id)?._id
+                        val discordMember = snowflake?.let { guild!!.getMemberOrNull(it) }
+
+                        if (discordMember != null) {
+                            list.append(discordMember.mention)
+                        } else {
+                            list.append("**Not Synced**")
+                        }
+
+                        list.append(" ([${ghMember.login}](https://github.com/${ghMember.login}))\n")
+                    }
+
+                    respond {
+                        embed {
+                            title = "Team: ${ghTeam.name}"
+                            description = list.toString()
+                            thumbnail {
+                                url = "https://avatars.githubusercontent.com/t/${ghTeam.id}?s=256"
+                            }
+                        }
+                    }
+                }
             }
 
             publicSubCommand(::AddMemberArguments) {
-                name = "addMember"
+                name = "add-member"
                 description = "Add a a member to a team."
-
+                guild(TOOLCHAIN_GUILD)
                 action {
                     val team = teamCollection.get(arguments.team.id)
 
@@ -101,26 +145,26 @@ class TeamsExtension : Extension() {
 
                     if (userGhId == null || userGhLogin == null) {
                         respond {
-                           content = "${arguments.user.mention} needs to link their Github account using `/github link` " +
-                                   "before they can be added to a team!"
+                           content = "${arguments.user.mention} needs to link their Github account " +
+                                   "using `/github link` before they can be added to a team!"
                             // user is intentionally pinged so they link their GH account
                         }
 
                         return@action
                     }
 
-
                     val result = GhTeam.addMember(team.databaseId, userGhLogin)
 
                     if (!result.added) {
-                        respond {
+                        respondEphemeral {
                             content = "Unable to add user: ${result.statusCode}"
                         }
                     } else {
                         if (result.pending) {
                             respond {
-                                content = "${arguments.user.mention} was successfully invited to join ${arguments.team.mention}. " +
-                                        "They can accept the invitation here: https://github.com/quiltmc/invitation"
+                                content = "${arguments.user.mention} was successfully invited to join " +
+                                        "${arguments.team.mention}. They can accept the invitation here: " +
+                                        "https://github.com/quiltmc/invitation"
 
                                 allowedMentions {
                                     // intentionally ping the user so that they know to accept the invite
@@ -138,32 +182,127 @@ class TeamsExtension : Extension() {
             }
 
             publicSubCommand(::RemoveMemberArguments) {
-                name = "removeMember"
+                name = "remove-member"
                 description = "Remove a member from a team"
+                guild(TOOLCHAIN_GUILD)
+                action {
+                    val team = teamCollection.get(arguments.team.id)
+
+                    if (team == null) {
+                        respondEphemeral {
+                            content = "That role isn't a Cozy-managed team!"
+                        }
+
+                        return@action
+                    }
+
+                    if (!isManager(team, user.asMember(guild!!.id))) {
+                        respondEphemeral {
+                            content = "You must be a manager of ${arguments.team.mention} to add or remove its members!"
+                            allowedMentions { }
+                        }
+
+                        return@action
+                    }
+
+                    val userGhId = userFlagsCollection.get(arguments.user.id)?.githubId
+                    val userGhLogin = userGhId?.let { GhUser.get(it)?.login }
+
+                    if (userGhId == null || userGhLogin == null) {
+                        respondEphemeral {
+                            content = "${arguments.user.mention} does not have a Github account linked!"
+                        }
+
+                        return@action
+                    }
+
+                    GhTeam.removeMember(team.databaseId, userGhLogin)
+                    respondPublic {
+                        content = "Successfully removed ${arguments.user.mention} from ${arguments.team.mention}."
+                        allowedMentions { }
+                    }
+                }
             }
 
-            publicSubCommand(::AddManagersArguments) {
-                name = "addManagers"
-                description = "Add teams that can add/remove members from a specific team"
+            ephemeralSubCommand(::AddManagerArguments) {
+                name = "add-manager"
+                description = "Add a role that can add/remove members from a specific team"
+                guild(TOOLCHAIN_GUILD)
+                check {
+                    hasAdminRole()
+                }
+                action {
+                    val team = teamCollection.get(arguments.team.id)
+
+                    if (team == null) {
+                        respond {
+                            content = "That role isn't a Cozy-managed team!"
+                        }
+
+                        return@action
+                    }
+
+                    if (team.managers.contains(arguments.manager.id)) {
+                        respond {
+                            content = "${arguments.manager.mention} is already a manager of ${arguments.team.mention}"
+                            allowedMentions {}
+                        }
+                        return@action
+                    }
+
+                    team.managers.add(arguments.manager.id)
+                    respond {
+                        content = "Successfully added ${arguments.manager.mention} as a manager of ${arguments.team.mention}"
+                        allowedMentions { }
+                    }
+                    team.save()
+                }
             }
 
-            publicSubCommand(::RemoveManagersArguments) {
-                name = "removeManagers"
-                description = "Remove teams that can add/remove members from a specific team"
+            publicSubCommand(::RemoveManagerArguments) {
+                name = "remove-manager"
+                description = "Remove a role that can add/remove members from a specific team"
+                guild(TOOLCHAIN_GUILD)
+                check {
+                    hasAdminRole()
+                }
+                action {
+                    val team = teamCollection.get(arguments.team.id)
+
+                    if (team == null) {
+                        respond {
+                            content = "That role isn't a Cozy-managed team!"
+                        }
+
+                        return@action
+                    }
+
+                    if (!team.managers.remove(arguments.manager.id)) {
+                        respond {
+                            content = "${arguments.manager.mention} is not a manager of ${arguments.team.mention}"
+                        }
+                    } else {
+                        respond {
+                            content = "${arguments.manager.mention} was removed" +
+                                    " as a manager of ${arguments.team.mention}"
+                        }
+                    }
+
+                    team.save()
+                }
             }
         }
     }
 
-    private suspend fun isManager(team: Team, member: MemberBehavior) : Boolean {
+    private suspend fun isManager(team: Team, member: MemberBehavior): Boolean {
         return member.asMember().roleIds.any {
-            it in team.managers
+            it in team.managers || it == TOOLCHAIN_ADMIN_ROLE
         }
     }
 
     inner class LinkTeamArguments : Arguments() {
         val slug by string("slug", "The slug of the team on GitHub")
         val role by role("role", "The role of this team on Discord")
-        val managers by roleList("managers", "The teams that may add and remove members from this team.")
     }
 
     inner class ViewTeamArguments : Arguments() {
@@ -180,14 +319,13 @@ class TeamsExtension : Extension() {
         val team by role("team", "The team to remove the user from")
     }
 
-    inner class AddManagersArguments : Arguments() {
-        val team by role("team", "The team to add managers to")
-        val managers by roleList("managers", "The managers to add to the team")
+    inner class AddManagerArguments : Arguments() {
+        val team by role("team", "The team to add a manager to")
+        val manager by role("managers", "The manager to add to the team")
     }
 
-    inner class RemoveManagersArguments : Arguments() {
+    inner class RemoveManagerArguments : Arguments() {
         val team by role("team", "The team to remove managers from")
-        val managers by roleList("managers", "The managers to remove from the team")
+        val manager by role("managers", "The manager to remove from the team")
     }
-
 }

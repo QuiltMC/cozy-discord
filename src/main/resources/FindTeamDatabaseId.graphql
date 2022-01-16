@@ -1,8 +1,0 @@
-query FindTeamDatabaseId($slug:String!) {
-  organization(login:"QuiltMC") {
-     team(slug:$slug) {
-      databaseId
-      viewerCanAdminister
-    }
-  }
-}

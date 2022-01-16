@@ -32,7 +32,7 @@ class GithubExtension : Extension() {
             ephemeralSubCommand(::LinkUserArgs) {
                 name = "link"
                 description = "Link your GitHub account to your Discord account. Used by Cozy for adding users to teams"
-
+                guild(TOOLCHAIN_GUILD)
                 action {
                     val userId: DatabaseId? = GhUser.get(arguments.login)?.id
 
@@ -58,7 +58,7 @@ class GithubExtension : Extension() {
             ephemeralSubCommand() {
                 name = "unlink"
                 description = "Unlink your GitHub account from your Discord user on Cozy"
-
+                guild(TOOLCHAIN_GUILD)
                 action {
                     // I have no idea how this API works with deletions, so I'm going to go the safe route.
                     val flags = userFlagsCollection.getOrCreate(this.user.id)
@@ -72,9 +72,7 @@ class GithubExtension : Extension() {
 
                 }
             }
-
         }
-
         // TODO: github's rest api doesn't support deleting issues,
         //      so we'll have to manually use graphql to reimplement this
 //        // both guilds

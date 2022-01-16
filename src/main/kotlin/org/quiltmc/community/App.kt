@@ -41,10 +41,9 @@ suspend fun setupDev() = ExtensibleBot(DISCORD_TOKEN) {
     database()
 
     extensions {
-        add(::TeamsExtension)
-
         if (GITHUB_TOKEN != null) {
             add(::GithubExtension)
+            add(::TeamsExtension)
         }
 
         sentry {

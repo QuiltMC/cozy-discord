@@ -5,12 +5,9 @@ import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.litote.kmongo.eq
-import org.litote.kmongo.graphLookup
-import org.litote.kmongo.limit
 import org.quiltmc.community.database.Collection
 import org.quiltmc.community.database.Database
 import org.quiltmc.community.database.entities.Team
-import org.quiltmc.community.github.NodeId
 
 class TeamCollection : KoinComponent {
     private val database: Database by inject()
@@ -24,24 +21,6 @@ class TeamCollection : KoinComponent {
 
     suspend fun delete(id: Snowflake) =
         col.deleteOne(Team::_id eq id)
-
-//    suspend fun getImmediateChildren(id: NodeId) =
-//        col.find(Team::parent eq id)
-
-//    suspend fun getParents(id: NodeId) =
-//        col.aggregate<AggregateResult>(
-//            listOf(
-//                graphLookup(
-//                    name,
-//                    id,
-//                    "parent",
-//                    "_id",
-//                    "parentHierarchy"
-//                ),
-//
-//                limit(1)
-//            )
-//        ).first()?.parentHierarchy?.map { it.parent }.orEmpty()
 
     @Serializable
     data class AggregateResult(val parentHierarchy: List<Team>)

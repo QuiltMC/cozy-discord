@@ -1,5 +1,0 @@
-query FindUserNodeId($login:String!) {
-	user(login:$login) {
-    id
-  }
-}

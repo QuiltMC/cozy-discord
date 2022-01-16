@@ -5,9 +5,6 @@ import com.kotlindiscord.kord.extensions.checks.types.CheckContext
 import com.kotlindiscord.kord.extensions.utils.hasPermission
 import com.kotlindiscord.kord.extensions.utils.translate
 import dev.kord.common.entity.Permission
-import dev.kord.common.entity.Snowflake
-import dev.kord.core.behavior.MemberBehavior
-import dev.kord.core.event.Event
 import mu.KotlinLogging
 import org.quiltmc.community.database.collections.ServerSettingsCollection
 
@@ -110,7 +107,29 @@ suspend fun CheckContext<*>.inQuiltGuild() {
         }
     }
 }
+suspend fun CheckContext<*>.hasAdminRole() {
+    if (!passed) {
+        return
+    }
+    inQuiltGuild()
 
+    if (this.passed) {  // They're on a Quilt guild
+        val logger = KotlinLogging.logger("org.quiltmc.community.hasAdminRole")
+        val member = memberFor(event)?.asMemberOrNull()
+
+        if (member == null) {  // Shouldn't happen, but you never know
+            logger.nullMember(event)
+
+            fail()
+        } else {
+            if (!member.roleIds.any { it in ADMIN_ROLES }) {
+                logger.failed("Member does not have a Quilt Admin Board role")
+
+                fail("Must be a member of the Administrative Board")
+            }
+        }
+    }
+}
 suspend fun CheckContext<*>.hasBaseModeratorRole() {
     if (!passed) {
         return

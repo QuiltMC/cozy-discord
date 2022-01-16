@@ -67,6 +67,7 @@ dependencies {
     implementation(platform(libs.kotlin.bom))
     implementation(libs.kotlin.stdlib)
     implementation(libs.kx.ser)
+    implementation(kotlin("reflect", "1.6.10"))
 }
 
 configurations.all {

@@ -11,8 +11,10 @@ import dev.kord.common.entity.Snowflake
 
 internal val DISCORD_TOKEN = env("TOKEN")
 internal val GITHUB_TOKEN = envOrNull("GITHUB_TOKEN")
-internal const val GH_ORG_SLUG = "quiltmc"
-internal const val GH_ORG_ID = "78571508"
+internal val GH_ORG_SLUG = envOrNull("GH_ORG_SLUG") ?: "quiltmc"
+internal val GH_ORG_ID = envOrNull("GH_ORG_ID") ?: "78571508"
+internal val GH_COZY_ID = envOrNull("GH_COZY_ID") ?: "86573733"
+
 internal val MAIN_GUILD = Snowflake(
     envOrNull("MAIN_GUILD_ID")?.toULong()
         ?: envOrNull("COMMUNITY_GUILD_ID")?.toULong()
@@ -37,6 +39,15 @@ internal val MODERATOR_ROLES: List<Snowflake> =
         ?.split(',')
         ?.map { Snowflake(it.trim()) }
         ?: listOf(COMMUNITY_MODERATOR_ROLE, TOOLCHAIN_MODERATOR_ROLE)
+
+internal val COMMUNITY_ADMIN_ROLE = envOrNull("COMMUNITY_ADMIN_ROLE")?.let { Snowflake(it) }
+    ?: Snowflake(236548787739295744)
+
+internal val TOOLCHAIN_ADMIN_ROLE = envOrNull("TOOLCHAIN_ADMIN_ROLE")?.let { Snowflake(it) }
+    ?: Snowflake(833877395046924349)
+
+// does this really need an environment variable?
+internal val ADMIN_ROLES: List<Snowflake> = listOf(COMMUNITY_ADMIN_ROLE, TOOLCHAIN_ADMIN_ROLE)
 
 internal val COMMUNITY_GUILD = Snowflake(
     envOrNull("COMMUNITY_GUILD_ID")?.toLong() ?: 817576132726620200
