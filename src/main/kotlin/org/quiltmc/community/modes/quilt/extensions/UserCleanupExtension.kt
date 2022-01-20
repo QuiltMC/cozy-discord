@@ -148,10 +148,11 @@ class UserCleanupExtension : Extension() {
     }
 
     inner class CleanupArgs : Arguments() {
-        val dryRun by defaultingBoolean(
-            "dry-run",
-            "Whether to preview the member to kick instead of actually kicking them",
-            true
-        )
+        val dryRun by defaultingBoolean {
+            name = "dry-run"
+            description = "Whether to preview the member to kick instead of actually kicking them"
+
+            defaultValue = true
+        }
     }
 }

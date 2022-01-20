@@ -132,17 +132,44 @@ class SubteamsExtension : Extension() {
     }
 
     inner class TeamArguments : Arguments() {
-        val role by role("team", "Which team to add", requiredGuild = { TOOLCHAIN_GUILD })
-        val targetUser by member("user", "Who to add to the team", requiredGuild = { TOOLCHAIN_GUILD })
+        val role by role {
+            name = "team"
+            description = "Which team to add"
+
+            requiredGuild = { TOOLCHAIN_GUILD }
+        }
+
+        val targetUser by member {
+            name = "user"
+            description = "Who to add to the team"
+
+            requiredGuild = { TOOLCHAIN_GUILD }
+        }
     }
 
     inner class ManageTeamAllowArguments : Arguments() {
-        val superior by role("superior", "The superior role", requiredGuild = { TOOLCHAIN_GUILD })
-        val inferior by role("inferior", "The inferior role", requiredGuild = { TOOLCHAIN_GUILD })
+        val superior by role {
+            name = "superior"
+            description = "The superior role"
+
+            requiredGuild = { TOOLCHAIN_GUILD }
+        }
+
+        val inferior by role {
+            name = "inferior"
+            description = "The inferior role"
+
+            requiredGuild = { TOOLCHAIN_GUILD }
+        }
     }
 
     inner class ManageTeamDisallowArguments : Arguments() {
-        val role by role("role", "Role to disallow managing for", requiredGuild = { TOOLCHAIN_GUILD })
+        val role by role {
+            name = "role"
+            description = "Role to disallow managing for"
+
+            requiredGuild = { TOOLCHAIN_GUILD }
+        }
     }
 
     private suspend fun Member.mayManageRole(role: Role): Boolean =

@@ -4,14 +4,13 @@
 
 package org.quiltmc.community.modes.quilt.extensions.suggestions
 
-import com.kotlindiscord.kord.extensions.DiscordRelayedException
 import com.kotlindiscord.kord.extensions.checks.hasRole
 import com.kotlindiscord.kord.extensions.checks.inChannel
 import com.kotlindiscord.kord.extensions.checks.inTopChannel
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.converters.impl.enumChoice
-import com.kotlindiscord.kord.extensions.commands.converters.impl.coalescedString
-import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalCoalescingString
+import com.kotlindiscord.kord.extensions.commands.converters.impl.coalescingOptionalString
+import com.kotlindiscord.kord.extensions.commands.converters.impl.coalescingString
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.extensions.event
@@ -639,13 +638,19 @@ class SuggestionsExtension : Extension() {
     }
 
     inner class SuggestionEditArguments : Arguments() {
-        val suggestion by suggestion("suggestion", "Suggestion ID to act on")
+        val suggestion by suggestion {
+            name = "suggestion"
+            description = "Suggestion ID to act on"
+        }
 
-        val text by coalescedString("text", "New suggestion text") { _, str ->
-            if (str.length > SUGGESTION_SIZE_LIMIT) {
-                throw DiscordRelayedException(
-                    "Suggestion text must not be longer than $SUGGESTION_SIZE_LIMIT characters."
-                )
+        val text by coalescingString {
+            name = "text"
+            description = "New suggestion text"
+
+            validate {
+                if (value.length > SUGGESTION_SIZE_LIMIT) {
+                    fail("Suggestion text must not be longer than $SUGGESTION_SIZE_LIMIT characters.")
+                }
             }
         }
     }
@@ -671,12 +676,26 @@ class SuggestionsExtension : Extension() {
 //    }
 
     inner class SuggestionStateArguments : Arguments() {
-        val status by enumChoice<SuggestionStatus>("status", "Status to apply", "status")
-        val suggestion by suggestion("suggestion", "Suggestion ID to act on")
+        val status by enumChoice<SuggestionStatus> {
+            name = "status"
+            description = "Status to apply"
 
-        val comment by optionalCoalescingString("comment", "Comment text to set") { _, str ->
-            if ((str?.length ?: -1) > COMMENT_SIZE_LIMIT) {
-                throw DiscordRelayedException("Comment must not be longer than $COMMENT_SIZE_LIMIT characters.")
+            typeName = "status"
+        }
+
+        val suggestion by suggestion {
+            name = "suggestion"
+            description = "Suggestion ID to act on"
+        }
+
+        val comment by coalescingOptionalString {
+            name = "comment"
+            description = "Comment text to set"
+
+            validate {
+                if ((value?.length ?: -1) > COMMENT_SIZE_LIMIT) {
+                    fail("Comment must not be longer than $COMMENT_SIZE_LIMIT characters.")
+                }
             }
         }
     }

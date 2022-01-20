@@ -5,13 +5,15 @@ package org.quiltmc.community.modes.quilt.extensions.filtering
 import com.github.curiousoddman.rgxgen.RgxGen
 import com.github.curiousoddman.rgxgen.config.RgxGenOption
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties
-import com.kotlindiscord.kord.extensions.*
+import com.kotlindiscord.kord.extensions.DISCORD_BLURPLE
+import com.kotlindiscord.kord.extensions.DISCORD_GREEN
+import com.kotlindiscord.kord.extensions.DISCORD_RED
+import com.kotlindiscord.kord.extensions.DISCORD_YELLOW
 import com.kotlindiscord.kord.extensions.checks.isNotBot
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.converters.impl.enumChoice
 import com.kotlindiscord.kord.extensions.commands.application.slash.converters.impl.optionalEnumChoice
 import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
-import com.kotlindiscord.kord.extensions.commands.converters.impl.boolean
 import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingBoolean
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalString
 import com.kotlindiscord.kord.extensions.commands.converters.impl.string
@@ -761,86 +763,161 @@ class FilterExtension : Extension() {
 
     @Suppress("TooGenericExceptionCaught")
     inner class FilterIDArgs : Arguments() {
-        val uuid by string("uuid", "Filter ID") { _, value ->
-            try {
-                UUID.fromString(value)
-            } catch (t: Throwable) {
-                throw DiscordRelayedException("Please provide a valid UUID.")
+        val uuid by string {
+            name = "uuid"
+            description = "Filter ID"
+
+            validate {
+                try {
+                    UUID.fromString(value)
+                } catch (t: Throwable) {
+                    fail("Please provide a valid UUID")
+                }
             }
         }
     }
 
     inner class FilterCreateArgs : Arguments() {
-        val match by string("match", "Text to match on")
-        val matchType by enumChoice<MatchType>("match-type", "Type of match", "match type`")
+        val match by string {
+            name = "match"
+            description = "Text to match on"
+        }
 
-        val action by optionalEnumChoice<FilterAction>("action", "Action to take", "action")
-        val ping by defaultingBoolean("ping", "Whether to ping the moderators", false)
-        val note by optionalString("note", "Note explaining what this filter is for")
+        val matchType by enumChoice<MatchType> {
+            name = "match-type"
+            description = "Type of match"
+
+            typeName = "match type`"
+        }
+
+        val action by optionalEnumChoice<FilterAction> {
+            name = "action"
+            description = "Action to take"
+
+            typeName = "action"
+        }
+
+        val ping by defaultingBoolean {
+            name = "ping"
+            description = "Whether to ping the moderators"
+
+            defaultValue = false
+        }
+
+        val note by optionalString {
+            name = "note"
+            description = "Note explaining what this filter is for"
+        }
     }
 
     @Suppress("TooGenericExceptionCaught")
     inner class FilterEditMatchArgs : Arguments() {
-        val uuid by string("uuid", "Filter ID") { _, value ->
-            try {
-                UUID.fromString(value)
-            } catch (t: Throwable) {
-                throw DiscordRelayedException("Please provide a valid UUID.")
+        val uuid by string {
+            name = "uuid"
+            description = "Filter ID"
+
+            validate {
+                try {
+                    UUID.fromString(value)
+                } catch (t: Throwable) {
+                    fail("Please provide a valid UUID")
+                }
             }
         }
 
-        val match by string("match", "Text to match on")
+        val match by string {
+            name = "match"
+            description = "Text to match on"
+        }
     }
 
     @Suppress("TooGenericExceptionCaught")
     inner class FilterEditMatchTypeArgs : Arguments() {
-        val uuid by string("uuid", "Filter ID") { _, value ->
-            try {
-                UUID.fromString(value)
-            } catch (t: Throwable) {
-                throw DiscordRelayedException("Please provide a valid UUID.")
+        val uuid by string {
+            name = "uuid"
+            description = "Filter ID"
+
+            validate {
+                try {
+                    UUID.fromString(value)
+                } catch (t: Throwable) {
+                    fail("Please provide a valid UUID")
+                }
             }
         }
 
-        val matchType by enumChoice<MatchType>("match-type", "Type of match", "match type`")
+        val matchType by enumChoice<MatchType> {
+            name = "match-type"
+            description = "Type of match"
+
+            typeName = "match type`"
+        }
     }
 
     @Suppress("TooGenericExceptionCaught")
     inner class FilterEditActionArgs : Arguments() {
-        val uuid by string("uuid", "Filter ID") { _, value ->
-            try {
-                UUID.fromString(value)
-            } catch (t: Throwable) {
-                throw DiscordRelayedException("Please provide a valid UUID.")
+        val uuid by string {
+            name = "uuid"
+            description = "Filter ID"
+
+            validate {
+                try {
+                    UUID.fromString(value)
+                } catch (t: Throwable) {
+                    fail("Please provide a valid UUID")
+                }
             }
         }
 
-        val action by optionalEnumChoice<FilterAction>("action", "Action to take", "action")
+        val action by optionalEnumChoice<FilterAction> {
+            name = "action"
+            description = "Action to take"
+
+            typeName = "action"
+        }
     }
 
     @Suppress("TooGenericExceptionCaught")
     inner class FilterEditPingArgs : Arguments() {
-        val uuid by string("uuid", "Filter ID") { _, value ->
-            try {
-                UUID.fromString(value)
-            } catch (t: Throwable) {
-                throw DiscordRelayedException("Please provide a valid UUID.")
+        val uuid by string {
+            name = "uuid"
+            description = "Filter ID"
+
+            validate {
+                try {
+                    UUID.fromString(value)
+                } catch (t: Throwable) {
+                    fail("Please provide a valid UUID")
+                }
             }
         }
 
-        val ping by boolean("ping", "Whether to ping the moderators")
+        val ping by defaultingBoolean {
+            name = "ping"
+            description = "Whether to ping the moderators"
+
+            defaultValue = false
+        }
     }
 
     @Suppress("TooGenericExceptionCaught")
     inner class FilterEditNoteArgs : Arguments() {
-        val uuid by string("uuid", "Filter ID") { _, value ->
-            try {
-                UUID.fromString(value)
-            } catch (t: Throwable) {
-                throw DiscordRelayedException("Please provide a valid UUID.")
+        val uuid by string {
+            name = "uuid"
+            description = "Filter ID"
+
+            validate {
+                try {
+                    UUID.fromString(value)
+                } catch (t: Throwable) {
+                    fail("Please provide a valid UUID")
+                }
             }
         }
 
-        val note by string("note", "Note explaining what this filter is for")
+        val note by optionalString {
+            name = "note"
+            description = "Note explaining what this filter is for"
+        }
     }
 }

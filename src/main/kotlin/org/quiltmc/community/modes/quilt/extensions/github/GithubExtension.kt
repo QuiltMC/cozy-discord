@@ -135,11 +135,19 @@ class GithubExtension : Extension() {
     }
 
     inner class DeleteIssueArgs : Arguments() {
-        val repo by string("repository", "The name of the repository")
-        val issue by int("issue", "The number of the issue or pull request to delete")
-        val reason by optionalString(
-            "reason",
-            "A short explanation of why this issue is being deleted"
-        )
+        val repo by string {
+            name = "repository"
+            description = "The name of the repository"
+        }
+
+        val issue by int {
+            name = "issue"
+            description = "The number of the issue or pull request to delete"
+        }
+
+        val reason by optionalString {
+            name = "reason"
+            description = "A short explanation of why this issue is being deleted"
+        }
     }
 }
