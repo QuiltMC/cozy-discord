@@ -133,7 +133,7 @@ class UserCleanupExtension : Extension() {
                 .mapNotNull { kord.getGuild(it._id) }
 
             guilds.forEach { guild ->
-                val members = kord.cache.getEntry<MemberData>()!!.query { }.asFlow()
+                val members = kord.cache.getEntry<MemberData>()!!.query { MemberData::pending eq true }.asFlow()
                 val membersInGuild = members.filter { it.guildId == guild.id }.toList()
                 val count = membersInGuild.size
 
@@ -148,7 +148,7 @@ class UserCleanupExtension : Extension() {
 
                 membersInGuild
                     .map { Member(it, users[it.userId]!!, kord) }
-                    .filter { it.isPending && (it.joinedAt + MAX_PENDING_DURATION) <= now }
+                    .filter { (it.joinedAt + MAX_PENDING_DURATION) <= now }
                     .toList()
                     .forEach {
                         if (!dryRun) {
