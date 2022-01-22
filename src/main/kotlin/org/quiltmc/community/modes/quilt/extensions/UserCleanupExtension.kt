@@ -8,16 +8,23 @@ import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingBoolean
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
+import com.kotlindiscord.kord.extensions.extensions.event
 import com.kotlindiscord.kord.extensions.time.TimestampType
 import com.kotlindiscord.kord.extensions.time.toDiscord
 import com.kotlindiscord.kord.extensions.types.editingPaginator
 import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.scheduling.Task
+import dev.kord.cache.api.getEntry
+import dev.kord.cache.api.query
 import dev.kord.common.entity.Permission
+import dev.kord.core.cache.data.MemberData
+import dev.kord.core.cache.data.UserData
 import dev.kord.core.entity.Member
+import dev.kord.core.event.guild.MembersChunkEvent
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.toList
 import kotlinx.datetime.Clock
+import mu.KotlinLogging
 import org.koin.core.component.inject
 import org.quiltmc.community.GUILDS
 import org.quiltmc.community.database.collections.ServerSettingsCollection
@@ -34,6 +41,7 @@ private val MAX_PENDING_DURATION = Duration.days(MAX_PENDING_DAYS)
 class UserCleanupExtension : Extension() {
     override val name: String = "user-cleanup"
 
+    private val logger = KotlinLogging.logger {}
     private val servers: ServerSettingsCollection by inject()
 
     // private val scheduler = Scheduler()
@@ -41,6 +49,12 @@ class UserCleanupExtension : Extension() {
 
     override suspend fun setup() {
 //        task = scheduler.schedule(TASK_DELAY, pollingSeconds = 60, callback = ::taskRun)
+
+        event<MembersChunkEvent> {
+            action {
+                logger.info { "Member chunk event: ${event.guildId} -> ${event.members.count()}" }
+            }
+        }
 
         GUILDS.forEach { guildId ->
             ephemeralSlashCommand(::CleanupArgs) {
@@ -119,7 +133,21 @@ class UserCleanupExtension : Extension() {
                 .mapNotNull { kord.getGuild(it._id) }
 
             guilds.forEach { guild ->
-                guild.members
+                val members = kord.cache.getEntry<MemberData>()!!.query { }.asFlow()
+                val membersInGuild = members.filter { it.guildId == guild.id }.toList()
+                val count = membersInGuild.size
+
+                val users = kord.cache.getEntry<UserData>()!!
+                    .query { }
+                    .asFlow()
+                    .filter { user -> membersInGuild.any { it.userId == user.id } }
+                    .toList()
+                    .associateBy { it.id }
+
+                logger.info { "Members in cache (before, ${guild.name}): $count" }
+
+                membersInGuild
+                    .map { Member(it, users[it.userId]!!, kord) }
                     .filter { it.isPending && (it.joinedAt + MAX_PENDING_DURATION) <= now }
                     .toList()
                     .forEach {
