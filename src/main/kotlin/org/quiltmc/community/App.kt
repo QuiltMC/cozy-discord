@@ -39,6 +39,8 @@ suspend fun setupDev() = ExtensibleBot(DISCORD_TOKEN) {
     extensions {
         add(::SubteamsExtension)
 
+        extMappings { }
+
         if (GITHUB_TOKEN != null) {
             add(::GithubExtension)
         }
@@ -77,8 +79,6 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
         add(::SyncExtension)
         add(::UserCleanupExtension)
         add(::UtilityExtension)
-
-        extMappings { }
 
         extPhishing {
             appName = "QuiltMC's Cozy Bot"
