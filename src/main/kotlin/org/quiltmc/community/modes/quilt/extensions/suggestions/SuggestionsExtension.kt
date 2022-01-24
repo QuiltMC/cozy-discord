@@ -8,9 +8,9 @@ import com.kotlindiscord.kord.extensions.checks.hasRole
 import com.kotlindiscord.kord.extensions.checks.inChannel
 import com.kotlindiscord.kord.extensions.checks.inTopChannel
 import com.kotlindiscord.kord.extensions.commands.Arguments
-import com.kotlindiscord.kord.extensions.commands.application.slash.converters.impl.enumChoice
-import com.kotlindiscord.kord.extensions.commands.converters.impl.coalescingOptionalString
+import com.kotlindiscord.kord.extensions.commands.application.slash.converters.impl.optionalEnumChoice
 import com.kotlindiscord.kord.extensions.commands.converters.impl.coalescingString
+import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalString
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.extensions.event
@@ -67,6 +67,8 @@ private const val COMMENT_SIZE_LIMIT: Long = 800
 private const val SUGGESTION_SIZE_LIMIT: Long = 1000
 private const val THIRTY_SECONDS: Long = 30_000
 private const val TUPPERBOX_DELAY: Long = 5
+
+private const val GITHUB_EMOJI: String = "<:github:806562308716232735>"
 
 private val EMOTE_DOWNVOTE = ReactionEmoji.Unicode("⬇️")
 private val EMOTE_REMOVE = ReactionEmoji.Unicode("\uD83D\uDDD1️")
@@ -342,13 +344,23 @@ class SuggestionsExtension : Extension() {
             action {
                 val status = arguments.status
 
-                arguments.suggestion.status = status
+                if (status != null) {
+                    arguments.suggestion.status = status
+                }
 
                 if (arguments.comment != null) {
                     arguments.suggestion.comment = if (arguments.comment!!.lowercase() in CLEAR_WORDS) {
                         null
                     } else {
                         arguments.comment
+                    }
+                }
+
+                if (arguments.issue != null) {
+                    arguments.suggestion.githubIssue = if (arguments.issue!!.lowercase() in CLEAR_WORDS) {
+                        null
+                    } else {
+                        arguments.issue
                     }
                 }
 
@@ -481,12 +493,22 @@ class SuggestionsExtension : Extension() {
                 }
 
                 description += "has been updated.\n\n" +
-                        "**Status:** ${suggestion.status.readableName}\n\n" +
                         "**__Suggestion__**\n\n" +
                         suggestion.text
 
+                description += "\n\n**Status:** ${suggestion.status.readableName}\n"
+
+                if (suggestion.githubIssue != null) {
+                    val issue = suggestion.githubIssue!!
+                    val (repoName, issueNumber) = issue.split('/')
+
+                    description += "$GITHUB_EMOJI " +
+                            "[Issue: $repoName#$issueNumber]" +
+                            "(https://github.com/QuiltMC/$repoName/issues/$issueNumber)\n"
+                }
+
                 if (suggestion.comment != null) {
-                    description += "\n\n" +
+                    description += "\n" +
                             "**__Staff response__**\n\n" +
                             suggestion.comment
                 }
@@ -496,10 +518,19 @@ class SuggestionsExtension : Extension() {
         if (suggestion.thread != null) {
             kord.getChannelOf<ThreadChannel>(suggestion.thread!!)?.createMessage {
                 content = "**__Suggestion updated__**\n" +
-                        "**Status:** ${suggestion.status.readableName}"
+                        "**Status:** ${suggestion.status.readableName}\n"
+
+                if (suggestion.githubIssue != null) {
+                    val issue = suggestion.githubIssue!!
+                    val (repoName, issueNumber) = issue.split('/')
+
+                    content += "$GITHUB_EMOJI " +
+                            "[Issue: $repoName#$issueNumber]" +
+                            "(https://github.com/QuiltMC/$repoName/issues/$issueNumber)\n"
+                }
 
                 if (suggestion.comment != null) {
-                    content += "\n\n" +
+                    content += "\n" +
                             "**__Staff response__**\n\n" +
                             suggestion.comment
                 }
@@ -526,6 +557,15 @@ class SuggestionsExtension : Extension() {
                 }
 
                 description += "${suggestion.text}\n\n"
+
+                if (suggestion.githubIssue != null) {
+                    val issue = suggestion.githubIssue!!
+                    val (repoName, issueNumber) = issue.split('/')
+
+                    description += "$GITHUB_EMOJI " +
+                            "[Issue: $repoName#$issueNumber]" +
+                            "(https://github.com/QuiltMC/$repoName/issues/$issueNumber)\n\n"
+                }
 
                 if (suggestion.positiveVotes > 0) {
                     description += "**Upvotes:** ${suggestion.positiveVotes}\n"
@@ -589,6 +629,15 @@ class SuggestionsExtension : Extension() {
                 }
 
                 description += "${suggestion.text}\n\n"
+
+                if (suggestion.githubIssue != null) {
+                    val issue = suggestion.githubIssue!!
+                    val (repoName, issueNumber) = issue.split('/')
+
+                    description += "$GITHUB_EMOJI " +
+                            "[Issue: $repoName#$issueNumber]" +
+                            "(https://github.com/QuiltMC/$repoName/issues/$issueNumber)\n\n"
+                }
 
                 if (suggestion.positiveVotes > 0) {
                     description += "**Upvotes:** ${suggestion.positiveVotes}\n"
@@ -676,25 +725,45 @@ class SuggestionsExtension : Extension() {
 //    }
 
     inner class SuggestionStateArguments : Arguments() {
-        val status by enumChoice<SuggestionStatus> {
+        val suggestion by suggestion {
+            name = "suggestion"
+            description = "Suggestion ID to act on"
+        }
+
+        val status by optionalEnumChoice<SuggestionStatus> {
             name = "status"
             description = "Status to apply"
 
             typeName = "status"
         }
 
-        val suggestion by suggestion {
-            name = "suggestion"
-            description = "Suggestion ID to act on"
-        }
-
-        val comment by coalescingOptionalString {
+        val comment by optionalString {
             name = "comment"
-            description = "Comment text to set"
+            description = "Comment text to set, 'clear' to remove"
 
             validate {
                 if ((value?.length ?: -1) > COMMENT_SIZE_LIMIT) {
                     fail("Comment must not be longer than $COMMENT_SIZE_LIMIT characters.")
+                }
+            }
+        }
+
+        val issue by optionalString {
+            name = "github-issue"
+            description = "GitHub issue for this suggestion, 'clear' to remove"
+
+            validate {
+                value ?: return@validate
+
+                failIf(
+                    "Issue specification must be of the form `repo/123`, without the repo owner - " +
+                            "For example: `cozy-discord/12`"
+                ) { value!!.count { it == '/' } != 1 }
+
+                if (passed) {
+                    failIf(
+                        "Issue numbers must be integers"
+                    ) { value!!.split('/').last().toIntOrNull() == null }
                 }
             }
         }

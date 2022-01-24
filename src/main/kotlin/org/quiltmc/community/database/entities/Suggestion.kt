@@ -24,10 +24,12 @@ data class Suggestion(
     val ownerAvatar: String?,
     val ownerName: String,
 
+    var githubIssue: String? = null,
+
     val positiveVoters: MutableList<Snowflake> = mutableListOf(),
     val negativeVoters: MutableList<Snowflake> = mutableListOf(),
 
-    val isTupper: Boolean = false
+    val isTupper: Boolean = false,
 ) : Entity<Snowflake> {
     val positiveVotes get() = positiveVoters.size
     val negativeVotes get() = negativeVoters.size
