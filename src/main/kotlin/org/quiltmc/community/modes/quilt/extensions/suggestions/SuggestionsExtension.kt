@@ -68,7 +68,7 @@ private const val SUGGESTION_SIZE_LIMIT: Long = 1000
 private const val THIRTY_SECONDS: Long = 30_000
 private const val TUPPERBOX_DELAY: Long = 5
 
-private const val GITHUB_EMOJI: String = "<:github:806562308716232735>"
+private const val GITHUB_EMOJI: String = "<:github:864972399111569468>"
 
 private val EMOTE_DOWNVOTE = ReactionEmoji.Unicode("⬇️")
 private val EMOTE_REMOVE = ReactionEmoji.Unicode("\uD83D\uDDD1️")
@@ -503,8 +503,7 @@ class SuggestionsExtension : Extension() {
                     val (repoName, issueNumber) = issue.split('/')
 
                     description += "$GITHUB_EMOJI " +
-                            "[Issue: $repoName#$issueNumber]" +
-                            "(https://github.com/QuiltMC/$repoName/issues/$issueNumber)\n"
+                            "<https://github.com/QuiltMC/$repoName/issues/$issueNumber>\n"
                 }
 
                 if (suggestion.comment != null) {
