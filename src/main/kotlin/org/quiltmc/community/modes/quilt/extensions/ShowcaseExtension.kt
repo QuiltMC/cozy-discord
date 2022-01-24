@@ -61,7 +61,10 @@ class ShowcaseExtension : Extension() {
                 val author = event.message.author!!
                 val channel = event.message.channel.asChannelOf<TextChannel>()
 
-                val thread = channel.startPublicThread("Gallery | ${event.message.id}")
+                val thread = channel.startPublicThreadWithMessage(
+                    event.message.id,
+                    "Gallery | ${event.message.id}"
+                )
 
                 threads.set(
                     OwnedThread(thread.id, author.id, guild.id)
