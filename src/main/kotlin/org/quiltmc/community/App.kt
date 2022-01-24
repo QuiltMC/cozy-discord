@@ -75,6 +75,7 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
         add(::MessageLogExtension)
         add(::MinecraftExtension)
         add(::PKExtension)
+        add(::ShowcaseExtension)
         add(::SuggestionsExtension)
         add(::SyncExtension)
         add(::UserCleanupExtension)

@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalTime::class, KordPreview::class)
 
-@file:Suppress("MagicNumber")  // Yep. I'm done.
+@file:Suppress("MagicNumber", "NoUnusedImports")  // Apparently Duration.Companion.seconds isn't used enough?
 
 package org.quiltmc.community.modes.quilt.extensions
 
@@ -59,6 +59,8 @@ import org.quiltmc.community.database.entities.OwnedThread
 import org.quiltmc.community.database.entities.UserFlags
 import java.time.format.DateTimeFormatter
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
 val SPEAKING_PERMISSIONS: Array<Permission> = arrayOf(
@@ -69,7 +71,8 @@ val SPEAKING_PERMISSIONS: Array<Permission> = arrayOf(
     Permission.SendMessagesInThreads,
 )
 
-val DELETE_DELAY = Duration.seconds(10)  // Seconds
+val PIN_DELETE_DELAY = 10.seconds
+val THREAD_CREATE_DELETE_DELAY = 30.minutes
 
 class UtilityExtension : Extension() {
     override val name: String = "utility"
@@ -110,7 +113,18 @@ class UtilityExtension : Extension() {
             check { failIf { event.message.data.authorId != event.kord.selfId } }
 
             action {
-                delay(DELETE_DELAY)
+                delay(PIN_DELETE_DELAY)
+
+                event.message.deleteIgnoringNotFound()
+            }
+        }
+
+        event<MessageCreateEvent> {
+            check { inQuiltGuild() }
+            check { failIf { event.message.type != MessageType.ThreadCreated } }
+
+            action {
+                delay(THREAD_CREATE_DELETE_DELAY)
 
                 event.message.deleteIgnoringNotFound()
             }
