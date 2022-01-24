@@ -9,6 +9,7 @@ import com.kotlindiscord.kord.extensions.utils.authorId
 import dev.kord.common.entity.MessageType
 import dev.kord.core.behavior.channel.asChannelOf
 import dev.kord.core.behavior.channel.createMessage
+import dev.kord.core.behavior.channel.threads.edit
 import dev.kord.core.behavior.channel.withTyping
 import dev.kord.core.behavior.edit
 import dev.kord.core.entity.channel.TextChannel
@@ -60,10 +61,7 @@ class ShowcaseExtension : Extension() {
                 val author = event.message.author!!
                 val channel = event.message.channel.asChannelOf<TextChannel>()
 
-                val thread = channel.startPublicThread(
-                    "Gallery | ${event.message.id}",
-                    guild.getMaxArchiveDuration()
-                )
+                val thread = channel.startPublicThread("Gallery | ${event.message.id}")
 
                 threads.set(
                     OwnedThread(thread.id, author.id, guild.id)
@@ -91,10 +89,18 @@ class ShowcaseExtension : Extension() {
                 message.edit {
                     content = "Welcome to your new gallery thread, ${author.mention}! This message is at the " +
                             "start of the thread. Remember, you're welcome to use the `/thread` commands to manage " +
-                            "your thread as needed." +
+                            "your thread as needed.\n\n" +
 
-                            "\n\nWe recommend using `/thread rename` to give your thread a more meaningful title as " +
-                            "soon as possible!"
+                            "We recommend using `/thread rename` to give your thread a more meaningful title as " +
+                            "soon as possible!\n\n" +
+
+                            "**Note:** To avoid filling up the sidebar, this thread has been archived on creation. " +
+                            "Feel free to send a message or rename it to unarchive it!"
+                }
+
+                thread.edit {
+                    archived = true
+                    reason = "Gallery thread archived on creation."
                 }
             }
         }
