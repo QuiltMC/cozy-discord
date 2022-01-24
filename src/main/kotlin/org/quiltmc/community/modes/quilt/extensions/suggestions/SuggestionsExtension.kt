@@ -502,8 +502,9 @@ class SuggestionsExtension : Extension() {
                     val issue = suggestion.githubIssue!!
                     val (repoName, issueNumber) = issue.split('/')
 
-                    description += "$GITHUB_EMOJI " +
-                            "<https://github.com/QuiltMC/$repoName/issues/$issueNumber>\n"
+                    description += "$GITHUB_EMOJI  " +
+                            "[$repoName#$issueNumber]" +
+                            "(https://github.com/QuiltMC/$repoName/issues/$issueNumber)\n"
                 }
 
                 if (suggestion.comment != null) {
@@ -523,9 +524,8 @@ class SuggestionsExtension : Extension() {
                     val issue = suggestion.githubIssue!!
                     val (repoName, issueNumber) = issue.split('/')
 
-                    content += "$GITHUB_EMOJI " +
-                            "[Issue: $repoName#$issueNumber]" +
-                            "(https://github.com/QuiltMC/$repoName/issues/$issueNumber)\n"
+                    content += "$GITHUB_EMOJI  " +
+                            "<https://github.com/QuiltMC/$repoName/issues/$issueNumber>\n"
                 }
 
                 if (suggestion.comment != null) {
@@ -562,7 +562,7 @@ class SuggestionsExtension : Extension() {
                     val (repoName, issueNumber) = issue.split('/')
 
                     description += "$GITHUB_EMOJI " +
-                            "[Issue: $repoName#$issueNumber]" +
+                            "[$repoName#$issueNumber]" +
                             "(https://github.com/QuiltMC/$repoName/issues/$issueNumber)\n\n"
                 }
 
@@ -634,7 +634,7 @@ class SuggestionsExtension : Extension() {
                     val (repoName, issueNumber) = issue.split('/')
 
                     description += "$GITHUB_EMOJI " +
-                            "[Issue: $repoName#$issueNumber]" +
+                            "[$repoName#$issueNumber]" +
                             "(https://github.com/QuiltMC/$repoName/issues/$issueNumber)\n\n"
                 }
 
