@@ -1,3 +1,9 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
 pluginManagement {
     repositories {
         google()
@@ -13,6 +19,7 @@ pluginManagement {
         id("com.github.johnrengelman.shadow") version "5.2.0"
         id("io.gitlab.arturbosch.detekt") version "1.17.1"
         id("com.expediagroup.graphql") version "5.2.0"
+        id("org.cadixdev.licenser") version "0.6.1"
     }
 }
 

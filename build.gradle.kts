@@ -1,3 +1,10 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
+import org.cadixdev.gradle.licenser.LicenseExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -11,13 +18,13 @@ plugins {
     id("com.github.johnrengelman.shadow")
     id("io.gitlab.arturbosch.detekt")
     id("com.expediagroup.graphql")
+    id("org.cadixdev.licenser")
 }
 
 group = "org.quiltmc.community"
 version = "1.0-SNAPSHOT"
 
 repositories {
-    // You can remove this if you're not testing locally-installed KordEx builds
     mavenLocal()
     google()
 
@@ -93,11 +100,10 @@ application {
 
 gitHooks {
     setHooks(
-        mapOf("pre-commit" to "detekt")
+        mapOf("pre-commit" to "updateLicense detekt")
     )
 }
 
-// If you don't want the import, remove it and use org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 tasks.withType<KotlinCompile> {
     // Current LTS version of Java
     kotlinOptions.jvmTarget = "15"
@@ -123,6 +129,14 @@ java {
 detekt {
     buildUponDefaultConfig = true
     config = rootProject.files("detekt.yml")
+}
+
+// Credit to ZML for this workaround.
+// https://github.com/CadixDev/licenser/issues/6#issuecomment-817048318
+extensions.configure(LicenseExtension::class.java) {
+    exclude {
+        it.file.startsWith(buildDir)
+    }
 }
 
 sourceSets {
