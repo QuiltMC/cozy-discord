@@ -23,6 +23,7 @@ import com.kotlindiscord.kord.extensions.utils.scheduling.Task
 import dev.kord.cache.api.getEntry
 import dev.kord.cache.api.query
 import dev.kord.common.entity.Permission
+import dev.kord.common.entity.optional.optional
 import dev.kord.core.cache.data.MemberData
 import dev.kord.core.cache.data.UserData
 import dev.kord.core.entity.Member
@@ -128,8 +129,8 @@ class UserCleanupExtension : Extension() {
         }
     }
 
-    suspend fun taskRun(dryRun: Boolean = false): MutableList<Member> {
-        val removed: MutableList<Member> = mutableListOf()
+    suspend fun taskRun(dryRun: Boolean = false): MutableSet<Member> {
+        val removed: MutableSet<Member> = mutableSetOf()
         val now = Clock.System.now()
 
         try {
@@ -139,7 +140,10 @@ class UserCleanupExtension : Extension() {
                 .mapNotNull { kord.getGuild(it._id) }
 
             guilds.forEach { guild ->
-                val members = kord.cache.getEntry<MemberData>()!!.query { MemberData::pending eq true }.asFlow()
+                val members = kord.cache.getEntry<MemberData>()!!
+                    .query { MemberData::pending eq true.optional() }
+                    .asFlow()
+
                 val membersInGuild = members.filter { it.guildId == guild.id }.toList()
                 val count = membersInGuild.size
 

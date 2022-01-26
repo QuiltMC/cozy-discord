@@ -10,7 +10,10 @@
 
 package org.quiltmc.community.modes.quilt.extensions
 
-import com.kotlindiscord.kord.extensions.*
+import com.kotlindiscord.kord.extensions.DISCORD_BLURPLE
+import com.kotlindiscord.kord.extensions.DISCORD_GREEN
+import com.kotlindiscord.kord.extensions.DISCORD_RED
+import com.kotlindiscord.kord.extensions.DiscordRelayedException
 import com.kotlindiscord.kord.extensions.checks.channelType
 import com.kotlindiscord.kord.extensions.checks.hasPermission
 import com.kotlindiscord.kord.extensions.checks.isInThread
@@ -31,7 +34,10 @@ import com.kotlindiscord.kord.extensions.types.respondEphemeral
 import com.kotlindiscord.kord.extensions.utils.authorId
 import com.kotlindiscord.kord.extensions.utils.deleteIgnoringNotFound
 import dev.kord.common.annotation.KordPreview
-import dev.kord.common.entity.*
+import dev.kord.common.entity.ChannelType
+import dev.kord.common.entity.MessageType
+import dev.kord.common.entity.Permission
+import dev.kord.common.entity.Permissions
 import dev.kord.core.behavior.channel.*
 import dev.kord.core.behavior.channel.threads.edit
 import dev.kord.core.behavior.edit
@@ -41,8 +47,6 @@ import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.entity.channel.thread.ThreadChannel
 import dev.kord.core.event.channel.thread.TextChannelThreadCreateEvent
 import dev.kord.core.event.channel.thread.ThreadUpdateEvent
-import dev.kord.core.event.guild.GuildCreateEvent
-import dev.kord.core.event.guild.GuildUpdateEvent
 import dev.kord.core.event.message.MessageCreateEvent
 import dev.kord.rest.builder.message.create.embed
 import dev.kord.rest.builder.message.modify.embed
@@ -86,7 +90,6 @@ class UtilityExtension : Extension() {
     private val logger = KotlinLogging.logger { }
     private val threads: OwnedThreadCollection by inject()
 
-    private val guildCache: MutableMap<Snowflake, Guild> = mutableMapOf()
     private val userFlags: UserFlagsCollection by inject()
 
     @OptIn(ExperimentalSerializationApi::class)
@@ -189,42 +192,6 @@ class UtilityExtension : Extension() {
                     channel.edit {
                         archived = false
                         reason = "Preventing thread from being archived."
-                    }
-                }
-            }
-        }
-
-        event<GuildCreateEvent> {
-            action {
-                guildCache[event.guild.id] = event.guild
-            }
-        }
-
-        event<GuildUpdateEvent> {
-            action {
-                val new = event.guild
-                val old = guildCache[new.id] ?: return@action
-
-                if (old.features != new.features) {
-                    val added = new.features - old.features
-                    val removed = old.features - new.features
-
-                    if (added.isNotEmpty() && removed.isNotEmpty()) return@action
-
-                    new.getModLogChannel()?.createEmbed {
-                        color = DISCORD_FUCHSIA
-                        timestamp = Clock.System.now()
-                        title = "Guild Flags Updated"
-
-                        description = ""
-
-                        if (added.isNotEmpty()) {
-                            description += "**Added:** " + added.joinToString { "`${it.value}`" } + "\n"
-                        }
-
-                        if (removed.isNotEmpty()) {
-                            description += "**Removed:** " + removed.joinToString { "`${it.value}`" }
-                        }
                     }
                 }
             }
