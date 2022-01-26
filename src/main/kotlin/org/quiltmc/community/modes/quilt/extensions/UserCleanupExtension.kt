@@ -19,6 +19,7 @@ import com.kotlindiscord.kord.extensions.time.TimestampType
 import com.kotlindiscord.kord.extensions.time.toDiscord
 import com.kotlindiscord.kord.extensions.types.editingPaginator
 import com.kotlindiscord.kord.extensions.types.respond
+import com.kotlindiscord.kord.extensions.utils.scheduling.Scheduler
 import com.kotlindiscord.kord.extensions.utils.scheduling.Task
 import dev.kord.cache.api.getEntry
 import dev.kord.cache.api.query
@@ -42,7 +43,7 @@ import kotlin.time.ExperimentalTime
 private const val MAX_PENDING_DAYS = 3
 private const val MEMBER_CHUNK_SIZE = 10
 
-// private val TASK_DELAY = Duration.hours(1)
+private val TASK_DELAY = Duration.hours(1)
 private val MAX_PENDING_DURATION = Duration.days(MAX_PENDING_DAYS)
 
 class UserCleanupExtension : Extension() {
@@ -51,11 +52,11 @@ class UserCleanupExtension : Extension() {
     private val logger = KotlinLogging.logger {}
     private val servers: ServerSettingsCollection by inject()
 
-    // private val scheduler = Scheduler()
+    private val scheduler = Scheduler()
     private lateinit var task: Task
 
     override suspend fun setup() {
-//        task = scheduler.schedule(TASK_DELAY, pollingSeconds = 60, callback = ::taskRun)
+        task = scheduler.schedule(TASK_DELAY, pollingSeconds = 60, callback = ::taskRun)
 
         event<MembersChunkEvent> {
             action {
@@ -148,7 +149,7 @@ class UserCleanupExtension : Extension() {
                 val count = membersInGuild.size
 
                 val users = kord.cache.getEntry<UserData>()!!
-                    .query { }
+                    .query { UserData::bot eq false.optional() }
                     .asFlow()
                     .filter { user -> membersInGuild.any { it.userId == user.id } }
                     .toList()
