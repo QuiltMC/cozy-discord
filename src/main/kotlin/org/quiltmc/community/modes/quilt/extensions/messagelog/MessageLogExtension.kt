@@ -45,7 +45,7 @@ import org.quiltmc.community.*
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
-import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 import java.time.Instant as jtInstant
 
@@ -236,7 +236,7 @@ class MessageLogExtension : Extension() {
 
             action {
                 // Wait here in case we get a bulk deletion event
-                delay(Duration.seconds(1))
+                delay(1.seconds)
 
                 if (event.messageId in bulkDeletedMessages) {
                     bulkDeletedMessages.remove(event.messageId)

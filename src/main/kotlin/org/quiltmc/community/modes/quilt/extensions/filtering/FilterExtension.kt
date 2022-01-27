@@ -590,6 +590,8 @@ class FilterExtension : Extension() {
                     reason = "Banned by filter: $_id"
                 }
             }
+
+            null -> {}  // Nothing
         }
 
         filterEvents.add(

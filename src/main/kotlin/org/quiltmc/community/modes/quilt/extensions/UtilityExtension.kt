@@ -68,7 +68,6 @@ import org.quiltmc.community.database.collections.UserFlagsCollection
 import org.quiltmc.community.database.entities.OwnedThread
 import org.quiltmc.community.database.entities.UserFlags
 import java.time.format.DateTimeFormatter
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
@@ -162,7 +161,7 @@ class UtilityExtension : Extension() {
                 }
 
                 event.channel.withTyping {
-                    delay(Duration.Companion.seconds(3))
+                    delay(3.seconds)
                 }
 
                 message.edit {
@@ -170,7 +169,7 @@ class UtilityExtension : Extension() {
                 }
 
                 event.channel.withTyping {
-                    delay(Duration.Companion.seconds(3))
+                    delay(3.seconds)
                 }
 
                 message.edit {
@@ -720,7 +719,7 @@ class UtilityExtension : Extension() {
                                                 " transfer, simply ignore this message."
                                 }
 
-                                components(Duration.seconds(15)) {
+                                components(15.seconds) {
                                     onTimeout {
                                         edit {
                                             embed {

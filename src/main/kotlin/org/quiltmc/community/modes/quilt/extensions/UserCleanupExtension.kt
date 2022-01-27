@@ -32,14 +32,15 @@ import org.koin.core.component.inject
 import org.quiltmc.community.GUILDS
 import org.quiltmc.community.database.collections.ServerSettingsCollection
 import org.quiltmc.community.hasPermissionInMainGuild
-import kotlin.time.Duration
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.hours
 import kotlin.time.ExperimentalTime
 
 private const val MAX_PENDING_DAYS = 3
 private const val MEMBER_CHUNK_SIZE = 10
 
-private val TASK_DELAY = Duration.hours(1)
-private val MAX_PENDING_DURATION = Duration.days(MAX_PENDING_DAYS)
+private val TASK_DELAY = 1.hours
+private val MAX_PENDING_DURATION = MAX_PENDING_DAYS.days
 
 class UserCleanupExtension : Extension() {
     override val name: String = "user-cleanup"

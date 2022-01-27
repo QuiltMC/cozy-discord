@@ -42,7 +42,7 @@ import org.quiltmc.community.database.enums.QuiltServerType
 import org.quiltmc.community.hasPermissionInMainGuild
 import org.quiltmc.community.inToolchain
 import org.quiltmc.community.modes.quilt.extensions.messagelog.MessageLogExtension
-import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
 // TODO: Implement these settings in other parts of the bot, and add logging
@@ -76,7 +76,7 @@ class SettingsExtension : Extension() {
                 } else if (settings.leaveServer) {
                     logger.info { "Leaving guild, as configured: ${event.guild.name} (${event.guild.id.value})" }
 
-                    delay(Duration.seconds(2))
+                    delay(2.seconds)
 
                     event.guild.leave()
                 }

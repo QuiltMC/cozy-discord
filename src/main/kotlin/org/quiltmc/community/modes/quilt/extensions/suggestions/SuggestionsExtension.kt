@@ -56,7 +56,7 @@ import org.quiltmc.community.database.collections.OwnedThreadCollection
 import org.quiltmc.community.database.collections.SuggestionsCollection
 import org.quiltmc.community.database.entities.OwnedThread
 import org.quiltmc.community.database.entities.Suggestion
-import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
 private const val ACTION_DOWN = "down"
@@ -110,7 +110,7 @@ class SuggestionsExtension : Extension() {
 
             action {
                 event.message.channel.withTyping {
-                    delay(Duration.seconds(TUPPERBOX_DELAY))
+                    delay(TUPPERBOX_DELAY.seconds)
 
                     // If it's been yeeted, it's probably been moderated or proxied
                     event.message.channel.getMessageOrNull(event.message.id) ?: return@action
@@ -440,14 +440,14 @@ class SuggestionsExtension : Extension() {
                     content = "Oh right, better get the mods in..."
                 }
 
-                delay(Duration.seconds(3))
+                delay(3.seconds)
 
                 pingMessage.edit {
                     content = "Oh right, better get the mods in...\n" +
                             "Hey, ${modRole.mention}! Squirrel!"
                 }
 
-                delay(Duration.seconds(3))
+                delay(3.seconds)
 
                 pingMessage.delete("Removing temporary moderator ping message.")
             }

@@ -4,23 +4,12 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-import org.cadixdev.gradle.licenser.LicenseExtension
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
+    `cozy-module`
+
     application
 
-    alias(libs.plugins.kotlin.jvm)
-
-    // We have to do this because JetBrains doesn't package their plugins in a standard manner
-    kotlin("plugin.serialization") version libs.plugins.kotlin.serialization.get().version.requiredVersion
-
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.githooks)
-    alias(libs.plugins.shadow)
-    alias(libs.plugins.detekt)
-    alias(libs.plugins.graphql)
-    alias(libs.plugins.licenser)
+    id("com.github.jakemarsden.git-hooks")
 }
 
 group = "org.quiltmc.community"
@@ -87,12 +76,6 @@ graphql {
         packageName = "quilt.ghgen"
         serializer = com.expediagroup.graphql.plugin.gradle.config.GraphQLSerializer.KOTLINX
     }
-
-}
-
-configurations.all {
-    resolutionStrategy.cacheDynamicVersionsFor(10, "seconds")
-    resolutionStrategy.cacheChangingModulesFor(10, "seconds")
 }
 
 application {
@@ -106,50 +89,10 @@ gitHooks {
     )
 }
 
-tasks.withType<KotlinCompile> {
-    // Current LTS version of Java
-    kotlinOptions.jvmTarget = "15"
-
-    kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
-}
-
 tasks.jar {
     manifest {
         attributes(
             "Main-Class" to "org.quiltmc.community.AppKt"
         )
-    }
-}
-
-java {
-    // Current LTS version of Java
-    sourceCompatibility = JavaVersion.VERSION_15
-    targetCompatibility = JavaVersion.VERSION_15
-}
-
-detekt {
-    buildUponDefaultConfig = true
-    config = rootProject.files("detekt.yml")
-}
-
-// Credit to ZML for this workaround.
-// https://github.com/CadixDev/licenser/issues/6#issuecomment-817048318
-extensions.configure(LicenseExtension::class.java) {
-    exclude {
-        it.file.startsWith(buildDir)
-    }
-}
-
-sourceSets {
-    main {
-        java {
-            srcDir(file("$buildDir/generated/ksp/main/kotlin/"))
-        }
-    }
-
-    test {
-        java {
-            srcDir(file("$buildDir/generated/ksp/test/kotlin/"))
-        }
     }
 }
