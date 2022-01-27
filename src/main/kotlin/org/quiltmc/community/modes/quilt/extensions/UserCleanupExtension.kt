@@ -21,12 +21,7 @@ import com.kotlindiscord.kord.extensions.types.editingPaginator
 import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.scheduling.Scheduler
 import com.kotlindiscord.kord.extensions.utils.scheduling.Task
-import dev.kord.cache.api.getEntry
-import dev.kord.cache.api.query
 import dev.kord.common.entity.Permission
-import dev.kord.common.entity.optional.optional
-import dev.kord.core.cache.data.MemberData
-import dev.kord.core.cache.data.UserData
 import dev.kord.core.entity.Member
 import dev.kord.core.event.guild.MembersChunkEvent
 import kotlinx.coroutines.flow.filter
@@ -141,24 +136,8 @@ class UserCleanupExtension : Extension() {
                 .mapNotNull { kord.getGuild(it._id) }
 
             guilds.forEach { guild ->
-                val members = kord.cache.getEntry<MemberData>()!!
-                    .query { MemberData::pending eq true.optional() }
-                    .asFlow()
-
-                val membersInGuild = members.filter { it.guildId == guild.id }.toList()
-                val count = membersInGuild.size
-
-                val users = kord.cache.getEntry<UserData>()!!
-                    .query { UserData::bot eq false.optional() }
-                    .asFlow()
-                    .filter { user -> membersInGuild.any { it.userId == user.id } }
-                    .toList()
-                    .associateBy { it.id }
-
-                logger.info { "Members in cache (before, ${guild.name}): $count" }
-
-                membersInGuild
-                    .map { Member(it, users[it.userId]!!, kord) }
+                guild.members
+                    .filter { it.isPending && !it.isBot }
                     .filter { (it.joinedAt + MAX_PENDING_DURATION) <= now }
                     .toList()
                     .forEach {

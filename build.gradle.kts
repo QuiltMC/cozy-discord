@@ -10,15 +10,17 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     application
 
-    kotlin("jvm")
-    kotlin("plugin.serialization")
+    alias(libs.plugins.kotlin.jvm)
 
-    id("com.google.devtools.ksp")
-    id("com.github.jakemarsden.git-hooks")
-    id("com.github.johnrengelman.shadow")
-    id("io.gitlab.arturbosch.detekt")
-    id("com.expediagroup.graphql")
-    id("org.cadixdev.licenser")
+    // We have to do this because JetBrains doesn't package their plugins in a standard manner
+    kotlin("plugin.serialization") version libs.plugins.kotlin.serialization.get().version.requiredVersion
+
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.githooks)
+    alias(libs.plugins.shadow)
+    alias(libs.plugins.detekt)
+    alias(libs.plugins.graphql)
+    alias(libs.plugins.licenser)
 }
 
 group = "org.quiltmc.community"
@@ -109,7 +111,6 @@ tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "15"
 
     kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
-    kotlinOptions.useIR = true
 }
 
 tasks.jar {

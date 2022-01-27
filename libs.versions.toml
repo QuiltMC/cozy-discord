@@ -1,7 +1,7 @@
 [versions]
-detekt = "1.17.1"  # Note: Plugin versions must be updated in the settings.gradle.kts too
-kotlin = "1.5.30"  # Note: Plugin versions must be updated in the settings.gradle.kts too
-graphql = "5.2.0"  # Note: Plugin versions must be updated in the settings.gradle.kts too
+detekt = "1.19.0"
+kotlin = "1.6.10"
+graphql = "5.2.0"
 
 commons-text = "1.9"
 kmongo = "4.4.0"
@@ -30,4 +30,16 @@ kx-ser = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 logging = { module = "io.github.microutils:kotlin-logging", version.ref = "logging" }
 rgxgen = { module = "com.github.curious-odd-man:rgxgen", version.ref = "rgxgen" }
-graphql = {module = "com.expediagroup:graphql-kotlin-ktor-client", version.ref = "graphql"}
+graphql = { module = "com.expediagroup:graphql-kotlin-ktor-client", version.ref = "graphql" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.kotlin-serialization", version.ref = "kotlin" }
+
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+graphql = { id = "com.expediagroup.graphql", version.ref = "graphql" }
+
+githooks = { id = "com.github.jakemarsden.git-hooks", version = "0.0.2" }
+ksp = { id = "com.google.devtools.ksp", version = "1.6.10-1.0.2" }
+licenser = { id = "org.cadixdev.licenser", version = "0.6.1" }
+shadow = { id = "com.github.johnrengelman.shadow", version = "5.2.0" }
