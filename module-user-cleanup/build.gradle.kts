@@ -14,16 +14,6 @@ repositories {
     google()
 
     maven {
-        name = "Kotlin Discord"
-        url = uri("https://maven.kotlindiscord.com/repository/maven-public/")
-    }
-
-    maven {
-        name = "Fabric"
-        url = uri("https://maven.fabricmc.net")
-    }
-
-    maven {
         name = "QuiltMC (Releases)"
         url = uri("https://maven.quiltmc.org/repository/release/")
     }
@@ -31,11 +21,6 @@ repositories {
     maven {
         name = "QuiltMC (Snapshots)"
         url = uri("https://maven.quiltmc.org/repository/snapshot/")
-    }
-
-    maven {
-        name = "JitPack"
-        url = uri("https://jitpack.io")
     }
 }
 
