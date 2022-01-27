@@ -13,7 +13,6 @@ plugins {
     kotlin("plugin.serialization")
 
     id("com.expediagroup.graphql")
-    id("com.github.johnrengelman.shadow")
     id("com.google.devtools.ksp")
     id("io.gitlab.arturbosch.detekt")
     id("org.cadixdev.licenser")
@@ -64,6 +63,10 @@ tasks {
                 jvmTarget = "16"
                 freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
             }
+        }
+
+        license {
+            header(rootDir.toPath().resolve("LICENSE"))
         }
 
         java {

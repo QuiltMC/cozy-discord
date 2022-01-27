@@ -12,20 +12,28 @@
 package org.quiltmc.community
 
 import com.kotlindiscord.kord.extensions.ExtensibleBot
+import com.kotlindiscord.kord.extensions.checks.hasPermission
 import com.kotlindiscord.kord.extensions.modules.extra.mappings.extMappings
 import com.kotlindiscord.kord.extensions.modules.extra.phishing.DetectionAction
 import com.kotlindiscord.kord.extensions.modules.extra.phishing.extPhishing
 import com.kotlindiscord.kord.extensions.utils.envOrNull
+import com.kotlindiscord.kord.extensions.utils.getKoin
+import dev.kord.common.entity.Permission
 import dev.kord.gateway.Intents
 import dev.kord.gateway.PrivilegedIntent
+import org.quiltmc.community.cozy.modules.cleanup.userCleanup
+import org.quiltmc.community.database.collections.ServerSettingsCollection
 import org.quiltmc.community.modes.quilt.extensions.*
 import org.quiltmc.community.modes.quilt.extensions.filtering.FilterExtension
 import org.quiltmc.community.modes.quilt.extensions.github.GithubExtension
 import org.quiltmc.community.modes.quilt.extensions.messagelog.MessageLogExtension
 import org.quiltmc.community.modes.quilt.extensions.minecraft.MinecraftExtension
 import org.quiltmc.community.modes.quilt.extensions.suggestions.SuggestionsExtension
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.hours
 
 val MODE = envOrNull("MODE")?.lowercase() ?: "quilt"
+val ENVIRONMENT = envOrNull("ENVIRONMENT")?.lowercase() ?: "production"
 
 suspend fun setupCollab() = ExtensibleBot(DISCORD_TOKEN) {
     common()
@@ -84,7 +92,7 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
         add(::ShowcaseExtension)
         add(::SuggestionsExtension)
         add(::SyncExtension)
-        add(::UserCleanupExtension)
+//        add(::UserCleanupExtension)
         add(::UtilityExtension)
 
         extPhishing {
@@ -95,6 +103,23 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
 
             check { inQuiltGuild() }
             check { notHasBaseModeratorRole() }
+        }
+
+        userCleanup {
+            maxPendingDuration = 3.days
+            taskDelay = 1.hours
+            loggingChannelName = "cozy-logs"
+
+            runAutomatically = false
+
+            guildPredicate {
+                val servers = getKoin().get<ServerSettingsCollection>()
+                val serverEntry = servers.get(it.id)
+
+                serverEntry?.quiltServerType != null
+            }
+
+            commandCheck { hasPermission(Permission.Administrator) }
         }
 
         sentry {

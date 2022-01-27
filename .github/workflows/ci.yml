@@ -39,3 +39,10 @@ jobs:
         with:
           name: JARs
           path: build/libs/*.jar
+
+      - name: Upload artifacts (Module JARs)
+        uses: actions/upload-artifact@v2
+
+        with:
+          name: Module JARs
+          path: module-*/build/libs/*.jar

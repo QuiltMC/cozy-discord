@@ -5,12 +5,8 @@
  */
 
 plugins {
+    `api-module`
     `cozy-module`
-    `shadow-module`
-
-    application
-
-    id("com.github.jakemarsden.git-hooks")
 }
 
 repositories {
@@ -48,53 +44,11 @@ dependencies {
 
     ksp(libs.kordex.annotationProcessor)
 
-    implementation(libs.kmongo)
-    implementation(libs.rgxgen)
-
     implementation(libs.kordex.annotations)
     implementation(libs.kordex.core)
-    implementation(libs.kordex.mappings)
-    implementation(libs.kordex.phishing)
 
-    implementation(libs.commons.text)
-    implementation(libs.jansi)
-    implementation(libs.logback)
     implementation(libs.logging)
-    implementation(libs.groovy)
 
     implementation(platform(libs.kotlin.bom))
     implementation(libs.kotlin.stdlib)
-    implementation(libs.kx.ser)
-    implementation(libs.graphql)
-
-    implementation(project(":module-user-cleanup"))
-}
-
-graphql {
-    client {
-        sdlEndpoint = "https://docs.github.com/public/schema.docs.graphql"
-        packageName = "quilt.ghgen"
-        serializer = com.expediagroup.graphql.plugin.gradle.config.GraphQLSerializer.KOTLINX
-    }
-}
-
-application {
-    // This is deprecated, but the Shadow plugin requires it
-    mainClassName = "org.quiltmc.community.AppKt"
-}
-
-gitHooks {
-    setHooks(
-        mapOf("pre-commit" to "updateLicense detekt")
-    )
-}
-
-tasks {
-    jar {
-        manifest {
-            attributes(
-                "Main-Class" to "org.quiltmc.community.AppKt"
-            )
-        }
-    }
 }

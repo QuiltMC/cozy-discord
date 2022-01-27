@@ -22,3 +22,5 @@ dependencyResolutionManagement {
         }
     }
 }
+
+include(":module-user-cleanup")
