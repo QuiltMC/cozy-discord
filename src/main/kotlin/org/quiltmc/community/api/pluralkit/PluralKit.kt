@@ -35,17 +35,20 @@ class PluralKit {
     suspend fun getMessage(id: Snowflake) =
         getMessage(id.toString())
 
+    @Suppress("MagicNumber")
     suspend fun getMessage(id: String): PKMessage {
         val url = MESSAGE_URL.replace("id" to id)
 
         try {
             val result: PKMessage = client.get(url)
 
-            logger.info { "/messages/$id -> 200" }
+            logger.debug { "/messages/$id -> 200" }
 
             return result
         } catch (e: ClientRequestException) {
-            logger.info { "/messages/$id -> ${e.response.status}" }
+            if (e.response.status.value in 400 until 499) {
+                logger.error(e) { "/messages/$id -> ${e.response.status}" }
+            }
 
             throw e
         }

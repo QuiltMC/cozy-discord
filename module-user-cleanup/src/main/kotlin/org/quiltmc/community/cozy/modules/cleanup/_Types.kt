@@ -10,4 +10,4 @@ package org.quiltmc.community.cozy.modules.cleanup
 
 import dev.kord.core.entity.Guild
 
-public typealias GuildPredicate = suspend (Guild) -> Boolean
+public typealias GuildPredicate = suspend (guild: Guild) -> Boolean

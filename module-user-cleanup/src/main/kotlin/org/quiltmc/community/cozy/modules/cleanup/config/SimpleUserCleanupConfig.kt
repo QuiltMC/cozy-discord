@@ -11,8 +11,7 @@ import dev.kord.core.entity.Guild
 import dev.kord.core.entity.channel.GuildMessageChannel
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.last
+import kotlinx.coroutines.flow.lastOrNull
 import org.quiltmc.community.cozy.modules.cleanup.GuildPredicate
 import java.util.*
 import kotlin.time.Duration
@@ -30,11 +29,8 @@ public class SimpleUserCleanupConfig(builder: Builder) : UserCleanupConfig() {
     private val commandChecks: MutableList<Check<*>> = builder.commandChecks
 
     init {
-        guildPredicates.add {
-            it.channels
-                .filterIsInstance<GuildMessageChannel>()
-                .filter { channel -> channel.name.equals(loggingChannelName, true) }
-                .firstOrNull() != null
+        guildPredicates.add { guild ->
+            getLoggingChannelOrNull(guild) != null
         }
     }
 
@@ -44,11 +40,11 @@ public class SimpleUserCleanupConfig(builder: Builder) : UserCleanupConfig() {
     override suspend fun getCommandChecks(): List<Check<*>> =
         commandChecks
 
-    override suspend fun getLoggingChannel(guild: Guild): GuildMessageChannel =
+    override suspend fun getLoggingChannelOrNull(guild: Guild): GuildMessageChannel? =
         guild.channels
             .filterIsInstance<GuildMessageChannel>()
             .filter { channel -> channel.name.equals(loggingChannelName, true) }
-            .last()
+            .lastOrNull()
 
     override suspend fun getMaxPendingDuration(): Duration =
         maxPendingDuration
