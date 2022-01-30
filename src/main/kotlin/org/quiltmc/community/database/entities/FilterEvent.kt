@@ -25,6 +25,6 @@ data class FilterEvent(
 
     val guildId: Snowflake,
     val authorId: Snowflake,
-    val channelId: Snowflake,
-    val messageId: Snowflake,
+    val channelId: Snowflake?,
+    val messageId: Snowflake?,
 ) : Entity<UUID>

@@ -10,10 +10,7 @@ import com.kotlindiscord.kord.extensions.commands.application.slash.converters.C
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class MatchType(override val readableName: String) : ChoiceEnum {
-    CONTAINS("Target partially contains this text"),
-    EXACT("Target exactly matches this text"),
-    REGEX("Target exactly matches this regular expression"),
-    REGEX_CONTAINS("Target contains this regular expression"),
-    INVITE("Target contains an invite for this guild ID"),
+enum class MatchTarget(override val readableName: String) : ChoiceEnum {
+    MESSAGE("Message content"),
+    USER("Username, nickname or activities"),
 }

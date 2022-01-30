@@ -15,6 +15,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 import org.quiltmc.community.database.Entity
 import org.quiltmc.community.modes.quilt.extensions.filtering.FilterAction
+import org.quiltmc.community.modes.quilt.extensions.filtering.MatchTarget
 import org.quiltmc.community.modes.quilt.extensions.filtering.MatchType
 import java.util.*
 
@@ -28,6 +29,7 @@ data class FilterEntry(
 
     var match: String,
     var matchType: MatchType,
+    var matchTarget: MatchTarget,
 
     var note: String? = null,
 ) : Entity<UUID>

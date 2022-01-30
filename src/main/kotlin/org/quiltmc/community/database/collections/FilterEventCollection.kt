@@ -26,16 +26,16 @@ class FilterEventCollection : KoinComponent {
 
         guild: GuildBehavior,
         author: UserBehavior,
-        channel: ChannelBehavior,
-        message: MessageBehavior
+        channel: ChannelBehavior?,
+        message: MessageBehavior?
     ) = add(
         FilterEvent(
             filter = filter._id,
 
             guildId = guild.id,
             authorId = author.id,
-            channelId = channel.id,
-            messageId = message.id
+            channelId = channel?.id,
+            messageId = message?.id
         )
     )
 

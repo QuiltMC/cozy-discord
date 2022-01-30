@@ -10,8 +10,12 @@ import com.kotlindiscord.kord.extensions.commands.application.slash.converters.C
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class FilterAction(val severity: Int, override val readableName: String) : ChoiceEnum {
+enum class FilterAction(
+    val severity: Int,
+    override val readableName: String,
+    val validForUsers: Boolean = false
+) : ChoiceEnum {
     DELETE(0, "Delete message"),
-    KICK(1, "Delete message and kick user"),
-    BAN(2, "Delete message and ban user")
+    KICK(1, "Kick user", true),
+    BAN(2, "Ban user", true)
 }

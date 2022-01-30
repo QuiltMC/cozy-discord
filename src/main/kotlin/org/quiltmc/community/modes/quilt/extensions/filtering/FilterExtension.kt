@@ -35,9 +35,13 @@ import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.ban
 import dev.kord.core.behavior.channel.createEmbed
 import dev.kord.core.behavior.channel.createMessage
+import dev.kord.core.entity.Member
 import dev.kord.core.entity.Message
+import dev.kord.core.event.guild.MemberJoinEvent
+import dev.kord.core.event.guild.MemberUpdateEvent
 import dev.kord.core.event.message.MessageCreateEvent
 import dev.kord.core.event.message.MessageUpdateEvent
+import dev.kord.core.event.user.UserUpdateEvent
 import dev.kord.rest.builder.message.EmbedBuilder
 import dev.kord.rest.builder.message.create.embed
 import mu.KotlinLogging
@@ -45,10 +49,11 @@ import org.koin.core.component.inject
 import org.quiltmc.community.*
 import org.quiltmc.community.database.collections.FilterCollection
 import org.quiltmc.community.database.collections.FilterEventCollection
+import org.quiltmc.community.database.collections.GlobalSettingsCollection
+import org.quiltmc.community.database.collections.ServerSettingsCollection
 import org.quiltmc.community.database.entities.FilterEntry
 import java.util.*
 
-const val APPEALS_INVITE_CODE = "H32HVWw9Nu"
 const val FILTERS_PER_PAGE = 2
 
 // Regex adapted by the regex used in the Python Discord bot, which is MIT-licensed.
@@ -74,6 +79,9 @@ class FilterExtension : Extension() {
 
     private val rgxProperties = RgxGenProperties()
     private val inviteCache: MutableMap<String, Snowflake> = mutableMapOf()
+
+    private val globalSettings: GlobalSettingsCollection by inject()
+    private val serverSettings: ServerSettingsCollection by inject()
 
     init {
         RgxGenOption.INFINITE_PATTERN_REPETITION.setInProperties(rgxProperties, 2)
@@ -109,6 +117,42 @@ class FilterExtension : Extension() {
             }
         }
 
+        event<MemberJoinEvent> {
+            check { isNotBot() }
+            check { inQuiltGuild() }
+            check { notHasBaseModeratorRole() }
+
+            action {
+                handleMember(event.member)
+            }
+        }
+
+        event<MemberUpdateEvent> {
+            check { isNotBot() }
+            check { inQuiltGuild() }
+            check { notHasBaseModeratorRole() }
+
+            action {
+                handleMember(event.member)
+            }
+        }
+
+        event<UserUpdateEvent> {
+            check { isNotBot() }
+            check { inQuiltGuild() }
+            check { notHasBaseModeratorRole() }
+
+            action {
+                val guilds = serverSettings.getByQuiltServers().toList().mapNotNull {
+                    kord.getGuild(it._id)
+                }
+
+                val members = guilds.mapNotNull { it.getMemberOrNull(event.user.id) }.toList()
+
+                members.forEach { handleMember(it) }
+            }
+        }
+
         GUILDS.forEach { guildId ->
             ephemeralSlashCommand {
                 name = "filters"
@@ -135,6 +179,7 @@ class FilterExtension : Extension() {
 
                         filter.match = arguments.match
                         filters.set(filter)
+                        filterCache[filter._id] = filter
 
                         this@FilterExtension.kord.getGuild(COMMUNITY_GUILD)
                             ?.getCozyLogChannel()
@@ -178,6 +223,7 @@ class FilterExtension : Extension() {
 
                         filter.matchType = arguments.matchType
                         filters.set(filter)
+                        filterCache[filter._id] = filter
 
                         this@FilterExtension.kord.getGuild(COMMUNITY_GUILD)
                             ?.getCozyLogChannel()
@@ -219,8 +265,18 @@ class FilterExtension : Extension() {
                             return@action
                         }
 
+                        if (filter.matchTarget == MatchTarget.USER && arguments.action?.validForUsers == false) {
+                            respond {
+                                content = "The given action (**${arguments.action?.readableName}**) is not valid " +
+                                        "for filters that target user profiles."
+                            }
+
+                            return@action
+                        }
+
                         filter.action = arguments.action
                         filters.set(filter)
+                        filterCache[filter._id] = filter
 
                         this@FilterExtension.kord.getGuild(COMMUNITY_GUILD)
                             ?.getCozyLogChannel()
@@ -247,6 +303,59 @@ class FilterExtension : Extension() {
                     }
                 }
 
+                ephemeralSubCommand(::FilterEditTargetArgs) {
+                    name = "edit_target"
+                    description = "Update the content target type for a given filter"
+
+                    action {
+                        val filter = filters.get(UUID.fromString(arguments.uuid))
+
+                        if (filter == null) {
+                            respond {
+                                content = "No such filter: `${arguments.uuid}`"
+                            }
+
+                            return@action
+                        }
+
+                        if (arguments.target == MatchTarget.USER && filter.action?.validForUsers == false) {
+                            respond {
+                                content = "The filter's action (**${filter.action?.readableName}**) is not valid " +
+                                        "for filters that target user profiles."
+                            }
+
+                            return@action
+                        }
+
+                        filter.matchTarget = arguments.target
+                        filters.set(filter)
+                        filterCache[filter._id] = filter
+
+                        this@FilterExtension.kord.getGuild(COMMUNITY_GUILD)
+                            ?.getCozyLogChannel()
+                            ?.createEmbed {
+                                color = DISCORD_GREEN
+                                title = "Filter target updated"
+
+                                formatFilter(filter)
+
+                                field {
+                                    name = "Moderator"
+                                    value = "${user.mention} (`${user.id.value}` / `${user.asUser().tag}`)"
+                                }
+                            }
+
+                        respond {
+                            embed {
+                                color = DISCORD_GREEN
+                                title = "Filter target updated"
+
+                                formatFilter(filter)
+                            }
+                        }
+                    }
+                }
+
                 ephemeralSubCommand(::FilterEditPingArgs) {
                     name = "edit_ping"
                     description = "Update the ping setting for a given filter"
@@ -264,6 +373,7 @@ class FilterExtension : Extension() {
 
                         filter.pingStaff = arguments.ping
                         filters.set(filter)
+                        filterCache[filter._id] = filter
 
                         this@FilterExtension.kord.getGuild(COMMUNITY_GUILD)
                             ?.getCozyLogChannel()
@@ -307,6 +417,7 @@ class FilterExtension : Extension() {
 
                         filter.note = arguments.note
                         filters.set(filter)
+                        filterCache[filter._id] = filter
 
                         this@FilterExtension.kord.getGuild(COMMUNITY_GUILD)
                             ?.getCozyLogChannel()
@@ -338,6 +449,15 @@ class FilterExtension : Extension() {
                     description = "Create a new filter"
 
                     action {
+                        if (arguments.target == MatchTarget.USER && arguments.action?.validForUsers == false) {
+                            respond {
+                                content = "The given action (**${arguments.action?.readableName}**) is not valid " +
+                                        "for filters that target user profiles."
+                            }
+
+                            return@action
+                        }
+
                         val filter = FilterEntry(
                             _id = UUID.randomUUID(),
 
@@ -347,7 +467,8 @@ class FilterExtension : Extension() {
                             match = arguments.match,
                             matchType = arguments.matchType,
 
-                            note = arguments.note
+                            note = arguments.note,
+                            matchTarget = arguments.target
                         )
 
                         filters.set(filter)
@@ -497,7 +618,7 @@ class FilterExtension : Extension() {
     @Suppress("TooGenericExceptionCaught")
     suspend fun handleMessage(message: Message) {
         val matched = filterCache.values
-            .filter { it.matches(message.content) }
+            .filter { it.matchTarget == MatchTarget.MESSAGE }
             .sortedByDescending { it.action?.severity ?: -1 }
 
         for (filter in matched) {
@@ -509,6 +630,174 @@ class FilterExtension : Extension() {
                 }
             } catch (t: Throwable) {
                 logger.error(t) { "Failed to check filter ${filter._id}" }
+            }
+        }
+    }
+
+    @Suppress("TooGenericExceptionCaught")
+    suspend fun handleMember(member: Member) {
+        val matched = filterCache.values
+            .filter { it.matchTarget == MatchTarget.USER }
+            .sortedByDescending { it.action?.severity ?: -1 }
+
+        for (filter in matched) {
+            try {
+                if (
+                    filter.matches(member.username) ||
+                    (member.nickname != null && filter.matches(member.nickname!!)) ||
+
+                    member.getPresenceOrNull()?.activities?.any {
+                        filter.matches(it.name) || (it.details != null && filter.matches(it.details!!))
+                    } == true
+                ) {
+                    filter.action(member)
+
+                    return
+                }
+            } catch (t: Throwable) {
+                logger.error(t) { "Failed to check filter ${filter._id}" }
+            }
+        }
+    }
+
+    // TODO: Provide profile content
+    suspend fun FilterEntry.action(member: Member) {
+        val guild = member.getGuild()
+
+        if (action?.validForUsers == false) {
+            error(
+                "The filter's action is not valid for user profiles.\n" +
+                        "Filter: $_id,\n" +
+                        "Action: ${action?.readableName}"
+            )
+        }
+
+        when (action) {
+            FilterAction.KICK -> {
+                member.dm {
+                    content = "You have been kicked from **${guild.name}** for something in your user " +
+                            "profile."
+                }
+
+                member.kick("Kicked by filter: $_id")
+            }
+
+            FilterAction.BAN -> {
+                member.dm {
+                    content = "You have been kicked from **${guild.name}** for something in your user " +
+                            "profile.\n\n" +
+
+                            "If you'd like to appeal your ban: https://discord.gg/" +
+                            "${globalSettings.get()?.appealsInvite}"
+                }
+
+                member.ban {
+                    reason = "Banned by filter: $_id"
+                }
+            }
+
+            else -> {}  // Nothing
+        }
+
+        filterEvents.add(
+            this, guild, member, null, null
+        )
+
+        guild.getFilterLogChannel()?.createMessage {
+            if (pingStaff) {
+                val modRole = when (guild.id) {
+                    COMMUNITY_GUILD -> guild.getRole(COMMUNITY_MODERATOR_ROLE)
+                    TOOLCHAIN_GUILD -> guild.getRole(TOOLCHAIN_MODERATOR_ROLE)
+
+                    else -> null
+                }
+
+                content = modRole?.mention
+                    ?: "**Warning:** This filter shouldn't have triggered on this server! This is a bug!"
+            }
+
+            embed {
+                color = DISCORD_YELLOW
+                title = "Filter triggered!"
+
+                field {
+                    inline = true
+                    name = "User"
+                    value = "${member.mention} (`${member.id}` / `${member.tag}`)"
+                }
+
+                field {
+                    inline = true
+                    name = "Username"
+                    value = member.username
+                }
+
+                if (member.nickname != null) {
+                    field {
+                        inline = true
+                        name = "Nickname"
+                        value = member.nickname!!
+                    }
+                }
+
+                val presence = member.getPresenceOrNull()
+
+                if (presence != null && presence.activities.isNotEmpty()) {
+                    field {
+                        name = "Activities"
+                        value = presence.activities.joinToString("\n") {
+                            "**${it.name}**" + if (it.details != null) {
+                                ": ${it.details}"
+                            } else {
+                                ""
+                            }
+                        }
+                    }
+                }
+
+                field {
+                    name = "Filter ID"
+                    value = "`$_id`"
+                }
+
+                field {
+                    inline = true
+                    name = "Action"
+                    value = action?.readableName ?: "Log only"
+                }
+
+                field {
+                    inline = true
+                    name = "Match Type"
+                    value = matchType.readableName
+                }
+
+                field {
+                    inline = true
+                    name = "Target Type"
+                    value = matchTarget.readableName
+                }
+
+                if (note != null) {
+                    field {
+                        name = "Filter Note"
+                        value = note!!
+                    }
+                }
+
+                field {
+                    name = "Match String"
+
+                    value = "```\n" +
+
+                            if (matchType == MatchType.INVITE) {
+                                "Guild ID: $match\n"
+                            } else {
+                                "$match\n"
+                            } +
+
+                            "```"
+                }
             }
         }
     }
@@ -569,7 +858,8 @@ class FilterExtension : Extension() {
                 message.author!!.dm {
                     content = "You have been banned from **${guild.name}** for sending the below message.\n\n" +
 
-                            "If you'd like to appeal your ban: https://discord.gg/$APPEALS_INVITE_CODE"
+                            "If you'd like to appeal your ban: https://discord.gg/" +
+                            "${globalSettings.get()?.appealsInvite}"
 
                     embed {
                         description = message.content
@@ -651,6 +941,12 @@ class FilterExtension : Extension() {
                     value = matchType.readableName
                 }
 
+                field {
+                    inline = true
+                    name = "Target Type"
+                    value = matchTarget.readableName
+                }
+
                 if (note != null) {
                     field {
                         name = "Filter Note"
@@ -727,6 +1023,7 @@ class FilterExtension : Extension() {
         description += "__**${filter._id}**__\n\n" +
                 "**Action:** ${filter.action?.readableName ?: "Log only"}\n" +
                 "**Match type:** ${filter.matchType.readableName}\n" +
+                "**Target type:** ${filter.matchTarget.readableName}\n" +
                 "**Ping staff:** ${if (filter.pingStaff) "Yes" else "No"}\n\n" +
 
                 if (filter.note != null) {
@@ -796,6 +1093,13 @@ class FilterExtension : Extension() {
             description = "Type of match"
 
             typeName = "match type`"
+        }
+
+        val target by enumChoice<MatchTarget> {
+            name = "target"
+            description = "Content type to target"
+
+            typeName = "target"
         }
 
         val action by optionalEnumChoice<FilterAction> {
@@ -882,6 +1186,29 @@ class FilterExtension : Extension() {
             description = "Action to take"
 
             typeName = "action"
+        }
+    }
+
+    @Suppress("TooGenericExceptionCaught")
+    inner class FilterEditTargetArgs : Arguments() {
+        val uuid by string {
+            name = "uuid"
+            description = "Filter ID"
+
+            validate {
+                try {
+                    UUID.fromString(value)
+                } catch (t: Throwable) {
+                    fail("Please provide a valid UUID")
+                }
+            }
+        }
+
+        val target by enumChoice<MatchTarget> {
+            name = "target"
+            description = "Content type to target"
+
+            typeName = "target"
         }
     }
 
