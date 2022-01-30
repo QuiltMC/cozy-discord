@@ -248,6 +248,9 @@ class MinecraftExtension : Extension() {
         result = result.replace("<strong>", "**")
         result = result.replace("</strong>", "**")
 
+        result = result.replace("<code>", "`")
+        result = result.replace("</code>", "`")
+
         result = result.replace("[\n]*<h\\d+>[\n]*".toRegex(), "\n\n__**")
         result = result.replace("[\n]*</h\\d+>[\n]*".toRegex(), "**__\n")
 
