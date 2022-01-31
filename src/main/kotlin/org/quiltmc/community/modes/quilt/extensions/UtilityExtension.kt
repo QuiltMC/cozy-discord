@@ -505,7 +505,7 @@ class UtilityExtension : Extension() {
                         }
 
                         if (arguments.lock) {
-                            edit { content = "**Error:** Only members of the community team may lock threads." }
+                            edit { content = "**Error:** Only moderators may lock threads." }
 
                             return@action
                         }
