@@ -327,11 +327,15 @@ class MinecraftExtension : Extension() {
                     guild.asGuild().getMaxArchiveDuration()
                 )
 
-                is NewsChannel -> startPublicThreadWithMessage(
-                    message.id,
-                    title,
-                    guild.asGuild().getMaxArchiveDuration()
-                )
+                is NewsChannel -> {
+                    startPublicThreadWithMessage(
+                        message.id,
+                        title,
+                        guild.asGuild().getMaxArchiveDuration()
+                    )
+
+                    message.publish()
+                }
             }
         }
     }
