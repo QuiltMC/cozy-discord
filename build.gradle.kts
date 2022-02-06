@@ -13,33 +13,40 @@ plugins {
     id("com.github.jakemarsden.git-hooks")
 }
 
-repositories {
-    mavenLocal()
-    google()
+allprojects {
+    repositories {
+        mavenLocal()
+        google()
 
-    maven {
-        name = "Kotlin Discord"
-        url = uri("https://maven.kotlindiscord.com/repository/maven-public/")
-    }
+        maven {
+            name = "Sonatype Snapshots"
+            url = uri("https://oss.sonatype.org/content/repositories/snapshots")
+        }
 
-    maven {
-        name = "Fabric"
-        url = uri("https://maven.fabricmc.net")
-    }
+        maven {
+            name = "Kotlin Discord"
+            url = uri("https://maven.kotlindiscord.com/repository/maven-public/")
+        }
 
-    maven {
-        name = "QuiltMC (Releases)"
-        url = uri("https://maven.quiltmc.org/repository/release/")
-    }
+        maven {
+            name = "Fabric"
+            url = uri("https://maven.fabricmc.net")
+        }
 
-    maven {
-        name = "QuiltMC (Snapshots)"
-        url = uri("https://maven.quiltmc.org/repository/snapshot/")
-    }
+        maven {
+            name = "QuiltMC (Releases)"
+            url = uri("https://maven.quiltmc.org/repository/release/")
+        }
 
-    maven {
-        name = "JitPack"
-        url = uri("https://jitpack.io")
+        maven {
+            name = "QuiltMC (Snapshots)"
+            url = uri("https://maven.quiltmc.org/repository/snapshot/")
+        }
+
+        maven {
+            name = "JitPack"
+            url = uri("https://jitpack.io")
+        }
     }
 }
 
