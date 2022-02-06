@@ -9,21 +9,6 @@ plugins {
     `cozy-module`
 }
 
-repositories {
-    mavenLocal()
-    google()
-
-    maven {
-        name = "QuiltMC (Releases)"
-        url = uri("https://maven.quiltmc.org/repository/release/")
-    }
-
-    maven {
-        name = "QuiltMC (Snapshots)"
-        url = uri("https://maven.quiltmc.org/repository/snapshot/")
-    }
-}
-
 dependencies {
     detektPlugins(libs.detekt)
 
