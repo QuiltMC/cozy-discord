@@ -24,3 +24,4 @@ dependencyResolutionManagement {
 }
 
 include(":module-user-cleanup")
+include(":module-moderation")
