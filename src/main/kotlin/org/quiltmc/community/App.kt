@@ -128,8 +128,8 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
         moderation {
             loggingChannelName = "cozy-logs"
 
-            commandCheck { hasBaseModeratorRole() }
             commandCheck { inQuiltGuild() }
+            commandCheck { hasBaseModeratorRole() }
         }
 
         sentry {

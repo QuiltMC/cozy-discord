@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.lastOrNull
 
 public class SimpleModerationConfig(builder: Builder) : ModerationConfig() {
     private val loggingChannelName: String = builder.loggingChannelName!!
-
     private val commandChecks: MutableList<Check<*>> = builder.commandChecks
 
     override suspend fun getLoggingChannelOrNull(guild: Guild): GuildMessageChannel? =
