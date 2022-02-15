@@ -11,16 +11,18 @@ import com.kotlindiscord.kord.extensions.checks.anyGuild
 import com.kotlindiscord.kord.extensions.checks.isNotInThread
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
-import com.kotlindiscord.kord.extensions.commands.converters.impl.int
+import com.kotlindiscord.kord.extensions.commands.converters.impl.duration
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
-import dev.kord.common.entity.optional.value
 import dev.kord.core.behavior.channel.asChannelOf
 import dev.kord.core.behavior.channel.createEmbed
 import dev.kord.core.behavior.channel.edit
 import dev.kord.core.entity.channel.TextChannel
+import kotlinx.datetime.DateTimePeriod
 import org.quiltmc.community.cozy.modules.moderation.config.ModerationConfig
+
+public val MAXIMUM_SLOWMODE_DURATION: DateTimePeriod = DateTimePeriod(hours = 6)
 
 /**
  * Moderation, extension, provides different moderation related tools.
@@ -80,12 +82,12 @@ public class ModerationExtension(
                     val channel = channel.asChannel() as TextChannel
 
                     channel.edit {
-                        rateLimitPerUser = arguments.duration
+                        rateLimitPerUser = arguments.duration.toTotalSeconds()
                     }
 
                     config.getLoggingChannelOrNull(guild!!.asGuild())?.createEmbed {
                         title = "Slowmode changed"
-                        description = "Set to ${arguments.duration} second(s)."
+                        description = "Set to ${arguments.duration.toTotalSeconds()} second(s)."
                         color = DISCORD_BLURPLE
 
                         field {
@@ -102,7 +104,7 @@ public class ModerationExtension(
                     }
 
                     respond {
-                        content = "Slowmode set to ${arguments.duration} second(s)."
+                        content = "Slowmode set to ${arguments.duration.toTotalSeconds()} second(s)."
                     }
                 }
             }
@@ -110,14 +112,14 @@ public class ModerationExtension(
     }
 
     public inner class SlowmodeEditArguments : Arguments() {
-        public val duration: Int by int {
+        public val duration: DateTimePeriod by duration {
             name = "duration"
-            description = "The new duration of the slowmode, in seconds"
+            description = "The new duration of the slowmode"
 
             validate() {
-                if (value < 0) {
-                    error("Duration must be greater than 0")
-                }
+                failIf(
+                    "Slowmode cannot be longer than ${MAXIMUM_SLOWMODE_DURATION.hours} hours"
+                ) { value > MAXIMUM_SLOWMODE_DURATION }
             }
         }
     }
