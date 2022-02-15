@@ -16,6 +16,7 @@ import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.common.entity.optional.value
+import dev.kord.core.behavior.channel.asChannelOf
 import dev.kord.core.behavior.channel.createEmbed
 import dev.kord.core.behavior.channel.edit
 import dev.kord.core.entity.channel.TextChannel
@@ -49,7 +50,7 @@ public class ModerationExtension(
                 action {
                     respond {
                         content = "Slowmode is currently " +
-                                "${channel.asChannel().data.rateLimitPerUser.value ?: 0} second(s)."
+                                "${channel.asChannelOf<TextChannel>().userRateLimit} second(s)."
                     }
                 }
             }
