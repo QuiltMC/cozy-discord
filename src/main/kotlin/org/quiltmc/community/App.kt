@@ -22,6 +22,7 @@ import dev.kord.common.entity.Permission
 import dev.kord.gateway.Intents
 import dev.kord.gateway.PrivilegedIntent
 import org.quiltmc.community.cozy.modules.cleanup.userCleanup
+import org.quiltmc.community.cozy.modules.moderation.moderation
 import org.quiltmc.community.database.collections.ServerSettingsCollection
 import org.quiltmc.community.modes.quilt.extensions.*
 import org.quiltmc.community.modes.quilt.extensions.filtering.FilterExtension
@@ -122,6 +123,13 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
             }
 
             commandCheck { hasPermission(Permission.Administrator) }
+        }
+
+        moderation {
+            loggingChannelName = "cozy-logs"
+
+            commandCheck { inQuiltGuild() }
+            commandCheck { hasBaseModeratorRole() }
         }
 
         sentry {
