@@ -26,7 +26,12 @@ repositories {
     google()
 
     maven {
-        name = "Kotlin Discord"
+        name = "Kotlin Discord (Snapshots)"
+        url = uri("https://maven.kotlindiscord.com/repository/maven-snapshots/")
+    }
+
+    maven {
+        name = "Kotlin Discord (Public)"
         url = uri("https://maven.kotlindiscord.com/repository/maven-public/")
     }
 

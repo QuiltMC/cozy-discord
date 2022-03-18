@@ -66,5 +66,15 @@
       <option name="name" value="Sonatype Snapshots" />
       <option name="url" value="https://oss.sonatype.org/content/repositories/snapshots" />
     </remote-repository>
+    <remote-repository>
+      <option name="id" value="Sonatype Snapshots" />
+      <option name="name" value="Sonatype Snapshots" />
+      <option name="url" value="https://oss.sonatype.org/content/repositories/snapshots" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="Kotlin Discord (Snapshots)" />
+      <option name="name" value="Kotlin Discord (Snapshots)" />
+      <option name="url" value="https://maven.kotlindiscord.com/repository/maven-snapshots/" />
+    </remote-repository>
   </component>
 </project>

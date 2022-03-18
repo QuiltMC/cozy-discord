@@ -339,7 +339,7 @@ class UtilityExtension : Extension() {
 
                                 this@UtilityExtension.logger.debug { "\nAuthor name: `$authorName`\n${msg.content}\n" }
 
-                                if (msg.type == MessageType.ApplicationCommand) {
+                                if (msg.type == MessageType.ChatInputCommand) {
                                     builder.append("🖥️ ")
                                 } else if (author == null) {
                                     builder.append("🌐 ")
@@ -380,7 +380,7 @@ class UtilityExtension : Extension() {
                             if (msg.content.isNotEmpty() || msg.attachments.isNotEmpty()) {
                                 val authorName = author?.tag ?: msg.data.author.username
 
-                                if (msg.type == MessageType.ApplicationCommand) {
+                                if (msg.type == MessageType.ChatInputCommand) {
                                     builder.append("🖥️ ")
                                 } else if (author == null) {
                                     builder.append("🌐 ")

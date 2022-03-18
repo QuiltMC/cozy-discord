@@ -19,6 +19,7 @@ import com.kotlindiscord.kord.extensions.parser.StringParser
 import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.entity.interaction.OptionValue
+import dev.kord.core.entity.interaction.StringOptionValue
 import dev.kord.rest.builder.interaction.OptionsBuilder
 import dev.kord.rest.builder.interaction.StringChoiceBuilder
 import org.koin.core.component.inject
@@ -56,7 +57,7 @@ class SuggestionConverter(
         StringChoiceBuilder(arg.displayName, arg.description).apply { required = true }
 
     override suspend fun parseOption(context: CommandContext, option: OptionValue<*>): Boolean {
-        val arg = (option as? OptionValue.StringOptionValue)?.value ?: return false
+        val arg = (option as? StringOptionValue)?.value ?: return false
 
         try {
             val snowflake = Snowflake(arg)

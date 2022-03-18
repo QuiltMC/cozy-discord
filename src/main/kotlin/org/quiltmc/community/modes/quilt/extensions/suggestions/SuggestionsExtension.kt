@@ -30,7 +30,7 @@ import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.behavior.channel.withTyping
 import dev.kord.core.behavior.edit
 import dev.kord.core.behavior.getChannelOf
-import dev.kord.core.behavior.interaction.followUpEphemeral
+import dev.kord.core.behavior.interaction.response.createEphemeralFollowup
 import dev.kord.core.behavior.reply
 import dev.kord.core.builder.components.emoji
 import dev.kord.core.entity.ReactionEmoji
@@ -222,7 +222,7 @@ class SuggestionsExtension : Extension() {
                 val response = interaction.ackEphemeral(false)
 
                 if (suggestion.status != SuggestionStatus.Open) {
-                    response.followUpEphemeral {
+                    response.createEphemeralFollowup {
                         content = "**Error:** This suggestion isn't open, and votes can't be changed."
                     }
 
@@ -234,11 +234,11 @@ class SuggestionsExtension : Extension() {
                         suggestion.positiveVoters.add(interaction.user.id)
                         suggestion.negativeVoters.remove(interaction.user.id)
 
-                        response.followUpEphemeral {
+                        response.createEphemeralFollowup {
                             content = "Vote registered!"
                         }
                     } else {
-                        response.followUpEphemeral {
+                        response.createEphemeralFollowup {
                             content = "**Error:** You've already upvoted this suggestion."
                         }
 
@@ -249,11 +249,11 @@ class SuggestionsExtension : Extension() {
                         suggestion.negativeVoters.add(interaction.user.id)
                         suggestion.positiveVoters.remove(interaction.user.id)
 
-                        response.followUpEphemeral {
+                        response.createEphemeralFollowup {
                             content = "Vote registered!"
                         }
                     } else {
-                        response.followUpEphemeral {
+                        response.createEphemeralFollowup {
                             content = "**Error:** You've already downvoted this suggestion."
                         }
 
@@ -263,24 +263,24 @@ class SuggestionsExtension : Extension() {
                     ACTION_REMOVE -> if (suggestion.positiveVoters.contains(interaction.user.id)) {
                         suggestion.positiveVoters.remove(interaction.user.id)
 
-                        response.followUpEphemeral {
+                        response.createEphemeralFollowup {
                             content = "Vote removed!"
                         }
                     } else if (suggestion.negativeVoters.contains(interaction.user.id)) {
                         suggestion.negativeVoters.remove(interaction.user.id)
 
-                        response.followUpEphemeral {
+                        response.createEphemeralFollowup {
                             content = "Vote removed!"
                         }
                     } else {
-                        response.followUpEphemeral {
+                        response.createEphemeralFollowup {
                             content = "**Error:** You haven't voted for this suggestion."
                         }
 
                         return@action
                     }
 
-                    else -> response.followUpEphemeral {
+                    else -> response.createEphemeralFollowup {
                         content = "Unknown action: $action"
 
                         return@action
