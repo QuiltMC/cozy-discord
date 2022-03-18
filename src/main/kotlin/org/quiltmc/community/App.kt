@@ -32,7 +32,6 @@ import org.quiltmc.community.modes.quilt.extensions.minecraft.MinecraftExtension
 import org.quiltmc.community.modes.quilt.extensions.settings.SettingsExtension
 import org.quiltmc.community.modes.quilt.extensions.suggestions.SuggestionsExtension
 import kotlin.time.Duration.Companion.days
-import kotlin.time.Duration.Companion.hours
 
 val MODE = envOrNull("MODE")?.lowercase() ?: "quilt"
 val ENVIRONMENT = envOrNull("ENVIRONMENT")?.lowercase() ?: "production"
@@ -110,10 +109,10 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
 
         userCleanup {
             maxPendingDuration = 3.days
-            taskDelay = 1.hours
+            taskDelay = 1.days
             loggingChannelName = "cozy-logs"
 
-            runAutomatically = false
+            runAutomatically = true
 
             guildPredicate {
                 val servers = getKoin().get<ServerSettingsCollection>()

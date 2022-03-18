@@ -55,7 +55,7 @@ public class UserCleanupExtension(
             .withZone(ZoneId.systemDefault())
 
         if (config.runAutomatically) {
-            task = scheduler.schedule(config.getTaskDelay(), pollingSeconds = 60, callback = ::taskRun)
+            task = scheduler.schedule(config.getTaskDelay(), pollingSeconds = 60, repeat = true, callback = ::taskRun)
         }
 
         if (!config.registerCommand) {
@@ -138,31 +138,25 @@ public class UserCleanupExtension(
             .filter { config.checkGuild(it) }
             .toList()
 
-        try {
-            guilds.forEach { guild ->
-                val removed = processGuild(guild, false)
+        guilds.forEach { guild ->
+            val removed = processGuild(guild, false)
 
-                if (removed.isNotEmpty()) {
-                    logger.info { "Removed ${removed.size} users from ${guild.name} (${guild.id})" }
+            if (removed.isNotEmpty()) {
+                logger.info { "Removed ${removed.size} users from ${guild.name} (${guild.id})" }
 
-                    val table = "| User ID | Tag | Join Date (UTC) |\n" +
-                            "| ------- | --- | --------------- |\n" +
+                val table = "| User ID | Tag | Join Date (UTC) |\n" +
+                        "| ------- | --- | --------------- |\n" +
 
-                            removed.joinToString("\n") {
-                                "| ${it.id} | ${it.tag} | ${instantFormatter.format(it.joinedAt.toJavaInstant())} |"
-                            }
+                        removed.joinToString("\n") {
+                            "| ${it.id} | ${it.tag} | ${instantFormatter.format(it.joinedAt.toJavaInstant())} |"
+                        }
 
-                    config.getLoggingChannel(guild).createMessage {
-                        content = "**User Cleanup:** Cleaned up ${removed.size} users that didn't pass member " +
-                                "screening quickly enough."
+                config.getLoggingChannel(guild).createMessage {
+                    content = "**User Cleanup:** Cleaned up ${removed.size} users that didn't pass member " +
+                            "screening quickly enough."
 
-                        addFile("users.md", table.byteInputStream())
-                    }
+                    addFile("users.md", table.byteInputStream())
                 }
-            }
-        } finally {
-            if (::task.isInitialized) {
-                task.restart()
             }
         }
     }
