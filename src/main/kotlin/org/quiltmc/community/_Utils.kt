@@ -27,7 +27,6 @@ import kotlinx.coroutines.runBlocking
 import org.koin.dsl.bind
 import org.quiltmc.community.database.Database
 import org.quiltmc.community.database.collections.*
-import org.quiltmc.community.database.getSettings
 import org.quiltmc.community.modes.quilt.extensions.settings.SettingsExtension
 
 @Suppress("MagicNumber")  // It's the status code...
@@ -122,20 +121,6 @@ suspend fun ExtensibleBotBuilder.database(migrate: Boolean = false) {
 }
 
 suspend fun ExtensibleBotBuilder.common() {
-    chatCommands {
-        defaultPrefix = "?"
-
-        prefix { default ->
-            getGuild()?.getSettings()?.commandPrefix ?: default
-        }
-
-        check {
-            if (event.message.author == null) {
-                fail()
-            }
-        }
-    }
-
     extensions {
         sentry {
             val sentryDsn = envOrNull("SENTRY_DSN")
@@ -145,6 +130,10 @@ suspend fun ExtensibleBotBuilder.common() {
 
                 dsn = sentryDsn
             }
+        }
+
+        help {
+            enableBundledExtension = false  // We have no chat commands
         }
     }
 }

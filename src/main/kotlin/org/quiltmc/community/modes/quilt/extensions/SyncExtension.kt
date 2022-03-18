@@ -10,16 +10,16 @@ package org.quiltmc.community.modes.quilt.extensions
 
 import com.kotlindiscord.kord.extensions.checks.hasPermission
 import com.kotlindiscord.kord.extensions.checks.types.CheckContext
+import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
 import com.kotlindiscord.kord.extensions.extensions.Extension
-import com.kotlindiscord.kord.extensions.extensions.chatGroupCommand
+import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.extensions.event
+import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.hasPermission
-import com.kotlindiscord.kord.extensions.utils.respond
 import com.kotlindiscord.kord.extensions.utils.translate
 import dev.kord.common.entity.Permission
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.ban
-import dev.kord.core.behavior.channel.withTyping
 import dev.kord.core.entity.Guild
 import dev.kord.core.event.Event
 import dev.kord.core.event.guild.BanAddEvent
@@ -80,14 +80,14 @@ class SyncExtension : Extension() {
 
     @Suppress("SpreadOperator")  // No better way atm, and performance impact is negligible
     override suspend fun setup() {
-        chatGroupCommand {
+        ephemeralSlashCommand {
             name = "sync"
             description = "Synchronisation commands."
 
             check { inQuiltGuild() }
             check { hasBanOrRolePerms() }
 
-            chatCommand {
+            ephemeralSubCommand {
                 name = "bans"
                 description = "Additively synchronise bans between all servers, so that everything matches."
 
@@ -107,9 +107,9 @@ class SyncExtension : Extension() {
                         val member = it.getMember(this@SyncExtension.kord.selfId)
 
                         if (!BAN_PERMS.any { perm -> member.hasPermission(perm) }) {
-                            message.respond(
-                                "I don't have permission to ban members on ${it.name} (`${it.id.value}`)"
-                            )
+                            respond {
+                                content = "I don't have permission to ban members on ${it.name} (`${it.id.value}`)"
+                            }
 
                             return@action
                         }
@@ -118,35 +118,33 @@ class SyncExtension : Extension() {
                     val allBans: MutableMap<Snowflake, String?> = mutableMapOf()
                     val syncedBans: MutableMap<Guild, Int> = mutableMapOf()
 
-                    message.channel.withTyping {
-                        guilds.forEach { guild ->
-                            guild.bans.toList().forEach { ban ->
-                                if (allBans[ban.userId] == null || ban.reason?.startsWith("Synced:") == false) {
-                                    // If it's null/not present or the given ban entry doesn't start with "Synced:"
-                                    allBans[ban.userId] = ban.reason
+                    guilds.forEach { guild ->
+                        guild.bans.toList().forEach { ban ->
+                            if (allBans[ban.userId] == null || ban.reason?.startsWith("Synced:") == false) {
+                                // If it's null/not present or the given ban entry doesn't start with "Synced:"
+                                allBans[ban.userId] = ban.reason
+                            }
+                        }
+                    }
+
+                    guilds.forEach { guild ->
+                        allBans.forEach { (userId, reason) ->
+                            if (guild.getBanOrNull(userId) == null) {
+                                syncedBans[guild] = (syncedBans[guild] ?: 0) + 1
+
+                                guild.ban(userId) {
+                                    this.reason = "Synced: " + (reason ?: "No reason given")
                                 }
                             }
                         }
+                    }
 
-                        guilds.forEach { guild ->
-                            allBans.forEach { (userId, reason) ->
-                                if (guild.getBanOrNull(userId) == null) {
-                                    syncedBans[guild] = (syncedBans[guild] ?: 0) + 1
+                    respond {
+                        embed {
+                            title = "Bans synced"
 
-                                    guild.ban(userId) {
-                                        this.reason = "Synced: " + (reason ?: "No reason given")
-                                    }
-                                }
-                            }
-                        }
-
-                        message.respond {
-                            embed {
-                                title = "Bans synced"
-
-                                description = syncedBans.map { "**${it.key.name}**: ${it.value} added" }
-                                    .joinToString("\n")
-                            }
+                            description = syncedBans.map { "**${it.key.name}**: ${it.value} added" }
+                                .joinToString("\n")
                         }
                     }
                 }
