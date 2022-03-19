@@ -16,21 +16,27 @@ import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.extensions.event
 import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.hasPermission
+import com.kotlindiscord.kord.extensions.utils.timeoutUntil
 import com.kotlindiscord.kord.extensions.utils.translate
 import dev.kord.common.entity.Permission
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.ban
+import dev.kord.core.behavior.edit
 import dev.kord.core.entity.Guild
 import dev.kord.core.event.Event
 import dev.kord.core.event.guild.BanAddEvent
 import dev.kord.core.event.guild.BanRemoveEvent
+import dev.kord.core.event.guild.MemberUpdateEvent
 import dev.kord.rest.builder.message.create.embed
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.toList
+import kotlinx.datetime.Instant
 import mu.KotlinLogging
 import org.quiltmc.community.GUILDS
 import org.quiltmc.community.inQuiltGuild
 
 private val BAN_PERMS: Array<Permission> = arrayOf(Permission.BanMembers, Permission.Administrator)
+private val TIMEOUT_PERMS: Array<Permission> = arrayOf(Permission.ModerateMembers, Permission.Administrator)
 private val ROLE_PERMS: Array<Permission> = arrayOf(Permission.ManageRoles, Permission.Administrator)
 
 class SyncExtension : Extension() {
@@ -89,7 +95,7 @@ class SyncExtension : Extension() {
 
             ephemeralSubCommand {
                 name = "bans"
-                description = "Additively synchronise bans between all servers, so that everything matches."
+                description = "Additively sync bans between all servers, so that everything matches."
 
                 check { inQuiltGuild() }
                 check { hasBanPerms() }
@@ -149,6 +155,76 @@ class SyncExtension : Extension() {
                     }
                 }
             }
+
+            ephemeralSubCommand {
+                name = "timeouts"
+                description = "Additively sync timeouts between all servers, so that everything matches."
+
+                check { inQuiltGuild() }
+                check { hasBanPerms() }
+
+                requireBotPermissions(Permission.ModerateMembers)
+
+                action {
+                    val guilds = getGuilds()
+
+                    logger.info { "Syncing timeouts for ${guilds.size} guilds." }
+
+                    guilds.forEach {
+                        logger.debug { "${it.id.value} -> ${it.name}" }
+
+                        val member = it.getMember(this@SyncExtension.kord.selfId)
+
+                        if (!TIMEOUT_PERMS.any { perm -> member.hasPermission(perm) }) {
+                            respond {
+                                content = "I don't have permission to timeout members on ${it.name} (`${it.id.value}`)"
+                            }
+
+                            return@action
+                        }
+                    }
+
+                    val allTimeouts: MutableMap<Snowflake, Instant> = mutableMapOf()
+                    val syncedTimeouts: MutableMap<Guild, Int> = mutableMapOf()
+
+                    guilds.forEach { guild ->
+                        guild.members
+                            .filter { it.timeoutUntil != null }
+                            .collect {
+                                val current = allTimeouts[it.id]
+
+                                if (current == null || current < it.timeoutUntil!!) {
+                                    allTimeouts[it.id] = it.timeoutUntil!!
+                                }
+                            }
+                    }
+
+                    guilds.forEach { guild ->
+                        for ((userId, expiry) in allTimeouts) {
+                            val member = guild.getMemberOrNull(userId) ?: continue
+
+                            if (member.timeoutUntil != expiry) {
+                                member.edit {
+                                    timeoutUntil = expiry
+
+                                    reason = "Synced automatically"
+                                }
+
+                                syncedTimeouts[guild] = (syncedTimeouts[guild] ?: 0) + 1
+                            }
+                        }
+                    }
+
+                    respond {
+                        embed {
+                            title = "Timeouts synced"
+
+                            description = syncedTimeouts.map { "**${it.key.name}**: ${it.value} added" }
+                                .joinToString("\n")
+                        }
+                    }
+                }
+            }
         }
 
         event<BanAddEvent> {
@@ -177,6 +253,24 @@ class SyncExtension : Extension() {
                 guilds.forEach {
                     if (it.getBanOrNull(event.user.id) != null) {
                         it.unban(event.user.id)
+                    }
+                }
+            }
+        }
+
+        event<MemberUpdateEvent> {
+            check { inQuiltGuild() }
+
+            action {
+                val guilds = getGuilds().filter { it.id != event.guildId }
+
+                for (guild in guilds) {
+                    val guildMember = guild.getMemberOrNull(event.member.id) ?: continue
+
+                    if (guildMember.timeoutUntil != event.member.timeoutUntil) {
+                        guildMember.edit {
+                            timeoutUntil = event.member.timeoutUntil
+                        }
                     }
                 }
             }
