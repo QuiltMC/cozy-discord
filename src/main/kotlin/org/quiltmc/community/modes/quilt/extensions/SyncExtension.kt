@@ -218,7 +218,7 @@ class SyncExtension : Extension() {
 
                     guilds.forEach { guild ->
                         sentry.breadcrumb(BreadcrumbType.Info) {
-                            message = "Applying up to${allTimeouts.size} timeouts for guild: ${guild.name} " +
+                            message = "Applying up to ${allTimeouts.size} timeouts for guild: ${guild.name} " +
                                     "(${guild.id})"
                         }
 
