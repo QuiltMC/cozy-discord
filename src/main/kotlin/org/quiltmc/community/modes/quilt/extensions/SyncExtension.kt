@@ -14,6 +14,7 @@ import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSub
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.extensions.event
+import com.kotlindiscord.kord.extensions.sentry.BreadcrumbType
 import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.hasPermission
 import com.kotlindiscord.kord.extensions.utils.timeoutUntil
@@ -168,6 +169,10 @@ class SyncExtension : Extension() {
                 action {
                     val guilds = getGuilds()
 
+                    sentry.breadcrumb(BreadcrumbType.Info) {
+                        message = "Syncing timeouts for ${guilds.size} guilds."
+                    }
+
                     logger.info { "Syncing timeouts for ${guilds.size} guilds." }
 
                     guilds.forEach {
@@ -184,10 +189,18 @@ class SyncExtension : Extension() {
                         }
                     }
 
+                    sentry.breadcrumb(BreadcrumbType.Info) {
+                        message = "Ensured that the bot has adequate permissions on all servers."
+                    }
+
                     val allTimeouts: MutableMap<Snowflake, Instant> = mutableMapOf()
                     val syncedTimeouts: MutableMap<Guild, Int> = mutableMapOf()
 
                     guilds.forEach { guild ->
+                        sentry.breadcrumb(BreadcrumbType.Info) {
+                            message = "Collecting timed-out members for guild: ${guild.name} (${guild.id})"
+                        }
+
                         guild.members
                             .filter { it.timeoutUntil != null }
                             .collect {
@@ -199,7 +212,16 @@ class SyncExtension : Extension() {
                             }
                     }
 
+                    sentry.breadcrumb(BreadcrumbType.Info) {
+                        message = "Collected ${allTimeouts.size} timeouts."
+                    }
+
                     guilds.forEach { guild ->
+                        sentry.breadcrumb(BreadcrumbType.Info) {
+                            message = "Applying up to${allTimeouts.size} timeouts for guild: ${guild.name} " +
+                                    "(${guild.id})"
+                        }
+
                         for ((userId, expiry) in allTimeouts) {
                             val member = guild.getMemberOrNull(userId) ?: continue
 

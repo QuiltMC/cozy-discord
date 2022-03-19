@@ -90,7 +90,6 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
         add(::ShowcaseExtension)
         add(::SuggestionsExtension)
         add(::SyncExtension)
-//        add(::UserCleanupExtension)
         add(::UtilityExtension)
 
         extPhishing {

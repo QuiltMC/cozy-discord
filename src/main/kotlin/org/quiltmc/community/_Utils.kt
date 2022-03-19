@@ -121,6 +121,11 @@ suspend fun ExtensibleBotBuilder.database(migrate: Boolean = false) {
 }
 
 suspend fun ExtensibleBotBuilder.common() {
+    applicationCommands {
+        // Need to disable this due to the slash command perms experiment
+        syncPermissions = false
+    }
+
     extensions {
         sentry {
             val sentryDsn = envOrNull("SENTRY_DSN")
