@@ -50,9 +50,9 @@ public class UserCleanupExtension(
     private lateinit var task: Task
 
     override suspend fun setup() {
-        instantFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.FULL)
+        instantFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG)
             .withLocale(config.dateFormattingLocale)
-            .withZone(ZoneId.systemDefault())
+            .withZone(ZoneId.of("UTC"))
 
         if (config.runAutomatically) {
             task = scheduler.schedule(config.getTaskDelay(), pollingSeconds = 60, repeat = true, callback = ::taskRun)
