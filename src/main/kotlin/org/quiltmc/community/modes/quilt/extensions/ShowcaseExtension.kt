@@ -74,11 +74,11 @@ class ShowcaseExtension : Extension() {
                     ?.split(",", ".")
                     ?.take(CHANNEL_NAME_LENGTH)
 
-                    ?: "${event.message.id}"
+                    ?: "Gallery | ${event.message.id}"
 
                 val thread = channel.startPublicThreadWithMessage(
                     event.message.id,
-                    "🖼️ | $title"
+                    title
                 )
 
                 threads.set(
