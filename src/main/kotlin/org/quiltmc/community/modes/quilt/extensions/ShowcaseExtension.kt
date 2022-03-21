@@ -72,6 +72,7 @@ class ShowcaseExtension : Extension() {
                     .split("\n")
                     .firstOrNull()
                     ?.split(",", ".")
+                    ?.firstOrNull()
                     ?.take(CHANNEL_NAME_LENGTH)
 
                     ?: "Gallery | ${event.message.id}"
