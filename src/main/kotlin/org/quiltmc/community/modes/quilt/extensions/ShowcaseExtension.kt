@@ -110,8 +110,8 @@ class ShowcaseExtension : Extension() {
                             "start of the thread. Remember, you're welcome to use the `/thread` commands to manage " +
                             "your thread as needed.\n\n" +
 
-                            "We recommend using `/thread rename` to give your thread a more meaningful title as " +
-                            "soon as possible!\n\n" +
+                            "We recommend using `/thread rename` to give your thread a more meaningful title if the " +
+                            "generated one isn't good enough!\n\n" +
 
                             "**Note:** To avoid filling up the sidebar, this thread has been archived on creation. " +
                             "Feel free to send a message or rename it to unarchive it!"
