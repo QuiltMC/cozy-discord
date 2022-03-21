@@ -29,6 +29,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
 private val THREAD_DELAY = 3.seconds
+private const val CHANNEL_NAME_LENGTH = 75
 
 class ShowcaseExtension : Extension() {
     override val name: String = "showcase"
@@ -67,9 +68,17 @@ class ShowcaseExtension : Extension() {
                 val author = event.message.author!!
                 val channel = event.message.channel.asChannelOf<TextChannel>()
 
+                val title = event.message.content.trim()
+                    .split("\n")
+                    .firstOrNull()
+                    ?.split(",", ".")
+                    ?.take(CHANNEL_NAME_LENGTH)
+
+                    ?: "${event.message.id}"
+
                 val thread = channel.startPublicThreadWithMessage(
                     event.message.id,
-                    "Gallery | ${event.message.id}"
+                    "🖼️ | $title"
                 )
 
                 threads.set(
