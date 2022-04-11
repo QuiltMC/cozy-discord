@@ -75,6 +75,7 @@ class ShowcaseExtension : Extension() {
                 val author = event.message.author!!
                 val channel = event.message.channel.asChannelOf<TextChannel>()
 
+                @Suppress("SpreadOperator")  // What choice do I have, exactly?
                 val title = event.message.content.trim()
                     .split("\n")
                     .firstOrNull()
