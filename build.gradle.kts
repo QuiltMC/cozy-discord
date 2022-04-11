@@ -1,3 +1,5 @@
+import com.expediagroup.graphql.plugin.gradle.config.GraphQLSerializer
+
 /*
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -81,9 +83,10 @@ dependencies {
 
 graphql {
     client {
-        sdlEndpoint = "https://docs.github.com/public/schema.docs.graphql"
+        schemaFile = rootProject.file("github.graphql")
+//        sdlEndpoint = "https://docs.github.com/public/schema.docs.graphql"
         packageName = "quilt.ghgen"
-        serializer = com.expediagroup.graphql.plugin.gradle.config.GraphQLSerializer.KOTLINX
+        serializer = GraphQLSerializer.KOTLINX
     }
 }
 
