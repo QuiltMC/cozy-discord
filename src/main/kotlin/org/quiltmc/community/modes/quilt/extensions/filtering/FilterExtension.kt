@@ -45,6 +45,7 @@ import dev.kord.core.event.user.UserUpdateEvent
 import dev.kord.rest.builder.message.EmbedBuilder
 import dev.kord.rest.builder.message.create.embed
 import mu.KotlinLogging
+import net.codebox.homoglyph.HomoglyphBuilder
 import org.koin.core.component.inject
 import org.quiltmc.community.*
 import org.quiltmc.community.database.collections.FilterCollection
@@ -82,6 +83,8 @@ class FilterExtension : Extension() {
 
     private val globalSettings: GlobalSettingsCollection by inject()
     private val serverSettings: ServerSettingsCollection by inject()
+
+    private val homoglyphs = HomoglyphBuilder.build()
 
     init {
         RgxGenOption.INFINITE_PATTERN_REPETITION.setInProperties(rgxProperties, 2)
@@ -972,7 +975,7 @@ class FilterExtension : Extension() {
     }
 
     suspend fun FilterEntry.matches(content: String): Boolean = when (matchType) {
-        MatchType.CONTAINS -> content.contains(match, ignoreCase = true)
+        MatchType.CONTAINS -> homoglyphs.search(match.lowercase()).size > 0
         MatchType.EXACT -> content.equals(match, ignoreCase = true)
         MatchType.REGEX -> match.toRegex(RegexOption.IGNORE_CASE).matches(content)
         MatchType.REGEX_CONTAINS -> content.contains(match.toRegex(RegexOption.IGNORE_CASE))
