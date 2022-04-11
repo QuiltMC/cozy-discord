@@ -112,7 +112,7 @@ build/
 .linkie-cache
 
 # Data files
-data/
+/data/
 
 # Dotenv file
 .env

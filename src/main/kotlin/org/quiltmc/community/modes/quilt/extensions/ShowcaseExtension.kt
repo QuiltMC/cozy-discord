@@ -31,6 +31,13 @@ import kotlin.time.ExperimentalTime
 private val THREAD_DELAY = 3.seconds
 private const val CHANNEL_NAME_LENGTH = 75
 
+private val THREAD_DELIMITERS = arrayOf(
+    ",", ".",
+    "(", ")",
+    "<", ">",
+    "[", "]",
+)
+
 class ShowcaseExtension : Extension() {
     override val name: String = "showcase"
 
@@ -71,7 +78,7 @@ class ShowcaseExtension : Extension() {
                 val title = event.message.content.trim()
                     .split("\n")
                     .firstOrNull()
-                    ?.split(",", ".")
+                    ?.split(*THREAD_DELIMITERS)
                     ?.firstOrNull()
                     ?.take(CHANNEL_NAME_LENGTH)
 
