@@ -19,14 +19,22 @@ publishing {
             name = "QuiltMC"
 
             url = if (project.version.toString().contains("SNAPSHOT")) {
-                uri("https://maven.quiltmc.org/repository/snapshots/")
+                uri(
+                    project.findProperty("maven.url.snapshots") as String?
+                        ?: System.getenv("SNAPSHOTS_URL")
+                        ?: "https://maven.quiltmc.org/repository/snapshots/"
+                )
             } else {
-                uri("https://maven.quiltmc.org/repository/releases/")
+                uri(
+                    project.findProperty("maven.url.releases") as String?
+                    ?: System.getenv("MAVEN_URL")
+                    ?: "https://maven.quiltmc.org/repository/releases/"
+                )
             }
 
             credentials {
                 username = project.findProperty("maven.user") as String?
-                    ?: System.getenv("MAVEN_USER")
+                    ?: System.getenv("MAVEN_USERNAME")
 
                 password = project.findProperty("maven.password") as String?
                     ?: System.getenv("MAVEN_PASSWORD")
