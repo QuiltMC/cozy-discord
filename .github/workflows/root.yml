@@ -49,10 +49,10 @@ jobs:
         with:
           arguments: |
             publish 
-            -Pmaven.url.snapshots=${{ secrets.SNAPSHOTS_URL }}
-            -Pmaven.url.releases=${{ secrets.MAVEN_URL }}
-            -Pmaven.user=${{ secrets.MAVEN_USERNAME }}
-            -Pmaven.password=${{ secrets.MAVEN_PASSWORD }}
+            "-Pmaven.url.snapshots=${{ secrets.SNAPSHOTS_URL }}"
+            "-Pmaven.url.releases=${{ secrets.MAVEN_URL }}"
+            "-Pmaven.user=${{ secrets.MAVEN_USERNAME }}"
+            "-Pmaven.password=${{ secrets.MAVEN_PASSWORD }}"
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v1
