@@ -11,7 +11,7 @@ plugins {
 }
 
 val sourceJar: Task by tasks.getting
-val javadocJar: Task by tasks.getting
+//val javadocJar: Task by tasks.getting
 
 publishing {
     repositories {
@@ -19,13 +19,15 @@ publishing {
             name = "QuiltMC"
 
             url = if (project.version.toString().contains("SNAPSHOT")) {
-                uri("https://maven.quiltmc.org/repository/maven-snapshots/")
+                uri("https://maven.quiltmc.org/repository/snapshots/")
             } else {
-                uri("https://maven.quiltmc.org/repository/maven-releases/")
+                uri("https://maven.quiltmc.org/repository/releases/")
             }
 
             credentials {
-                username = project.findProperty("maven.user") as String? ?: System.getenv("MAVEN_USER")
+                username = project.findProperty("maven.user") as String?
+                    ?: System.getenv("MAVEN_USER")
+
                 password = project.findProperty("maven.password") as String?
                     ?: System.getenv("MAVEN_PASSWORD")
             }
@@ -39,7 +41,7 @@ publishing {
             from(components.getByName("java"))
 
             artifact(sourceJar)
-            artifact(javadocJar)
+//            artifact(javadocJar)
         }
     }
 }

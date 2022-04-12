@@ -7,6 +7,7 @@
 plugins {
     `api-module`
     `cozy-module`
+    `published-module`
 }
 
 dependencies {
