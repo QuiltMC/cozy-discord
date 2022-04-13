@@ -4,7 +4,7 @@ kotlin = "1.6.10"
 graphql = "5.2.0"
 
 commons-text = "1.9"
-kmongo = "4.4.0"
+kmongo = "4.5.1"
 groovy = "3.0.8"
 homoglyph = "1.1.1"
 jansi = "2.4.0"

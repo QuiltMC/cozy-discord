@@ -19,7 +19,8 @@ import org.quiltmc.community.cozy.modules.tags.TagFormatter
  */
 public interface TagsConfig {
     /**
-     * Get the configured tag formatter callback, used to turn a tag into a message.
+     * Get the configured tag formatter callback, used to turn a tag into a message. **Users configuring this to avoid
+     * creating embeds should make sure to append to the message content instead of replacing it.**
      */
     public suspend fun getTagFormatter(): TagFormatter
 

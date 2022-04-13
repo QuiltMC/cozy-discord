@@ -40,7 +40,7 @@ object Migrations : KoinComponent {
             @Suppress("TooGenericExceptionCaught")
             try {
                 @Suppress("MagicNumber")
-                when (nextVersion) {  // TODO: This should REALLY be annotation-based
+                when (nextVersion) {  // TODO: This should **REALLY** be annotation-based
                     1 -> ::v1
                     2 -> ::v2
                     3 -> ::v3
@@ -53,6 +53,7 @@ object Migrations : KoinComponent {
                     10 -> ::v10
                     11 -> ::v11
                     12 -> ::v12
+                    13 -> ::v13
 
                     else -> break
                 }(db.mongo)

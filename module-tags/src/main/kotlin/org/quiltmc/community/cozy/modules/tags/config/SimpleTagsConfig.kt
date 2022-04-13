@@ -48,7 +48,7 @@ public class SimpleTagsConfig(private val builder: Builder) : TagsConfig {
                 color = tag.color
 
                 footer {
-                    text = "${tag.category} | ${tag.key}"
+                    text = "${tag.category}/${tag.key}"
                 }
             }
         }

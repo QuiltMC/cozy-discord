@@ -109,6 +109,7 @@ suspend fun ExtensibleBotBuilder.database(migrate: Boolean = false) {
                 single { SuggestionsCollection() } bind SuggestionsCollection::class
                 single { TeamCollection() } bind TeamCollection::class
                 single { UserFlagsCollection() } bind UserFlagsCollection::class
+                single { TagsCollection() } bind TagsCollection::class
             }
 
             if (migrate) {
@@ -139,6 +140,13 @@ suspend fun ExtensibleBotBuilder.common() {
 
         help {
             enableBundledExtension = false  // We have no chat commands
+        }
+    }
+
+    plugins {
+        if (ENVIRONMENT != "production") {
+            // Add plugin build folders here for testing in dev
+            // pluginPath("module-tags/build/libs")
         }
     }
 }

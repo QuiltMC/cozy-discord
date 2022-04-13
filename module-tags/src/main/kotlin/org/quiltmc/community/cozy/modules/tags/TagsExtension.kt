@@ -6,6 +6,7 @@
 
 package org.quiltmc.community.cozy.modules.welcome
 
+import com.kotlindiscord.kord.extensions.checks.anyGuild
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalColor
@@ -19,7 +20,9 @@ import com.kotlindiscord.kord.extensions.types.editingPaginator
 import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.FilterStrategy
 import com.kotlindiscord.kord.extensions.utils.suggestStringMap
+import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.behavior.interaction.suggestString
+import dev.kord.rest.builder.message.create.allowedMentions
 import org.koin.core.component.inject
 import org.quiltmc.community.cozy.modules.tags.config.TagsConfig
 import org.quiltmc.community.cozy.modules.tags.data.Tag
@@ -81,7 +84,7 @@ public class TagsExtension : Extension() {
                     editingPaginator {
                         tags.forEach { tag ->
                             page {
-                                title = "tag.title"
+                                title = tag.title
                                 description = tag.description
                                 color = tag.color
 
@@ -161,6 +164,10 @@ public class TagsExtension : Extension() {
             name = "manage-tags"
             description = "Tag management commands"
 
+            check {
+                anyGuild()
+            }
+
             tagsConfig.getStaffCommandChecks().forEach(::check)
 
             ephemeralSubCommand(::SetArgs) {
@@ -178,6 +185,14 @@ public class TagsExtension : Extension() {
                     )
 
                     tagsData.setTag(tag)
+
+                    tagsConfig.getLoggingChannel(guild!!.asGuild()).createMessage {
+                        allowedMentions { }
+
+                        content = "**Tag created/updated by ${user.mention}**\n\n"
+
+                        tagsConfig.getTagFormatter().invoke(this, tag)
+                    }
 
                     respond {
                         content = "Tag set: ${tag.title}"
@@ -214,7 +229,7 @@ public class TagsExtension : Extension() {
                                         **Key:** `${it.key}`
                                         **Title:** `${it.title}`
                                         **Category:** `${it.category}`
-                                        **Guild ID:** `${it.guildId ?: "N/A"}
+                                        **Guild ID:** `${it.guildId ?: "N/A"}`
                                     """.trimIndent()
                                 }
                             }
@@ -229,6 +244,16 @@ public class TagsExtension : Extension() {
 
                 action {
                     val tag = tagsData.deleteTagByKey(arguments.key, arguments.guild?.id)
+
+                    if (tag != null) {
+                        tagsConfig.getLoggingChannel(guild!!.asGuild()).createMessage {
+                            allowedMentions { }
+
+                            content = "**Tag removed by ${user.mention}**\n\n"
+
+                            tagsConfig.getTagFormatter().invoke(this, tag)
+                        }
+                    }
 
                     respond {
                         content = if (tag == null) {
