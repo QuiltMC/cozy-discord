@@ -50,6 +50,8 @@ public class SimpleTagsConfig(private val builder: Builder) : TagsConfig {
                 footer {
                     text = "${tag.category}/${tag.key}"
                 }
+
+                image = tag.image
             }
         }
 

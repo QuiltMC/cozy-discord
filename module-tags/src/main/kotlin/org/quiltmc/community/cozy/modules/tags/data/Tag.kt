@@ -21,5 +21,6 @@ public data class Tag(
     val title: String,
 
     val color: Color? = null,
-    val guildId: Snowflake? = null
+    val guildId: Snowflake? = null,
+    val image: String? = null
 )

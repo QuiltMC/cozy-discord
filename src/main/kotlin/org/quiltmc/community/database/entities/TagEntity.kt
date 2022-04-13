@@ -28,7 +28,8 @@ data class TagEntity(
     val title: String,
 
     val color: Color? = null,
-    val guildId: Snowflake? = null
+    val guildId: Snowflake? = null,
+    val image: String? = null
 ) : Entity<String> {
     fun toTag(): Tag = Tag(
         category = category,
@@ -36,7 +37,8 @@ data class TagEntity(
         key = _id,
         title = title,
         color = color,
-        guildId = guildId
+        guildId = guildId,
+        image = image
     )
 
     companion object {
@@ -48,7 +50,8 @@ data class TagEntity(
                 description = tag.description,
                 title = tag.title,
                 color = tag.color,
-                guildId = tag.guildId
+                guildId = tag.guildId,
+                image = tag.image
             )
     }
 }

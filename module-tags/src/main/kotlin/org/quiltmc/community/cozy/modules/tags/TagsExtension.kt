@@ -28,6 +28,9 @@ import org.quiltmc.community.cozy.modules.tags.config.TagsConfig
 import org.quiltmc.community.cozy.modules.tags.data.Tag
 import org.quiltmc.community.cozy.modules.tags.data.TagsData
 
+internal const val POSITIVE_EMOTE = "\uD83D\uDC4D"
+internal const val NEGATIVE_EMOTE = "❌"
+
 @Suppress("MagicNumber")
 public class TagsExtension : Extension() {
     override val name: String = "quiltmc-tags"
@@ -47,7 +50,7 @@ public class TagsExtension : Extension() {
 
                 if (tag == null) {
                     respond {
-                        content = "Unknown tag: ${arguments.tagKey}"
+                        content = "$NEGATIVE_EMOTE Unknown tag: ${arguments.tagKey}"
                     }
 
                     return@action
@@ -75,13 +78,15 @@ public class TagsExtension : Extension() {
 
                     if (tags.isEmpty()) {
                         respond {
-                            content = "Tag not found"
+                            content = "$NEGATIVE_EMOTE Tag not found"
                         }
 
                         return@action
                     }
 
                     editingPaginator {
+                        timeoutSeconds = 60
+
                         tags.forEach { tag ->
                             page {
                                 title = tag.title
@@ -91,6 +96,8 @@ public class TagsExtension : Extension() {
                                 footer {
                                     text = "${tag.category}/${tag.key}"
                                 }
+
+                                image = tag.image
                             }
                         }
                     }.send()
@@ -106,13 +113,15 @@ public class TagsExtension : Extension() {
 
                     if (tags.isEmpty()) {
                         respond {
-                            content = "Tag not found"
+                            content = "$NEGATIVE_EMOTE Tag not found"
                         }
 
                         return@action
                     }
 
                     editingPaginator {
+                        timeoutSeconds = 60
+
                         tags.forEach { tag ->
                             page {
                                 title = "tag.title"
@@ -122,6 +131,8 @@ public class TagsExtension : Extension() {
                                 footer {
                                     text = "${tag.category}/${tag.key}"
                                 }
+
+                                image = tag.image
                             }
                         }
                     }.send()
@@ -137,13 +148,15 @@ public class TagsExtension : Extension() {
 
                     if (tags.isEmpty()) {
                         respond {
-                            content = "Tag not found"
+                            content = "$NEGATIVE_EMOTE Tag not found"
                         }
 
                         return@action
                     }
 
                     editingPaginator {
+                        timeoutSeconds = 60
+
                         tags.forEach { tag ->
                             page {
                                 title = "tag.title"
@@ -153,6 +166,8 @@ public class TagsExtension : Extension() {
                                 footer {
                                     text = "${tag.category}/${tag.key}"
                                 }
+
+                                image = tag.image
                             }
                         }
                     }.send()
@@ -181,7 +196,8 @@ public class TagsExtension : Extension() {
                         key = arguments.key,
                         title = arguments.title,
                         color = arguments.colour,
-                        guildId = arguments.guild?.id
+                        guildId = arguments.guild?.id,
+                        image = arguments.image
                     )
 
                     tagsData.setTag(tag)
@@ -195,7 +211,62 @@ public class TagsExtension : Extension() {
                     }
 
                     respond {
-                        content = "Tag set: ${tag.title}"
+                        content = "$POSITIVE_EMOTE Tag set: ${tag.title}"
+                    }
+                }
+            }
+
+            ephemeralSubCommand(::EditArgs) {
+                name = "edit"
+                description = "Edit an existing tag"
+
+                action {
+                    var tag = tagsData.getTagByKey(arguments.key, arguments.guild?.id)
+
+                    if (tag == null) {
+                        respond {
+                            content = "$NEGATIVE_EMOTE Tag not found"
+                        }
+
+                        return@action
+                    }
+
+                    if (arguments.title != null) {
+                        tag = tag.copy(title = arguments.title!!)
+                    }
+
+                    if (arguments.description != null) {
+                        tag = tag.copy(description = arguments.description!!)
+                    }
+
+                    if (arguments.category != null) {
+                        tag = tag.copy(category = arguments.category!!)
+                    }
+
+                    if (arguments.colour != null) {
+                        tag = tag.copy(color = arguments.colour!!)
+                    }
+
+                    if (arguments.image != null) {
+                        if (arguments.image == "none") {
+                            tag = tag.copy(image = null)
+                        } else {
+                            tag = tag.copy(image = arguments.image)
+                        }
+                    }
+
+                    tagsData.setTag(tag)
+
+                    tagsConfig.getLoggingChannel(guild!!.asGuild()).createMessage {
+                        allowedMentions { }
+
+                        content = "**Tag edited by ${user.mention}**\n\n"
+
+                        tagsConfig.getTagFormatter().invoke(this, tag)
+                    }
+
+                    respond {
+                        content = "$POSITIVE_EMOTE Tag edited: ${tag.title}"
                     }
                 }
             }
@@ -213,13 +284,15 @@ public class TagsExtension : Extension() {
 
                     if (tags.isEmpty()) {
                         respond {
-                            content = "No tags found for that query."
+                            content = "$NEGATIVE_EMOTE No tags found for that query."
                         }
 
                         return@action
                     }
 
                     editingPaginator {
+                        timeoutSeconds = 60
+
                         val chunks = tags.chunked(10)
 
                         chunks.forEach { chunk ->
@@ -230,6 +303,7 @@ public class TagsExtension : Extension() {
                                         **Title:** `${it.title}`
                                         **Category:** `${it.category}`
                                         **Guild ID:** `${it.guildId ?: "N/A"}`
+                                        **Image:** `${it.image ?: "N/A"}`
                                     """.trimIndent()
                                 }
                             }
@@ -257,15 +331,17 @@ public class TagsExtension : Extension() {
 
                     respond {
                         content = if (tag == null) {
-                            "Tag not found"
+                            "$NEGATIVE_EMOTE Tag not found"
                         } else {
-                            "Deleted tag: ${tag.title}"
+                            "$POSITIVE_EMOTE Deleted tag: ${tag.title}"
                         }
                     }
                 }
             }
         }
     }
+
+    // region: Arguments
 
     private fun GetTagArgs(): GetTagArgs =
         GetTagArgs(tagsData)
@@ -275,6 +351,9 @@ public class TagsExtension : Extension() {
 
     private fun SetArgs(): SetArgs =
         SetArgs(tagsData)
+
+    private fun EditArgs(): EditArgs =
+        EditArgs(tagsData)
 
     internal class ByKeyAndOptionalGuildArgs : Arguments() {
         val key by string {
@@ -346,6 +425,61 @@ public class TagsExtension : Extension() {
         val guild by optionalGuild {
             name = "guild"
             description = "Optional guild to limit the tag to - \"this\" for the current guild"
+        }
+
+        val image by optionalString {
+            name = "image"
+            description = "Image URL to embed as part of the tag"
+        }
+    }
+
+    internal class EditArgs(tagsData: TagsData) : Arguments() {
+        val key by string {
+            name = "key"
+            description = "Tag key to use for matching (this can't be edited)"
+        }
+
+        val guild by optionalGuild {
+            name = "guild"
+            description = "Optional guild to use for matching (this can't be edited)"
+        }
+
+        val title by optionalString {
+            name = "title"
+            description = "Tag title for display"
+        }
+
+        val description by optionalString {
+            name = "description"
+            description = "Tag content - use \\n for a newline if needed"
+
+            mutate {
+                it?.replace("\\n", "\n")
+            }
+        }
+
+        val category by optionalString {
+            name = "category"
+            description = "Category to use for this tag - specify a new one to create it"
+
+            autoComplete {
+                val categories = tagsData.getAllCategories(data.guildId.value)
+
+                suggestStringMap(
+                    categories.associateWith { it },
+                    FilterStrategy.Contains
+                )
+            }
+        }
+
+        val colour by optionalColor {
+            name = "colour"
+            description = "Use hex codes, RGB integers (0 to clear) or Discord colour constants"
+        }
+
+        val image by optionalString {
+            name = "image"
+            description = "Image URL to embed as part of the tag, \"none\" to clear"
         }
     }
 
@@ -434,4 +568,6 @@ public class TagsExtension : Extension() {
             }
         }
     }
+
+    // endregion
 }
