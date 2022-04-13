@@ -391,10 +391,8 @@ public class TagsExtension : Extension() {
                 lateinit var tagKey: String
 
                 if ("/" in input) {
-                    val split = input.split("/", limit = 2)
-
-                    category = split.first()
-                    tagKey = split.last()
+                    category = input.substringBeforeLast("/")
+                    tagKey = input.substringAfterLast("/")
                 } else {
                     tagKey = input
                 }
