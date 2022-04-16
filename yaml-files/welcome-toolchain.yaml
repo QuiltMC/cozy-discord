@@ -1,0 +1,90 @@
+- type: text
+  text: https://cdn.discordapp.com/attachments/863707104903561216/965007265734230066/toolchain-header.png
+
+- type: embed
+
+  embeds:
+    - title: Welcome to The Quilt Toolchain
+
+      description: >
+        Welcome to The Quilt Toolchain, the official development Discord server for The Quilt Project.
+        
+        
+        The Quilt Project is an open-source, community-driven modding toolchain designed primarily for Minecraft.
+        By focusing on speed, ease of use and modularity, Quilt aims to provide a sleek and modern modding toolchain
+        with an open ecosystem.
+        
+        
+        Quilt is a project that was born out of a need for change in the Minecraft modding ecosystem. Our teams contain
+        many experienced members of the modding community, providing a level of familiarity that helps us to avoid the
+        mistakes of the past – whether those mistakes relate to community management, diversity and inclusivity, project
+        governance or transparency. For more information on how we hope to do this,
+        [please see our "about" pages](https://quiltmc.org/about/).
+        
+        
+        Before you get started, **please make sure to review our [rules](https://quiltmc.org/community) and
+        [Code of Conduct](https://quiltmc.org/community/code-of-conduct).**
+        
+        
+        We hope you enjoy your time with us!
+
+    - title: Quilt Community
+
+      thumbnail:
+        url: https://raw.githubusercontent.com/QuiltMC/art/master/brand/1024png/quilt_logo_dark.png
+
+      description: >
+        If you're interested in hanging out with other Quilt users, using quilt, or getting help with modding, then
+        please feel free to join [the Community Discord server](https://discord.gg/M7GpuyTBvy)!
+
+- type: text
+  text: https://cdn.discordapp.com/attachments/863707104903561216/965007266023632967/toolchain-rules.png
+
+- type: rules
+
+  rules:
+    Follow Quilt's Code of Conduct: >
+      Everyone is expected to read and abide by our [Code of Conduct](http://quiltmc.org/community/code-of-conduct)
+
+    Follow Discord's rules: >
+      As a Discord-based community, we require everyone to follow Discord's
+      [Community Guidelines](https://discord.com/guidelines) and [Terms of Service](https://discord.com/terms)
+
+    Try to speak English: >
+      The common language in our community is English, but we understand that not everyone speaks English at the same
+      level. Try to speak English to the best of your ability, and don't worry if you need to use translation tools. We
+      will not tolerate making fun of people for poor English.
+
+    Listen to & respect all community team members: >
+      Please take requests from community team members seriously and listen when a team member asks you to do
+      something. If you have a problem with what a team member is asking you to do, we advise that you step away from
+      the situation and send a private message to another team member.
+
+    Keep all projects legal, legitimate & appropriate: >
+      We will not tolerate any projects that may break laws, breach a Terms of Service or an EULA, involve sexual
+      content, or that the moderators determine to be malicious or inappropriate.
+
+    Don’t spam: >
+      Don't spam our channels or users, and don't advertise your projects outside of the relevant showcase channels.
+
+    Respect our channels: >
+      Follow the given channel topic, and don't derail a discussion
+
+    When requesting help, specify your mappings: >
+      You must help us to help you, and it's important that you include as much information as you can with your help
+      request. We also recommend creating a thread for your help request, with your mappings in the thread name
+      (`MCP`, `MM`, `YM` or `QM`).
+
+    Don't import drama or controversy from other communities: >
+      One of our most important rules - don't make things difficult for other users by bringing up controversies from
+      other communities.
+
+- type: links
+
+  title: Useful Links
+
+  links:
+    Community Rules: https://quiltmc.org/community/rules
+    QuiltMC Website: https://quiltmc.org/
+    QuiltMC on GitHub: https://github.com/QuiltMC
+    Discord Stats: https://stats-quilt.gserv.me/public/dashboard/9b181b97-bd7f-4ab0-87ed-3239f9149932

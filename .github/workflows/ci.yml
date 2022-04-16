@@ -6,6 +6,9 @@ on:
       - root
       - develop
 
+    paths-ignore:
+      - "yaml-files/"
+
   pull_request:
 
 jobs:

@@ -5,6 +5,9 @@ on:
     branches:
       - root
 
+    paths-ignore:
+      - "yaml-files/"
+
 jobs:
   build:
     runs-on: ubuntu-latest
