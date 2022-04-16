@@ -24,8 +24,10 @@ import dev.kord.gateway.PrivilegedIntent
 import org.quiltmc.community.cozy.modules.cleanup.userCleanup
 import org.quiltmc.community.cozy.modules.moderation.moderation
 import org.quiltmc.community.cozy.modules.tags.tags
+import org.quiltmc.community.cozy.modules.welcome.welcomeChannel
 import org.quiltmc.community.database.collections.ServerSettingsCollection
 import org.quiltmc.community.database.collections.TagsCollection
+import org.quiltmc.community.database.collections.WelcomeChannelCollection
 import org.quiltmc.community.modes.quilt.extensions.*
 import org.quiltmc.community.modes.quilt.extensions.filtering.FilterExtension
 import org.quiltmc.community.modes.quilt.extensions.github.GithubExtension
@@ -34,6 +36,7 @@ import org.quiltmc.community.modes.quilt.extensions.minecraft.MinecraftExtension
 import org.quiltmc.community.modes.quilt.extensions.settings.SettingsExtension
 import org.quiltmc.community.modes.quilt.extensions.suggestions.SuggestionsExtension
 import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.minutes
 
 val MODE = envOrNull("MODE")?.lowercase() ?: "quilt"
 val ENVIRONMENT = envOrNull("ENVIRONMENT")?.lowercase() ?: "production"
@@ -93,6 +96,14 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
         add(::SuggestionsExtension)
         add(::SyncExtension)
         add(::UtilityExtension)
+
+        welcomeChannel(getKoin().get<WelcomeChannelCollection>()) {
+            staffCommandCheck {
+                hasBaseModeratorRole()
+            }
+
+            refreshDuration = 5.minutes
+        }
 
         tags(getKoin().get<TagsCollection>()) {
             loggingChannelName = "cozy-logs"

@@ -26,3 +26,4 @@ dependencyResolutionManagement {
 include(":module-user-cleanup")
 include(":module-moderation")
 include(":module-tags")
+include(":module-welcome")
