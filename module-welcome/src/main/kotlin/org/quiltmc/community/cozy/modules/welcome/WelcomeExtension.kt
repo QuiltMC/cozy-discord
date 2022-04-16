@@ -130,7 +130,7 @@ public class WelcomeExtension : Extension() {
                         welcomeChannel.shutdown()
                     }
 
-                    welcomeChannel = WelcomeChannel(channel.asChannelOf(), arguments.url)
+                    welcomeChannel = WelcomeChannel(arguments.channel.asChannelOf(), arguments.url)
 
                     data.setUrlForChannel(arguments.channel.id, arguments.url)
                     welcomeChannels[arguments.channel.id] = welcomeChannel
@@ -171,7 +171,7 @@ public class WelcomeExtension : Extension() {
         val clear by defaultingBoolean {
             name = "clear"
             description = "Whether to clear the channel before repopulating it"
-            defaultValue = true
+            defaultValue = false
         }
     }
 
