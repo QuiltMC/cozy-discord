@@ -58,7 +58,7 @@ public class TagsExtension : Extension() {
                         .invoke(this, tag)
 
                     if (arguments.userToMention != null) {
-                        content = "${arguments.userToMention}\n\n${content ?: ""}"
+                        content = "${arguments.userToMention!!.mention}\n\n${content ?: ""}"
 
                         allowedMentions {
                             users += arguments.userToMention!!.id
