@@ -400,7 +400,7 @@ public class TagsExtension : Extension() {
 
             mutate {
                 it.replace("\\n", "\n")
-                    ?.replace("\n ", "\n")
+                    .replace("\n ", "\n")
             }
         }
 
