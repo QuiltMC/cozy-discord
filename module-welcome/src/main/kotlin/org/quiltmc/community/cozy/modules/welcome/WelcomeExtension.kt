@@ -66,13 +66,20 @@ public class WelcomeExtension : Extension() {
                 description = "Delete a welcome channel configuration"
 
                 action {
-                    val deletedUrl = data.removeChannel(arguments.channel.id)
+                    val welcomeChannel = welcomeChannels[arguments.channel.id]
 
-                    respond {
-                        content = if (deletedUrl != null) {
-                            "Configuration removed - old URL was `$deletedUrl`"
-                        } else {
-                            "No configuration for ${arguments.channel.mention} exists"
+                    if (welcomeChannel != null) {
+                        welcomeChannel.shutdown()
+                        welcomeChannels.remove(arguments.channel.id)
+
+                        val deletedUrl = data.removeChannel(arguments.channel.id)
+
+                        respond {
+                            content = "Configuration removed - old URL was `$deletedUrl`"
+                        }
+                    } else {
+                        respond {
+                            content = "No configuration for ${arguments.channel.mention} exists"
                         }
                     }
                 }
