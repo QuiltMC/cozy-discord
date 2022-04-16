@@ -22,5 +22,7 @@ public data class TextBlock(
 
     override suspend fun edit(builder: MessageModifyBuilder) {
         builder.content = text
+        builder.embeds = mutableListOf()
+        builder.components = mutableListOf()
     }
 }

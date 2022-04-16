@@ -56,6 +56,7 @@ public data class LinksBlock(
 
     override suspend fun edit(builder: MessageModifyBuilder) {
         builder.content = text
+        builder.components = mutableListOf()
 
         builder.embed {
             title = this@LinksBlock.title

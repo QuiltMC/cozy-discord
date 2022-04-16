@@ -36,6 +36,7 @@ public data class EmbedBlock(
 
     override suspend fun edit(builder: MessageModifyBuilder) {
         builder.content = text
+        builder.components = mutableListOf()
 
         builder.embed {
             Embed(embed, kord).apply(this)
