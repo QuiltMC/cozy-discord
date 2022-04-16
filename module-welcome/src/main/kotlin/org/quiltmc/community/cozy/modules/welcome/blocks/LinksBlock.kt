@@ -26,6 +26,12 @@ public data class LinksBlock(
     val description: String? = null,
     val template: String = "**»** [{TEXT}]({URL})"
 ) : Block() {
+    init {
+        if (links.isEmpty()) {
+            error("Must provide at least one link")
+        }
+    }
+
     private fun buildDescription() = buildString {
         if (description != null) {
             append(description)

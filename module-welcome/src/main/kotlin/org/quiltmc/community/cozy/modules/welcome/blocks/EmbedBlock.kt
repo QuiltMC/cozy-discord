@@ -18,19 +18,28 @@ import kotlinx.serialization.Serializable
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
+@Suppress("MagicNumber")
 @Serializable
 @SerialName("embed")
 public data class EmbedBlock(
-    val embed: EmbedData,
+    val embeds: List<EmbedData>,
     val text: String? = null
 ) : Block(), KoinComponent {
     val kord: Kord by inject()
 
+    init {
+        if (embeds.isEmpty() || embeds.size > 10) {
+            error("Must provide up to 10 embeds")
+        }
+    }
+
     override suspend fun create(builder: MessageCreateBuilder) {
         builder.content = text
 
-        builder.embed {
-            Embed(embed, kord).apply(this)
+        embeds.forEach { embed ->
+            builder.embed {
+                Embed(embed, kord).apply(this)
+            }
         }
     }
 
@@ -38,8 +47,10 @@ public data class EmbedBlock(
         builder.content = text
         builder.components = mutableListOf()
 
-        builder.embed {
-            Embed(embed, kord).apply(this)
+        embeds.forEach { embed ->
+            builder.embed {
+                Embed(embed, kord).apply(this)
+            }
         }
     }
 }

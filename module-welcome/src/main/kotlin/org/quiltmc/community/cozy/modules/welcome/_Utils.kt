@@ -34,8 +34,9 @@ public fun ExtensibleBotBuilder.ExtensionsBuilder.welcomeChannel(
 }
 
 public fun MessageCreateBuilder.isSimilar(other: Message): Boolean {
-    if (components.isNotEmpty()) {
+    if (components.isNotEmpty() || other.actionRows.isNotEmpty()) {
         // We do this because comparing components is a type-safety mess and a waste of time in comparison
+
         return false
     }
 
@@ -46,6 +47,7 @@ public fun MessageCreateBuilder.isSimilar(other: Message): Boolean {
     }
 
     return content == other.content &&
+            embeds.size == messageEmbedBuilders.size &&
             embeds.all { embed ->
                 messageEmbedBuilders.any { otherEmbed ->
                     embed.isSimilar(otherEmbed)
