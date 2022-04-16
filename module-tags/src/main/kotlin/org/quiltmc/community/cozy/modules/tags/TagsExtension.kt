@@ -9,10 +9,7 @@ package org.quiltmc.community.cozy.modules.welcome
 import com.kotlindiscord.kord.extensions.checks.anyGuild
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
-import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalColor
-import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalGuild
-import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalString
-import com.kotlindiscord.kord.extensions.commands.converters.impl.string
+import com.kotlindiscord.kord.extensions.commands.converters.impl.*
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
@@ -59,6 +56,14 @@ public class TagsExtension : Extension() {
                 respond {
                     tagsConfig.getTagFormatter()
                         .invoke(this, tag)
+
+                    if (arguments.userToMention != null) {
+                        content = "${arguments.userToMention}\n\n${content ?: ""}"
+
+                        allowedMentions {
+                            users += arguments.userToMention!!.id
+                        }
+                    }
                 }
             }
         }
@@ -568,6 +573,11 @@ public class TagsExtension : Extension() {
                     }
                 }
             }
+        }
+
+        val userToMention by optionalMember {
+            name = "user"
+            description = "User to mention along with this tag."
         }
     }
 
