@@ -56,13 +56,11 @@ public class WelcomeChannel(
     public suspend fun setup() {
         val taskDelay = config.getRefreshDelay()
 
-        try {
+        if (!::yaml.isInitialized) {
             yaml = Yaml(
                 config.getSerializersModule(),
                 YamlConfiguration(polymorphismStyle = PolymorphismStyle.Property)
             )
-        } catch (e: YamlException) {
-            throw DiscordRelayedException("Failed to parse the given YAML \n\n>>> $e")
         }
 
         task?.cancel()
