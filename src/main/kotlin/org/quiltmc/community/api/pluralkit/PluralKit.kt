@@ -8,6 +8,7 @@ package org.quiltmc.community.api.pluralkit
 
 import dev.kord.common.entity.Snowflake
 import io.ktor.client.HttpClient
+import io.ktor.client.call.NoTransformationFoundException
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -27,10 +28,7 @@ class PluralKit {
     private val client = HttpClient {
         install(ContentNegotiation) {
             json(
-                Json {
-                    ignoreUnknownKeys = true
-                },
-
+                Json { ignoreUnknownKeys = true },
                 ContentType.Any
             )
         }
@@ -68,6 +66,8 @@ class PluralKit {
             if (e.response.status.value != HttpStatusCode.NotFound.value) {
                 throw e
             }
+        } catch (e: NoTransformationFoundException) {
+            logger.debug(e) { "No transformation found for message ID $id, could be a 404" }
         }
 
         return null
