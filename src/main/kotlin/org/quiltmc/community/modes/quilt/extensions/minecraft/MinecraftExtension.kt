@@ -65,6 +65,8 @@ class MinecraftExtension : Extension() {
         install(ContentNegotiation) {
             json()
         }
+
+        expectSuccess = true
     }
 
     private val scheduler = Scheduler()
