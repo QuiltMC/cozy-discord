@@ -30,8 +30,10 @@ import dev.kord.core.entity.channel.TopGuildMessageChannel
 import dev.kord.rest.builder.message.EmbedBuilder
 import dev.kord.rest.builder.message.create.embed
 import io.ktor.client.HttpClient
-import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.call.body
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.datetime.Clock
 import mu.KotlinLogging
 import org.apache.commons.text.StringEscapeUtils
@@ -60,7 +62,9 @@ class MinecraftExtension : Extension() {
     private val logger = KotlinLogging.logger { }
 
     private val client = HttpClient {
-        install(JsonFeature)
+        install(ContentNegotiation) {
+            json()
+        }
     }
 
     private val scheduler = Scheduler()
@@ -200,7 +204,7 @@ class MinecraftExtension : Extension() {
     }
 
     suspend fun populateVersions() {
-        currentEntries = client.get(JSON_URL)
+        currentEntries = client.get(JSON_URL).body()
 
         currentEntries.entries.forEach { knownVersions.add(it.version) }
     }
@@ -209,7 +213,8 @@ class MinecraftExtension : Extension() {
     suspend fun checkTask() {
         try {
             val now = Clock.System.now()
-            currentEntries = client.get(JSON_URL + "?cbt=${now.epochSeconds}")
+
+            currentEntries = client.get(JSON_URL + "?cbt=${now.epochSeconds}").body()
 
             currentEntries.entries.forEach {
                 if (it.version !in knownVersions) {

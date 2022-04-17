@@ -27,6 +27,8 @@ import dev.kord.core.entity.Member
 import dev.kord.core.entity.channel.TextChannel
 import kotlinx.datetime.DateTimePeriod
 import org.quiltmc.community.cozy.modules.moderation.config.ModerationConfig
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 public val MAXIMUM_SLOWMODE_DURATION: DateTimePeriod = DateTimePeriod(hours = 6)
 public const val MAX_TIMEOUT_SECS: Int = 60 * 60 * 24 * 28
@@ -93,7 +95,7 @@ public class ModerationExtension(
                     val channel = channel.asChannel() as TextChannel
 
                     channel.edit {
-                        rateLimitPerUser = 0
+                        rateLimitPerUser = Duration.ZERO
                     }
 
                     respond {
@@ -110,7 +112,7 @@ public class ModerationExtension(
                     val channel = channel.asChannel() as TextChannel
 
                     channel.edit {
-                        rateLimitPerUser = arguments.duration.toTotalSeconds()
+                        rateLimitPerUser = arguments.duration.toTotalSeconds().seconds
                     }
 
                     config.getLoggingChannelOrNull(guild!!.asGuild())?.createEmbed {

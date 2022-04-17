@@ -8,11 +8,12 @@ package org.quiltmc.community.api.pluralkit
 
 import dev.kord.common.entity.Snowflake
 import io.ktor.client.HttpClient
-import io.ktor.client.features.ClientRequestException
-import io.ktor.client.features.json.JsonFeature
-import io.ktor.client.features.json.serializer.KotlinxSerializer
+import io.ktor.client.call.body
+import io.ktor.client.plugins.ClientRequestException
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.http.HttpStatusCode
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import mu.KotlinLogging
 
@@ -23,8 +24,8 @@ class PluralKit {
     private val logger = KotlinLogging.logger { }
 
     private val client = HttpClient {
-        install(JsonFeature) {
-            this.serializer = KotlinxSerializer(
+        install(ContentNegotiation) {
+            json(
                 Json {
                     ignoreUnknownKeys = true
                 }
@@ -40,7 +41,7 @@ class PluralKit {
         val url = MESSAGE_URL.replace("id" to id)
 
         try {
-            val result: PKMessage = client.get(url)
+            val result: PKMessage = client.get(url).body()
 
             logger.debug { "/messages/$id -> 200" }
 

@@ -4,6 +4,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+@file:Suppress("DEPRECATION")
+
 package org.quiltmc.community.cozy.modules.welcome
 
 import com.kotlindiscord.kord.extensions.builders.ExtensibleBotBuilder

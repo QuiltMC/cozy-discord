@@ -19,7 +19,7 @@ import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.core.behavior.channel.createEmbed
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
-import io.ktor.client.features.defaultRequest
+import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.header
 import org.quiltmc.community.*
 import quilt.ghgen.DeleteIssue
