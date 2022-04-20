@@ -21,6 +21,7 @@ import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.behavior.edit
 import dev.kord.core.entity.Message
 import dev.kord.core.entity.channel.GuildMessageChannel
+import dev.kord.core.event.interaction.InteractionCreateEvent
 import dev.kord.core.supplier.EntitySupplyStrategy
 import dev.kord.rest.builder.message.create.UserMessageCreateBuilder
 import dev.kord.rest.builder.message.create.allowedMentions
@@ -37,6 +38,7 @@ import kotlinx.serialization.decodeFromString
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.quiltmc.community.cozy.modules.welcome.blocks.Block
+import org.quiltmc.community.cozy.modules.welcome.blocks.InteractionBlock
 import org.quiltmc.community.cozy.modules.welcome.config.WelcomeChannelConfig
 
 public class WelcomeChannel(
@@ -53,6 +55,14 @@ public class WelcomeChannel(
     private var task: Task? = null
 
     public val scheduler: Scheduler = Scheduler()
+
+    public suspend fun handleInteraction(event: InteractionCreateEvent) {
+        blocks.forEach {
+            if (it is InteractionBlock) {
+                it.handleInteraction(event)
+            }
+        }
+    }
 
     public suspend fun setup() {
         val taskDelay = config.getRefreshDelay()
@@ -97,7 +107,14 @@ public class WelcomeChannel(
     public suspend fun populate() {
         task?.cancel()
 
+        val guild = channel.getGuild()
+
         blocks = getBlocks().toMutableList()
+
+        blocks.forEach {
+            it.channel = channel
+            it.guild = guild
+        }
 
         val messages = channel.withStrategy(EntitySupplyStrategy.rest)
             .messages

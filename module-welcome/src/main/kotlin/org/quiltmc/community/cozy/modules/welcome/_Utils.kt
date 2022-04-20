@@ -10,8 +10,10 @@ package org.quiltmc.community.cozy.modules.welcome
 
 import com.kotlindiscord.kord.extensions.builders.ExtensibleBotBuilder
 import com.kotlindiscord.kord.extensions.utils.loadModule
+import dev.kord.common.entity.DiscordComponent
 import dev.kord.common.entity.EmbedType
 import dev.kord.core.entity.Message
+import dev.kord.core.entity.component.Component
 import dev.kord.rest.builder.message.EmbedBuilder
 import dev.kord.rest.builder.message.create.MessageCreateBuilder
 import org.koin.dsl.bind
@@ -37,11 +39,13 @@ public fun ExtensibleBotBuilder.ExtensionsBuilder.welcomeChannel(
 }
 
 public fun MessageCreateBuilder.isSimilar(other: Message): Boolean {
-    if (components.isNotEmpty() || other.actionRows.isNotEmpty()) {
-        // We do this because comparing components is a type-safety mess and a waste of time in comparison
+    val builderComponents = components
+        .mapNotNull { it.build().components.value }
+        .reduce { left, right -> left + right }
 
-        return false
-    }
+    val messageComponents = other.actionRows
+        .map { it.components }
+        .reduce { left, right -> left + right }
 
     val messageEmbedBuilders = other.embeds
         .filter { it.type == null || it.type == EmbedType.Rich }
@@ -57,12 +61,43 @@ public fun MessageCreateBuilder.isSimilar(other: Message): Boolean {
 
     return content == other.content &&
             embeds.size == messageEmbedBuilders.size &&
+            componentsAreSimilar(builderComponents, messageComponents) &&
 
             embeds.filterIndexed { index, embed ->
                 val otherEmbed = messageEmbedBuilders[index]
 
                 embed.isSimilar(otherEmbed)
             }.size == embeds.size
+}
+
+public fun componentsAreSimilar(
+    builderComponents: List<DiscordComponent>,
+    messageComponents: List<Component>
+): Boolean {
+    if (builderComponents.size != messageComponents.size) {
+        return false
+    }
+
+    if (builderComponents.isEmpty()) {
+        return true
+    }
+
+    val results: MutableList<Boolean> = mutableListOf()
+
+    builderComponents.forEachIndexed { index, builderComponent ->
+        val messageComponent = messageComponents[index]
+
+        results.add(
+            builderComponent.customId == messageComponent.data.customId &&
+                    builderComponent.type == messageComponent.type &&
+                    builderComponent.label == messageComponent.data.label &&
+                    builderComponent.emoji == messageComponent.data.emoji &&
+                    builderComponent.disabled == messageComponent.data.disabled &&
+                    builderComponent.url == messageComponent.data.url
+        )
+    }
+
+    return results.all { it }
 }
 
 public fun EmbedBuilder.isSimilar(other: EmbedBuilder): Boolean {

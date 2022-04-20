@@ -19,6 +19,7 @@ public abstract class WelcomeChannelConfig {
             polymorphic(Block::class) {
                 subclass(EmbedBlock::class)
                 subclass(LinksBlock::class)
+                subclass(RolesBlock::class)
                 subclass(RulesBlock::class)
                 subclass(TextBlock::class)
             }

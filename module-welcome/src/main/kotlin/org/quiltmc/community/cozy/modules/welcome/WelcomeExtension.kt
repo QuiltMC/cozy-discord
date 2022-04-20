@@ -20,6 +20,7 @@ import dev.kord.core.behavior.channel.asChannelOf
 import dev.kord.core.behavior.channel.asChannelOfOrNull
 import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.core.event.guild.GuildCreateEvent
+import dev.kord.core.event.interaction.InteractionCreateEvent
 import kotlinx.coroutines.flow.toList
 import org.koin.core.component.inject
 import org.quiltmc.community.cozy.modules.welcome.config.WelcomeChannelConfig
@@ -52,6 +53,12 @@ public class WelcomeExtension : Extension() {
 
                     welcomeChannel.setup()
                 }
+            }
+        }
+
+        event<InteractionCreateEvent> {
+            action {
+                welcomeChannels[event.interaction.channelId]?.handleInteraction(event)
             }
         }
 
@@ -155,6 +162,11 @@ public class WelcomeExtension : Extension() {
                 }
             }
         }
+    }
+
+    override suspend fun unload() {
+        welcomeChannels.values.forEach { it.shutdown() }
+        welcomeChannels.clear()
     }
 
     internal class ChannelCreateArgs : Arguments() {
