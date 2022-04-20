@@ -136,7 +136,7 @@ public data class RolesBlock(
 
         val guildRoles = getGuildRoles()
         val member = event.interaction.user.asMember(guild.id)
-        val userRoles = member.roleIds
+        val userRoles = member.roleIds.filter { it in guildRoles.keys }
 
         val selectedRoles = event.interaction.values
             .map { Snowflake(it) }
