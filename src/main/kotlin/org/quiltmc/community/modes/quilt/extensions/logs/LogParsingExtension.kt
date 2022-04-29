@@ -16,17 +16,19 @@ import dev.kord.rest.builder.message.create.embed
 import org.quiltmc.community.inQuiltGuild
 import org.quiltmc.community.modes.quilt.extensions.logs.parsers.BaseLogParser
 import org.quiltmc.community.modes.quilt.extensions.logs.parsers.FabricImplParser
+import org.quiltmc.community.modes.quilt.extensions.logs.parsers.FabricLoaderParser
 import org.quiltmc.community.modes.quilt.extensions.logs.retrievers.AttachmentLogRetriever
 import org.quiltmc.community.modes.quilt.extensions.logs.retrievers.BaseLogRetriever
 
 class LogParsingExtension : Extension() {
     override val name: String = "log-parsing"
 
-    val parsers: List<BaseLogParser> = listOf(
+    private val parsers: List<BaseLogParser> = listOf(
+        FabricLoaderParser(),
         FabricImplParser()
     )
 
-    val retrievers: List<BaseLogRetriever> = listOf(
+    private val retrievers: List<BaseLogRetriever> = listOf(
         AttachmentLogRetriever()
     )
 
