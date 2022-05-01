@@ -17,10 +17,13 @@ private const val SLUG: String = "([^/?#]*)"
 private val strategyMap: Map<Regex, String> = mutableMapOf(
     "0x0.st/$SLUG".toRegex() to "https://0x0.st/$1",
     "bytebin.lucko.me/$SLUG".toRegex() to "https://bytebin.lucko.me/$1",
-    "gist.github.com/$SLUG/$SLUG".toRegex() to "https://gist.githubusercontent.com/$1/$2/raw",
-    "gist.githubusercontent.com/$SLUG/$SLUG/raw".toRegex() to "https://gist.githubusercontent.com/$1/$2/raw",
     "paste.ee/[pd]/$SLUG".toRegex() to "https://paste.ee/d/$1",
     "pastes.dev/$SLUG".toRegex() to "https://api.pastes.dev/$1",
+
+    "gist.github.com/$SLUG/$SLUG".toRegex() to "https://gist.githubusercontent.com/raw/$2",
+    "gist.github.com/$SLUG".toRegex() to "https://gist.githubusercontent.com/raw/$1",
+    "gist.githubusercontent.com/$SLUG/$SLUG/raw".toRegex() to "https://gist.githubusercontent.com/$1/$2/raw",
+    "gist.githubusercontent.com/raw/$SLUG".toRegex() to "https://gist.githubusercontent.com/raw.$1",
 
     "pastebin.com/$SLUG".toRegex() to "https://pastebin.com/dl/$1",
     "pastebin.com/(raw|dl|clone|embed|print)/$SLUG".toRegex() to "https://pastebin.com/dl/$2",
