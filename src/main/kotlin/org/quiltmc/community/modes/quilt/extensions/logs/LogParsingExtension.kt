@@ -19,6 +19,8 @@ import org.quiltmc.community.modes.quilt.extensions.logs.parsers.FabricImplParse
 import org.quiltmc.community.modes.quilt.extensions.logs.parsers.FabricLoaderParser
 import org.quiltmc.community.modes.quilt.extensions.logs.retrievers.AttachmentLogRetriever
 import org.quiltmc.community.modes.quilt.extensions.logs.retrievers.BaseLogRetriever
+import org.quiltmc.community.modes.quilt.extensions.logs.retrievers.RawLogRetriever
+import org.quiltmc.community.modes.quilt.extensions.logs.retrievers.ScrapingLogRetriever
 
 class LogParsingExtension : Extension() {
     override val name: String = "log-parsing"
@@ -29,7 +31,9 @@ class LogParsingExtension : Extension() {
     )
 
     private val retrievers: List<BaseLogRetriever> = listOf(
-        AttachmentLogRetriever()
+        AttachmentLogRetriever(),
+        RawLogRetriever(),
+        ScrapingLogRetriever()
     )
 
     override suspend fun setup() {
@@ -51,6 +55,7 @@ class LogParsingExtension : Extension() {
                             .reduce { left, right -> left + right }
                     }
                     ?.reduceOrNull { left, right -> left + right }
+                    ?.map { "**»** $it" }
                     ?.toSet()
                     ?: setOf()
 
@@ -62,7 +67,7 @@ class LogParsingExtension : Extension() {
                             color = DISCORD_FUCHSIA
 
                             description = "**The following potential issues were found in your logs:**\n\n" +
-                                    messages.joinToString("\n")
+                                    messages.joinToString("\n\n")
 
                             @Suppress("MagicNumber")
                             if (description!!.length > 4000) {

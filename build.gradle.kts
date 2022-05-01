@@ -68,6 +68,8 @@ dependencies {
     implementation(libs.commons.text)
     implementation(libs.homoglyph)
     implementation(libs.jansi)
+    implementation(libs.jsoup)
+
     implementation(libs.logback)
     implementation(libs.logging)
     implementation(libs.groovy)
