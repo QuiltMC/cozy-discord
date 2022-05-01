@@ -9,7 +9,7 @@ package org.quiltmc.community.modes.quilt.extensions.logs.parsers
 private val LOADER_REGEX = "\\[fabric-loader-[\\d.]+\\.jar:\\?]".toRegex()
 
 class FabricLoaderParser : BaseLogParser {
-    override fun getMessages(logContent: String): List<String> {
+    override suspend fun getMessages(logContent: String): List<String> {
         val messages: MutableList<String> = mutableListOf()
 
         if (logContent.contains(LOADER_REGEX)) {

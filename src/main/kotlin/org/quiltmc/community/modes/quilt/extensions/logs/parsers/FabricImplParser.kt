@@ -7,7 +7,7 @@
 package org.quiltmc.community.modes.quilt.extensions.logs.parsers
 
 class FabricImplParser : BaseLogParser {
-    override fun getMessages(logContent: String): List<String> {
+    override suspend fun getMessages(logContent: String): List<String> {
         var classNotFoundLine: Int? = null
         var suspectedMod: String? = null
         var suspectedPackage: String? = null

@@ -17,6 +17,7 @@ import org.quiltmc.community.inQuiltGuild
 import org.quiltmc.community.modes.quilt.extensions.logs.parsers.BaseLogParser
 import org.quiltmc.community.modes.quilt.extensions.logs.parsers.FabricImplParser
 import org.quiltmc.community.modes.quilt.extensions.logs.parsers.FabricLoaderParser
+import org.quiltmc.community.modes.quilt.extensions.logs.parsers.LoaderVersionParser
 import org.quiltmc.community.modes.quilt.extensions.logs.retrievers.AttachmentLogRetriever
 import org.quiltmc.community.modes.quilt.extensions.logs.retrievers.BaseLogRetriever
 import org.quiltmc.community.modes.quilt.extensions.logs.retrievers.RawLogRetriever
@@ -27,13 +28,14 @@ class LogParsingExtension : Extension() {
 
     private val parsers: List<BaseLogParser> = listOf(
         FabricLoaderParser(),
-        FabricImplParser()
+        FabricImplParser(),
+        LoaderVersionParser(),
     )
 
     private val retrievers: List<BaseLogRetriever> = listOf(
         AttachmentLogRetriever(),
         RawLogRetriever(),
-        ScrapingLogRetriever()
+        ScrapingLogRetriever(),
     )
 
     override suspend fun setup() {

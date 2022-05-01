@@ -38,14 +38,26 @@ public fun ExtensibleBotBuilder.ExtensionsBuilder.welcomeChannel(
     welcomeChannel(SimpleWelcomeChannelConfig(body), data)
 }
 
+public inline fun <reified T, reified R> List<T>.ifNotEmpty(body: (Collection<T>).() -> List<R>): List<R> {
+    if (this.isNotEmpty()) {
+        return body()
+    }
+
+    return emptyList()
+}
+
 public fun MessageCreateBuilder.isSimilar(other: Message): Boolean {
     val builderComponents = components
         .mapNotNull { it.build().components.value }
-        .reduce { left, right -> left + right }
+        .ifNotEmpty {
+            reduce { left, right -> left + right }
+        }
 
     val messageComponents = other.actionRows
         .map { it.components }
-        .reduce { left, right -> left + right }
+        .ifNotEmpty {
+            reduce { left, right -> left + right }
+        }
 
     val messageEmbedBuilders = other.embeds
         .filter { it.type == null || it.type == EmbedType.Rich }
