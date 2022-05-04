@@ -11,12 +11,16 @@ import com.kotlindiscord.kord.extensions.time.TimestampType
 import com.kotlindiscord.kord.extensions.time.toDiscord
 import dev.kord.common.Color
 import dev.kord.common.entity.ChannelType
+import dev.kord.common.entity.Permission
+import dev.kord.core.behavior.channel.asChannelOfOrNull
+import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.entity.channel.thread.ThreadChannel
 import dev.kord.rest.builder.message.EmbedBuilder
 import dev.kord.rest.builder.message.create.MessageCreateBuilder
 import dev.kord.rest.builder.message.create.embed
 import dev.kord.rest.builder.message.modify.MessageModifyBuilder
 import dev.kord.rest.builder.message.modify.embed
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.toList
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -56,6 +60,9 @@ public data class ThreadListBlock(
 
     @SerialName("include_private")
     val includePrivate: Boolean = false,
+
+    @SerialName("include_hidden_channels")
+    val includeHiddenChannels: Boolean = false,
 ) : Block() {
     override suspend fun create(builder: MessageCreateBuilder) {
         builder.content = text
@@ -87,6 +94,8 @@ public data class ThreadListBlock(
                     .replace("{MENTION}", thread.mention)
                     .replace("{URL}", thread.getJumpUrl())
                     .replace("{CREATED_TIME}", thread.id.timestamp.toDiscord(TimestampType.RelativeTime))
+                    .replace("{PARENT_ID}", thread.parentId.toString())
+                    .replace("{PARENT}", thread.parent.mention)
 
                 if (thread.lastMessageId != null) {
                     line = line.replace(
@@ -114,7 +123,23 @@ public data class ThreadListBlock(
     }
 
     private suspend fun getThreads(): List<ThreadChannel> {
-        var threads = guild.threads.toList()
+        var threads = guild.threads
+            .filter { thread ->
+                if (!includeHiddenChannels) {
+                    val channel = thread.parent.asChannelOfOrNull<TextChannel>()
+
+                    if (channel == null) {
+                        false
+                    } else {
+                        val overwrite = channel.permissionOverwrites.firstOrNull { it.target == guild.id }
+
+                        overwrite == null || overwrite.denied.contains(Permission.ViewChannel).not()
+                    }
+                } else {
+                    true
+                }
+            }
+            .toList()
 
         threads = when (mode) {
             ThreadListType.ACTIVE -> threads.sortedByDescending { it.lastMessage?.id?.timestamp }
