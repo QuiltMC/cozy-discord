@@ -13,6 +13,7 @@ import com.kotlindiscord.kord.extensions.utils.loadModule
 import dev.kord.common.entity.DiscordComponent
 import dev.kord.common.entity.EmbedType
 import dev.kord.core.entity.Message
+import dev.kord.core.entity.channel.Channel
 import dev.kord.core.entity.component.Component
 import dev.kord.rest.builder.message.EmbedBuilder
 import dev.kord.rest.builder.message.create.MessageCreateBuilder
@@ -20,6 +21,8 @@ import org.koin.dsl.bind
 import org.quiltmc.community.cozy.modules.welcome.config.SimpleWelcomeChannelConfig
 import org.quiltmc.community.cozy.modules.welcome.config.WelcomeChannelConfig
 import org.quiltmc.community.cozy.modules.welcome.data.WelcomeChannelData
+
+private const val DISCORD_CHANNEL_URI = "https://discord.com/channels"
 
 public fun ExtensibleBotBuilder.ExtensionsBuilder.welcomeChannel(
     config: WelcomeChannelConfig,
@@ -134,3 +137,11 @@ public fun EmbedBuilder.isSimilar(other: EmbedBuilder): Boolean {
                 }
             }
 }
+
+/**
+ * Generate the jump URL for this channel.
+ *
+ * @return A clickable URL to jump to this channel.
+ */
+public fun Channel.getJumpUrl(): String =
+    "$DISCORD_CHANNEL_URI/${data.guildId.value?.value ?: "@me"}/${id.value}"
