@@ -12,13 +12,21 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.http.ContentType
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import kotlinx.serialization.json.Json
 import org.quiltmc.community.modes.quilt.extensions.logs.misc.ModrinthVersion
+import kotlin.time.Duration.Companion.minutes
 
 private val MATCH_REGEX = "- quilted_fabric_api ([^\\n]+)".toRegex(RegexOption.IGNORE_CASE)
 private const val MODRINTH_URL = "https://api.modrinth.com/v2/project/qsl/version"
 
+private val CACHE_TIMEOUT = 10.minutes
+
 class QSLVersionParser : BaseLogParser {
+    private var lastCheck: Instant? = null
+    private var latestVersion: ModrinthVersion? = null
+
     val client = HttpClient {
         install(ContentNegotiation) {
             json(
@@ -50,12 +58,18 @@ class QSLVersionParser : BaseLogParser {
     }
 
     suspend fun getVersion(): Pair<String, String>? {
-        val response: List<ModrinthVersion> = client.get(MODRINTH_URL).body()
+        val now = Clock.System.now()
 
-        val latest = response
-            .maxByOrNull { it.datePublished }
-            ?: return null
+        if (latestVersion == null || lastCheck == null || now - lastCheck!! > CACHE_TIMEOUT) {
+            val response: List<ModrinthVersion> = client.get(MODRINTH_URL).body()
 
-        return latest.versionNumber to latest.files.first { it.primary }.url
+            val latest = response
+                .maxByOrNull { it.datePublished }
+                ?: return null
+
+            latestVersion = latest
+        }
+
+        return latestVersion!!.versionNumber to latestVersion!!.files.first { it.primary }.url
     }
 }
