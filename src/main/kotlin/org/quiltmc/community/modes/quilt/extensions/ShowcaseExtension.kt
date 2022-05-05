@@ -14,13 +14,18 @@ import com.kotlindiscord.kord.extensions.extensions.event
 import com.kotlindiscord.kord.extensions.utils.authorId
 import dev.kord.common.entity.MessageType
 import dev.kord.core.behavior.channel.asChannelOf
+import dev.kord.core.behavior.channel.asChannelOfOrNull
 import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.behavior.channel.threads.edit
 import dev.kord.core.behavior.channel.withTyping
 import dev.kord.core.behavior.edit
 import dev.kord.core.entity.channel.TextChannel
+import dev.kord.core.entity.channel.thread.TextChannelThread
 import dev.kord.core.event.message.MessageCreateEvent
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.toList
 import org.koin.core.component.inject
 import org.quiltmc.community.*
 import org.quiltmc.community.database.collections.OwnedThreadCollection
@@ -59,6 +64,16 @@ class ShowcaseExtension : Extension() {
             check { failIf(event.message.interaction != null) }
 
             check { inChannel(GALLERY_CHANNEL) }
+
+            check {
+                // Don't do anything if the message mentions a thread in the same channel.
+                val threads = event.message.mentionedChannels
+                    .mapNotNull { it.asChannelOfOrNull<TextChannelThread>() }
+                    .filter { it.parentId == GALLERY_CHANNEL }
+                    .toList()
+
+                failIf(threads.isNotEmpty())
+            }
 
             action {
                 // TODO: This sort of thing *needs* to be factored out into a broader threads manager
