@@ -53,7 +53,7 @@ data class ModrinthVersionDependency(
     val projectId: String,
 
     @SerialName("version_id")
-    val versionId: String,
+    val versionId: String?,
 )
 
 @Serializable
