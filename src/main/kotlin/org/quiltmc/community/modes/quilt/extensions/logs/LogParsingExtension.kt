@@ -14,10 +14,7 @@ import dev.kord.common.entity.MessageType
 import dev.kord.core.event.message.MessageCreateEvent
 import dev.kord.rest.builder.message.create.embed
 import org.quiltmc.community.inQuiltGuild
-import org.quiltmc.community.modes.quilt.extensions.logs.parsers.BaseLogParser
-import org.quiltmc.community.modes.quilt.extensions.logs.parsers.FabricImplParser
-import org.quiltmc.community.modes.quilt.extensions.logs.parsers.FabricLoaderParser
-import org.quiltmc.community.modes.quilt.extensions.logs.parsers.LoaderVersionParser
+import org.quiltmc.community.modes.quilt.extensions.logs.parsers.*
 import org.quiltmc.community.modes.quilt.extensions.logs.retrievers.AttachmentLogRetriever
 import org.quiltmc.community.modes.quilt.extensions.logs.retrievers.BaseLogRetriever
 import org.quiltmc.community.modes.quilt.extensions.logs.retrievers.RawLogRetriever
@@ -30,6 +27,7 @@ class LogParsingExtension : Extension() {
         FabricLoaderParser(),
         FabricImplParser(),
         LoaderVersionParser(),
+        QSLVersionParser(),
     )
 
     private val retrievers: List<BaseLogRetriever> = listOf(
