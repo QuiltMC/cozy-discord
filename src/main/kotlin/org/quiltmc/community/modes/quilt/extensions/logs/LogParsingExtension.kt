@@ -27,7 +27,8 @@ class LogParsingExtension : Extension() {
         FabricLoaderParser(),
         FabricImplParser(),
         LoaderVersionParser(),
-        PlayerIPParser()
+        PlayerIPParser(),
+        QSLVersionParser(),
     )
 
     private val retrievers: List<BaseLogRetriever> = listOf(

@@ -58,10 +58,18 @@ public class ModerationExtension(
                         arguments.duration!!,
                         reason = "Timed out by ${user.asUser().tag}"
                     )
+
+                    respond {
+                        content = "Timeout applied."
+                    }
                 } else {
                     arguments.user.removeTimeout(
                         "Timeout removed by ${user.asUser().tag}"
                     )
+
+                    respond {
+                        content = "Timeout removed."
+                    }
                 }
             }
         }

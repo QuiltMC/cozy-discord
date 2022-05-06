@@ -22,6 +22,7 @@ public abstract class WelcomeChannelConfig {
                 subclass(RolesBlock::class)
                 subclass(RulesBlock::class)
                 subclass(TextBlock::class)
+                subclass(ThreadListBlock::class)
             }
         }
 
