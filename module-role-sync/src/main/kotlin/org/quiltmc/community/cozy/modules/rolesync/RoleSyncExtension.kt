@@ -19,7 +19,7 @@ import org.quiltmc.community.cozy.modules.rolesync.config.RoleSyncConfig
 /**
  * Module providing role sync functionality.
  *
- * When one of the source role is added or removed from a user, the user is added or removed from the target role.
+ * When one of the source roles is added or removed from a user, the user is added or removed from the target role.
  */
 public class RoleSyncExtension(
     private val config: RoleSyncConfig
