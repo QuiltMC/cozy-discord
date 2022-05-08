@@ -79,10 +79,11 @@ dependencies {
     implementation(libs.kx.ser)
     implementation(libs.graphql)
 
-    implementation(project(":module-welcome"))
-    implementation(project(":module-user-cleanup"))
-    implementation(project(":module-tags"))
     implementation(project(":module-moderation"))
+    implementation(project(":module-role-sync"))
+    implementation(project(":module-tags"))
+    implementation(project(":module-user-cleanup"))
+    implementation(project(":module-welcome"))
 }
 
 graphql {

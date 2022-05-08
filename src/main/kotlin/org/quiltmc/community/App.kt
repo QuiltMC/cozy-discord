@@ -23,6 +23,7 @@ import dev.kord.gateway.Intents
 import dev.kord.gateway.PrivilegedIntent
 import org.quiltmc.community.cozy.modules.cleanup.userCleanup
 import org.quiltmc.community.cozy.modules.moderation.moderation
+import org.quiltmc.community.cozy.modules.rolesync.rolesync
 import org.quiltmc.community.cozy.modules.tags.tags
 import org.quiltmc.community.cozy.modules.welcome.welcomeChannel
 import org.quiltmc.community.database.collections.ServerSettingsCollection
@@ -148,6 +149,16 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
 
         moderation {
             loggingChannelName = "cozy-logs"
+
+            commandCheck { inQuiltGuild() }
+            commandCheck { hasBaseModeratorRole() }
+        }
+
+        rolesync {
+            roleToSync(
+                TOOLCHAIN_DEVELOPER_ROLE,
+                COMMUNITY_DEVELOPER_ROLE
+            )
 
             commandCheck { inQuiltGuild() }
             commandCheck { hasBaseModeratorRole() }
