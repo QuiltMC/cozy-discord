@@ -31,20 +31,23 @@ public class RoleSyncExtension(
         event<MemberUpdateEvent> {
             action {
                 // Make sure the old member is available
-                if (event.old == null) return@action
+                event.old ?: return@action
 
                 // Check if the roles have changed
-                if (event.old!!.roleIds == event.member.roleIds) return@action
+                if (event.old!!.roleIds == event.member.roleIds) { return@action }
 
                 for (role in config.getRolesToSync()) {
-                    // Check if the role got added
                     if (!event.old!!.roleIds.contains(role.source) && event.member.roleIds.contains(role.source)) {
+                        // Role was added
+
                         getGuildForRoleSnowflake(role.target, bot).guild
                             .getMember(event.member.id)
                             .addRole(role.target, "Role synced")
-                    }
-                    // Check if the role got removed
-                    else if (event.old!!.roleIds.contains(role.source) && !event.member.roleIds.contains(role.source)) {
+                    } else if (
+                        event.old!!.roleIds.contains(role.source) && !event.member.roleIds.contains(role.source)
+                    ) {
+                        // Role was removed
+
                         getGuildForRoleSnowflake(role.target, bot).guild
                             .getMember(event.member.id)
                             .removeRole(role.target, "Role synced")
