@@ -12,6 +12,7 @@ import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.extensions.event
 import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.hasRole
+import dev.kord.core.event.guild.MemberJoinEvent
 import dev.kord.core.event.guild.MemberUpdateEvent
 import kotlinx.coroutines.flow.filter
 import org.quiltmc.community.cozy.modules.rolesync.config.RoleSyncConfig
@@ -41,16 +42,31 @@ public class RoleSyncExtension(
                         // Role was added
 
                         getGuildForRoleSnowflake(role.target, bot).guild
-                            .getMember(event.member.id)
-                            .addRole(role.target, "Role synced")
+                            .getMemberOrNull(event.member.id)
+                            ?.addRole(role.target, "Role synced")
                     } else if (
                         event.old!!.roleIds.contains(role.source) && !event.member.roleIds.contains(role.source)
                     ) {
                         // Role was removed
 
                         getGuildForRoleSnowflake(role.target, bot).guild
-                            .getMember(event.member.id)
-                            .removeRole(role.target, "Role synced")
+                            .getMemberOrNull(event.member.id)
+                            ?.removeRole(role.target, "Role synced")
+                    }
+                }
+            }
+        }
+
+        event<MemberJoinEvent> {
+            action {
+                for (role in config.getRolesToSync()) {
+                    if (
+                        getGuildForRoleSnowflake(role.source, bot).guild
+                            .getMemberOrNull(event.member.id)
+                            ?.roleIds
+                            ?.contains(role.source) == true
+                    ) {
+                        event.member.addRole(role.target, "Role synced")
                     }
                 }
             }
@@ -74,7 +90,7 @@ public class RoleSyncExtension(
                     targetRole.guild.members
                         .filter { it.roleIds.contains(role.target) }  // Has the target role
                         .filter {
-                            !sourceRole.guild.getMember(it.id).hasRole(sourceRole)
+                            sourceRole.guild.getMemberOrNull(it.id)?.hasRole(sourceRole) == false
                         }  // Doesn't have the source role
                         .collect {
                             it.removeRole(role.target, "Role synced")
@@ -85,10 +101,10 @@ public class RoleSyncExtension(
                     sourceRole.guild.members
                         .filter { it.roleIds.contains(role.source) }  // Has the source role
                         .filter {
-                            !targetRole.guild.getMember(it.id).hasRole(targetRole)
+                            targetRole.guild.getMemberOrNull(it.id)?.hasRole(targetRole) == false
                         }  // Doesn't have the target role
                         .collect {
-                            it.addRole(role.target, "Role synced")
+                            targetRole.guild.getMemberOrNull(it.id)?.addRole(role.target, "Role synced")
                             added++
                         }
                 }
