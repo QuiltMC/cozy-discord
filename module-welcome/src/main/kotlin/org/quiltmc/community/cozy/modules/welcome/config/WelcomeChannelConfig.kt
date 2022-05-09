@@ -7,6 +7,8 @@
 package org.quiltmc.community.cozy.modules.welcome.config
 
 import com.kotlindiscord.kord.extensions.checks.types.Check
+import dev.kord.core.entity.Guild
+import dev.kord.core.entity.channel.GuildMessageChannel
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
@@ -25,6 +27,9 @@ public abstract class WelcomeChannelConfig {
                 subclass(ThreadListBlock::class)
             }
         }
+
+    /** Get the configured logging channel for the given channel and guild. **/
+    public abstract suspend fun getLoggingChannel(channel: GuildMessageChannel, guild: Guild): GuildMessageChannel?
 
     /**
      * Get the configured staff command checks, used to ensure a staff-facing command can be run.

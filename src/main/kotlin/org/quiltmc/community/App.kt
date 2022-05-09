@@ -19,8 +19,12 @@ import com.kotlindiscord.kord.extensions.modules.extra.phishing.extPhishing
 import com.kotlindiscord.kord.extensions.utils.envOrNull
 import com.kotlindiscord.kord.extensions.utils.getKoin
 import dev.kord.common.entity.Permission
+import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.gateway.Intents
 import dev.kord.gateway.PrivilegedIntent
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.lastOrNull
 import org.quiltmc.community.cozy.modules.cleanup.userCleanup
 import org.quiltmc.community.cozy.modules.moderation.moderation
 import org.quiltmc.community.cozy.modules.rolesync.rolesync
@@ -103,6 +107,13 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
         welcomeChannel(getKoin().get<WelcomeChannelCollection>()) {
             staffCommandCheck {
                 hasBaseModeratorRole()
+            }
+
+            getLogChannel { _, guild ->
+                guild.channels
+                    .filterIsInstance<GuildMessageChannel>()
+                    .filter { it.name == "cozy-logs" }
+                    .lastOrNull()
             }
 
             refreshDuration = 5.minutes

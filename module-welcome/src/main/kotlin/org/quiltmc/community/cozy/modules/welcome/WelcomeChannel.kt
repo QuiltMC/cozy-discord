@@ -10,6 +10,8 @@ import com.charleskorn.kaml.PolymorphismStyle
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlConfiguration
 import com.charleskorn.kaml.YamlException
+import com.kotlindiscord.kord.extensions.DISCORD_GREEN
+import com.kotlindiscord.kord.extensions.DISCORD_RED
 import com.kotlindiscord.kord.extensions.DiscordRelayedException
 import com.kotlindiscord.kord.extensions.utils.deleteIgnoringNotFound
 import com.kotlindiscord.kord.extensions.utils.hasNotStatus
@@ -25,6 +27,7 @@ import dev.kord.core.event.interaction.InteractionCreateEvent
 import dev.kord.core.supplier.EntitySupplyStrategy
 import dev.kord.rest.builder.message.create.UserMessageCreateBuilder
 import dev.kord.rest.builder.message.create.allowedMentions
+import dev.kord.rest.builder.message.create.embed
 import dev.kord.rest.builder.message.modify.allowedMentions
 import dev.kord.rest.request.RestRequestException
 import io.ktor.client.HttpClient
@@ -109,7 +112,32 @@ public class WelcomeChannel(
 
         val guild = channel.getGuild()
 
-        blocks = getBlocks().toMutableList()
+        @Suppress("TooGenericExceptionCaught")
+        try {
+            blocks = getBlocks().toMutableList()
+        } catch (e: Exception) {
+            log {
+                embed {
+                    title = "Welcome channel update failed"
+                    color = DISCORD_RED
+
+                    description = buildString {
+                        appendLine("**__Failed to update blocks__**")
+                        appendLine()
+                        appendLine("```")
+                        appendLine(e)
+                        appendLine("```")
+                    }
+
+                    field {
+                        name = "Channel"
+                        value = "${channel.mention} (`${channel.id}` / `${channel.name}`)"
+                    }
+                }
+            }
+
+            throw e
+        }
 
         blocks.forEach {
             it.channel = channel
@@ -122,53 +150,115 @@ public class WelcomeChannel(
             .toList()
             .sortedBy { it.id.timestamp }
 
-        if (messages.size > blocks.size) {
-            messages.forEachIndexed { index, message ->
-                val block = blocks.getOrNull(index)
+        var changed = 0
+        var created = 0
+        var deleted = 0
 
-                if (block != null) {
-                    if (messageNeedsUpdate(message, block)) {
-                        message.edit {
-                            block.edit(this)
+        @Suppress("TooGenericExceptionCaught")
+        try {
+            if (messages.size > blocks.size) {
+                messages.forEachIndexed { index, message ->
+                    val block = blocks.getOrNull(index)
+
+                    if (block != null) {
+                        if (messageNeedsUpdate(message, block)) {
+                            changed += 1
+
+                            message.edit {
+                                block.edit(this)
+
+                                allowedMentions { }
+                            }
+                        }
+
+                        messageMapping[message.id] = block
+                    } else {
+                        deleted += 1
+
+                        message.delete()
+                        messageMapping.remove(message.id)
+                    }
+                }
+            } else {
+                blocks.forEachIndexed { index, block ->
+                    val message = messages.getOrNull(index)
+
+                    if (message != null) {
+                        if (messageNeedsUpdate(message, block)) {
+                            changed += 1
+
+                            message.edit {
+                                block.edit(this)
+
+                                allowedMentions { }
+                            }
+                        }
+
+                        messageMapping[message.id] = block
+                    } else {
+                        val newMessage = channel.createMessage {
+                            created += 1
+
+                            block.create(this)
 
                             allowedMentions { }
                         }
-                    }
 
-                    messageMapping[message.id] = block
-                } else {
-                    message.delete()
-                    messageMapping.remove(message.id)
+                        messageMapping[newMessage.id] = block
+                    }
                 }
             }
-        } else {
-            blocks.forEachIndexed { index, block ->
-                val message = messages.getOrNull(index)
+        } catch (e: Exception) {
+            log {
+                embed {
+                    title = "Welcome channel update failed"
+                    color = DISCORD_RED
 
-                if (message != null) {
-                    if (messageNeedsUpdate(message, block)) {
-                        message.edit {
-                            block.edit(this)
-
-                            allowedMentions { }
-                        }
+                    description = buildString {
+                        appendLine("**__Failed to update messages__**")
+                        appendLine()
+                        appendLine("```")
+                        appendLine(e)
+                        appendLine("```")
                     }
 
-                    messageMapping[message.id] = block
-                } else {
-                    val newMessage = channel.createMessage {
-                        block.create(this)
+                    field {
+                        name = "Channel"
+                        value = "${channel.mention} (`${channel.id}` / `${channel.name}`)"
+                    }
+                }
+            }
 
-                        allowedMentions { }
+            throw e
+        }
+
+        if (created + changed + deleted > 0) {
+            log {
+                embed {
+                    title = "Welcome channel updated"
+                    color = DISCORD_GREEN
+
+                    description = buildString {
+                        appendLine("**__Message stats__**")
+                        appendLine()
+                        appendLine("**Changed:** `$changed`")
+                        appendLine("**Created:** `$created`")
+                        appendLine("**Deleted:** `$deleted`")
                     }
 
-                    messageMapping[newMessage.id] = block
+                    field {
+                        name = "Channel"
+                        value = "${channel.mention} (`${channel.id}` / `${channel.name}`)"
+                    }
                 }
             }
         }
 
         task?.start()
     }
+
+    public suspend fun log(builder: suspend UserMessageCreateBuilder.() -> Unit): Message? =
+        config.getLoggingChannel(channel, channel.guild.asGuild())?.createMessage { builder() }
 
     public suspend fun clear() {
         val messages = channel.withStrategy(EntitySupplyStrategy.rest)
@@ -180,7 +270,32 @@ public class WelcomeChannel(
             channel.bulkDelete(messages.map { it.id })
         } catch (e: RestRequestException) {
             if (e.hasNotStatus(HttpStatusCode.NotFound)) {
-                messages.forEach { it.deleteIgnoringNotFound() }
+                @Suppress("TooGenericExceptionCaught")
+                try {
+                    messages.forEach { it.deleteIgnoringNotFound() }
+                } catch (e: Exception) {
+                    log {
+                        embed {
+                            title = "Failed to clear welcome channel"
+                            color = DISCORD_RED
+
+                            description = buildString {
+                                appendLine("**__Failed to clear channel__**")
+                                appendLine()
+                                appendLine("```")
+                                appendLine(e)
+                                appendLine("```")
+                            }
+
+                            field {
+                                name = "Channel"
+                                value = "${channel.mention} (`${channel.id}` / `${channel.name}`)"
+                            }
+                        }
+                    }
+
+                    throw e
+                }
             }
         }
     }

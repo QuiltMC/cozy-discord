@@ -6,6 +6,7 @@
 
 package org.quiltmc.community.cozy.modules.welcome
 
+import com.kotlindiscord.kord.extensions.DISCORD_YELLOW
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
 import com.kotlindiscord.kord.extensions.commands.converters.impl.channel
@@ -18,9 +19,13 @@ import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.channel.asChannelOf
 import dev.kord.core.behavior.channel.asChannelOfOrNull
+import dev.kord.core.behavior.channel.createMessage
+import dev.kord.core.entity.Message
 import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.core.event.guild.GuildCreateEvent
 import dev.kord.core.event.interaction.InteractionCreateEvent
+import dev.kord.rest.builder.message.create.UserMessageCreateBuilder
+import dev.kord.rest.builder.message.create.embed
 import kotlinx.coroutines.flow.toList
 import org.koin.core.component.inject
 import org.quiltmc.community.cozy.modules.welcome.config.WelcomeChannelConfig
@@ -84,6 +89,31 @@ public class WelcomeExtension : Extension() {
                         respond {
                             content = "Configuration removed - old URL was `$deletedUrl`"
                         }
+
+                        welcomeChannel.log {
+                            embed {
+                                title = "Welcome channel removed"
+                                color = DISCORD_YELLOW
+
+                                description = "Welcome channel configuration removed."
+
+                                field {
+                                    name = "Channel"
+                                    value = "${welcomeChannel.channel.mention} (" +
+                                            "`${welcomeChannel.channel.id}` / " +
+                                            "`${welcomeChannel.channel.name}`" +
+                                            ")"
+                                }
+
+                                field {
+                                    name = "Staff Member"
+                                    value = "${user.mention} (" +
+                                            "`${user.id}` / " +
+                                            "`${user.asUser().tag}`" +
+                                            ")"
+                                }
+                            }
+                        }
                     } else {
                         respond {
                             content = "No configuration for ${arguments.channel.mention} exists"
@@ -116,19 +146,55 @@ public class WelcomeExtension : Extension() {
                 action {
                     val welcomeChannel = welcomeChannels[arguments.channel.id]
 
+                    if (welcomeChannel == null) {
+                        respond {
+                            content = "No configuration for ${arguments.channel.mention} exists"
+                        }
+
+                        return@action
+                    }
+
                     respond {
-                        content = if (welcomeChannel != null) {
-                            "Manually refreshing ${arguments.channel.mention} now..."
-                        } else {
-                            "No configuration for ${arguments.channel.mention} exists"
+                        content = "Manually refreshing ${arguments.channel.mention} now..."
+                    }
+                    welcomeChannel.log {
+                        embed {
+                            title = "Welcome channel refreshed"
+                            color = DISCORD_YELLOW
+
+                            description = buildString {
+                                append("Manually ")
+
+                                if (arguments.clear) {
+                                    append("**clearing** and ")
+                                }
+
+                                append("refreshing welcome channel...")
+                            }
+
+                            field {
+                                name = "Channel"
+                                value = "${welcomeChannel.channel.mention} (" +
+                                        "`${welcomeChannel.channel.id}` / " +
+                                        "`${welcomeChannel.channel.name}`" +
+                                        ")"
+                            }
+
+                            field {
+                                name = "Staff Member"
+                                value = "${user.mention} (" +
+                                        "`${user.id}` / " +
+                                        "`${user.asUser().tag}`" +
+                                        ")"
+                            }
                         }
                     }
 
                     if (arguments.clear) {
-                        welcomeChannel?.clear()
+                        welcomeChannel.clear()
                     }
 
-                    welcomeChannel?.populate()
+                    welcomeChannel.populate()
                 }
             }
 
@@ -150,8 +216,47 @@ public class WelcomeExtension : Extension() {
                     welcomeChannels[arguments.channel.id] = welcomeChannel
 
                     respond {
-                        content = "Set the configuration URL for ${arguments.channel.mention} to `${arguments.url}`, " +
-                                "clearing and refreshing..."
+                        content = buildString {
+                            append("Set the configuration URL for ${arguments.channel.mention} to `${arguments.url}`, ")
+
+                            if (arguments.clear) {
+                                append("clearing and ")
+                            }
+
+                            append("refreshing...")
+                        }
+                    }
+
+                    welcomeChannel.log {
+                        embed {
+                            title = "Welcome channel removed"
+                            color = DISCORD_YELLOW
+
+                            description = buildString {
+                                append("Welcome channel URL set: `${arguments.url}`")
+
+                                if (arguments.clear) {
+                                    appendLine()
+                                    appendLine("**Clearing channel...**")
+                                }
+                            }
+
+                            field {
+                                name = "Channel"
+                                value = "${welcomeChannel.channel.mention} (" +
+                                        "`${welcomeChannel.channel.id}` / " +
+                                        "`${welcomeChannel.channel.name}`" +
+                                        ")"
+                            }
+
+                            field {
+                                name = "Staff Member"
+                                value = "${user.mention} (" +
+                                        "`${user.id}` / " +
+                                        "`${user.asUser().tag}`" +
+                                        ")"
+                            }
+                        }
                     }
 
                     if (arguments.clear) {
@@ -163,6 +268,9 @@ public class WelcomeExtension : Extension() {
             }
         }
     }
+
+    public suspend fun log(channel: GuildMessageChannel, builder: UserMessageCreateBuilder.() -> Unit): Message? =
+        config.getLoggingChannel(channel, channel.guild.asGuild())?.createMessage { builder() }
 
     override suspend fun unload() {
         welcomeChannels.values.forEach { it.shutdown() }
