@@ -6,6 +6,7 @@
 
 package org.quiltmc.community.modes.quilt.extensions.logs.parsers
 
+import io.github.z4kn4fein.semver.Version
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -36,17 +37,36 @@ class LoaderVersionParser : BaseLogParser {
 
         if (match != null) {
             val mcVersion = match.groups[1]!!.value.trim()
-            val loaderVersion = match.groups[2]!!.value.trim()
+            val loaderVersion = Version.parse(match.groups[2]!!.value.trim())
 
             @Suppress("TooGenericExceptionCaught")
             try {
-                val currentVersion = getVersion(mcVersion)
+                val currentVersions = getVersions(mcVersion)
 
-                if (loaderVersion != currentVersion) {
+                val latestStable = currentVersions
+                    .filter { it.isStable }
+                    .maxByOrNull { it }
+                    ?: Version.min
+
+                val latestBeta = currentVersions
+                    .filter { it.isStable.not() }
+                    .maxByOrNull { it }
+                    ?: Version.min
+
+                if (latestStable > loaderVersion) {
                     messages.add(
                         "You appear to be using version `$loaderVersion` of Quilt Loader - please try updating to " +
-                                "`$currentVersion`."
+                                "`$latestStable`."
                     )
+                } else if (!loaderVersion.isStable) {
+                    val suggestedVersion = maxOf(loaderVersion, latestStable, latestBeta)
+
+                    if (suggestedVersion > loaderVersion) {
+                        messages.add(
+                            "You appear to be using version `$loaderVersion` of Quilt Loader - please try updating " +
+                                    "to `$latestStable`."
+                        )
+                    }
                 }
             } catch (e: Exception) {
                 messages.add(
@@ -59,11 +79,9 @@ class LoaderVersionParser : BaseLogParser {
         return messages
     }
 
-    suspend fun getVersion(mcVersion: String): String? {
+    suspend fun getVersions(mcVersion: String): List<Version> {
         val url = "https://meta.quiltmc.org/v3/versions/loader/$mcVersion"
         val response: List<LoaderVersion> = client.get(url).body()
-        val latest = response.maxByOrNull { it.loader.build }!!
-
-        return latest.loader.version.trim()
+        return response.map { it.loader.version }
     }
 }

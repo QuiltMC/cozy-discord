@@ -16,8 +16,15 @@ private val IPV6_REGEX =
 
 class PlayerIPParser : BaseLogParser {
     override suspend fun getMessages(logContent: String): List<String> {
+        val content = if (logContent.contains("Setting user:")) {
+            logContent.substringAfter("Setting user:")
+        } else {
+            logContent
+        }
+
         val messages: MutableList<String> = mutableListOf()
-        val ips = (IPV4_REGEX.findAll(logContent) + IPV6_REGEX.findAll(logContent)).mapNotNull {
+
+        val ips = (IPV4_REGEX.findAll(content) + IPV6_REGEX.findAll(content)).mapNotNull {
             return@mapNotNull try {
                 InetAddress.getByName(it.value)
             } catch (e: UnknownHostException) {
