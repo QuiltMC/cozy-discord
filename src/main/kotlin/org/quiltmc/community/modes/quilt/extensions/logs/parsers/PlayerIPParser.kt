@@ -6,6 +6,9 @@
 
 package org.quiltmc.community.modes.quilt.extensions.logs.parsers
 
+import java.net.InetAddress
+import java.net.UnknownHostException
+
 private val IPV4_REGEX =
     "(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]\\d|\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]\\d|\\d)){3}".toRegex()
 private val IPV6_REGEX =
@@ -14,8 +17,15 @@ private val IPV6_REGEX =
 class PlayerIPParser : BaseLogParser {
     override suspend fun getMessages(logContent: String): List<String> {
         val messages: MutableList<String> = mutableListOf()
+        val ips = (IPV4_REGEX.findAll(logContent) + IPV6_REGEX.findAll(logContent)).mapNotNull {
+            return@mapNotNull try {
+                InetAddress.getByName(it.value)
+            } catch (e: UnknownHostException) {
+                null
+            }
+        }.filter { !it.isLoopbackAddress }.toList()
 
-        if (logContent.contains(IPV4_REGEX) || logContent.contains(IPV6_REGEX)) {
+        if (ips.isNotEmpty()) {
             messages.add(
                 "This log appears to contain players' IP addresses - " +
                         "please consider deleting your uploaded log, " +
