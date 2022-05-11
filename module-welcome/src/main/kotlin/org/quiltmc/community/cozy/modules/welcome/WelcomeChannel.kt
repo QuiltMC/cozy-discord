@@ -10,7 +10,6 @@ import com.charleskorn.kaml.PolymorphismStyle
 import com.charleskorn.kaml.Yaml
 import com.charleskorn.kaml.YamlConfiguration
 import com.charleskorn.kaml.YamlException
-import com.kotlindiscord.kord.extensions.DISCORD_GREEN
 import com.kotlindiscord.kord.extensions.DISCORD_RED
 import com.kotlindiscord.kord.extensions.DiscordRelayedException
 import com.kotlindiscord.kord.extensions.utils.deleteIgnoringNotFound
@@ -150,10 +149,6 @@ public class WelcomeChannel(
             .toList()
             .sortedBy { it.id.timestamp }
 
-        var changed = 0
-        var created = 0
-        var deleted = 0
-
         @Suppress("TooGenericExceptionCaught")
         try {
             if (messages.size > blocks.size) {
@@ -162,8 +157,6 @@ public class WelcomeChannel(
 
                     if (block != null) {
                         if (messageNeedsUpdate(message, block)) {
-                            changed += 1
-
                             message.edit {
                                 block.edit(this)
 
@@ -173,8 +166,6 @@ public class WelcomeChannel(
 
                         messageMapping[message.id] = block
                     } else {
-                        deleted += 1
-
                         message.delete()
                         messageMapping.remove(message.id)
                     }
@@ -185,8 +176,6 @@ public class WelcomeChannel(
 
                     if (message != null) {
                         if (messageNeedsUpdate(message, block)) {
-                            changed += 1
-
                             message.edit {
                                 block.edit(this)
 
@@ -197,8 +186,6 @@ public class WelcomeChannel(
                         messageMapping[message.id] = block
                     } else {
                         val newMessage = channel.createMessage {
-                            created += 1
-
                             block.create(this)
 
                             allowedMentions { }
@@ -230,28 +217,6 @@ public class WelcomeChannel(
             }
 
             throw e
-        }
-
-        if (created + changed + deleted > 0) {
-            log {
-                embed {
-                    title = "Welcome channel updated"
-                    color = DISCORD_GREEN
-
-                    description = buildString {
-                        appendLine("**__Message stats__**")
-                        appendLine()
-                        appendLine("**Changed:** `$changed`")
-                        appendLine("**Created:** `$created`")
-                        appendLine("**Deleted:** `$deleted`")
-                    }
-
-                    field {
-                        name = "Channel"
-                        value = "${channel.mention} (`${channel.id}` / `${channel.name}`)"
-                    }
-                }
-            }
         }
 
         task?.start()
