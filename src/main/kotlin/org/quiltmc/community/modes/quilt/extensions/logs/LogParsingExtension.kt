@@ -27,6 +27,7 @@ class LogParsingExtension : Extension() {
         FabricLoaderParser(),
         FabricImplParser(),
         LoaderVersionParser(),
+        PlayerIPParser(),
         QSLVersionParser(),
     )
 
