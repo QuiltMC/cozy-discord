@@ -10,23 +10,20 @@ import java.net.InetAddress
 import java.net.UnknownHostException
 
 private val IPV4_REGEX =
-    "(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]\\d|\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]\\d|\\d)){3}".toRegex()
+    ("\\[\\/((?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]\\d|\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]\\d|\\d)){3}):[0-9]+] " +
+            "logged in with entity id")
+        .toRegex()
 private val IPV6_REGEX =
-    "(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}".toRegex()
+    "\\[/\\[((?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})]:[0-9]+] logged in with entity id"
+        .toRegex()
 
 class PlayerIPParser : BaseLogParser {
     override suspend fun getMessages(logContent: String): List<String> {
-        val content = if (logContent.contains("Setting user:")) {
-            logContent.substringAfter("Setting user:")
-        } else {
-            logContent
-        }
-
         val messages: MutableList<String> = mutableListOf()
 
-        val ips = (IPV4_REGEX.findAll(content) + IPV6_REGEX.findAll(content)).mapNotNull {
+        val ips = (IPV4_REGEX.findAll(logContent) + IPV6_REGEX.findAll(logContent)).mapNotNull {
             return@mapNotNull try {
-                InetAddress.getByName(it.value)
+                InetAddress.getByName(it.groups[1]!!.value)
             } catch (e: UnknownHostException) {
                 null
             }
