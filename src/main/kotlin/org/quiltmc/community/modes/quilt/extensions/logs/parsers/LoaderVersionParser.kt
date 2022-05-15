@@ -44,12 +44,12 @@ class LoaderVersionParser : BaseLogParser {
                 val currentVersions = getVersions(mcVersion)
 
                 val latestStable = currentVersions
-                    .filter { it.isStable }
+                    .filter { it.isPreRelease.not() }
                     .maxByOrNull { it }
                     ?: Version.min
 
                 val latestBeta = currentVersions
-                    .filter { it.isStable.not() }
+                    .filter { it.isPreRelease }
                     .maxByOrNull { it }
                     ?: Version.min
 
@@ -58,13 +58,13 @@ class LoaderVersionParser : BaseLogParser {
                         "You appear to be using version `$loaderVersion` of Quilt Loader - please try updating to " +
                                 "`$latestStable`."
                     )
-                } else if (!loaderVersion.isStable) {
+                } else if (loaderVersion.isPreRelease) {
                     val suggestedVersion = maxOf(loaderVersion, latestStable, latestBeta)
 
                     if (suggestedVersion > loaderVersion) {
                         messages.add(
                             "You appear to be using version `$loaderVersion` of Quilt Loader - please try updating " +
-                                    "to `$latestStable`."
+                                    "to `$suggestedVersion`."
                         )
                     }
                 }
