@@ -89,6 +89,10 @@
   template: "{EMOJI} **{NAME}**: {DESCRIPTION}\n"
 
   roles:
+    976178214269497366:
+      description: "Get pinged when we post announcements in <#832357051463630947>."
+      emoji: "📢"
+
     976082711817113610:
       description: "Let people know that you're using a translator to talk."
       emoji: "<:via_translator:976173251720015922>"
