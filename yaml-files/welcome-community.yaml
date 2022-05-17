@@ -80,6 +80,19 @@
       One of our most important rules - don't make things difficult for other users by bringing up controversies from
       other communities.
 
+- type: roles
+
+  id: community-roles
+
+  title: "Role Assignment"
+  description: "Click the button below to assign or remove any of the following roles."
+  template: "{EMOJI} **{NAME}**: {DESCRIPTION}\n"
+
+  roles:
+    976082711817113610:
+      description: "Let people know that you're using a translator to talk."
+      emoji: "<:via_translator:976173251720015922>"
+
 - type: links
 
   title: Useful Links
