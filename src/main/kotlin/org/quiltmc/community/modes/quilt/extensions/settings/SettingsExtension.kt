@@ -102,10 +102,24 @@ class SettingsExtension : Extension() {
                                 title = "Your Settings"
                                 color = DISCORD_BLURPLE
 
-                                description = "**Auto publish:** " + if (flags.autoPublish) {
-                                    "Enabled"
-                                } else {
-                                    "Disabled"
+                                description = buildString {
+                                    append("**Auto publish:** ")
+
+                                    if (flags.autoPublish) {
+                                        appendLine("Enabled")
+                                    } else {
+                                        appendLine("Disabled")
+                                    }
+
+                                    append("**Sync nicknames:** ")
+
+                                    if (flags.syncNicks) {
+                                        appendLine("Enabled")
+                                    } else {
+                                        appendLine("Disabled")
+                                    }
+
+                                    trim()
                                 }
                             }
                         }
@@ -124,6 +138,26 @@ class SettingsExtension : Extension() {
 
                         respond {
                             content = "Auto-publishing **" + if (flags.autoPublish) {
+                                "enabled"
+                            } else {
+                                "disabled"
+                            } + "**."
+                        }
+                    }
+                }
+
+                ephemeralSubCommand(booleanFlag("sync nickname between servers")) {
+                    name = "nick-sync"
+                    description = "Set whether your nickname should be synced between Quilt servers"
+
+                    action {
+                        val flags = userFlags.get(user.id) ?: UserFlags(user.id)
+
+                        flags.syncNicks = arguments.value
+                        flags.save()
+
+                        respond {
+                            content = "Nickname sync **" + if (flags.autoPublish) {
                                 "enabled"
                             } else {
                                 "disabled"
