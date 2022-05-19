@@ -157,7 +157,7 @@ class SettingsExtension : Extension() {
                         flags.save()
 
                         respond {
-                            content = "Nickname sync **" + if (flags.autoPublish) {
+                            content = "Nickname sync **" + if (flags.syncNicks) {
                                 "enabled"
                             } else {
                                 "disabled"
