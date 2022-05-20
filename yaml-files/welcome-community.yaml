@@ -80,6 +80,25 @@
       One of our most important rules - don't make things difficult for other users by bringing up controversies from
       other communities.
 
+- type: text
+  text: https://cdn.discordapp.com/attachments/863707104903561216/977158076442505236/forum-header-community.png
+
+- type: embed
+
+  embeds:
+    - title: The Quilt Forum
+
+      url: "https://forum.quiltmc.org"
+      color: 0x5865F2
+
+      description: >
+        This isn't our only social space - we believe that Discord isn't the best platform for long-form 
+        discussions, and that important information should be available to people that aren't here.
+        
+        
+        If you're interested in long-form discussions, development help, news or community project, please feel free
+        to join our forum at [https://forum.quiltmc.org](https://forum.quiltmc.org)!
+
 - type: roles
 
   id: community-roles
@@ -105,5 +124,6 @@
     Community Rules: https://quiltmc.org/community/rules
     Newcomers' Guide: https://quiltmc.org/about/newcomer-guide/
     QuiltMC Website: https://quiltmc.org/
+    QuiltMC Forum: https://forum.quiltmc.org
     QuiltMC on GitHub: https://github.com/QuiltMC
     Discord Stats: https://stats-quilt.gserv.me/public/dashboard/9b181b97-bd7f-4ab0-87ed-3239f9149932
