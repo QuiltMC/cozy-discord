@@ -65,10 +65,13 @@ class QSLVersionParser : BaseLogParser {
         val now = Clock.System.now()
 
         if (latestVersion == null || lastCheck == null || now - lastCheck!! > CACHE_TIMEOUT) {
-            val response: List<ModrinthVersion> = client.get(MODRINTH_URL).body()
+            val response: List<ModrinthVersion> = client.get(MODRINTH_URL) {
+                url {
+                    parameters.append("game_versions", "[\"${minecraftVersion}\"]")
+                }
+            }.body()
 
             val latest = response
-                .filter { it.gameVersions.contains(minecraftVersion) }
                 .maxByOrNull { it.datePublished }
                 ?: return null
 
