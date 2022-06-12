@@ -18,7 +18,8 @@ import kotlinx.serialization.json.Json
 import org.quiltmc.community.modes.quilt.extensions.logs.misc.ModrinthVersion
 import kotlin.time.Duration.Companion.minutes
 
-private val MATCH_REGEX = "- quilted_fabric_api ([^\\n]+)".toRegex(RegexOption.IGNORE_CASE)
+private val QSL_MATCH_REGEX = "- quilted_fabric_api ([^\\n]+)".toRegex(RegexOption.IGNORE_CASE)
+private val MINECRAFT_MATCH_REGEX = "- minecraft ([^\\n]+)".toRegex(RegexOption.IGNORE_CASE)
 private const val MODRINTH_URL = "https://api.modrinth.com/v2/project/qsl/version"
 
 private val CACHE_TIMEOUT = 10.minutes
@@ -40,11 +41,14 @@ class QSLVersionParser : BaseLogParser {
 
     override suspend fun getMessages(logContent: String): List<String> {
         val messages: MutableList<String> = mutableListOf()
-        val match = MATCH_REGEX.find(logContent)
+        val qslMatch = QSL_MATCH_REGEX.find(logContent)
+        val minecraftMatch = MINECRAFT_MATCH_REGEX.find(logContent)
 
-        if (match != null) {
-            val providedVersion = match.groups[1]!!.value.trim()
-            val (version, url) = getVersion() ?: return emptyList()
+        if (qslMatch != null && minecraftMatch != null) {
+            val providedVersion = qslMatch.groups[1]!!.value.trim()
+            val minecraftVersion = minecraftMatch.groups[1]!!.value.trim()
+
+            val (version, url) = getVersion(minecraftVersion) ?: return emptyList()
 
             if (!providedVersion.equals(version, true)) {
                 messages.add(
@@ -57,13 +61,14 @@ class QSLVersionParser : BaseLogParser {
         return messages
     }
 
-    suspend fun getVersion(): Pair<String, String>? {
+    suspend fun getVersion(minecraftVersion: String): Pair<String, String>? {
         val now = Clock.System.now()
 
         if (latestVersion == null || lastCheck == null || now - lastCheck!! > CACHE_TIMEOUT) {
             val response: List<ModrinthVersion> = client.get(MODRINTH_URL).body()
 
             val latest = response
+                .filter { it.gameVersions.contains(minecraftVersion) }
                 .maxByOrNull { it.datePublished }
                 ?: return null
 
