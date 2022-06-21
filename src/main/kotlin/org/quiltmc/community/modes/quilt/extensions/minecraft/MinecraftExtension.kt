@@ -249,6 +249,9 @@ class MinecraftExtension : Extension() {
     fun String.formatHTML(): String {
         var result = this
 
+        result = result.replace("\u200B", "")
+        result = result.replace("<p></p>", "")
+
         result = result.replace("[\n]*</p>\n+<p>[\n]*".toRegex(), "\n\n")
         result = result.replace("[\n]*<[/]*p>[\n]*".toRegex(), "\n")
 
