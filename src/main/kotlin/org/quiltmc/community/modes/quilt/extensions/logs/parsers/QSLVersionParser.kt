@@ -45,7 +45,7 @@ class QSLVersionParser : BaseLogParser {
         val minecraftMatch = MINECRAFT_MATCH_REGEX.find(logContent)
 
         if (qslMatch != null && minecraftMatch != null) {
-            val providedVersion = qslMatch.groups[1]!!.value.trim()
+            val providedVersion = qslMatch.groups[1]!!.value.trim().replace(" ", "+")
             val minecraftVersion = minecraftMatch.groups[1]!!.value.trim()
 
             val (version, url) = getVersion(minecraftVersion) ?: return emptyList()
