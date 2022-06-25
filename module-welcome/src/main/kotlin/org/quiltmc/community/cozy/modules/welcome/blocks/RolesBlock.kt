@@ -9,6 +9,7 @@
 package org.quiltmc.community.cozy.modules.welcome.blocks
 
 import com.kotlindiscord.kord.extensions.DISCORD_BLURPLE
+import com.kotlindiscord.kord.extensions.koin.KordExKoinComponent
 import com.kotlindiscord.kord.extensions.utils.emoji
 import com.kotlindiscord.kord.extensions.utils.toReaction
 import dev.kord.common.Color
@@ -31,7 +32,6 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.toList
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 @Suppress("MagicNumber")
@@ -44,7 +44,7 @@ public data class RolesBlock(
     val description: String = "Click the button below to assign yourself any of the following roles.",
     val color: Color = DISCORD_BLURPLE,
     val template: String = "**»** {MENTION} {DESCRIPTION}"
-) : Block(), InteractionBlock, KoinComponent {
+) : Block(), InteractionBlock, KordExKoinComponent {
     val kord: Kord by inject()
 
     init {

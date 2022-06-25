@@ -6,14 +6,14 @@
 
 package org.quiltmc.community.database.collections
 
+import com.kotlindiscord.kord.extensions.koin.KordExKoinComponent
 import com.mongodb.client.result.UpdateResult
-import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.quiltmc.community.database.Collection
 import org.quiltmc.community.database.Database
 import org.quiltmc.community.database.entities.GlobalSettings
 
-class GlobalSettingsCollection : KoinComponent {
+class GlobalSettingsCollection : KordExKoinComponent {
     private val database: Database by inject()
     private val col = database.mongo.getCollection<GlobalSettings>(name)
 

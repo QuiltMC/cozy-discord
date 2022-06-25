@@ -343,8 +343,6 @@ class SuggestionsExtension : Extension() {
 
             guild(COMMUNITY_GUILD)
 
-            MODERATOR_ROLES.forEach(::allowRole)
-
             check { hasRole(COMMUNITY_MODERATOR_ROLE) }
 
             action {

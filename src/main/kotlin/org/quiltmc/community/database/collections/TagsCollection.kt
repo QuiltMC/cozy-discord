@@ -6,9 +6,9 @@
 
 package org.quiltmc.community.database.collections
 
+import com.kotlindiscord.kord.extensions.koin.KordExKoinComponent
 import dev.kord.common.entity.Snowflake
 import org.bson.conversions.Bson
-import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.litote.kmongo.eq
 import org.litote.kmongo.or
@@ -18,7 +18,7 @@ import org.quiltmc.community.database.Collection
 import org.quiltmc.community.database.Database
 import org.quiltmc.community.database.entities.TagEntity
 
-class TagsCollection : KoinComponent, TagsData {
+class TagsCollection : KordExKoinComponent, TagsData {
     private val database: Database by inject()
     private val col = database.mongo.getCollection<TagEntity>(name)
 

@@ -12,6 +12,7 @@ import com.charleskorn.kaml.YamlConfiguration
 import com.charleskorn.kaml.YamlException
 import com.kotlindiscord.kord.extensions.DISCORD_RED
 import com.kotlindiscord.kord.extensions.DiscordRelayedException
+import com.kotlindiscord.kord.extensions.koin.KordExKoinComponent
 import com.kotlindiscord.kord.extensions.utils.deleteIgnoringNotFound
 import com.kotlindiscord.kord.extensions.utils.hasNotStatus
 import com.kotlindiscord.kord.extensions.utils.scheduling.Scheduler
@@ -29,24 +30,36 @@ import dev.kord.rest.builder.message.create.allowedMentions
 import dev.kord.rest.builder.message.create.embed
 import dev.kord.rest.builder.message.modify.allowedMentions
 import dev.kord.rest.request.RestRequestException
-import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.plugins.ClientRequestException
-import io.ktor.client.request.get
-import io.ktor.http.HttpStatusCode
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.plugins.*
+import io.ktor.client.request.*
+import io.ktor.http.*
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.toList
 import kotlinx.serialization.decodeFromString
-import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.quiltmc.community.cozy.modules.welcome.blocks.Block
 import org.quiltmc.community.cozy.modules.welcome.blocks.InteractionBlock
 import org.quiltmc.community.cozy.modules.welcome.config.WelcomeChannelConfig
+import kotlin.collections.List
+import kotlin.collections.MutableList
+import kotlin.collections.MutableMap
+import kotlin.collections.filter
+import kotlin.collections.forEach
+import kotlin.collections.forEachIndexed
+import kotlin.collections.getOrNull
+import kotlin.collections.map
+import kotlin.collections.mutableListOf
+import kotlin.collections.mutableMapOf
+import kotlin.collections.set
+import kotlin.collections.sortedBy
+import kotlin.collections.toMutableList
 
 public class WelcomeChannel(
     public val channel: GuildMessageChannel,
     public val url: String,
-) : KoinComponent {
+) : KordExKoinComponent {
     private var blocks: MutableList<Block> = mutableListOf()
     private val messageMapping: MutableMap<Snowflake, Block> = mutableMapOf()
 

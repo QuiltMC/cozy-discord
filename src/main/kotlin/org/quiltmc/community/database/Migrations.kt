@@ -6,8 +6,8 @@
 
 package org.quiltmc.community.database
 
+import com.kotlindiscord.kord.extensions.koin.KordExKoinComponent
 import mu.KotlinLogging
-import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.quiltmc.community.database.collections.MetaCollection
 import org.quiltmc.community.database.entities.Meta
@@ -15,7 +15,7 @@ import org.quiltmc.community.database.migrations.*
 
 const val FILE_TEMPLATE = "migrations/v{VERSION}.bson"
 
-object Migrations : KoinComponent {
+object Migrations : KordExKoinComponent {
     private val logger = KotlinLogging.logger { }
 
     val db: Database by inject()
@@ -40,7 +40,7 @@ object Migrations : KoinComponent {
             @Suppress("TooGenericExceptionCaught")
             try {
                 @Suppress("MagicNumber")
-                when (nextVersion) {  // TODO: This should **REALLLLLLLY** be annotation-based
+                when (nextVersion) {  // TODO: This should **REALLLLLLLLLLLLLLLLLLLY** be annotation-based
                     1 -> ::v1
                     2 -> ::v2
                     3 -> ::v3
@@ -57,6 +57,7 @@ object Migrations : KoinComponent {
                     14 -> ::v14
                     15 -> ::v15
                     16 -> ::v16
+                    17 -> ::v17
 
                     else -> break
                 }(db.mongo)

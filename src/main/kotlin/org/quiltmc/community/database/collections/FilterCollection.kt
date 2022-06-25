@@ -6,7 +6,7 @@
 
 package org.quiltmc.community.database.collections
 
-import org.koin.core.component.KoinComponent
+import com.kotlindiscord.kord.extensions.koin.KordExKoinComponent
 import org.koin.core.component.inject
 import org.litote.kmongo.eq
 import org.quiltmc.community.database.Collection
@@ -14,7 +14,7 @@ import org.quiltmc.community.database.Database
 import org.quiltmc.community.database.entities.FilterEntry
 import java.util.*
 
-class FilterCollection : KoinComponent {
+class FilterCollection : KordExKoinComponent {
     private val database: Database by inject()
     private val col = database.mongo.getCollection<FilterEntry>(name)
 

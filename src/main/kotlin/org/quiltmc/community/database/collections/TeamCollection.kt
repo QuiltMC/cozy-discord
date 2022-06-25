@@ -6,9 +6,9 @@
 
 package org.quiltmc.community.database.collections
 
+import com.kotlindiscord.kord.extensions.koin.KordExKoinComponent
 import dev.kord.common.entity.Snowflake
 import kotlinx.serialization.Serializable
-import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.litote.kmongo.eq
 import org.litote.kmongo.graphLookup
@@ -17,7 +17,7 @@ import org.quiltmc.community.database.Collection
 import org.quiltmc.community.database.Database
 import org.quiltmc.community.database.entities.Team
 
-class TeamCollection : KoinComponent {
+class TeamCollection : KordExKoinComponent {
     private val database: Database by inject()
     private val col = database.mongo.getCollection<Team>(name)
 

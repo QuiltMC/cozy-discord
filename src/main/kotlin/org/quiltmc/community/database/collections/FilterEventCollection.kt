@@ -6,18 +6,18 @@
 
 package org.quiltmc.community.database.collections
 
+import com.kotlindiscord.kord.extensions.koin.KordExKoinComponent
 import dev.kord.core.behavior.GuildBehavior
 import dev.kord.core.behavior.MessageBehavior
 import dev.kord.core.behavior.UserBehavior
 import dev.kord.core.behavior.channel.ChannelBehavior
-import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.quiltmc.community.database.Collection
 import org.quiltmc.community.database.Database
 import org.quiltmc.community.database.entities.FilterEntry
 import org.quiltmc.community.database.entities.FilterEvent
 
-class FilterEventCollection : KoinComponent {
+class FilterEventCollection : KordExKoinComponent {
     private val database: Database by inject()
     private val col = database.mongo.getCollection<FilterEvent>(name)
 

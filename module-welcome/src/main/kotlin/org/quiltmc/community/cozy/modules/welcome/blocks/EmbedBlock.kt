@@ -6,6 +6,7 @@
 
 package org.quiltmc.community.cozy.modules.welcome.blocks
 
+import com.kotlindiscord.kord.extensions.koin.KordExKoinComponent
 import dev.kord.core.Kord
 import dev.kord.core.cache.data.EmbedData
 import dev.kord.core.entity.Embed
@@ -15,7 +16,6 @@ import dev.kord.rest.builder.message.modify.MessageModifyBuilder
 import dev.kord.rest.builder.message.modify.embed
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 @Suppress("MagicNumber")
@@ -24,7 +24,7 @@ import org.koin.core.component.inject
 public data class EmbedBlock(
     val embeds: List<EmbedData>,
     val text: String? = null
-) : Block(), KoinComponent {
+) : Block(), KordExKoinComponent {
     val kord: Kord by inject()
 
     init {

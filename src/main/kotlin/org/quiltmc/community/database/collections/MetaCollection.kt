@@ -6,13 +6,13 @@
 
 package org.quiltmc.community.database.collections
 
-import org.koin.core.component.KoinComponent
+import com.kotlindiscord.kord.extensions.koin.KordExKoinComponent
 import org.koin.core.component.inject
 import org.quiltmc.community.database.Collection
 import org.quiltmc.community.database.Database
 import org.quiltmc.community.database.entities.Meta
 
-class MetaCollection : KoinComponent {
+class MetaCollection : KordExKoinComponent {
     private val database: Database by inject()
     private val col = database.mongo.getCollection<Meta>(name)
 

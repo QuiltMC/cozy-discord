@@ -97,7 +97,6 @@ class SubteamsExtension : Extension() {
 
             guild(TOOLCHAIN_GUILD)
 
-            allowRole(TOOLCHAIN_MODERATOR_ROLE)
             check { hasRole(TOOLCHAIN_MODERATOR_ROLE) }
 
             ephemeralSubCommand(::ManageTeamAllowArguments) {
