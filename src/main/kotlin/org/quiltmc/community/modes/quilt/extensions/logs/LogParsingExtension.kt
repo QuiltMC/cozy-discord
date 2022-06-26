@@ -30,6 +30,7 @@ class LogParsingExtension : Extension() {
         LoaderVersionParser(),
         PlayerIPParser(),
         QSLVersionParser(),
+        RuleBreakingModParser(),
     )
 
     private val retrievers: List<BaseLogRetriever> = listOf(
