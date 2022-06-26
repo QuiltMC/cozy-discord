@@ -40,7 +40,7 @@ object Migrations : KordExKoinComponent {
             @Suppress("TooGenericExceptionCaught")
             try {
                 @Suppress("MagicNumber")
-                when (nextVersion) {  // TODO: This should **REALLLLLLLLLLLLLLLLLLLY** be annotation-based
+                when (nextVersion) {  // TODO: This should **REEEEEEEEEALLLLLLLLLLLLLLLLLLLY** be annotation-based
                     1 -> ::v1
                     2 -> ::v2
                     3 -> ::v3
@@ -58,6 +58,7 @@ object Migrations : KordExKoinComponent {
                     15 -> ::v15
                     16 -> ::v16
                     17 -> ::v17
+                    18 -> ::v18
 
                     else -> break
                 }(db.mongo)

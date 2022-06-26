@@ -17,14 +17,14 @@ import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import org.koin.core.component.inject
+import org.litote.kmongo.coroutine.CoroutineCollection
 import org.litote.kmongo.eq
-import org.quiltmc.community.database.Collection
 import org.quiltmc.community.database.Database
 import org.quiltmc.community.database.entities.AdaptedData
 
 class MongoDBDataAdapter : DataAdapter<String>(), KordExKoinComponent {
     private val database: Database by inject()
-    private val col = database.mongo.getCollection<AdaptedData>(name)
+    private val collectionCache: MutableMap<String, CoroutineCollection<AdaptedData>> = mutableMapOf()
 
     private fun StorageUnit<*>.getIdentifier(): String =
         buildString {
@@ -38,10 +38,24 @@ class MongoDBDataAdapter : DataAdapter<String>(), KordExKoinComponent {
             append(identifier)
         }
 
+    private suspend fun getCollection(namespace: String): CoroutineCollection<AdaptedData> {
+        val collName = "data-$namespace"
+        var coll = collectionCache[collName]
+
+        if (coll == null) {
+            coll = database.mongo.getCollection(collName)
+
+            collectionCache[collName] = coll
+        }
+
+        return coll
+    }
+
     override suspend fun <R : Data> delete(unit: StorageUnit<R>): Boolean {
         removeFromCache(unit)
 
-        val result = col.deleteOne(AdaptedData::_id eq unit.getIdentifier())
+        val result = getCollection(unit.namespace)
+            .deleteOne(AdaptedData::_id eq unit.getIdentifier())
 
         return result.deletedCount > 0
     }
@@ -62,7 +76,8 @@ class MongoDBDataAdapter : DataAdapter<String>(), KordExKoinComponent {
 
     override suspend fun <R : Data> reload(unit: StorageUnit<R>): R? {
         val dataId = unit.getIdentifier()
-        val result = col.findOne(AdaptedData::_id eq dataId)?.data
+        val result = getCollection(unit.namespace)
+            .findOne(AdaptedData::_id eq dataId)?.data
 
         if (result != null) {
             dataCache[dataId] = Json.decodeFromString(unit.dataType.serializer(), result)
@@ -75,7 +90,7 @@ class MongoDBDataAdapter : DataAdapter<String>(), KordExKoinComponent {
     override suspend fun <R : Data> save(unit: StorageUnit<R>): R? {
         val data = get(unit) ?: return null
 
-        col.save(
+        getCollection(unit.namespace).save(
             AdaptedData(
                 unit.getIdentifier(),
                 Json.encodeToString(unit.dataType.serializer(), data)
@@ -91,7 +106,7 @@ class MongoDBDataAdapter : DataAdapter<String>(), KordExKoinComponent {
         dataCache[dataId] = data
         unitCache[unit] = dataId
 
-        col.save(
+        getCollection(unit.namespace).save(
             AdaptedData(
                 unit.getIdentifier(),
                 Json.encodeToString(unit.dataType.serializer(), data)
@@ -100,6 +115,4 @@ class MongoDBDataAdapter : DataAdapter<String>(), KordExKoinComponent {
 
         return data
     }
-
-    companion object : Collection("adapted_data")
 }

@@ -7,7 +7,6 @@
 package org.quiltmc.community.modes.quilt.extensions.logs.parsers
 
 private val INCOMPATIBLE_MODS = mapOf(
-    "essential" to "Essential",
     "libjf" to "LibJF",
     "limitless" to "Limitless",
     "seamless_loading_screen" to "Seamless Loading Screen",
