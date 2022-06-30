@@ -6,7 +6,7 @@ on:
       - root
 
     paths-ignore:
-      - "yaml-files/"
+      - "yaml-files/**"
 
 jobs:
   build:

@@ -6,7 +6,7 @@ on:
       - develop
 
     paths-ignore:
-      - "yaml-files/"
+      - "yaml-files/**"
 
 jobs:
   build:
