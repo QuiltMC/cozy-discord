@@ -96,7 +96,7 @@ public class WelcomeChannel(
         scheduler.shutdown()
     }
 
-    protected suspend fun fetchBlocks(): List<Block> {
+    private suspend fun fetchBlocks(): List<Block> {
         try {
             val response = client.get(url).body<String>()
 
