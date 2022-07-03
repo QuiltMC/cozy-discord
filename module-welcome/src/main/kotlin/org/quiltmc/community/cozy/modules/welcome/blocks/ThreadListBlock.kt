@@ -61,6 +61,9 @@ public data class ThreadListBlock(
     @SerialName("include_private")
     val includePrivate: Boolean = false,
 
+    @SerialName("include_hidden")
+    val includeHidden: Boolean = false,
+
     @SerialName("include_hidden_channels")
     val includeHiddenChannels: Boolean = false,
 ) : Block() {
@@ -123,7 +126,7 @@ public data class ThreadListBlock(
     }
 
     private suspend fun getThreads(): List<ThreadChannel> {
-        var threads = guild.threads
+        var threads = guild.cachedThreads
             .filter { thread ->
                 if (!includeHiddenChannels) {
                     val channel = thread.parent.asChannelOfOrNull<TextChannel>()
@@ -160,6 +163,15 @@ public data class ThreadListBlock(
 
         if (!includePrivate) {
             threads = threads.filter { it.type != ChannelType.PrivateThread }
+        }
+
+        if (!includeHidden) {
+            threads = threads.filter {
+                it.getParent()
+                    .getPermissionOverwritesForRole(it.guildId)
+                    ?.denied
+                    ?.contains(Permission.ViewChannel) != true
+            }
         }
 
         return threads.take(limit)
