@@ -73,6 +73,37 @@ public class WelcomeExtension : Extension() {
 
             config.getStaffCommandChecks().forEach(::check)
 
+            ephemeralSlashCommand(::ChannelArgs) {
+                name = "blocks"
+                description = "Get a list of the configured blocks"
+
+                action {
+                    val welcomeChannel = welcomeChannels[arguments.channel.id]
+
+                    if (welcomeChannel == null) {
+                        respond {
+                            content = "No configuration for ${arguments.channel.mention} exists"
+                        }
+
+                        return@action
+                    }
+
+                    val blocks = welcomeChannel.getBlocks()
+
+                    respond {
+                        content = buildString {
+                            if (blocks.isEmpty()) {
+                                append("A configuration was found, but it doesn't contain any blocks.")
+                            } else {
+                                blocks.forEach {
+                                    appendLine("**»** ${it.javaClass.simpleName}")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             ephemeralSubCommand(::ChannelArgs) {
                 name = "delete"
                 description = "Delete a welcome channel configuration"
