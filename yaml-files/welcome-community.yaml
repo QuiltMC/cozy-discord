@@ -152,3 +152,17 @@
     QuiltMC Forum: https://forum.quiltmc.org
     QuiltMC on GitHub: https://github.com/QuiltMC
     Discord Stats: https://stats-quilt.gserv.me/public/dashboard/9b181b97-bd7f-4ab0-87ed-3239f9149932
+
+- type: threads
+  mode: active
+  template: "**»** {EMOJI}[{NAME}]({URL}) | {ACTIVE_TIME}"
+  description: This is a list of the ten most-recently-active threads, sorted by the time they were last active.
+  archive_status_in_name: false
+  archived_emoji: "🔇"
+
+- type: threads
+  mode: newest
+  template: "**»** {EMOJI}[{NAME}]({URL}) | {CREATED_TIME}"
+  description: This is a list of the ten most-recently-created threads, sorted by their creation date.
+  archive_status_in_name: false
+  archived_emoji: "🔇"
