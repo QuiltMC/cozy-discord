@@ -178,9 +178,13 @@ class ShowcaseExtension : Extension() {
 
                 this.event.user.asUser().dm {
                     content =
-                        "Hey, we've noticed you've reacted to a showcase message using an emoji we don't allow. " +
-                        "The reason is we don't want the mod developers to feel pressured into uploading their mod " +
-                        "to another service, or open source it. Please respect everyone's wishes."
+                        "Your reaction '${event.emoji.name}' has been removed. We remove certain reactions " +
+                        "from messages in the releases and updates because we don't want modders to feel pressured " +
+                        "to upload their mod to other services or make it open-source if they don't want to.\n" +
+                        "\n" +
+                        "Whatever choice a modder makes over the licensing and distribution of their mod, the " +
+                        "choices theirs to make, and we want everyone to feel that they can safely share their mod " +
+                        "without being harassed or pressured by users who do not agree with those choices."
                 }
             }
         }
