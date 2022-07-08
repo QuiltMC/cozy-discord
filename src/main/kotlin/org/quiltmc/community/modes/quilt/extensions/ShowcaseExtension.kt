@@ -8,10 +8,12 @@
 
 package org.quiltmc.community.modes.quilt.extensions
 
+import com.kotlindiscord.kord.extensions.checks.inCategory
 import com.kotlindiscord.kord.extensions.checks.inChannel
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.event
 import com.kotlindiscord.kord.extensions.utils.authorId
+import com.kotlindiscord.kord.extensions.utils.dm
 import dev.kord.common.entity.MessageType
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.channel.asChannelOf
@@ -22,11 +24,15 @@ import dev.kord.core.behavior.edit
 import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.entity.channel.thread.TextChannelThread
 import dev.kord.core.event.message.MessageCreateEvent
+import dev.kord.core.event.message.ReactionAddEvent
 import kotlinx.coroutines.delay
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import org.koin.core.component.inject
 import org.quiltmc.community.*
 import org.quiltmc.community.database.collections.OwnedThreadCollection
 import org.quiltmc.community.database.entities.OwnedThread
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
@@ -42,10 +48,14 @@ private val THREAD_DELIMITERS = arrayOf(
 
 private val CHANNEL_REGEX = "<#(\\d)+>".toRegex()
 
+private val BANNED_REACTIONS = arrayOf("modrinth", "curse", "github")
+
 class ShowcaseExtension : Extension() {
     override val name: String = "showcase"
 
     private val threads: OwnedThreadCollection by inject()
+
+    private val lastWarnedUser: MutableMap<Snowflake, Instant> = mutableMapOf()
 
     override suspend fun setup() {
         event<MessageCreateEvent> {
@@ -144,6 +154,33 @@ class ShowcaseExtension : Extension() {
                 thread.edit {
                     archived = true
                     reason = "Gallery thread archived on creation."
+                }
+            }
+        }
+
+        event<ReactionAddEvent> {
+            check { inCategory(SHOWCASE_CATEGORY) }
+
+            check {
+                failIfNot(BANNED_REACTIONS.map { it.contains(this.event.emoji.name) }.any())
+            }
+
+            action {
+                this.event.message.deleteReaction(this.event.emoji)
+
+                if (
+                    lastWarnedUser.getOrDefault(this.event.user.id, Instant.DISTANT_PAST) >
+                    Clock.System.now().minus(5.minutes)
+                ) {
+                    return@action
+                }
+                lastWarnedUser[this.event.user.id] = Clock.System.now()
+
+                this.event.user.asUser().dm {
+                    content =
+                        "Hey, we've noticed you've reacted to a showcase message using an emoji we don't allow. " +
+                        "The reason is we don't want the mod developers to feel pressured into uploading their mod " +
+                        "to another service, or open source it. Please respect everyone's wishes."
                 }
             }
         }
