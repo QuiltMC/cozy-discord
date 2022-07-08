@@ -183,8 +183,8 @@ class ShowcaseExtension : Extension() {
                         "to upload their mod to other services or make it open-source if they don't want to.\n" +
                         "\n" +
                         "Whatever choice a modder makes over the licensing and distribution of their mod, the " +
-                        "choices theirs to make, and we want everyone to feel that they can safely share their mod " +
-                        "without being harassed or pressured by users who do not agree with those choices."
+                        "choices theirs to make, and we want everyone to feel that they can safely share their " +
+                        "creations without being harassed or pressured by users who do not agree with those choices."
                 }
             }
         }
