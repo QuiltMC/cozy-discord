@@ -11,14 +11,26 @@
 package org.quiltmc.community.database.entities
 
 import com.github.jershell.kbson.UUIDSerializer
+import com.kotlindiscord.kord.extensions.storage.StorageType
+import dev.kord.common.entity.Snowflake
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 import org.quiltmc.community.database.Entity
+import org.quiltmc.community.database.serializers.StorageTypeSerializer
 
 @Serializable
 @Suppress("ConstructorParameterNaming")  // MongoDB calls it that...
 data class AdaptedData(
     override val _id: String,
+    val identifier: String,
+
+    @Serializable(with = StorageTypeSerializer::class)
+    val type: StorageType? = null,
+
+    val channel: Snowflake? = null,
+    val guild: Snowflake? = null,
+    val message: Snowflake? = null,
+    val user: Snowflake? = null,
 
     var data: String
 ) : Entity<String>

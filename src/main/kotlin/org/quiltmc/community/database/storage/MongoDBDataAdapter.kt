@@ -16,7 +16,9 @@ import com.kotlindiscord.kord.extensions.storage.StorageUnit
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
+import org.bson.conversions.Bson
 import org.koin.core.component.inject
+import org.litote.kmongo.and
 import org.litote.kmongo.coroutine.CoroutineCollection
 import org.litote.kmongo.eq
 import org.quiltmc.community.database.Database
@@ -51,11 +53,24 @@ class MongoDBDataAdapter : DataAdapter<String>(), KordExKoinComponent {
         return coll
     }
 
+    private fun constructQuery(unit: StorageUnit<*>): Bson {
+        var query = AdaptedData::_id eq unit.identifier
+
+        query = and(query, AdaptedData::type eq unit.storageType)
+
+        query = and(query, AdaptedData::channel eq unit.channel)
+        query = and(query, AdaptedData::guild eq unit.guild)
+        query = and(query, AdaptedData::message eq unit.message)
+        query = and(query, AdaptedData::user eq unit.user)
+
+        return query
+    }
+
     override suspend fun <R : Data> delete(unit: StorageUnit<R>): Boolean {
         removeFromCache(unit)
 
         val result = getCollection(unit.namespace)
-            .deleteOne(AdaptedData::_id eq unit.getIdentifier())
+            .deleteOne(constructQuery(unit))
 
         return result.deletedCount > 0
     }
@@ -77,7 +92,7 @@ class MongoDBDataAdapter : DataAdapter<String>(), KordExKoinComponent {
     override suspend fun <R : Data> reload(unit: StorageUnit<R>): R? {
         val dataId = unit.getIdentifier()
         val result = getCollection(unit.namespace)
-            .findOne(AdaptedData::_id eq dataId)?.data
+            .findOne(constructQuery(unit))?.data
 
         if (result != null) {
             dataCache[dataId] = Json.decodeFromString(unit.dataType.serializer(), result)
@@ -92,8 +107,18 @@ class MongoDBDataAdapter : DataAdapter<String>(), KordExKoinComponent {
 
         getCollection(unit.namespace).save(
             AdaptedData(
-                unit.getIdentifier(),
-                Json.encodeToString(unit.dataType.serializer(), data)
+                _id = unit.getIdentifier(),
+
+                identifier = unit.identifier,
+
+                type = unit.storageType,
+
+                channel = unit.channel,
+                guild = unit.guild,
+                message = unit.message,
+                user = unit.user,
+
+                data = Json.encodeToString(unit.dataType.serializer(), data)
             )
         )
 
@@ -108,8 +133,18 @@ class MongoDBDataAdapter : DataAdapter<String>(), KordExKoinComponent {
 
         getCollection(unit.namespace).save(
             AdaptedData(
-                unit.getIdentifier(),
-                Json.encodeToString(unit.dataType.serializer(), data)
+                _id = unit.getIdentifier(),
+
+                identifier = unit.identifier,
+
+                type = unit.storageType,
+
+                channel = unit.channel,
+                guild = unit.guild,
+                message = unit.message,
+                user = unit.user,
+
+                data = Json.encodeToString(unit.dataType.serializer(), data)
             )
         )
 
