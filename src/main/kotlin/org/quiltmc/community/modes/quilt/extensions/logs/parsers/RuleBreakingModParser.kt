@@ -22,23 +22,25 @@ class RuleBreakingModParser : BaseLogParser {
             return messages
         }
 
-        messages.add(buildString {
-            append("You appear to have the following potentially rule-breaking mods installed: ")
+        messages.add(
+            buildString {
+                append("You appear to have the following potentially rule-breaking mods installed: ")
 
-            appendLine(
-                matches.subList(1, matches.size)
-                    .map { INCOMPATIBLE_MODS[it.groupValues[1]] }
-                    .toSet()
-                    .sortedBy { it }
-                    .joinToString { "**$it**" }
-            )
+                appendLine(
+                    matches.subList(1, matches.size)
+                        .map { INCOMPATIBLE_MODS[it.groupValues[1]] }
+                        .toSet()
+                        .sortedBy { it }
+                        .joinToString { "**$it**" }
+                )
 
-            appendLine()
-            append(
-                "For more information, please see [rule 5 on the site]($SITE_LINK). Please note that we cannot " +
-                        "provide you with support while you're using mods that break our rules."
-            )
-        })
+                appendLine()
+                append(
+                    "For more information, please see [rule 5 on the site]($SITE_LINK). Please note that we cannot " +
+                            "provide you with support while you're using mods that break our rules."
+                )
+            }
+        )
 
         return messages
     }

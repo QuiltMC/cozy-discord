@@ -329,6 +329,7 @@ class UtilityExtension : Extension() {
                     guild(guildId)
 
                     check { hasBaseModeratorRole() }
+                    check { isInThread() }
 
                     action {
                         val thread = channel.asChannelOfOrNull<ThreadChannel>()
@@ -459,6 +460,8 @@ class UtilityExtension : Extension() {
                     name = "rename"
                     description = "Rename the current thread, if you have permission"
 
+                    check { isInThread() }
+
                     action {
                         val channel = channel.asChannel() as ThreadChannel
                         val member = user.asMember(guild!!.id)
@@ -495,6 +498,8 @@ class UtilityExtension : Extension() {
                 ephemeralSubCommand(::ArchiveArguments) {
                     name = "archive"
                     description = "Archive the current thread, if you have permission"
+
+                    check { isInThread() }
 
                     action {
                         val channel = channel.asChannel() as ThreadChannel
@@ -568,6 +573,8 @@ class UtilityExtension : Extension() {
                     name = "pin"
                     description = "Pin a message in this thread, if you have permission"
 
+                    check { isInThread() }
+
                     action {
                         val channel = channel.asChannel() as ThreadChannel
                         val member = user.asMember(guild!!.id)
@@ -603,6 +610,8 @@ class UtilityExtension : Extension() {
                 ephemeralSubCommand(::PinMessageArguments) {
                     name = "unpin"
                     description = "Unpin a message in this thread, if you have permission"
+
+                    check { isInThread() }
 
                     action {
                         val channel = channel.asChannel() as ThreadChannel
@@ -642,10 +651,8 @@ class UtilityExtension : Extension() {
 
                     guild(guildId)
 
-                    check {
-                        hasBaseModeratorRole()
-                        isInThread()
-                    }
+                    check { hasBaseModeratorRole() }
+                    check { isInThread() }
 
                     action {
                         val channel = channel.asChannel() as ThreadChannel
@@ -697,6 +704,8 @@ class UtilityExtension : Extension() {
                 ephemeralSubCommand(::SetOwnerArguments) {
                     name = "set-owner"
                     description = "Change the owner of the thread, if you have permission"
+
+                    check { isInThread() }
 
                     action {
                         val channel = channel.asChannel() as ThreadChannel

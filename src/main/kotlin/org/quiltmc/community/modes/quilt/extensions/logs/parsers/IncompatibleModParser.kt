@@ -24,20 +24,22 @@ class IncompatibleModParser : BaseLogParser {
             return messages
         }
 
-        messages.add(buildString {
-            append("You appear to have the following incompatible mods installed: ")
+        messages.add(
+            buildString {
+                append("You appear to have the following incompatible mods installed: ")
 
-            appendLine(
-                matches.subList(1, matches.size)
-                    .map { INCOMPATIBLE_MODS[it.groupValues[1]] }
-                    .toSet()
-                    .sortedBy { it }
-                    .joinToString { "**$it**" }
-            )
+                appendLine(
+                    matches.subList(1, matches.size)
+                        .map { INCOMPATIBLE_MODS[it.groupValues[1]] }
+                        .toSet()
+                        .sortedBy { it }
+                        .joinToString { "**$it**" }
+                )
 
-            appendLine()
-            append("For more information, please see [our mod incompatibility megathread]($THREAD_LINK).")
-        })
+                appendLine()
+                append("For more information, please see [our mod incompatibility megathread]($THREAD_LINK).")
+            }
+        )
 
         return messages
     }

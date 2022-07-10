@@ -9,10 +9,11 @@ package org.quiltmc.community.modes.quilt.extensions.logs.parsers
 import java.net.InetAddress
 import java.net.UnknownHostException
 
-private val IPV4_REGEX =
-    ("\\[\\/((?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]\\d|\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]\\d|\\d)){3}):[0-9]+] " +
-            "logged in with entity id")
-        .toRegex()
+private val IPV4_REGEX = (
+        "\\[\\/((?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]\\d|\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]\\d|\\d)){3}):" +
+                "[0-9]+] logged in with entity id"
+        ).toRegex()
+
 private val IPV6_REGEX =
     "\\[/\\[((?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4})]:[0-9]+] logged in with entity id"
         .toRegex()
