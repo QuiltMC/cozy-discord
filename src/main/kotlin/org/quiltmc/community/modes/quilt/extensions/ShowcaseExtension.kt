@@ -181,7 +181,7 @@ class ShowcaseExtension : Extension() {
         event<ReactionAddEvent> {
             check { anyGuild() }
             check { isNotInThread() }
-//            check { notHasPermission(Permission.ManageGuild) }
+            check { notHasPermission(Permission.ManageGuild) }
 
             action {
                 val storage = bannedReactionStorage.withGuild(event.guildId!!)
