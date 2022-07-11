@@ -16,7 +16,6 @@ import dev.kord.common.entity.Snowflake
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 import org.quiltmc.community.database.Entity
-import org.quiltmc.community.database.serializers.StorageTypeSerializer
 
 @Serializable
 @Suppress("ConstructorParameterNaming")  // MongoDB calls it that...
@@ -24,7 +23,6 @@ data class AdaptedData(
     override val _id: String,
     val identifier: String,
 
-    @Serializable(with = StorageTypeSerializer::class)
     val type: StorageType? = null,
 
     val channel: Snowflake? = null,
