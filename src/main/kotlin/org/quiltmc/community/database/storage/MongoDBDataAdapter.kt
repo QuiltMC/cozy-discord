@@ -54,7 +54,7 @@ class MongoDBDataAdapter : DataAdapter<String>(), KordExKoinComponent {
     }
 
     private fun constructQuery(unit: StorageUnit<*>): Bson {
-        var query = AdaptedData::_id eq unit.identifier
+        var query = AdaptedData::identifier eq unit.identifier
 
         query = and(query, AdaptedData::type eq unit.storageType)
 
