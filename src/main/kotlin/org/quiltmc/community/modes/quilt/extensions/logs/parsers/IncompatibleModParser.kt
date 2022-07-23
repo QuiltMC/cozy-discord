@@ -10,6 +10,7 @@ private val INCOMPATIBLE_MODS = mapOf(
     "libjf" to "LibJF",
     "limitless" to "Limitless",
     "seamless_loading_screen" to "Seamless Loading Screen",
+    "optifabric" to "OptiFabric",
 )
 
 private val MATCH_REGEX = "- (${INCOMPATIBLE_MODS.keys.joinToString("|")})".toRegex(RegexOption.IGNORE_CASE)
