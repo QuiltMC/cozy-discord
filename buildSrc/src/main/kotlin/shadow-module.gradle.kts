@@ -5,5 +5,5 @@
  */
 
 plugins {
-    id("com.github.johnrengelman.shadow")
+	id("com.github.johnrengelman.shadow")
 }

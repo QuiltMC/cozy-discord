@@ -14,6 +14,6 @@ import org.quiltmc.community.database.Entity
 
 @Serializable
 data class Team(
-    override val _id: Snowflake,
-    val parent: Snowflake
+	override val _id: Snowflake,
+	val parent: Snowflake
 ) : Entity<Snowflake>

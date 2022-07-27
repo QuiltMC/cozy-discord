@@ -21,65 +21,65 @@ import org.quiltmc.community.modes.quilt.extensions.logs.retrievers.RawLogRetrie
 import org.quiltmc.community.modes.quilt.extensions.logs.retrievers.ScrapingLogRetriever
 
 class LogParsingExtension : Extension() {
-    override val name: String = "log-parsing"
+	override val name: String = "log-parsing"
 
-    private val parsers: List<BaseLogParser> = listOf(
-        FabricLoaderParser(),
-        FabricImplParser(),
-        IncompatibleModParser(),
-        LoaderVersionParser(),
-        PlayerIPParser(),
-        QSLVersionParser(),
-        RuleBreakingModParser(),
-    )
+	private val parsers: List<BaseLogParser> = listOf(
+		FabricLoaderParser(),
+		FabricImplParser(),
+		IncompatibleModParser(),
+		LoaderVersionParser(),
+		PlayerIPParser(),
+		QSLVersionParser(),
+		RuleBreakingModParser(),
+	)
 
-    private val retrievers: List<BaseLogRetriever> = listOf(
-        AttachmentLogRetriever(),
-        RawLogRetriever(),
-        ScrapingLogRetriever(),
-    )
+	private val retrievers: List<BaseLogRetriever> = listOf(
+		AttachmentLogRetriever(),
+		RawLogRetriever(),
+		ScrapingLogRetriever(),
+	)
 
-    override suspend fun setup() {
-        event<MessageCreateEvent> {
-            check { inQuiltGuild() }
-            check {
-                failIfNot(event.message.type in arrayOf(MessageType.Default, MessageType.Reply))
-            }
+	override suspend fun setup() {
+		event<MessageCreateEvent> {
+			check { inQuiltGuild() }
+			check {
+				failIfNot(event.message.type in arrayOf(MessageType.Default, MessageType.Reply))
+			}
 
-            action {
-                val logs = retrievers
-                    .map { it.getLogContent(event.message) }
-                    .reduceOrNull { left, right -> left + right }
+			action {
+				val logs = retrievers
+					.map { it.getLogContent(event.message) }
+					.reduceOrNull { left, right -> left + right }
 
-                val messages = logs
-                    ?.map { log ->
-                        parsers
-                            .map { it.getMessages(log) }
-                            .reduce { left, right -> left + right }
-                    }
-                    ?.reduceOrNull { left, right -> left + right }
-                    ?.map { "**»** $it" }
-                    ?.toSet()
-                    ?: setOf()
+				val messages = logs
+					?.map { log ->
+						parsers
+							.map { it.getMessages(log) }
+							.reduce { left, right -> left + right }
+					}
+					?.reduceOrNull { left, right -> left + right }
+					?.map { "**»** $it" }
+					?.toSet()
+					?: setOf()
 
-                if (messages.isNotEmpty()) {
-                    event.message.respond {
-                        embed {
-                            title = "Automatic log analysis"
+				if (messages.isNotEmpty()) {
+					event.message.respond {
+						embed {
+							title = "Automatic log analysis"
 
-                            color = DISCORD_FUCHSIA
+							color = DISCORD_FUCHSIA
 
-                            description = "**The following potential issues were found in your logs:**\n\n" +
-                                    messages.joinToString("\n\n")
+							description = "**The following potential issues were found in your logs:**\n\n" +
+									messages.joinToString("\n\n")
 
-                            @Suppress("MagicNumber")
-                            if (description!!.length > 4000) {
-                                description = description!!.slice(0 until 3997) + "..."
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+							@Suppress("MagicNumber")
+							if (description!!.length > 4000) {
+								description = description!!.slice(0 until 3997) + "..."
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 }

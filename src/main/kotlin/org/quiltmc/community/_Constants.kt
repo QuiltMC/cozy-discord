@@ -19,55 +19,55 @@ internal val DISCORD_TOKEN = env("TOKEN")
 internal val GITHUB_TOKEN = envOrNull("GITHUB_TOKEN")
 
 internal val MAIN_GUILD = Snowflake(
-    envOrNull("MAIN_GUILD_ID")?.toULong()
-        ?: envOrNull("COMMUNITY_GUILD_ID")?.toULong()
-        ?: 817576132726620200U
+	envOrNull("MAIN_GUILD_ID")?.toULong()
+		?: envOrNull("COMMUNITY_GUILD_ID")?.toULong()
+		?: 817576132726620200U
 )
 
 internal val MESSAGE_LOG_CATEGORIES = envOrNull("MESSAGE_LOG_CATEGORIES")?.split(',')
-    ?.map { Snowflake(it.trim()) } ?: listOf()
+	?.map { Snowflake(it.trim()) } ?: listOf()
 
 internal val COLOUR_BLURPLE = DISCORD_BLURPLE
 internal val COLOUR_NEGATIVE = DISCORD_RED
 internal val COLOUR_POSITIVE = DISCORD_GREEN
 
 internal val COMMUNITY_MODERATOR_ROLE = envOrNull("COMMUNITY_MODERATOR_ROLE")?.let { Snowflake(it) }
-    ?: Snowflake(863767207716192306)
+	?: Snowflake(863767207716192306)
 
 internal val TOOLCHAIN_MODERATOR_ROLE = envOrNull("TOOLCHAIN_MODERATOR_ROLE")?.let { Snowflake(it) }
-    ?: Snowflake(863767485609541632)
+	?: Snowflake(863767485609541632)
 
 internal val COMMUNITY_DEVELOPER_ROLE = envOrNull("COMMUNITY_DEVELOPER_ROLE")?.let { Snowflake(it) }
-    ?: Snowflake(972868531844710412)
+	?: Snowflake(972868531844710412)
 
 internal val TOOLCHAIN_DEVELOPER_ROLE = envOrNull("TOOLCHAIN_DEVELOPER_ROLE")?.let { Snowflake(it) }
-    ?: Snowflake(849305976951537725)
+	?: Snowflake(849305976951537725)
 
 internal val MODERATOR_ROLES: List<Snowflake> =
-    (envOrNull("MODERATOR_ROLES") ?: envOrNull("COMMUNITY_MANAGEMENT_ROLES")) // For now, back compat
-        ?.split(',')
-        ?.map { Snowflake(it.trim()) }
-        ?: listOf(COMMUNITY_MODERATOR_ROLE, TOOLCHAIN_MODERATOR_ROLE)
+	(envOrNull("MODERATOR_ROLES") ?: envOrNull("COMMUNITY_MANAGEMENT_ROLES")) // For now, back compat
+		?.split(',')
+		?.map { Snowflake(it.trim()) }
+		?: listOf(COMMUNITY_MODERATOR_ROLE, TOOLCHAIN_MODERATOR_ROLE)
 
 internal val COMMUNITY_GUILD = Snowflake(
-    envOrNull("COMMUNITY_GUILD_ID")?.toLong() ?: 817576132726620200
+	envOrNull("COMMUNITY_GUILD_ID")?.toLong() ?: 817576132726620200
 )
 
 internal val TOOLCHAIN_GUILD = Snowflake(
-    envOrNull("TOOLCHAIN_GUILD_ID")?.toLong() ?: 833872081585700874
+	envOrNull("TOOLCHAIN_GUILD_ID")?.toLong() ?: 833872081585700874
 )
 
 internal val GUILDS = envOrNull("GUILDS")?.split(',')?.map { Snowflake(it.trim()) }
-    ?: listOf(COMMUNITY_GUILD, TOOLCHAIN_GUILD)
+	?: listOf(COMMUNITY_GUILD, TOOLCHAIN_GUILD)
 
 internal val SUGGESTION_CHANNEL = Snowflake(
-    envOrNull("SUGGESTION_CHANNEL_ID")?.toLong() ?: 832353359074689084
+	envOrNull("SUGGESTION_CHANNEL_ID")?.toLong() ?: 832353359074689084
 )
 
 internal val GALLERY_CHANNEL = Snowflake(
-    envOrNull("GALLERY_CHANNEL_ID")?.toLong() ?: 832348385997619300
+	envOrNull("GALLERY_CHANNEL_ID")?.toLong() ?: 832348385997619300
 )
 
 internal val SHOWCASE_CATEGORY = Snowflake(
-    envOrNull("SHOWCASE_CATEGORY_ID")?.toLong() ?: 832351105898905602
+	envOrNull("SHOWCASE_CATEGORY_ID")?.toLong() ?: 832351105898905602
 )

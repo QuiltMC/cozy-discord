@@ -11,8 +11,8 @@ import org.quiltmc.community.cozy.modules.cleanup.config.SimpleUserCleanupConfig
 import org.quiltmc.community.cozy.modules.cleanup.config.UserCleanupConfig
 
 public fun ExtensibleBotBuilder.ExtensionsBuilder.userCleanup(config: UserCleanupConfig) {
-    add { UserCleanupExtension(config) }
+	add { UserCleanupExtension(config) }
 }
 
 public fun ExtensibleBotBuilder.ExtensionsBuilder.userCleanup(body: SimpleUserCleanupConfig.Builder.() -> Unit): Unit =
-    userCleanup(SimpleUserCleanupConfig(body))
+	userCleanup(SimpleUserCleanupConfig(body))

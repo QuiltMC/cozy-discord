@@ -13,17 +13,17 @@ import org.quiltmc.community.database.collections.SuggestionsCollection
 import org.quiltmc.community.database.entities.Suggestion
 
 suspend fun v2(db: CoroutineDatabase) {
-    db.createCollection("collab-server-settings")
+	db.createCollection("collab-server-settings")
 
-    with(db.getCollection<Suggestion>(SuggestionsCollection.name)) {
-        updateMany(
-            Suggestion::thread exists false,
-            setValue(Suggestion::thread, null),
-        )
+	with(db.getCollection<Suggestion>(SuggestionsCollection.name)) {
+		updateMany(
+			Suggestion::thread exists false,
+			setValue(Suggestion::thread, null),
+		)
 
-        updateMany(
-            Suggestion::threadButtons exists false,
-            setValue(Suggestion::threadButtons, null),
-        )
-    }
+		updateMany(
+			Suggestion::threadButtons exists false,
+			setValue(Suggestion::threadButtons, null),
+		)
+	}
 }

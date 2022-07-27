@@ -32,190 +32,190 @@ import org.quiltmc.community.modes.quilt.extensions.settings.SettingsExtension
 
 @Suppress("MagicNumber")  // It's the status code...
 suspend fun Kord.getGuildIgnoring403(id: Snowflake) =
-    try {
-        getGuild(id)
-    } catch (e: RestRequestException) {
-        if (e.status.code != 403) {
-            throw(e)
-        }
+	try {
+		getGuild(id)
+	} catch (e: RestRequestException) {
+		if (e.status.code != 403) {
+			throw (e)
+		}
 
-        null
-    }
+		null
+	}
 
 fun String.chunkByWhitespace(length: Int): List<String> {
-    if (length <= 0) {
-        error("Length must be greater than 0")
-    }
+	if (length <= 0) {
+		error("Length must be greater than 0")
+	}
 
-    if (contains("\n")) {
-        error("String must be a single line")
-    }
+	if (contains("\n")) {
+		error("String must be a single line")
+	}
 
-    val words = split(" ")
-    var currentLine = ""
-    val lines: MutableList<String> = mutableListOf()
+	val words = split(" ")
+	var currentLine = ""
+	val lines: MutableList<String> = mutableListOf()
 
-    for (word in words) {
-        if (word.length >= length) {
-            val parts = word.chunked(length)
+	for (word in words) {
+		if (word.length >= length) {
+			val parts = word.chunked(length)
 
-            if (currentLine.isNotEmpty()) {
-                lines.add(currentLine)
-                currentLine = ""
-            }
+			if (currentLine.isNotEmpty()) {
+				lines.add(currentLine)
+				currentLine = ""
+			}
 
-            parts.forEach {
-                if (it.length == length) {
-                    lines.add(it)
-                } else if (it.isNotEmpty()) {
-                    currentLine = it
-                }
-            }
-        } else {
-            val newLength = currentLine.length + word.length + if (currentLine.isEmpty()) 0 else 1
+			parts.forEach {
+				if (it.length == length) {
+					lines.add(it)
+				} else if (it.isNotEmpty()) {
+					currentLine = it
+				}
+			}
+		} else {
+			val newLength = currentLine.length + word.length + if (currentLine.isEmpty()) 0 else 1
 
-            if (newLength > length) {
-                lines.add(currentLine)
-                currentLine = word
-            } else {
-                currentLine += if (currentLine.isEmpty()) word else " $word"
-            }
-        }
-    }
+			if (newLength > length) {
+				lines.add(currentLine)
+				currentLine = word
+			} else {
+				currentLine += if (currentLine.isEmpty()) word else " $word"
+			}
+		}
+	}
 
-    if (currentLine.isNotEmpty()) {
-        lines.add(currentLine)
-    }
+	if (currentLine.isNotEmpty()) {
+		lines.add(currentLine)
+	}
 
-    return lines
+	return lines
 }
 
 suspend fun ExtensibleBotBuilder.database(migrate: Boolean = false) {
-    val url = env("DB_URL")
-    val db = Database(url)
+	val url = env("DB_URL")
+	val db = Database(url)
 
-    hooks {
-        beforeKoinSetup {
-            loadModule {
-                single { db } bind Database::class
-            }
+	hooks {
+		beforeKoinSetup {
+			loadModule {
+				single { db } bind Database::class
+			}
 
-            loadModule {
-                single { FilterCollection() } bind FilterCollection::class
-                single { FilterEventCollection() } bind FilterEventCollection::class
-                single { GlobalSettingsCollection() } bind GlobalSettingsCollection::class
-                single { MetaCollection() } bind MetaCollection::class
-                single { OwnedThreadCollection() } bind OwnedThreadCollection::class
-                single { ServerSettingsCollection() } bind ServerSettingsCollection::class
-                single { SuggestionsCollection() } bind SuggestionsCollection::class
-                single { TeamCollection() } bind TeamCollection::class
-                single { UserFlagsCollection() } bind UserFlagsCollection::class
-                single { TagsCollection() } bind TagsCollection::class
-                single { WelcomeChannelCollection() } bind WelcomeChannelCollection::class
-            }
+			loadModule {
+				single { FilterCollection() } bind FilterCollection::class
+				single { FilterEventCollection() } bind FilterEventCollection::class
+				single { GlobalSettingsCollection() } bind GlobalSettingsCollection::class
+				single { MetaCollection() } bind MetaCollection::class
+				single { OwnedThreadCollection() } bind OwnedThreadCollection::class
+				single { ServerSettingsCollection() } bind ServerSettingsCollection::class
+				single { SuggestionsCollection() } bind SuggestionsCollection::class
+				single { TeamCollection() } bind TeamCollection::class
+				single { UserFlagsCollection() } bind UserFlagsCollection::class
+				single { TagsCollection() } bind TagsCollection::class
+				single { WelcomeChannelCollection() } bind WelcomeChannelCollection::class
+			}
 
-            if (migrate) {
-                runBlocking {
-                    db.migrate()
-                }
-            }
-        }
-    }
+			if (migrate) {
+				runBlocking {
+					db.migrate()
+				}
+			}
+		}
+	}
 }
 
 suspend fun ExtensibleBotBuilder.common() {
-    dataAdapter(::MongoDBDataAdapter)
+	dataAdapter(::MongoDBDataAdapter)
 
-    applicationCommands {
-        // Need to disable this due to the slash command perms experiment
-        syncPermissions = false
-    }
+	applicationCommands {
+		// Need to disable this due to the slash command perms experiment
+		syncPermissions = false
+	}
 
-    extensions {
-        sentry {
-            val sentryDsn = envOrNull("SENTRY_DSN")
+	extensions {
+		sentry {
+			val sentryDsn = envOrNull("SENTRY_DSN")
 
-            if (sentryDsn != null) {
-                enable = true
+			if (sentryDsn != null) {
+				enable = true
 
-                dsn = sentryDsn
-            }
-        }
+				dsn = sentryDsn
+			}
+		}
 
-        help {
-            enableBundledExtension = false  // We have no chat commands
-        }
-    }
+		help {
+			enableBundledExtension = false  // We have no chat commands
+		}
+	}
 
-    plugins {
-        if (ENVIRONMENT != "production") {
-            // Add plugin build folders here for testing in dev
-            // pluginPath("module-tags/build/libs")
-        }
-    }
+	plugins {
+		if (ENVIRONMENT != "production") {
+			// Add plugin build folders here for testing in dev
+			// pluginPath("module-tags/build/libs")
+		}
+	}
 }
 
 suspend fun ExtensibleBotBuilder.settings() {
-    extensions {
-        add(::SettingsExtension)
-    }
+	extensions {
+		add(::SettingsExtension)
+	}
 }
 
 fun Guild.getMaxArchiveDuration(): ArchiveDuration {
-    val features = features.filter {
-        it.value == "THREE_DAY_THREAD_ARCHIVE" ||
-                it.value == "SEVEN_DAY_THREAD_ARCHIVE"
-    }.map { it.value }
+	val features = features.filter {
+		it.value == "THREE_DAY_THREAD_ARCHIVE" ||
+				it.value == "SEVEN_DAY_THREAD_ARCHIVE"
+	}.map { it.value }
 
-    return when {
-        features.contains("SEVEN_DAY_THREAD_ARCHIVE") -> ArchiveDuration.Week
-        features.contains("THREE_DAY_THREAD_ARCHIVE") -> ArchiveDuration.ThreeDays
+	return when {
+		features.contains("SEVEN_DAY_THREAD_ARCHIVE") -> ArchiveDuration.Week
+		features.contains("THREE_DAY_THREAD_ARCHIVE") -> ArchiveDuration.ThreeDays
 
-        else -> ArchiveDuration.Day
-    }
+		else -> ArchiveDuration.Day
+	}
 }
 
 // Logging-related extensions
 
 suspend fun <C : SlashCommandContext<C, A>, A : Arguments>
-        SlashCommandContext<C, A>.getGithubLogChannel(): GuildMessageChannel? {
-    val channelId = getKoin().get<GlobalSettingsCollection>().get()?.githubLogChannel ?: return null
+		SlashCommandContext<C, A>.getGithubLogChannel(): GuildMessageChannel? {
+	val channelId = getKoin().get<GlobalSettingsCollection>().get()?.githubLogChannel ?: return null
 
-    return event.kord.getChannelOf<GuildMessageChannel>(channelId)
+	return event.kord.getChannelOf<GuildMessageChannel>(channelId)
 }
 
 suspend fun Kord?.getGithubLogChannel(): GuildMessageChannel? {
-    val channelId = getKoin().get<GlobalSettingsCollection>().get()?.githubLogChannel ?: return null
+	val channelId = getKoin().get<GlobalSettingsCollection>().get()?.githubLogChannel ?: return null
 
-    return this?.getChannelOf(channelId)
+	return this?.getChannelOf(channelId)
 }
 
 suspend fun Guild.getCozyLogChannel(): GuildMessageChannel? {
-    val channelId = getKoin().get<ServerSettingsCollection>().get(id)?.cozyLogChannel ?: return null
+	val channelId = getKoin().get<ServerSettingsCollection>().get(id)?.cozyLogChannel ?: return null
 
-    return getChannelOf(channelId)
+	return getChannelOf(channelId)
 }
 
 suspend fun Guild.getFilterLogChannel(): GuildMessageChannel? {
-    val channelId = getKoin().get<ServerSettingsCollection>().get(id)?.filterLogChannel ?: return null
+	val channelId = getKoin().get<ServerSettingsCollection>().get(id)?.filterLogChannel ?: return null
 
-    return getChannelOf(channelId)
+	return getChannelOf(channelId)
 }
 
 suspend fun EmbedBuilder.userField(user: UserBehavior, role: String, inline: Boolean = false) {
-    field {
-        name = role
-        value = "${user.mention} (`${user.id}` / `${user.asUser().tag}`)"
+	field {
+		name = role
+		value = "${user.mention} (`${user.id}` / `${user.asUser().tag}`)"
 
-        this.inline = inline
-    }
+		this.inline = inline
+	}
 }
 
 fun EmbedBuilder.channelField(channel: MessageChannelBehavior, title: String, inline: Boolean = false) {
-    field {
-        this.name = title
-        this.value = "${channel.mention} (`${channel.id}`)"
+	field {
+		this.name = title
+		this.value = "${channel.mention} (`${channel.id}`)"
 
-        this.inline = inline
-    }
+		this.inline = inline
+	}
 }

@@ -18,51 +18,51 @@ import dev.kord.common.entity.Snowflake
  * All functions are suspending to allow for database access, for example, where needed.
  */
 public interface TagsData {
-    /**
-     * Get a tag by tag key and guild ID.
-     */
-    public suspend fun getTagByKey(key: String, guildId: Snowflake? = null): Tag?
+	/**
+	 * Get a tag by tag key and guild ID.
+	 */
+	public suspend fun getTagByKey(key: String, guildId: Snowflake? = null): Tag?
 
-    /**
-     * Get a list of tags with the given category and guild ID.
-     */
-    public suspend fun getTagsByCategory(category: String, guildId: Snowflake? = null): List<Tag>
+	/**
+	 * Get a list of tags with the given category and guild ID.
+	 */
+	public suspend fun getTagsByCategory(category: String, guildId: Snowflake? = null): List<Tag>
 
-    /**
-     * Get a list of tags with the given partial key and guild ID. Should find tags with keys that partially match
-     * the given [partialKey], but it's up to you whether to use `contains` or `startsWith`.
-     */
-    public suspend fun getTagsByPartialKey(partialKey: String, guildId: Snowflake? = null): List<Tag>
+	/**
+	 * Get a list of tags with the given partial key and guild ID. Should find tags with keys that partially match
+	 * the given [partialKey], but it's up to you whether to use `contains` or `startsWith`.
+	 */
+	public suspend fun getTagsByPartialKey(partialKey: String, guildId: Snowflake? = null): List<Tag>
 
-    /**
-     * Get a list of tags with the given partial title and guild ID. Should find tags with titles that partially match
-     * the given [partialTitle], but it's up to you whether to use `contains` or `startsWith`.
-     */
-    public suspend fun getTagsByPartialTitle(partialTitle: String, guildId: Snowflake? = null): List<Tag>
+	/**
+	 * Get a list of tags with the given partial title and guild ID. Should find tags with titles that partially match
+	 * the given [partialTitle], but it's up to you whether to use `contains` or `startsWith`.
+	 */
+	public suspend fun getTagsByPartialTitle(partialTitle: String, guildId: Snowflake? = null): List<Tag>
 
-    /**
-     * Get a set of all potential tag categories.
-     */
-    public suspend fun getAllCategories(guildId: Snowflake? = null): Set<String>
+	/**
+	 * Get a set of all potential tag categories.
+	 */
+	public suspend fun getAllCategories(guildId: Snowflake? = null): Set<String>
 
-    /**
-     * Find tags using optionally-provided criteria. Ignore null values, so their criteria is always matched.
-     */
-    public suspend fun findTags(category: String? = null, guildId: Snowflake? = null, key: String? = null): List<Tag>
+	/**
+	 * Find tags using optionally-provided criteria. Ignore null values, so their criteria is always matched.
+	 */
+	public suspend fun findTags(category: String? = null, guildId: Snowflake? = null, key: String? = null): List<Tag>
 
-    /**
-     * Given a [Tag] object, store it (and persist it if needed), overwriting any tags with the same key and guild ID.
-     */
-    public suspend fun setTag(tag: Tag)
+	/**
+	 * Given a [Tag] object, store it (and persist it if needed), overwriting any tags with the same key and guild ID.
+	 */
+	public suspend fun setTag(tag: Tag)
 
-    /**
-     * Convenience function wrapping [deleteTagByKey].
-     */
-    public suspend fun deleteTag(tag: Tag): Tag? = deleteTagByKey(tag.key, tag.guildId)
+	/**
+	 * Convenience function wrapping [deleteTagByKey].
+	 */
+	public suspend fun deleteTag(tag: Tag): Tag? = deleteTagByKey(tag.key, tag.guildId)
 
-    /**
-     * Delete a tag by tag key and guild ID, if it exists. Return `null` if the tag didn't exist, otherwise return
-     * the removed tag.
-     */
-    public suspend fun deleteTagByKey(key: String, guildId: Snowflake? = null): Tag?
+	/**
+	 * Delete a tag by tag key and guild ID, if it exists. Return `null` if the tag didn't exist, otherwise return
+	 * the removed tag.
+	 */
+	public suspend fun deleteTagByKey(key: String, guildId: Snowflake? = null): Tag?
 }

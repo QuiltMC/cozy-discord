@@ -13,10 +13,10 @@ import org.quiltmc.community.database.collections.OwnedThreadCollection
 import org.quiltmc.community.database.entities.OwnedThread
 
 suspend fun v8(db: CoroutineDatabase) {
-    with(db.getCollection<OwnedThread>(OwnedThreadCollection.name)) {
-        updateMany(
-            OwnedThread::preventArchiving exists false,
-            setValue(OwnedThread::preventArchiving, false),
-        )
-    }
+	with(db.getCollection<OwnedThread>(OwnedThreadCollection.name)) {
+		updateMany(
+			OwnedThread::preventArchiving exists false,
+			setValue(OwnedThread::preventArchiving, false),
+		)
+	}
 }

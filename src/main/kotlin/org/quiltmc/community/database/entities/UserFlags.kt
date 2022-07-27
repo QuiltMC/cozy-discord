@@ -16,15 +16,15 @@ import org.quiltmc.community.database.collections.UserFlagsCollection
 
 @Serializable
 data class UserFlags(
-    override val _id: Snowflake,
+	override val _id: Snowflake,
 
-    var hasUsedPK: Boolean = false,
-    var autoPublish: Boolean = true,
-    var syncNicks: Boolean = true,
+	var hasUsedPK: Boolean = false,
+	var autoPublish: Boolean = true,
+	var syncNicks: Boolean = true,
 ) : Entity<Snowflake> {
-    suspend fun save() {
-        val collection = getKoin().get<UserFlagsCollection>()
+	suspend fun save() {
+		val collection = getKoin().get<UserFlagsCollection>()
 
-        collection.set(this)
-    }
+		collection.set(this)
+	}
 }

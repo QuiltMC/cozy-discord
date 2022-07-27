@@ -13,10 +13,10 @@ import org.quiltmc.community.database.collections.UserFlagsCollection
 import org.quiltmc.community.database.entities.UserFlags
 
 suspend fun v16(db: CoroutineDatabase) {
-    with(db.getCollection<UserFlags>(UserFlagsCollection.name)) {
-        updateMany(
-                UserFlags::syncNicks exists false,
-                setValue(UserFlags::syncNicks, true),
-        )
-    }
+	with(db.getCollection<UserFlags>(UserFlagsCollection.name)) {
+		updateMany(
+			UserFlags::syncNicks exists false,
+			setValue(UserFlags::syncNicks, true),
+		)
+	}
 }

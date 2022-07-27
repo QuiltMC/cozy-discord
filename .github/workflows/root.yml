@@ -51,7 +51,7 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           arguments: |
-            publish 
+            publish
             "-Pmaven.url.snapshots=${{ secrets.SNAPSHOTS_URL }}"
             "-Pmaven.url.releases=${{ secrets.MAVEN_URL }}"
             "-Pmaven.user=${{ secrets.MAVEN_USERNAME }}"

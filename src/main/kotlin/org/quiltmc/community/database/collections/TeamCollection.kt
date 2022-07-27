@@ -18,38 +18,38 @@ import org.quiltmc.community.database.Database
 import org.quiltmc.community.database.entities.Team
 
 class TeamCollection : KordExKoinComponent {
-    private val database: Database by inject()
-    private val col = database.mongo.getCollection<Team>(name)
+	private val database: Database by inject()
+	private val col = database.mongo.getCollection<Team>(name)
 
-    suspend fun get(id: Snowflake) =
-        col.findOne(Team::_id eq id)
+	suspend fun get(id: Snowflake) =
+		col.findOne(Team::_id eq id)
 
-    suspend fun set(team: Team) =
-        col.save(team)
+	suspend fun set(team: Team) =
+		col.save(team)
 
-    suspend fun delete(id: Snowflake) =
-        col.deleteOne(Team::_id eq id)
+	suspend fun delete(id: Snowflake) =
+		col.deleteOne(Team::_id eq id)
 
-    suspend fun getImmediateChildren(id: Snowflake) =
-        col.find(Team::parent eq id)
+	suspend fun getImmediateChildren(id: Snowflake) =
+		col.find(Team::parent eq id)
 
-    suspend fun getParents(id: Snowflake) =
-        col.aggregate<AggregateResult>(
-            listOf(
-                graphLookup(
-                    name,
-                    id,
-                    "parent",
-                    "_id",
-                    "parentHierarchy"
-                ),
+	suspend fun getParents(id: Snowflake) =
+		col.aggregate<AggregateResult>(
+			listOf(
+				graphLookup(
+					name,
+					id,
+					"parent",
+					"_id",
+					"parentHierarchy"
+				),
 
-                limit(1)
-            )
-        ).first()?.parentHierarchy?.map { it.parent }.orEmpty()
+				limit(1)
+			)
+		).first()?.parentHierarchy?.map { it.parent }.orEmpty()
 
-    @Serializable
-    data class AggregateResult(val parentHierarchy: List<Team>)
+	@Serializable
+	data class AggregateResult(val parentHierarchy: List<Team>)
 
-    companion object : Collection("teams")
+	companion object : Collection("teams")
 }

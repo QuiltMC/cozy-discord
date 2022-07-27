@@ -10,33 +10,33 @@ import com.kotlindiscord.kord.extensions.checks.types.Check
 import dev.kord.common.entity.Snowflake
 
 public class SimpleRoleSyncConfig(builder: Builder) : RoleSyncConfig() {
-    private val rolesToSync: MutableList<RoleToSync> = builder.rolesToSync
-    private val commandChecks: MutableList<Check<*>> = builder.commandChecks
+	private val rolesToSync: MutableList<RoleToSync> = builder.rolesToSync
+	private val commandChecks: MutableList<Check<*>> = builder.commandChecks
 
-    override suspend fun getRolesToSync(): List<RoleToSync> =
-        rolesToSync
+	override suspend fun getRolesToSync(): List<RoleToSync> =
+		rolesToSync
 
-    override suspend fun getCommandChecks(): List<Check<*>> =
-        commandChecks
+	override suspend fun getCommandChecks(): List<Check<*>> =
+		commandChecks
 
-    public class Builder {
-        internal var rolesToSync: MutableList<RoleToSync> = mutableListOf()
-        internal val commandChecks: MutableList<Check<*>> = mutableListOf()
+	public class Builder {
+		internal var rolesToSync: MutableList<RoleToSync> = mutableListOf()
+		internal val commandChecks: MutableList<Check<*>> = mutableListOf()
 
-        public fun roleToSync(source: Snowflake, target: Snowflake) {
-            rolesToSync.add(RoleToSync(source, target))
-        }
+		public fun roleToSync(source: Snowflake, target: Snowflake) {
+			rolesToSync.add(RoleToSync(source, target))
+		}
 
-        public fun commandCheck(body: Check<*>) {
-            commandChecks.add(body)
-        }
-    }
+		public fun commandCheck(body: Check<*>) {
+			commandChecks.add(body)
+		}
+	}
 }
 
 public inline fun SimpleRoleSyncConfig(body: SimpleRoleSyncConfig.Builder.() -> Unit): SimpleRoleSyncConfig {
-    val builder = SimpleRoleSyncConfig.Builder()
+	val builder = SimpleRoleSyncConfig.Builder()
 
-    body(builder)
+	body(builder)
 
-    return SimpleRoleSyncConfig(builder)
+	return SimpleRoleSyncConfig(builder)
 }

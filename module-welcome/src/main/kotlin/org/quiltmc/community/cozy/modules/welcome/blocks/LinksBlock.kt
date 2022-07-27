@@ -19,56 +19,56 @@ import kotlinx.serialization.Serializable
 @Serializable
 @SerialName("links")
 public data class LinksBlock(
-    val title: String,
-    val links: Map<String, String>,
-    val text: String? = null,
-    val color: Color = DISCORD_BLURPLE,
-    val description: String? = null,
-    val template: String = "**»** [{TEXT}]({URL})"
+	val title: String,
+	val links: Map<String, String>,
+	val text: String? = null,
+	val color: Color = DISCORD_BLURPLE,
+	val description: String? = null,
+	val template: String = "**»** [{TEXT}]({URL})"
 ) : Block() {
-    init {
-        if (links.isEmpty()) {
-            error("Must provide at least one link")
-        }
-    }
+	init {
+		if (links.isEmpty()) {
+			error("Must provide at least one link")
+		}
+	}
 
-    private fun buildDescription() = buildString {
-        if (description != null) {
-            append(description)
+	private fun buildDescription() = buildString {
+		if (description != null) {
+			append(description)
 
-            appendLine()
-            appendLine()
-        }
+			appendLine()
+			appendLine()
+		}
 
-        links.forEach { (text, url) ->
-            appendLine(
-                template
-                    .replace("{TEXT}", text)
-                    .replace("{URL}", url)
-            )
-        }
-    }
+		links.forEach { (text, url) ->
+			appendLine(
+				template
+					.replace("{TEXT}", text)
+					.replace("{URL}", url)
+			)
+		}
+	}
 
-    override suspend fun create(builder: MessageCreateBuilder) {
-        builder.content = text
+	override suspend fun create(builder: MessageCreateBuilder) {
+		builder.content = text
 
-        builder.embed {
-            title = this@LinksBlock.title
-            color = this@LinksBlock.color
+		builder.embed {
+			title = this@LinksBlock.title
+			color = this@LinksBlock.color
 
-            description = buildDescription()
-        }
-    }
+			description = buildDescription()
+		}
+	}
 
-    override suspend fun edit(builder: MessageModifyBuilder) {
-        builder.content = text
-        builder.components = mutableListOf()
+	override suspend fun edit(builder: MessageModifyBuilder) {
+		builder.content = text
+		builder.components = mutableListOf()
 
-        builder.embed {
-            title = this@LinksBlock.title
-            color = this@LinksBlock.color
+		builder.embed {
+			title = this@LinksBlock.title
+			color = this@LinksBlock.color
 
-            description = buildDescription()
-        }
-    }
+			description = buildDescription()
+		}
+	}
 }

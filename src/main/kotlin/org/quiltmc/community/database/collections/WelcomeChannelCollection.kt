@@ -16,31 +16,31 @@ import org.quiltmc.community.database.Database
 import org.quiltmc.community.database.entities.WelcomeChannelEntity
 
 class WelcomeChannelCollection : KordExKoinComponent, WelcomeChannelData {
-    private val database: Database by inject()
-    private val col = database.mongo.getCollection<WelcomeChannelEntity>(name)
+	private val database: Database by inject()
+	private val col = database.mongo.getCollection<WelcomeChannelEntity>(name)
 
-    override suspend fun getChannelURLs(): Map<Snowflake, String> =
-        col.find()
-            .toList()
-            .map { it._id to it.url }
-            .toMap()
+	override suspend fun getChannelURLs(): Map<Snowflake, String> =
+		col.find()
+			.toList()
+			.map { it._id to it.url }
+			.toMap()
 
-    override suspend fun getUrlForChannel(channelId: Snowflake): String? =
-        col.findOne(WelcomeChannelEntity::_id eq channelId)
-            ?.url
+	override suspend fun getUrlForChannel(channelId: Snowflake): String? =
+		col.findOne(WelcomeChannelEntity::_id eq channelId)
+			?.url
 
-    override suspend fun setUrlForChannel(channelId: Snowflake, url: String) {
-        col.save(WelcomeChannelEntity(channelId, url))
-    }
+	override suspend fun setUrlForChannel(channelId: Snowflake, url: String) {
+		col.save(WelcomeChannelEntity(channelId, url))
+	}
 
-    override suspend fun removeChannel(channelId: Snowflake): String? {
-        val url = getUrlForChannel(channelId)
-            ?: return null
+	override suspend fun removeChannel(channelId: Snowflake): String? {
+		val url = getUrlForChannel(channelId)
+			?: return null
 
-        col.deleteOne(WelcomeChannelEntity::_id eq channelId)
+		col.deleteOne(WelcomeChannelEntity::_id eq channelId)
 
-        return url
-    }
+		return url
+	}
 
-    companion object : Collection("welcome-channels")
+	companion object : Collection("welcome-channels")
 }

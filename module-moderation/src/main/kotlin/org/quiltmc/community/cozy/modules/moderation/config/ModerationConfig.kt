@@ -17,14 +17,14 @@ import dev.kord.core.entity.channel.GuildMessageChannel
  * take a look at [SimpleModerationConfig] instead.
  */
 public abstract class ModerationConfig {
-    /**
-     * Override this to specify the channel where moderation operations should be logged.
-     * Return `null` if no channel could be found.
-     */
-    public abstract suspend fun getLoggingChannelOrNull(guild: Guild): GuildMessageChannel?
+	/**
+	 * Override this to specify the channel where moderation operations should be logged.
+	 * Return `null` if no channel could be found.
+	 */
+	public abstract suspend fun getLoggingChannelOrNull(guild: Guild): GuildMessageChannel?
 
-    /**
-     * Override this to provide a list of KordEx [Check]s that must pass for moderation commands to be executed.
-     */
-    public open suspend fun getCommandChecks(): List<Check<*>> = listOf()
+	/**
+	 * Override this to provide a list of KordEx [Check]s that must pass for moderation commands to be executed.
+	 */
+	public open suspend fun getCommandChecks(): List<Check<*>> = listOf()
 }

@@ -9,5 +9,5 @@ package org.quiltmc.community.cozy.modules.welcome.blocks
 import dev.kord.core.event.interaction.InteractionCreateEvent
 
 public interface InteractionBlock {
-    public suspend fun handleInteraction(event: InteractionCreateEvent)
+	public suspend fun handleInteraction(event: InteractionCreateEvent)
 }

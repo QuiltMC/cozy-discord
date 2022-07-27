@@ -11,13 +11,13 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class LoaderVersion(
-        val loader: LoaderElement,
+	val loader: LoaderElement,
 )
 
 @Serializable
 data class LoaderElement(
-        val separator: String,
-        val build: Int,
-        val maven: String,
-        val version: Version
+	val separator: String,
+	val build: Int,
+	val maven: String,
+	val version: Version
 )

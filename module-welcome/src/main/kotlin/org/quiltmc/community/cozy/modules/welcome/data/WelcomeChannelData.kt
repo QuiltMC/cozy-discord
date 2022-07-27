@@ -9,9 +9,9 @@ package org.quiltmc.community.cozy.modules.welcome.data
 import dev.kord.common.entity.Snowflake
 
 public interface WelcomeChannelData {
-    public suspend fun getChannelURLs(): Map<Snowflake, String>
-    public suspend fun getUrlForChannel(channelId: Snowflake): String?
+	public suspend fun getChannelURLs(): Map<Snowflake, String>
+	public suspend fun getUrlForChannel(channelId: Snowflake): String?
 
-    public suspend fun setUrlForChannel(channelId: Snowflake, url: String)
-    public suspend fun removeChannel(channelId: Snowflake): String?
+	public suspend fun setUrlForChannel(channelId: Snowflake, url: String)
+	public suspend fun removeChannel(channelId: Snowflake): String?
 }

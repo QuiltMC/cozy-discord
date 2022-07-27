@@ -45,236 +45,236 @@ import org.quiltmc.community.cozy.modules.welcome.config.WelcomeChannelConfig
 import kotlin.collections.set
 
 public class WelcomeChannel(
-    public val channel: GuildMessageChannel,
-    public val url: String,
+	public val channel: GuildMessageChannel,
+	public val url: String,
 ) : KordExKoinComponent {
-    private var blocks: MutableList<Block> = mutableListOf()
+	private var blocks: MutableList<Block> = mutableListOf()
 
-    private val messageMapping: MutableMap<Snowflake, Block> = mutableMapOf()
+	private val messageMapping: MutableMap<Snowflake, Block> = mutableMapOf()
 
-    private val config: WelcomeChannelConfig by inject()
-    private val client = HttpClient()
+	private val config: WelcomeChannelConfig by inject()
+	private val client = HttpClient()
 
-    private lateinit var yaml: Yaml
-    private var task: Task? = null
+	private lateinit var yaml: Yaml
+	private var task: Task? = null
 
-    public val scheduler: Scheduler = Scheduler()
+	public val scheduler: Scheduler = Scheduler()
 
-    public suspend fun handleInteraction(event: InteractionCreateEvent) {
-        blocks.forEach {
-            if (it is InteractionBlock) {
-                it.handleInteraction(event)
-            }
-        }
-    }
+	public suspend fun handleInteraction(event: InteractionCreateEvent) {
+		blocks.forEach {
+			if (it is InteractionBlock) {
+				it.handleInteraction(event)
+			}
+		}
+	}
 
-    public suspend fun setup() {
-        val taskDelay = config.getRefreshDelay()
+	public suspend fun setup() {
+		val taskDelay = config.getRefreshDelay()
 
-        if (!::yaml.isInitialized) {
-            yaml = Yaml(
-                config.getSerializersModule(),
-                YamlConfiguration(polymorphismStyle = PolymorphismStyle.Property)
-            )
-        }
+		if (!::yaml.isInitialized) {
+			yaml = Yaml(
+				config.getSerializersModule(),
+				YamlConfiguration(polymorphismStyle = PolymorphismStyle.Property)
+			)
+		}
 
-        task?.cancel()
+		task?.cancel()
 
-        if (taskDelay != null) {
-            task = scheduler.schedule(taskDelay, false) {
-                populate()
-            }
-        }
+		if (taskDelay != null) {
+			task = scheduler.schedule(taskDelay, false) {
+				populate()
+			}
+		}
 
-        populate()
+		populate()
 
-        task?.start()
-    }
+		task?.start()
+	}
 
-    public fun shutdown() {
-        task?.cancel()
-        scheduler.shutdown()
-    }
+	public fun shutdown() {
+		task?.cancel()
+		scheduler.shutdown()
+	}
 
-    private suspend fun fetchBlocks(): List<Block> {
-        try {
-            val response = client.get(url).body<String>()
+	private suspend fun fetchBlocks(): List<Block> {
+		try {
+			val response = client.get(url).body<String>()
 
-            return yaml.decodeFromString(response)
-        } catch (e: ClientRequestException) {
-            throw DiscordRelayedException("Failed to download the YAML file\n\n>>> $e")
-        } catch (e: YamlException) {
-            throw DiscordRelayedException("Failed to parse the given YAML\n\n>>> $e")
-        }
-    }
+			return yaml.decodeFromString(response)
+		} catch (e: ClientRequestException) {
+			throw DiscordRelayedException("Failed to download the YAML file\n\n>>> $e")
+		} catch (e: YamlException) {
+			throw DiscordRelayedException("Failed to parse the given YAML\n\n>>> $e")
+		}
+	}
 
-    public fun getBlocks(): List<Block> =
-        blocks.toList()
+	public fun getBlocks(): List<Block> =
+		blocks.toList()
 
-    public suspend fun populate() {
-        task?.cancel()
+	public suspend fun populate() {
+		task?.cancel()
 
-        val guild = channel.getGuild()
+		val guild = channel.getGuild()
 
-        @Suppress("TooGenericExceptionCaught")
-        try {
-            blocks = fetchBlocks().toMutableList()
-        } catch (e: Exception) {
-            log {
-                embed {
-                    title = "Welcome channel update failed"
-                    color = DISCORD_RED
+		@Suppress("TooGenericExceptionCaught")
+		try {
+			blocks = fetchBlocks().toMutableList()
+		} catch (e: Exception) {
+			log {
+				embed {
+					title = "Welcome channel update failed"
+					color = DISCORD_RED
 
-                    description = buildString {
-                        appendLine("**__Failed to update blocks__**")
-                        appendLine()
-                        appendLine("```")
-                        appendLine(e)
-                        appendLine("```")
-                    }
+					description = buildString {
+						appendLine("**__Failed to update blocks__**")
+						appendLine()
+						appendLine("```")
+						appendLine(e)
+						appendLine("```")
+					}
 
-                    field {
-                        name = "Channel"
-                        value = "${channel.mention} (`${channel.id}` / `${channel.name}`)"
-                    }
-                }
-            }
+					field {
+						name = "Channel"
+						value = "${channel.mention} (`${channel.id}` / `${channel.name}`)"
+					}
+				}
+			}
 
-            throw e
-        }
+			throw e
+		}
 
-        blocks.forEach {
-            it.channel = channel
-            it.guild = guild
-        }
+		blocks.forEach {
+			it.channel = channel
+			it.guild = guild
+		}
 
-        val messages = channel.withStrategy(EntitySupplyStrategy.rest)
-            .messages
-            .filter { it.type == MessageType.Default }
-            .toList()
-            .sortedBy { it.id.timestamp }
+		val messages = channel.withStrategy(EntitySupplyStrategy.rest)
+			.messages
+			.filter { it.type == MessageType.Default }
+			.toList()
+			.sortedBy { it.id.timestamp }
 
-        @Suppress("TooGenericExceptionCaught")
-        try {
-            if (messages.size > blocks.size) {
-                messages.forEachIndexed { index, message ->
-                    val block = blocks.getOrNull(index)
+		@Suppress("TooGenericExceptionCaught")
+		try {
+			if (messages.size > blocks.size) {
+				messages.forEachIndexed { index, message ->
+					val block = blocks.getOrNull(index)
 
-                    if (block != null) {
-                        if (messageNeedsUpdate(message, block)) {
-                            message.edit {
-                                block.edit(this)
+					if (block != null) {
+						if (messageNeedsUpdate(message, block)) {
+							message.edit {
+								block.edit(this)
 
-                                allowedMentions { }
-                            }
-                        }
+								allowedMentions { }
+							}
+						}
 
-                        messageMapping[message.id] = block
-                    } else {
-                        message.delete()
-                        messageMapping.remove(message.id)
-                    }
-                }
-            } else {
-                blocks.forEachIndexed { index, block ->
-                    val message = messages.getOrNull(index)
+						messageMapping[message.id] = block
+					} else {
+						message.delete()
+						messageMapping.remove(message.id)
+					}
+				}
+			} else {
+				blocks.forEachIndexed { index, block ->
+					val message = messages.getOrNull(index)
 
-                    if (message != null) {
-                        if (messageNeedsUpdate(message, block)) {
-                            message.edit {
-                                block.edit(this)
+					if (message != null) {
+						if (messageNeedsUpdate(message, block)) {
+							message.edit {
+								block.edit(this)
 
-                                allowedMentions { }
-                            }
-                        }
+								allowedMentions { }
+							}
+						}
 
-                        messageMapping[message.id] = block
-                    } else {
-                        val newMessage = channel.createMessage {
-                            block.create(this)
+						messageMapping[message.id] = block
+					} else {
+						val newMessage = channel.createMessage {
+							block.create(this)
 
-                            allowedMentions { }
-                        }
+							allowedMentions { }
+						}
 
-                        messageMapping[newMessage.id] = block
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            log {
-                embed {
-                    title = "Welcome channel update failed"
-                    color = DISCORD_RED
+						messageMapping[newMessage.id] = block
+					}
+				}
+			}
+		} catch (e: Exception) {
+			log {
+				embed {
+					title = "Welcome channel update failed"
+					color = DISCORD_RED
 
-                    description = buildString {
-                        appendLine("**__Failed to update messages__**")
-                        appendLine()
-                        appendLine("```")
-                        appendLine(e)
-                        appendLine("```")
-                    }
+					description = buildString {
+						appendLine("**__Failed to update messages__**")
+						appendLine()
+						appendLine("```")
+						appendLine(e)
+						appendLine("```")
+					}
 
-                    field {
-                        name = "Channel"
-                        value = "${channel.mention} (`${channel.id}` / `${channel.name}`)"
-                    }
-                }
-            }
+					field {
+						name = "Channel"
+						value = "${channel.mention} (`${channel.id}` / `${channel.name}`)"
+					}
+				}
+			}
 
-            throw e
-        }
+			throw e
+		}
 
-        task?.start()
-    }
+		task?.start()
+	}
 
-    public suspend fun log(builder: suspend UserMessageCreateBuilder.() -> Unit): Message? =
-        config.getLoggingChannel(channel, channel.guild.asGuild())?.createMessage { builder() }
+	public suspend fun log(builder: suspend UserMessageCreateBuilder.() -> Unit): Message? =
+		config.getLoggingChannel(channel, channel.guild.asGuild())?.createMessage { builder() }
 
-    public suspend fun clear() {
-        val messages = channel.withStrategy(EntitySupplyStrategy.rest)
-            .messages
-            .toList()
-            .filter { it.type == MessageType.Default }
+	public suspend fun clear() {
+		val messages = channel.withStrategy(EntitySupplyStrategy.rest)
+			.messages
+			.toList()
+			.filter { it.type == MessageType.Default }
 
-        try {
-            channel.bulkDelete(messages.map { it.id })
-        } catch (e: RestRequestException) {
-            if (e.hasNotStatus(HttpStatusCode.NotFound)) {
-                @Suppress("TooGenericExceptionCaught")
-                try {
-                    messages.forEach { it.deleteIgnoringNotFound() }
-                } catch (e: Exception) {
-                    log {
-                        embed {
-                            title = "Failed to clear welcome channel"
-                            color = DISCORD_RED
+		try {
+			channel.bulkDelete(messages.map { it.id })
+		} catch (e: RestRequestException) {
+			if (e.hasNotStatus(HttpStatusCode.NotFound)) {
+				@Suppress("TooGenericExceptionCaught")
+				try {
+					messages.forEach { it.deleteIgnoringNotFound() }
+				} catch (e: Exception) {
+					log {
+						embed {
+							title = "Failed to clear welcome channel"
+							color = DISCORD_RED
 
-                            description = buildString {
-                                appendLine("**__Failed to clear channel__**")
-                                appendLine()
-                                appendLine("```")
-                                appendLine(e)
-                                appendLine("```")
-                            }
+							description = buildString {
+								appendLine("**__Failed to clear channel__**")
+								appendLine()
+								appendLine("```")
+								appendLine(e)
+								appendLine("```")
+							}
 
-                            field {
-                                name = "Channel"
-                                value = "${channel.mention} (`${channel.id}` / `${channel.name}`)"
-                            }
-                        }
-                    }
+							field {
+								name = "Channel"
+								value = "${channel.mention} (`${channel.id}` / `${channel.name}`)"
+							}
+						}
+					}
 
-                    throw e
-                }
-            }
-        }
-    }
+					throw e
+				}
+			}
+		}
+	}
 
-    private suspend fun messageNeedsUpdate(message: Message, block: Block): Boolean {
-        val builder = UserMessageCreateBuilder()
+	private suspend fun messageNeedsUpdate(message: Message, block: Block): Boolean {
+		val builder = UserMessageCreateBuilder()
 
-        block.create(builder)
+		block.create(builder)
 
-        return !builder.isSimilar(message)
-    }
+		return !builder.isSimilar(message)
+	}
 }

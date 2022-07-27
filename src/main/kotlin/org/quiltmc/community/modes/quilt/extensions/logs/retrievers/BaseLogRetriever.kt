@@ -9,5 +9,5 @@ package org.quiltmc.community.modes.quilt.extensions.logs.retrievers
 import dev.kord.core.entity.Message
 
 interface BaseLogRetriever {
-    suspend fun getLogContent(message: Message): List<String>
+	suspend fun getLogContent(message: Message): List<String>
 }

@@ -25,158 +25,158 @@ import org.quiltmc.community.database.collections.TeamCollection
 import org.quiltmc.community.database.entities.Team
 
 class SubteamsExtension : Extension() {
-    override val name: String = "subteams"
+	override val name: String = "subteams"
 
-    private val teamColl: TeamCollection by inject()
+	private val teamColl: TeamCollection by inject()
 
-    override suspend fun setup() {
-        publicSlashCommand {
-            name = "team"
-            description = "Manage your teams"
+	override suspend fun setup() {
+		publicSlashCommand {
+			name = "team"
+			description = "Manage your teams"
 
-            guild(TOOLCHAIN_GUILD)
+			guild(TOOLCHAIN_GUILD)
 
-            publicSubCommand(::TeamArguments) {
-                name = "add"
-                description = "Add someone to your team or any subteam"
+			publicSubCommand(::TeamArguments) {
+				name = "add"
+				description = "Add someone to your team or any subteam"
 
-                action {
-                    if (this.member?.asMemberOrNull()?.mayManageRole(arguments.role) == true) {
-                        arguments.targetUser.addRole(
-                            arguments.role.id,
-                            "${this.user.asUserOrNull()?.tag ?: this.user.id} used /team add"
-                        )
+				action {
+					if (this.member?.asMemberOrNull()?.mayManageRole(arguments.role) == true) {
+						arguments.targetUser.addRole(
+							arguments.role.id,
+							"${this.user.asUserOrNull()?.tag ?: this.user.id} used /team add"
+						)
 
-                        respond {
-                            content = "Successfully added ${arguments.targetUser.mention} to ${arguments.role.mention}."
+						respond {
+							content = "Successfully added ${arguments.targetUser.mention} to ${arguments.role.mention}."
 
-                            allowedMentions { }
-                        }
-                    } else {
-                        respond {
-                            content = "Your team needs to be above ${arguments.role.mention} in order to add anyone " +
-                                    "to it."
+							allowedMentions { }
+						}
+					} else {
+						respond {
+							content = "Your team needs to be above ${arguments.role.mention} in order to add anyone " +
+									"to it."
 
-                            allowedMentions { }
-                        }
-                    }
-                }
-            }
+							allowedMentions { }
+						}
+					}
+				}
+			}
 
-            publicSubCommand(::TeamArguments) {
-                name = "remove"
-                description = "Remove someone from your team or any subteam"
+			publicSubCommand(::TeamArguments) {
+				name = "remove"
+				description = "Remove someone from your team or any subteam"
 
-                action {
-                    if (this.member?.asMemberOrNull()?.mayManageRole(arguments.role) == true) {
-                        arguments.targetUser.removeRole(
-                            arguments.role.id,
-                            "${this.user.asUserOrNull()?.tag ?: this.user.id} used /team remove"
-                        )
-                        respond {
-                            content = "Successfully removed ${arguments.targetUser.mention} from " +
-                                    "${arguments.role.mention}."
+				action {
+					if (this.member?.asMemberOrNull()?.mayManageRole(arguments.role) == true) {
+						arguments.targetUser.removeRole(
+							arguments.role.id,
+							"${this.user.asUserOrNull()?.tag ?: this.user.id} used /team remove"
+						)
+						respond {
+							content = "Successfully removed ${arguments.targetUser.mention} from " +
+									"${arguments.role.mention}."
 
-                            allowedMentions { }
-                        }
-                    } else {
-                        respond {
-                            content = "Your team needs to be above ${arguments.role.mention} in order to remove " +
-                                    "anyone from it."
+							allowedMentions { }
+						}
+					} else {
+						respond {
+							content = "Your team needs to be above ${arguments.role.mention} in order to remove " +
+									"anyone from it."
 
-                            allowedMentions { }
-                        }
-                    }
-                }
-            }
-        }
+							allowedMentions { }
+						}
+					}
+				}
+			}
+		}
 
-        publicSlashCommand {
-            name = "manage-teams"
-            description = "Change which roles can manage each other"
+		publicSlashCommand {
+			name = "manage-teams"
+			description = "Change which roles can manage each other"
 
-            guild(TOOLCHAIN_GUILD)
+			guild(TOOLCHAIN_GUILD)
 
-            check { hasRole(TOOLCHAIN_MODERATOR_ROLE) }
+			check { hasRole(TOOLCHAIN_MODERATOR_ROLE) }
 
-            ephemeralSubCommand(::ManageTeamAllowArguments) {
-                name = "allow"
-                description = "Allow a role to manage another using /team"
+			ephemeralSubCommand(::ManageTeamAllowArguments) {
+				name = "allow"
+				description = "Allow a role to manage another using /team"
 
-                action {
-                    teamColl.set(
-                        Team(
-                            _id = arguments.inferior.id,
-                            parent = arguments.superior.id
-                        )
-                    )
+				action {
+					teamColl.set(
+						Team(
+							_id = arguments.inferior.id,
+							parent = arguments.superior.id
+						)
+					)
 
-                    respond {
-                        content = "${arguments.superior.mention} can now manage ${arguments.inferior.mention}"
+					respond {
+						content = "${arguments.superior.mention} can now manage ${arguments.inferior.mention}"
 
-                        allowedMentions { }
-                    }
-                }
-            }
+						allowedMentions { }
+					}
+				}
+			}
 
-            ephemeralSubCommand(::ManageTeamDisallowArguments) {
-                name = "disallow"
-                description = "Prevent a role from being managed by another again"
+			ephemeralSubCommand(::ManageTeamDisallowArguments) {
+				name = "disallow"
+				description = "Prevent a role from being managed by another again"
 
-                action {
-                    teamColl.delete(arguments.role.id)
+				action {
+					teamColl.delete(arguments.role.id)
 
-                    respond {
-                        content = "${arguments.role.mention} can no longer be managed using /team."
+					respond {
+						content = "${arguments.role.mention} can no longer be managed using /team."
 
-                        allowedMentions { }
-                    }
-                }
-            }
-        }
-    }
+						allowedMentions { }
+					}
+				}
+			}
+		}
+	}
 
-    inner class TeamArguments : Arguments() {
-        val role by role {
-            name = "team"
-            description = "Which team to add"
+	inner class TeamArguments : Arguments() {
+		val role by role {
+			name = "team"
+			description = "Which team to add"
 
-            requiredGuild = { TOOLCHAIN_GUILD }
-        }
+			requiredGuild = { TOOLCHAIN_GUILD }
+		}
 
-        val targetUser by member {
-            name = "user"
-            description = "Who to add to the team"
+		val targetUser by member {
+			name = "user"
+			description = "Who to add to the team"
 
-            requiredGuild = { TOOLCHAIN_GUILD }
-        }
-    }
+			requiredGuild = { TOOLCHAIN_GUILD }
+		}
+	}
 
-    inner class ManageTeamAllowArguments : Arguments() {
-        val superior by role {
-            name = "superior"
-            description = "The superior role"
+	inner class ManageTeamAllowArguments : Arguments() {
+		val superior by role {
+			name = "superior"
+			description = "The superior role"
 
-            requiredGuild = { TOOLCHAIN_GUILD }
-        }
+			requiredGuild = { TOOLCHAIN_GUILD }
+		}
 
-        val inferior by role {
-            name = "inferior"
-            description = "The inferior role"
+		val inferior by role {
+			name = "inferior"
+			description = "The inferior role"
 
-            requiredGuild = { TOOLCHAIN_GUILD }
-        }
-    }
+			requiredGuild = { TOOLCHAIN_GUILD }
+		}
+	}
 
-    inner class ManageTeamDisallowArguments : Arguments() {
-        val role by role {
-            name = "role"
-            description = "Role to disallow managing for"
+	inner class ManageTeamDisallowArguments : Arguments() {
+		val role by role {
+			name = "role"
+			description = "Role to disallow managing for"
 
-            requiredGuild = { TOOLCHAIN_GUILD }
-        }
-    }
+			requiredGuild = { TOOLCHAIN_GUILD }
+		}
+	}
 
-    private suspend fun Member.mayManageRole(role: Role): Boolean =
-        teamColl.getParents(role.id).any { it in this.roleIds }
+	private suspend fun Member.mayManageRole(role: Role): Boolean =
+		teamColl.getParents(role.id).any { it in this.roleIds }
 }

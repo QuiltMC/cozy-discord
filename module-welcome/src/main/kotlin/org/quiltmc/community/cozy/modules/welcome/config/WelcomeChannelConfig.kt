@@ -16,30 +16,30 @@ import org.quiltmc.community.cozy.modules.welcome.blocks.*
 import kotlin.time.Duration
 
 public abstract class WelcomeChannelConfig {
-    public val defaultSerializersModule: SerializersModule =
-        SerializersModule {
-            polymorphic(Block::class) {
-                subclass(EmbedBlock::class)
-                subclass(LinksBlock::class)
-                subclass(RolesBlock::class)
-                subclass(RulesBlock::class)
-                subclass(TextBlock::class)
-                subclass(ThreadListBlock::class)
-            }
-        }
+	public val defaultSerializersModule: SerializersModule =
+		SerializersModule {
+			polymorphic(Block::class) {
+				subclass(EmbedBlock::class)
+				subclass(LinksBlock::class)
+				subclass(RolesBlock::class)
+				subclass(RulesBlock::class)
+				subclass(TextBlock::class)
+				subclass(ThreadListBlock::class)
+			}
+		}
 
-    /** Get the configured logging channel for the given channel and guild. **/
-    public abstract suspend fun getLoggingChannel(channel: GuildMessageChannel, guild: Guild): GuildMessageChannel?
+	/** Get the configured logging channel for the given channel and guild. **/
+	public abstract suspend fun getLoggingChannel(channel: GuildMessageChannel, guild: Guild): GuildMessageChannel?
 
-    /**
-     * Get the configured staff command checks, used to ensure a staff-facing command can be run.
-     */
-    public abstract suspend fun getStaffCommandChecks(): List<Check<*>>
+	/**
+	 * Get the configured staff command checks, used to ensure a staff-facing command can be run.
+	 */
+	public abstract suspend fun getStaffCommandChecks(): List<Check<*>>
 
-    public abstract suspend fun getRefreshDelay(): Duration?
+	public abstract suspend fun getRefreshDelay(): Duration?
 
-    /**
-     * Get the configured serializer module, which may be modified if other blocks have been set up.
-     */
-    public open suspend fun getSerializersModule(): SerializersModule = defaultSerializersModule
+	/**
+	 * Get the configured serializer module, which may be modified if other blocks have been set up.
+	 */
+	public open suspend fun getSerializersModule(): SerializersModule = defaultSerializersModule
 }

@@ -5,23 +5,23 @@
  */
 
 plugins {
-    `api-module`
-    `cozy-module`
-    `published-module`
+	`api-module`
+	`cozy-module`
+	`published-module`
 }
 
 dependencies {
-    detektPlugins(libs.detekt)
+	detektPlugins(libs.detekt)
 
-    ksp(libs.kordex.annotationProcessor)
+	ksp(libs.kordex.annotationProcessor)
 
-    implementation(libs.kordex.annotations)
-    implementation(libs.kordex.core)
+	implementation(libs.kordex.annotations)
+	implementation(libs.kordex.core)
 
-    implementation(libs.kaml)
+	implementation(libs.kaml)
 
-    implementation(libs.logging)
+	implementation(libs.logging)
 
-    implementation(platform(libs.kotlin.bom))
-    implementation(libs.kotlin.stdlib)
+	implementation(platform(libs.kotlin.bom))
+	implementation(libs.kotlin.stdlib)
 }

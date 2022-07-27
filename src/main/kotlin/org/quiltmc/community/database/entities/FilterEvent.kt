@@ -20,11 +20,11 @@ import java.util.*
 @Serializable
 @Suppress("ConstructorParameterNaming")  // MongoDB calls it that...
 data class FilterEvent(
-    override val _id: UUID = UUID.randomUUID(),
-    val filter: UUID,
+	override val _id: UUID = UUID.randomUUID(),
+	val filter: UUID,
 
-    val guildId: Snowflake,
-    val authorId: Snowflake,
-    val channelId: Snowflake?,
-    val messageId: Snowflake?,
+	val guildId: Snowflake,
+	val authorId: Snowflake,
+	val channelId: Snowflake?,
+	val messageId: Snowflake?,
 ) : Entity<UUID>

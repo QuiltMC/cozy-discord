@@ -14,20 +14,20 @@ import org.pf4j.PluginWrapper
  * Plugin containing the [UserCleanupExtension], which removes pending users after they've lurked for a while.
  */
 @WiredPlugin(
-    id = UserCleanupPlugin.id,
-    version = "1.0.0-SNAPSHOT",
+	id = UserCleanupPlugin.id,
+	version = "1.0.0-SNAPSHOT",
 
-    author = "QuiltMC",
-    description = "Automatic cleanup of lurking users that don't pass member screening",
-    license = "Mozilla Public License 2.0"
+	author = "QuiltMC",
+	description = "Automatic cleanup of lurking users that don't pass member screening",
+	license = "Mozilla Public License 2.0"
 )
 public class UserCleanupPlugin(wrapper: PluginWrapper) : KordExPlugin(wrapper) {
-    override suspend fun setup() {
+	override suspend fun setup() {
 // TODO: We can't really use the plugin system just yet since it doesn't currently support any configuration tooling
 //        extension(::UserCleanupExtension)
-    }
+	}
 
-    public companion object {
-        public const val id: String = "quiltmc-user-cleanup"
-    }
+	public companion object {
+		public const val id: String = "quiltmc-user-cleanup"
+	}
 }

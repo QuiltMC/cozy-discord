@@ -16,8 +16,8 @@ import dev.kord.common.entity.Snowflake
  * @param target The target role that will be synced when the source role is changed.
  */
 public data class RoleToSync(
-    val source: Snowflake,
-    val target: Snowflake,
+	val source: Snowflake,
+	val target: Snowflake,
 )
 
 /**
@@ -27,13 +27,13 @@ public data class RoleToSync(
  * take a look at [SimpleRoleSyncConfig] instead.
  */
 public open class RoleSyncConfig {
-    /**
-     * Override this to specify the roles that should be synced.
-     */
-    public open suspend fun getRolesToSync(): List<RoleToSync> = listOf()
+	/**
+	 * Override this to specify the roles that should be synced.
+	 */
+	public open suspend fun getRolesToSync(): List<RoleToSync> = listOf()
 
-    /**
-     * Override this to provide a list of KordEx [Check]s that must pass for commands to be executed.
-     */
-    public open suspend fun getCommandChecks(): List<Check<*>> = listOf()
+	/**
+	 * Override this to provide a list of KordEx [Check]s that must pass for commands to be executed.
+	 */
+	public open suspend fun getCommandChecks(): List<Check<*>> = listOf()
 }

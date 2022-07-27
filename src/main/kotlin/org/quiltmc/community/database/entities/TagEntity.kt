@@ -21,37 +21,37 @@ import org.quiltmc.community.database.Entity
 @Serializable
 @Suppress("ConstructorParameterNaming")  // MongoDB calls it that...
 data class TagEntity(
-    override val _id: String,
+	override val _id: String,
 
-    val category: String,
-    val description: String,
-    val title: String,
+	val category: String,
+	val description: String,
+	val title: String,
 
-    val color: Color? = null,
-    val guildId: Snowflake? = null,
-    val image: String? = null
+	val color: Color? = null,
+	val guildId: Snowflake? = null,
+	val image: String? = null
 ) : Entity<String> {
-    fun toTag(): Tag = Tag(
-        category = category,
-        description = description,
-        key = _id,
-        title = title,
-        color = color,
-        guildId = guildId,
-        image = image
-    )
+	fun toTag(): Tag = Tag(
+		category = category,
+		description = description,
+		key = _id,
+		title = title,
+		color = color,
+		guildId = guildId,
+		image = image
+	)
 
-    companion object {
-        fun fromTag(tag: Tag): TagEntity =
-            TagEntity(
-                _id = tag.key,
+	companion object {
+		fun fromTag(tag: Tag): TagEntity =
+			TagEntity(
+				_id = tag.key,
 
-                category = tag.category,
-                description = tag.description,
-                title = tag.title,
-                color = tag.color,
-                guildId = tag.guildId,
-                image = tag.image
-            )
-    }
+				category = tag.category,
+				description = tag.description,
+				title = tag.title,
+				color = tag.color,
+				guildId = tag.guildId,
+				image = tag.image
+			)
+	}
 }

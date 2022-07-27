@@ -13,14 +13,14 @@ import org.quiltmc.community.database.Database
 import org.quiltmc.community.database.entities.Meta
 
 class MetaCollection : KordExKoinComponent {
-    private val database: Database by inject()
-    private val col = database.mongo.getCollection<Meta>(name)
+	private val database: Database by inject()
+	private val col = database.mongo.getCollection<Meta>(name)
 
-    suspend fun get() =
-        col.findOne()
+	suspend fun get() =
+		col.findOne()
 
-    suspend fun set(meta: Meta) =
-        col.save(meta)
+	suspend fun set(meta: Meta) =
+		col.save(meta)
 
-    companion object : Collection("meta")
+	companion object : Collection("meta")
 }

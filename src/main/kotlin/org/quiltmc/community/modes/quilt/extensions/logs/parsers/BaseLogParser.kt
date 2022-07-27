@@ -7,5 +7,5 @@
 package org.quiltmc.community.modes.quilt.extensions.logs.parsers
 
 interface BaseLogParser {
-    suspend fun getMessages(logContent: String): List<String>
+	suspend fun getMessages(logContent: String): List<String>
 }

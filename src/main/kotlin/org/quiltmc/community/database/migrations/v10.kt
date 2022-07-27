@@ -13,10 +13,10 @@ import org.quiltmc.community.database.collections.FilterCollection
 import org.quiltmc.community.database.entities.FilterEntry
 
 suspend fun v10(db: CoroutineDatabase) {
-    with(db.getCollection<FilterEntry>(FilterCollection.name)) {
-        updateMany(
-            FilterEntry::note exists false,
-            setValue(FilterEntry::note, null),
-        )
-    }
+	with(db.getCollection<FilterEntry>(FilterCollection.name)) {
+		updateMany(
+			FilterEntry::note exists false,
+			setValue(FilterEntry::note, null),
+		)
+	}
 }

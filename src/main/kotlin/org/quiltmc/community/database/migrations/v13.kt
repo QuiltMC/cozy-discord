@@ -10,5 +10,5 @@ import org.litote.kmongo.coroutine.CoroutineDatabase
 import org.quiltmc.community.database.collections.TagsCollection
 
 suspend fun v13(db: CoroutineDatabase) {
-    db.createCollection(TagsCollection.name)
+	db.createCollection(TagsCollection.name)
 }

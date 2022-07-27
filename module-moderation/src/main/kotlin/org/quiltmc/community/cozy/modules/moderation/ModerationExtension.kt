@@ -40,143 +40,143 @@ public const val MAX_TIMEOUT_SECS: Int = 60 * 60 * 24 * 28
  * - Slowmode command
  */
 public class ModerationExtension(
-    private val config: ModerationConfig
+	private val config: ModerationConfig
 ) : Extension() {
-    override val name: String = ModerationPlugin.id
+	override val name: String = ModerationPlugin.id
 
-    @OptIn(DoNotChain::class)
-    override suspend fun setup() {
-        ephemeralSlashCommand(::TimeoutArguments) {
-            name = "timeout"
-            description = "Remove or apply a timeout to a user"
+	@OptIn(DoNotChain::class)
+	override suspend fun setup() {
+		ephemeralSlashCommand(::TimeoutArguments) {
+			name = "timeout"
+			description = "Remove or apply a timeout to a user"
 
-            config.getCommandChecks().forEach(::check)
+			config.getCommandChecks().forEach(::check)
 
-            action {
-                if (arguments.duration != null) {
-                    arguments.user.timeout(
-                        arguments.duration!!,
-                        reason = "Timed out by ${user.asUser().tag}"
-                    )
+			action {
+				if (arguments.duration != null) {
+					arguments.user.timeout(
+						arguments.duration!!,
+						reason = "Timed out by ${user.asUser().tag}"
+					)
 
-                    respond {
-                        content = "Timeout applied."
-                    }
-                } else {
-                    arguments.user.removeTimeout(
-                        "Timeout removed by ${user.asUser().tag}"
-                    )
+					respond {
+						content = "Timeout applied."
+					}
+				} else {
+					arguments.user.removeTimeout(
+						"Timeout removed by ${user.asUser().tag}"
+					)
 
-                    respond {
-                        content = "Timeout removed."
-                    }
-                }
-            }
-        }
+					respond {
+						content = "Timeout removed."
+					}
+				}
+			}
+		}
 
-        ephemeralSlashCommand {
-            name = "slowmode"
-            description = "Manage slowmode of the current channel"
+		ephemeralSlashCommand {
+			name = "slowmode"
+			description = "Manage slowmode of the current channel"
 
-            check { anyGuild() }
-            check { isNotInThread() }
+			check { anyGuild() }
+			check { isNotInThread() }
 
-            config.getCommandChecks().forEach(::check)
+			config.getCommandChecks().forEach(::check)
 
-            ephemeralSubCommand {
-                name = "get"
-                description = "Get the slowmode of the channel"
+			ephemeralSubCommand {
+				name = "get"
+				description = "Get the slowmode of the channel"
 
-                action {
-                    respond {
-                        content = "Slowmode is currently " +
-                                "${channel.asChannelOf<TextChannel>().userRateLimit} second(s)."
-                    }
-                }
-            }
+				action {
+					respond {
+						content = "Slowmode is currently " +
+								"${channel.asChannelOf<TextChannel>().userRateLimit} second(s)."
+					}
+				}
+			}
 
-            ephemeralSubCommand {
-                name = "reset"
-                description = "Reset the slowmode of the channel back to 0"
+			ephemeralSubCommand {
+				name = "reset"
+				description = "Reset the slowmode of the channel back to 0"
 
-                action {
-                    val channel = channel.asChannel() as TextChannel
+				action {
+					val channel = channel.asChannel() as TextChannel
 
-                    channel.edit {
-                        rateLimitPerUser = Duration.ZERO
-                    }
+					channel.edit {
+						rateLimitPerUser = Duration.ZERO
+					}
 
-                    respond {
-                        content = "Slowmode reset."
-                    }
-                }
-            }
+					respond {
+						content = "Slowmode reset."
+					}
+				}
+			}
 
-            ephemeralSubCommand(::SlowmodeEditArguments) {
-                name = "set"
-                description = "Set the slowmode of the channel"
+			ephemeralSubCommand(::SlowmodeEditArguments) {
+				name = "set"
+				description = "Set the slowmode of the channel"
 
-                action {
-                    val channel = channel.asChannel() as TextChannel
+				action {
+					val channel = channel.asChannel() as TextChannel
 
-                    channel.edit {
-                        rateLimitPerUser = arguments.duration.toTotalSeconds().seconds
-                    }
+					channel.edit {
+						rateLimitPerUser = arguments.duration.toTotalSeconds().seconds
+					}
 
-                    config.getLoggingChannelOrNull(guild!!.asGuild())?.createEmbed {
-                        title = "Slowmode changed"
-                        description = "Set to ${arguments.duration.toTotalSeconds()} second(s)."
-                        color = DISCORD_BLURPLE
+					config.getLoggingChannelOrNull(guild!!.asGuild())?.createEmbed {
+						title = "Slowmode changed"
+						description = "Set to ${arguments.duration.toTotalSeconds()} second(s)."
+						color = DISCORD_BLURPLE
 
-                        field {
-                            inline = true
-                            name = "Channel"
-                            value = channel.mention
-                        }
+						field {
+							inline = true
+							name = "Channel"
+							value = channel.mention
+						}
 
-                        field {
-                            inline = true
-                            name = "User"
-                            value = user.mention
-                        }
-                    }
+						field {
+							inline = true
+							name = "User"
+							value = user.mention
+						}
+					}
 
-                    respond {
-                        content = "Slowmode set to ${arguments.duration.toTotalSeconds()} second(s)."
-                    }
-                }
-            }
-        }
-    }
+					respond {
+						content = "Slowmode set to ${arguments.duration.toTotalSeconds()} second(s)."
+					}
+				}
+			}
+		}
+	}
 
-    public inner class SlowmodeEditArguments : Arguments() {
-        public val duration: DateTimePeriod by duration {
-            name = "duration"
-            description = "The new duration of the slowmode"
+	public inner class SlowmodeEditArguments : Arguments() {
+		public val duration: DateTimePeriod by duration {
+			name = "duration"
+			description = "The new duration of the slowmode"
 
-            validate {
-                failIf(
-                    "Slowmode cannot be longer than ${MAXIMUM_SLOWMODE_DURATION.hours} hours"
-                ) { value > MAXIMUM_SLOWMODE_DURATION }
-            }
-        }
-    }
+			validate {
+				failIf(
+					"Slowmode cannot be longer than ${MAXIMUM_SLOWMODE_DURATION.hours} hours"
+				) { value > MAXIMUM_SLOWMODE_DURATION }
+			}
+		}
+	}
 
-    public inner class TimeoutArguments : Arguments() {
-        public val user: Member by member {
-            name = "member"
-            description = "Member to apply a timeout to"
-        }
+	public inner class TimeoutArguments : Arguments() {
+		public val user: Member by member {
+			name = "member"
+			description = "Member to apply a timeout to"
+		}
 
-        public val duration: DateTimePeriod? by optionalDuration {
-            name = "duration"
-            description = "How long to time out for, from now"
+		public val duration: DateTimePeriod? by optionalDuration {
+			name = "duration"
+			description = "How long to time out for, from now"
 
-            validate {
-                failIf(
-                    "Timeouts must be for less than 28 days"
-                ) { value != null && value!!.toTotalSeconds() >= MAX_TIMEOUT_SECS }
-            }
-        }
-    }
+			validate {
+				failIf(
+					"Timeouts must be for less than 28 days"
+				) { value != null && value!!.toTotalSeconds() >= MAX_TIMEOUT_SECS }
+			}
+		}
+	}
 }

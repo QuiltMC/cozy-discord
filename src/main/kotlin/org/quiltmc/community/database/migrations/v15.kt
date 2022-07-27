@@ -10,5 +10,5 @@ import org.litote.kmongo.coroutine.CoroutineDatabase
 import org.quiltmc.community.database.collections.WelcomeChannelCollection
 
 suspend fun v15(db: CoroutineDatabase) {
-    db.createCollection(WelcomeChannelCollection.name)
+	db.createCollection(WelcomeChannelCollection.name)
 }

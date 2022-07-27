@@ -15,12 +15,12 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 public data class Tag(
-    val category: String,
-    val description: String,
-    val key: String,
-    val title: String,
+	val category: String,
+	val description: String,
+	val key: String,
+	val title: String,
 
-    val color: Color? = null,
-    val guildId: Snowflake? = null,
-    val image: String? = null
+	val color: Color? = null,
+	val guildId: Snowflake? = null,
+	val image: String? = null
 )

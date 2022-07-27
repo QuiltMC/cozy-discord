@@ -10,6 +10,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PKProxyTag(
-    val prefix: String?,
-    val suffix: String?
+	val prefix: String?,
+	val suffix: String?
 )

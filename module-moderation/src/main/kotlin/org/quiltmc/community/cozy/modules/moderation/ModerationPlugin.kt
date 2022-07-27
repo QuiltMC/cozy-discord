@@ -14,20 +14,20 @@ import org.pf4j.PluginWrapper
  * Plugin containing the [ModerationExtension], providing various moderation tools.
  */
 @WiredPlugin(
-    id = ModerationPlugin.id,
-    version = "1.0.0-SNAPSHOT",
+	id = ModerationPlugin.id,
+	version = "1.0.0-SNAPSHOT",
 
-    author = "QuiltMC",
-    description = "Various moderation tools for the QuiltMC community.",
-    license = "Mozilla Public License 2.0"
+	author = "QuiltMC",
+	description = "Various moderation tools for the QuiltMC community.",
+	license = "Mozilla Public License 2.0"
 )
 public class ModerationPlugin(wrapper: PluginWrapper) : KordExPlugin(wrapper) {
-    override suspend fun setup() {
+	override suspend fun setup() {
 // TODO: We can't really use the plugin system just yet since it doesn't currently support any configuration tooling
 //        extension(::ModerationExtension)
-    }
+	}
 
-    public companion object {
-        public const val id: String = "quiltmc-moderation"
-    }
+	public companion object {
+		public const val id: String = "quiltmc-moderation"
+	}
 }

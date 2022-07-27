@@ -14,10 +14,10 @@ import org.quiltmc.community.database.entities.FilterEntry
 import org.quiltmc.community.modes.quilt.extensions.filtering.MatchTarget
 
 suspend fun v12(db: CoroutineDatabase) {
-    with(db.getCollection<FilterEntry>(FilterCollection.name)) {
-        updateMany(
-            FilterEntry::matchTarget exists false,
-            setValue(FilterEntry::matchTarget, MatchTarget.MESSAGE),
-        )
-    }
+	with(db.getCollection<FilterEntry>(FilterCollection.name)) {
+		updateMany(
+			FilterEntry::matchTarget exists false,
+			setValue(FilterEntry::matchTarget, MatchTarget.MESSAGE),
+		)
+	}
 }

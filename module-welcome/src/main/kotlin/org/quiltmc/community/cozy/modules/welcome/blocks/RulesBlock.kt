@@ -18,69 +18,69 @@ import kotlinx.serialization.Serializable
 @Serializable
 @SerialName("rules")
 public data class RulesBlock(
-    val rules: LinkedHashMap<String, String>,
-    val text: String? = null,
-    val startingIndex: Int = 1,
+	val rules: LinkedHashMap<String, String>,
+	val text: String? = null,
+	val startingIndex: Int = 1,
 
-    val colors: List<Color> = listOf(
-        Color(0xff0000),
-        Color(0xff8c00),
-        Color(0xe1ff00),
-        Color(0x55ff00),
-        Color(0x00ff37),
-        Color(0x00ffc8),
-        Color(0x00aaff),
-        Color(0x001eff),
-        Color(0x7300ff),
-        Color(0xff00ff),
-    )
+	val colors: List<Color> = listOf(
+		Color(0xff0000),
+		Color(0xff8c00),
+		Color(0xe1ff00),
+		Color(0x55ff00),
+		Color(0x00ff37),
+		Color(0x00ffc8),
+		Color(0x00aaff),
+		Color(0x001eff),
+		Color(0x7300ff),
+		Color(0xff00ff),
+	)
 ) : Block() {
-    init {
-        if (rules.isEmpty() || rules.size > 10) {
-            error("Must provide up to 10 rules")
-        }
+	init {
+		if (rules.isEmpty() || rules.size > 10) {
+			error("Must provide up to 10 rules")
+		}
 
-        if (colors.size < rules.size) {
-            error("${rules.size} rules were provided, but not enough colours (${colors.size})")
-        }
-    }
+		if (colors.size < rules.size) {
+			error("${rules.size} rules were provided, but not enough colours (${colors.size})")
+		}
+	}
 
-    override suspend fun create(builder: MessageCreateBuilder) {
-        builder.content = text
+	override suspend fun create(builder: MessageCreateBuilder) {
+		builder.content = text
 
-        var currentIndex = 0
-        var humanIndex = currentIndex + 1
+		var currentIndex = 0
+		var humanIndex = currentIndex + 1
 
-        rules.forEach { (rule, text) ->
-            builder.embed {
-                title = "$humanIndex. $rule"
-                description = text
+		rules.forEach { (rule, text) ->
+			builder.embed {
+				title = "$humanIndex. $rule"
+				description = text
 
-                color = colors[currentIndex]
-            }
+				color = colors[currentIndex]
+			}
 
-            currentIndex += 1
-            humanIndex = currentIndex + 1
-        }
-    }
+			currentIndex += 1
+			humanIndex = currentIndex + 1
+		}
+	}
 
-    override suspend fun edit(builder: MessageModifyBuilder) {
-        builder.content = text
-        builder.components = mutableListOf()
+	override suspend fun edit(builder: MessageModifyBuilder) {
+		builder.content = text
+		builder.components = mutableListOf()
 
-        var currentIndex = 0
-        var humanIndex = currentIndex + 1
+		var currentIndex = 0
+		var humanIndex = currentIndex + 1
 
-        rules.forEach { (rule, text) ->
-            builder.embed {
-                title = "$humanIndex. $rule"
-                description = text
+		rules.forEach { (rule, text) ->
+			builder.embed {
+				title = "$humanIndex. $rule"
+				description = text
 
-                color = colors[currentIndex]
-            }
+				color = colors[currentIndex]
+			}
 
-            currentIndex += 1
-            humanIndex = currentIndex + 1
-        }
-    }
+			currentIndex += 1
+			humanIndex = currentIndex + 1
+		}
+	}
 }

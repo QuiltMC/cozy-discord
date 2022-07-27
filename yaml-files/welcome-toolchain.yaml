@@ -8,25 +8,25 @@
 
       description: >
         Welcome to The Quilt Toolchain, the official development Discord server for The Quilt Project.
-        
-        
+
+
         The Quilt Project is an open-source, community-driven modding toolchain designed primarily for Minecraft.
         By focusing on speed, ease of use and modularity, Quilt aims to provide a sleek and modern modding toolchain
         with an open ecosystem.
-        
-        
+
+
         Quilt is a project that was born out of a need for change in the Minecraft modding ecosystem. Our teams contain
         many experienced members of the modding community, providing a level of familiarity that helps us to avoid the
         mistakes of the past – whether those mistakes relate to community management, diversity and inclusivity, project
         governance or transparency. For more information on how we hope to do this,
         [please see our "about" pages](https://quiltmc.org/about/).
-        
-        
+
+
         Before you get started, **please make sure to review our [rules](https://quiltmc.org/community) and
         [Code of Conduct](https://quiltmc.org/community/code-of-conduct).** We also recommend taking a look at our
         [guide for newcomers](https://quiltmc.org/about/newcomer-guide/).
-        
-        
+
+
         We hope you enjoy your time with us!
 
     - title: Quilt Community
@@ -92,17 +92,17 @@
         Sometimes, something begins trending or becoming popular, or an event happens in the community. We try to
         allow for discussions to happen, but that isn't always possible. For that reason, we ask that you **do not post
         or talk about the following things:**
-        
-        
+
+
         **»** AI-generated "body horror" images - generated images of people, animals or faces that are disfigured or
         look "wrong" in any way.
-        
-        
+
+
         **»** Anything relating to Mojang's new Java Edition chat reporting features outside the relevant thread
-        in the Community server. 
+        in the Community server.
         Moderators reserve the rights to lock the thread if the discussion gets too heated, please keep it civil.
-        
-        
+
+
         This list will change over time, and we're equally likely to add or remove things as the way people approach
         these subjects online changes.
 
@@ -118,10 +118,10 @@
       color: 0x5865F2
 
       description: >
-        This isn't our only social space - we believe that Discord isn't the best platform for long-form 
+        This isn't our only social space - we believe that Discord isn't the best platform for long-form
         discussions, and that important information should be available to people that aren't here.
-        
-        
+
+
         If you're interested in long-form discussions, development help, news or community project, please feel free
         to join our forum at [https://forum.quiltmc.org](https://forum.quiltmc.org)!
 

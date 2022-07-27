@@ -16,16 +16,16 @@ import org.quiltmc.community.cozy.modules.moderation.config.SimpleModerationConf
 import kotlin.time.DurationUnit
 
 public operator fun DateTimePeriod.compareTo(other: DateTimePeriod): Int =
-    this.toTotalSeconds().compareTo(other.toTotalSeconds())
+	this.toTotalSeconds().compareTo(other.toTotalSeconds())
 
 public fun DateTimePeriod.toTotalSeconds(): Int {
-    val now = Clock.System.now()
-    return (now.plus(this, UTC) - now).toInt(DurationUnit.SECONDS)
+	val now = Clock.System.now()
+	return (now.plus(this, UTC) - now).toInt(DurationUnit.SECONDS)
 }
 
 public fun ExtensibleBotBuilder.ExtensionsBuilder.moderation(config: ModerationConfig) {
-    add { ModerationExtension(config) }
+	add { ModerationExtension(config) }
 }
 
 public fun ExtensibleBotBuilder.ExtensionsBuilder.moderation(body: SimpleModerationConfig.Builder.() -> Unit): Unit =
-    moderation(SimpleModerationConfig(body))
+	moderation(SimpleModerationConfig(body))

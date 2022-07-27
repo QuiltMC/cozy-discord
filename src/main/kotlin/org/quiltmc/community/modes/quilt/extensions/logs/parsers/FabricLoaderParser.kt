@@ -9,15 +9,15 @@ package org.quiltmc.community.modes.quilt.extensions.logs.parsers
 private val LOADER_REGEX = "\\[fabric-loader-[\\d.]+\\.jar:\\?]".toRegex()
 
 class FabricLoaderParser : BaseLogParser {
-    override suspend fun getMessages(logContent: String): List<String> {
-        val messages: MutableList<String> = mutableListOf()
+	override suspend fun getMessages(logContent: String): List<String> {
+		val messages: MutableList<String> = mutableListOf()
 
-        if (logContent.contains(LOADER_REGEX)) {
-            messages.add(
-                "You appear to be using Fabric instead of Quilt - please double-check that you have Quilt installed"
-            )
-        }
+		if (logContent.contains(LOADER_REGEX)) {
+			messages.add(
+				"You appear to be using Fabric instead of Quilt - please double-check that you have Quilt installed"
+			)
+		}
 
-        return messages
-    }
+		return messages
+	}
 }

@@ -18,29 +18,29 @@ import org.quiltmc.community.database.entities.FilterEntry
 import org.quiltmc.community.database.entities.FilterEvent
 
 class FilterEventCollection : KordExKoinComponent {
-    private val database: Database by inject()
-    private val col = database.mongo.getCollection<FilterEvent>(name)
+	private val database: Database by inject()
+	private val col = database.mongo.getCollection<FilterEvent>(name)
 
-    suspend fun add(
-        filter: FilterEntry,
+	suspend fun add(
+		filter: FilterEntry,
 
-        guild: GuildBehavior,
-        author: UserBehavior,
-        channel: ChannelBehavior?,
-        message: MessageBehavior?
-    ) = add(
-        FilterEvent(
-            filter = filter._id,
+		guild: GuildBehavior,
+		author: UserBehavior,
+		channel: ChannelBehavior?,
+		message: MessageBehavior?
+	) = add(
+		FilterEvent(
+			filter = filter._id,
 
-            guildId = guild.id,
-            authorId = author.id,
-            channelId = channel?.id,
-            messageId = message?.id
-        )
-    )
+			guildId = guild.id,
+			authorId = author.id,
+			channelId = channel?.id,
+			messageId = message?.id
+		)
+	)
 
-    suspend fun add(event: FilterEvent) =
-        col.save(event)
+	suspend fun add(event: FilterEvent) =
+		col.save(event)
 
-    companion object : Collection("filter_events")
+	companion object : Collection("filter_events")
 }

@@ -14,20 +14,20 @@ import org.pf4j.PluginWrapper
  * Plugin containing the [RoleSyncPlugin], providing various moderation tools.
  */
 @WiredPlugin(
-    id = RoleSyncPlugin.id,
-    version = "1.0.0-SNAPSHOT",
+	id = RoleSyncPlugin.id,
+	version = "1.0.0-SNAPSHOT",
 
-    author = "QuiltMC",
-    description = "Various moderation tools for the QuiltMC community.",
-    license = "Mozilla Public License 2.0"
+	author = "QuiltMC",
+	description = "Various moderation tools for the QuiltMC community.",
+	license = "Mozilla Public License 2.0"
 )
 public class RoleSyncPlugin(wrapper: PluginWrapper) : KordExPlugin(wrapper) {
-    override suspend fun setup() {
+	override suspend fun setup() {
 // TODO: We can't really use the plugin system just yet since it doesn't currently support any configuration tooling
 //        extension(::RoleSyncExtension)
-    }
+	}
 
-    public companion object {
-        public const val id: String = "quiltmc-role-sync"
-    }
+	public companion object {
+		public const val id: String = "quiltmc-role-sync"
+	}
 }

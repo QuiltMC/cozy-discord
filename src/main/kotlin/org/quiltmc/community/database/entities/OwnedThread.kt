@@ -15,9 +15,9 @@ import org.quiltmc.community.database.Entity
 @Serializable
 @Suppress("ConstructorParameterNaming")  // MongoDB calls it that...
 data class OwnedThread(
-    override val _id: Snowflake,
+	override val _id: Snowflake,
 
-    var owner: Snowflake,
-    val guild: Snowflake,
-    var preventArchiving: Boolean = false,
+	var owner: Snowflake,
+	val guild: Snowflake,
+	var preventArchiving: Boolean = false,
 ) : Entity<Snowflake>

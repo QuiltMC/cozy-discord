@@ -12,6 +12,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class BannedReactions(
-    val categories: MutableSet<Snowflake> = mutableSetOf(),
-    val reactionNames: MutableSet<String> = mutableSetOf(),
+	val categories: MutableSet<Snowflake> = mutableSetOf(),
+	val reactionNames: MutableSet<String> = mutableSetOf(),
 ) : Data

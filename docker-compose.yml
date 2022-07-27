@@ -7,7 +7,7 @@ services:
     restart: always
 
     volumes:
-    - "cozy-discord-data:/data"
+      - "cozy-discord-data:/data"
 
     environment:
       - "GUILDS=817576132726620200,833872081585700874"

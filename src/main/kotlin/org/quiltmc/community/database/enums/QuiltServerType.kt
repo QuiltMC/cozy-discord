@@ -11,6 +11,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 enum class QuiltServerType(override val readableName: String) : ChoiceEnum {
-    COMMUNITY("Community"),
-    TOOLCHAIN("Toolchain")
+	COMMUNITY("Community"),
+	TOOLCHAIN("Toolchain")
 }

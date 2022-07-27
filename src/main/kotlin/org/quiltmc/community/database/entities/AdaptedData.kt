@@ -20,15 +20,15 @@ import org.quiltmc.community.database.Entity
 @Serializable
 @Suppress("ConstructorParameterNaming")  // MongoDB calls it that...
 data class AdaptedData(
-    override val _id: String,
-    val identifier: String,
+	override val _id: String,
+	val identifier: String,
 
-    val type: StorageType? = null,
+	val type: StorageType? = null,
 
-    val channel: Snowflake? = null,
-    val guild: Snowflake? = null,
-    val message: Snowflake? = null,
-    val user: Snowflake? = null,
+	val channel: Snowflake? = null,
+	val guild: Snowflake? = null,
+	val message: Snowflake? = null,
+	val user: Snowflake? = null,
 
-    var data: String
+	var data: String
 ) : Entity<String>

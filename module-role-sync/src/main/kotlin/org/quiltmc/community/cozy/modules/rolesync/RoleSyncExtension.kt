@@ -23,94 +23,96 @@ import org.quiltmc.community.cozy.modules.rolesync.config.RoleSyncConfig
  * When one of the source roles is added or removed from a user, the user is added or removed from the target role.
  */
 public class RoleSyncExtension(
-    private val config: RoleSyncConfig
+	private val config: RoleSyncConfig
 ) : Extension() {
-    override val name: String = RoleSyncPlugin.id
+	override val name: String = RoleSyncPlugin.id
 
-    @OptIn(DoNotChain::class)
-    override suspend fun setup() {
-        event<MemberUpdateEvent> {
-            action {
-                // Make sure the old member is available
-                event.old ?: return@action
+	@OptIn(DoNotChain::class)
+	override suspend fun setup() {
+		event<MemberUpdateEvent> {
+			action {
+				// Make sure the old member is available
+				event.old ?: return@action
 
-                // Check if the roles have changed
-                if (event.old!!.roleIds == event.member.roleIds) { return@action }
+				// Check if the roles have changed
+				if (event.old!!.roleIds == event.member.roleIds) {
+					return@action
+				}
 
-                for (role in config.getRolesToSync()) {
-                    if (!event.old!!.roleIds.contains(role.source) && event.member.roleIds.contains(role.source)) {
-                        // Role was added
+				for (role in config.getRolesToSync()) {
+					if (!event.old!!.roleIds.contains(role.source) && event.member.roleIds.contains(role.source)) {
+						// Role was added
 
-                        getGuildForRoleSnowflake(role.target, bot).guild
-                            .getMemberOrNull(event.member.id)
-                            ?.addRole(role.target, "Role synced")
-                    } else if (
-                        event.old!!.roleIds.contains(role.source) && !event.member.roleIds.contains(role.source)
-                    ) {
-                        // Role was removed
+						getGuildForRoleSnowflake(role.target, bot).guild
+							.getMemberOrNull(event.member.id)
+							?.addRole(role.target, "Role synced")
+					} else if (
+						event.old!!.roleIds.contains(role.source) && !event.member.roleIds.contains(role.source)
+					) {
+						// Role was removed
 
-                        getGuildForRoleSnowflake(role.target, bot).guild
-                            .getMemberOrNull(event.member.id)
-                            ?.removeRole(role.target, "Role synced")
-                    }
-                }
-            }
-        }
+						getGuildForRoleSnowflake(role.target, bot).guild
+							.getMemberOrNull(event.member.id)
+							?.removeRole(role.target, "Role synced")
+					}
+				}
+			}
+		}
 
-        event<MemberJoinEvent> {
-            action {
-                for (role in config.getRolesToSync()) {
-                    if (
-                        getGuildForRoleSnowflake(role.source, bot).guild
-                            .getMemberOrNull(event.member.id)
-                            ?.roleIds
-                            ?.contains(role.source) == true
-                    ) {
-                        event.member.addRole(role.target, "Role synced")
-                    }
-                }
-            }
-        }
+		event<MemberJoinEvent> {
+			action {
+				for (role in config.getRolesToSync()) {
+					if (
+						getGuildForRoleSnowflake(role.source, bot).guild
+							.getMemberOrNull(event.member.id)
+							?.roleIds
+							?.contains(role.source) == true
+					) {
+						event.member.addRole(role.target, "Role synced")
+					}
+				}
+			}
+		}
 
-        ephemeralSlashCommand() {
-            name = "role-sync"
-            description = "Manually sync roles"
+		ephemeralSlashCommand() {
+			name = "role-sync"
+			description = "Manually sync roles"
 
-            config.getCommandChecks().forEach(::check)
+			config.getCommandChecks().forEach(::check)
 
-            action {
-                var added = 0
-                var removed = 0
+			action {
+				var added = 0
+				var removed = 0
 
-                for (role in config.getRolesToSync()) {
-                    val targetRole = getGuildForRoleSnowflake(role.target, bot)
-                    val sourceRole = getGuildForRoleSnowflake(role.source, bot)
+				for (role in config.getRolesToSync()) {
+					val targetRole = getGuildForRoleSnowflake(role.target, bot)
+					val sourceRole = getGuildForRoleSnowflake(role.source, bot)
 
-                    // Check if the target role should be removed
-                    targetRole.guild.members
-                        .filter { it.roleIds.contains(role.target) }  // Has the target role
-                        .filter {
-                            sourceRole.guild.getMemberOrNull(it.id)?.hasRole(sourceRole) == false
-                        }  // Doesn't have the source role
-                        .collect {
-                            it.removeRole(role.target, "Role synced")
-                            removed++
-                        }
+					// Check if the target role should be removed
+					targetRole.guild.members
+						.filter { it.roleIds.contains(role.target) }  // Has the target role
+						.filter {
+							sourceRole.guild.getMemberOrNull(it.id)?.hasRole(sourceRole) == false
+						}  // Doesn't have the source role
+						.collect {
+							it.removeRole(role.target, "Role synced")
+							removed++
+						}
 
-                    // Check if the target role should be added
-                    sourceRole.guild.members
-                        .filter { it.roleIds.contains(role.source) }  // Has the source role
-                        .filter {
-                            targetRole.guild.getMemberOrNull(it.id)?.hasRole(targetRole) == false
-                        }  // Doesn't have the target role
-                        .collect {
-                            targetRole.guild.getMemberOrNull(it.id)?.addRole(role.target, "Role synced")
-                            added++
-                        }
-                }
+					// Check if the target role should be added
+					sourceRole.guild.members
+						.filter { it.roleIds.contains(role.source) }  // Has the source role
+						.filter {
+							targetRole.guild.getMemberOrNull(it.id)?.hasRole(targetRole) == false
+						}  // Doesn't have the target role
+						.collect {
+							targetRole.guild.getMemberOrNull(it.id)?.addRole(role.target, "Role synced")
+							added++
+						}
+				}
 
-                respond { content = "$added role(s) added, $removed role(s) removed" }
-            }
-        }
-    }
+				respond { content = "$added role(s) added, $removed role(s) removed" }
+			}
+		}
+	}
 }

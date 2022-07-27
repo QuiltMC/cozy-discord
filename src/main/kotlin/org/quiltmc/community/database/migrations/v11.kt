@@ -13,10 +13,10 @@ import org.quiltmc.community.database.collections.SuggestionsCollection
 import org.quiltmc.community.database.entities.Suggestion
 
 suspend fun v11(db: CoroutineDatabase) {
-    with(db.getCollection<Suggestion>(SuggestionsCollection.name)) {
-        updateMany(
-            Suggestion::githubIssue exists false,
-            setValue(Suggestion::githubIssue, null),
-        )
-    }
+	with(db.getCollection<Suggestion>(SuggestionsCollection.name)) {
+		updateMany(
+			Suggestion::githubIssue exists false,
+			setValue(Suggestion::githubIssue, null),
+		)
+	}
 }

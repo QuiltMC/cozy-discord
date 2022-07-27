@@ -9,13 +9,13 @@ package org.quiltmc.community.cozy.modules.welcome.data
 import dev.kord.common.entity.Snowflake
 
 public class MemoryWelcomeChannelData : WelcomeChannelData {
-    private val data: MutableMap<Snowflake, String> = mutableMapOf()
+	private val data: MutableMap<Snowflake, String> = mutableMapOf()
 
-    override suspend fun getChannelURLs(): Map<Snowflake, String> = data
-    override suspend fun getUrlForChannel(channelId: Snowflake): String? = data[channelId]
-    override suspend fun removeChannel(channelId: Snowflake): String? = data.remove(channelId)
+	override suspend fun getChannelURLs(): Map<Snowflake, String> = data
+	override suspend fun getUrlForChannel(channelId: Snowflake): String? = data[channelId]
+	override suspend fun removeChannel(channelId: Snowflake): String? = data.remove(channelId)
 
-    override suspend fun setUrlForChannel(channelId: Snowflake, url: String) {
-        data[channelId] = url
-    }
+	override suspend fun setUrlForChannel(channelId: Snowflake, url: String) {
+		data[channelId] = url
+	}
 }

@@ -7,50 +7,50 @@
 package org.quiltmc.community.modes.quilt.extensions.logs.parsers
 
 class FabricImplParser : BaseLogParser {
-    override suspend fun getMessages(logContent: String): List<String> {
-        var classNotFoundLine: Int? = null
-        var suspectedMod: String? = null
-        var suspectedPackage: String? = null
+	override suspend fun getMessages(logContent: String): List<String> {
+		var classNotFoundLine: Int? = null
+		var suspectedMod: String? = null
+		var suspectedPackage: String? = null
 
-        for ((index, line) in logContent.lines().mapIndexed { index, s -> index to s }) {
-            if (line.startsWith("java.lang.RuntimeException: Could not execute entrypoint stage")) {
-                classNotFoundLine = index
+		for ((index, line) in logContent.lines().mapIndexed { index, s -> index to s }) {
+			if (line.startsWith("java.lang.RuntimeException: Could not execute entrypoint stage")) {
+				classNotFoundLine = index
 
-                suspectedMod = line
-                    .split("' due to errors, provided by '")
-                    .lastOrNull()
-                    ?.split("'")
-                    ?.firstOrNull()
-                    ?.trim()
+				suspectedMod = line
+					.split("' due to errors, provided by '")
+					.lastOrNull()
+					?.split("'")
+					?.firstOrNull()
+					?.trim()
 
-                continue
-            }
+				continue
+			}
 
-            if (classNotFoundLine == null || suspectedMod == null) {
-                continue
-            }
+			if (classNotFoundLine == null || suspectedMod == null) {
+				continue
+			}
 
-            if (line.startsWith("Caused by: java.lang.ClassNotFoundException:")) {
-                suspectedPackage = line.split("ClassNotFoundException:").lastOrNull()?.trim()
+			if (line.startsWith("Caused by: java.lang.ClassNotFoundException:")) {
+				suspectedPackage = line.split("ClassNotFoundException:").lastOrNull()?.trim()
 
-                if (suspectedPackage != null) {
-                    break
-                }
-            }
-        }
+				if (suspectedPackage != null) {
+					break
+				}
+			}
+		}
 
-        val messages: MutableList<String> = mutableListOf()
+		val messages: MutableList<String> = mutableListOf()
 
-        if (
-            suspectedMod != null &&
-            suspectedPackage != null &&
-            ".fabricmc." in suspectedPackage && ".impl." in suspectedPackage
-        ) {
-            messages.add(
-                "Mod `$suspectedMod` may be using Fabric internals:\n`$suspectedPackage`"
-            )
-        }
+		if (
+			suspectedMod != null &&
+			suspectedPackage != null &&
+			".fabricmc." in suspectedPackage && ".impl." in suspectedPackage
+		) {
+			messages.add(
+				"Mod `$suspectedMod` may be using Fabric internals:\n`$suspectedPackage`"
+			)
+		}
 
-        return messages
-    }
+		return messages
+	}
 }

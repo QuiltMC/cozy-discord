@@ -19,6 +19,6 @@ import org.quiltmc.community.database.Entity
 @Serializable
 @Suppress("ConstructorParameterNaming")  // MongoDB calls it that...
 data class WelcomeChannelEntity(
-    override val _id: Snowflake,
-    val url: String
+	override val _id: Snowflake,
+	val url: String
 ) : Entity<Snowflake>

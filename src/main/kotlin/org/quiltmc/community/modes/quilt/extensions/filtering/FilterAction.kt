@@ -11,12 +11,12 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 enum class FilterAction(
-    val severity: Int,
-    override val readableName: String,
-    val validForUsers: Boolean = false
+	val severity: Int,
+	override val readableName: String,
+	val validForUsers: Boolean = false
 ) : ChoiceEnum {
-    RESPOND(-1, "Respond with the filter note"),
-    DELETE(0, "Delete message"),
-    KICK(1, "Kick user", true),
-    BAN(2, "Ban user", true)
+	RESPOND(-1, "Respond with the filter note"),
+	DELETE(0, "Delete message"),
+	KICK(1, "Kick user", true),
+	BAN(2, "Ban user", true)
 }

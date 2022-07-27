@@ -19,32 +19,32 @@ import org.quiltmc.community.database.entities.OwnedThread
 import org.quiltmc.community.database.entities.Suggestion
 
 suspend fun v3(db: CoroutineDatabase) {
-    db.createCollection(OwnedThreadCollection.name)
+	db.createCollection(OwnedThreadCollection.name)
 
-    val suggestions = db.getCollection<Suggestion>(SuggestionsCollection.name)
-    val ownedThreads = db.getCollection<OwnedThread>(OwnedThreadCollection.name)
+	val suggestions = db.getCollection<Suggestion>(SuggestionsCollection.name)
+	val ownedThreads = db.getCollection<OwnedThread>(OwnedThreadCollection.name)
 
-    val documents = mutableListOf<ReplaceOneModel<OwnedThread>>()
+	val documents = mutableListOf<ReplaceOneModel<OwnedThread>>()
 
-    suggestions.find().consumeEach {
-        if (it.thread != null) {
-            documents.add(
-                replaceOne(
-                    OwnedThread::_id eq it.thread!!,
+	suggestions.find().consumeEach {
+		if (it.thread != null) {
+			documents.add(
+				replaceOne(
+					OwnedThread::_id eq it.thread!!,
 
-                    OwnedThread(
-                        it.thread!!,
-                        it.owner,
-                        COMMUNITY_GUILD
-                    ),
+					OwnedThread(
+						it.thread!!,
+						it.owner,
+						COMMUNITY_GUILD
+					),
 
-                    replaceUpsert()
-                )
-            )
-        }
-    }
+					replaceUpsert()
+				)
+			)
+		}
+	}
 
-    if (documents.isNotEmpty()) {
-        ownedThreads.bulkWrite(requests = documents, BulkWriteOptions().ordered(false))
-    }
+	if (documents.isNotEmpty()) {
+		ownedThreads.bulkWrite(requests = documents, BulkWriteOptions().ordered(false))
+	}
 }

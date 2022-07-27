@@ -15,12 +15,12 @@ import org.quiltmc.community.cozy.modules.tags.data.TagsData
 import org.quiltmc.community.cozy.modules.welcome.TagsExtension
 
 public fun ExtensibleBotBuilder.ExtensionsBuilder.tags(config: TagsConfig, data: TagsData) {
-    loadModule { single { config } bind TagsConfig::class }
-    loadModule { single { data } bind TagsData::class }
+	loadModule { single { config } bind TagsConfig::class }
+	loadModule { single { data } bind TagsData::class }
 
-    add { TagsExtension() }
+	add { TagsExtension() }
 }
 
 public fun ExtensibleBotBuilder.ExtensionsBuilder.tags(data: TagsData, body: SimpleTagsConfig.Builder.() -> Unit) {
-    tags(SimpleTagsConfig(body), data)
+	tags(SimpleTagsConfig(body), data)
 }

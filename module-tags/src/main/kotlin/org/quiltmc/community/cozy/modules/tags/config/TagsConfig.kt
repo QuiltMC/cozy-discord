@@ -18,30 +18,30 @@ import org.quiltmc.community.cozy.modules.tags.TagFormatter
  * All functions are suspending to allow for database access, for example, where needed.
  */
 public interface TagsConfig {
-    /**
-     * Get the configured tag formatter callback, used to turn a tag into a message. **Users configuring this to avoid
-     * creating embeds should make sure to append to the message content instead of replacing it.**
-     */
-    public suspend fun getTagFormatter(): TagFormatter
+	/**
+	 * Get the configured tag formatter callback, used to turn a tag into a message. **Users configuring this to avoid
+	 * creating embeds should make sure to append to the message content instead of replacing it.**
+	 */
+	public suspend fun getTagFormatter(): TagFormatter
 
-    /**
-     * Get the configured user command checks, used to ensure a user-facing command can be run.
-     */
-    public suspend fun getUserCommandChecks(): List<Check<*>>
+	/**
+	 * Get the configured user command checks, used to ensure a user-facing command can be run.
+	 */
+	public suspend fun getUserCommandChecks(): List<Check<*>>
 
-    /**
-     * Get the configured staff command checks, used to ensure a staff-facing command can be run.
-     */
-    public suspend fun getStaffCommandChecks(): List<Check<*>>
+	/**
+	 * Get the configured staff command checks, used to ensure a staff-facing command can be run.
+	 */
+	public suspend fun getStaffCommandChecks(): List<Check<*>>
 
-    /**
-     * Get the logging channel for logging tag updates, returning `null` if this isn't needed.
-     */
-    public suspend fun getLoggingChannelOrNull(guild: Guild): GuildMessageChannel?
+	/**
+	 * Get the logging channel for logging tag updates, returning `null` if this isn't needed.
+	 */
+	public suspend fun getLoggingChannelOrNull(guild: Guild): GuildMessageChannel?
 
-    /**
-     * Function wrapping [getLoggingChannelOrNull], with a non-null assertion.
-     */
-    public suspend fun getLoggingChannel(guild: Guild): GuildMessageChannel =
-        getLoggingChannelOrNull(guild)!!
+	/**
+	 * Function wrapping [getLoggingChannelOrNull], with a non-null assertion.
+	 */
+	public suspend fun getLoggingChannel(guild: Guild): GuildMessageChannel =
+		getLoggingChannelOrNull(guild)!!
 }

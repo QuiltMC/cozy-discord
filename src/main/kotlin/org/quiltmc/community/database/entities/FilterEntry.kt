@@ -22,14 +22,14 @@ import java.util.*
 @Serializable
 @Suppress("ConstructorParameterNaming")  // MongoDB calls it that...
 data class FilterEntry(
-    override val _id: UUID,
+	override val _id: UUID,
 
-    var action: FilterAction?,
-    var pingStaff: Boolean = false,
+	var action: FilterAction?,
+	var pingStaff: Boolean = false,
 
-    var match: String,
-    var matchType: MatchType,
-    var matchTarget: MatchTarget,
+	var match: String,
+	var matchType: MatchType,
+	var matchTarget: MatchTarget,
 
-    var note: String? = null,
+	var note: String? = null,
 ) : Entity<UUID>

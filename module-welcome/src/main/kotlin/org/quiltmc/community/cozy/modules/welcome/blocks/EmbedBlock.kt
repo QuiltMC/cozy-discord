@@ -22,35 +22,35 @@ import org.koin.core.component.inject
 @Serializable
 @SerialName("embed")
 public data class EmbedBlock(
-    val embeds: List<EmbedData>,
-    val text: String? = null
+	val embeds: List<EmbedData>,
+	val text: String? = null
 ) : Block(), KordExKoinComponent {
-    val kord: Kord by inject()
+	val kord: Kord by inject()
 
-    init {
-        if (embeds.isEmpty() || embeds.size > 10) {
-            error("Must provide up to 10 embeds")
-        }
-    }
+	init {
+		if (embeds.isEmpty() || embeds.size > 10) {
+			error("Must provide up to 10 embeds")
+		}
+	}
 
-    override suspend fun create(builder: MessageCreateBuilder) {
-        builder.content = text
+	override suspend fun create(builder: MessageCreateBuilder) {
+		builder.content = text
 
-        embeds.forEach { embed ->
-            builder.embed {
-                Embed(embed, kord).apply(this)
-            }
-        }
-    }
+		embeds.forEach { embed ->
+			builder.embed {
+				Embed(embed, kord).apply(this)
+			}
+		}
+	}
 
-    override suspend fun edit(builder: MessageModifyBuilder) {
-        builder.content = text
-        builder.components = mutableListOf()
+	override suspend fun edit(builder: MessageModifyBuilder) {
+		builder.content = text
+		builder.components = mutableListOf()
 
-        embeds.forEach { embed ->
-            builder.embed {
-                Embed(embed, kord).apply(this)
-            }
-        }
-    }
+		embeds.forEach { embed ->
+			builder.embed {
+				Embed(embed, kord).apply(this)
+			}
+		}
+	}
 }

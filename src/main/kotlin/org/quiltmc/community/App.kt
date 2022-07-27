@@ -48,160 +48,160 @@ val MODE = envOrNull("MODE")?.lowercase() ?: "quilt"
 val ENVIRONMENT = envOrNull("ENVIRONMENT")?.lowercase() ?: "production"
 
 suspend fun setupCollab() = ExtensibleBot(DISCORD_TOKEN) {
-    common()
-    database()
+	common()
+	database()
 
-    extensions {
-        sentry {
-            distribution = "collab"
-        }
-    }
+	extensions {
+		sentry {
+			distribution = "collab"
+		}
+	}
 }
 
 suspend fun setupDev() = ExtensibleBot(DISCORD_TOKEN) {
-    common()
-    database()
+	common()
+	database()
 
-    extensions {
-        add(::SubteamsExtension)
+	extensions {
+		add(::SubteamsExtension)
 
-        extMappings { }
+		extMappings { }
 
-        if (GITHUB_TOKEN != null) {
-            add(::GithubExtension)
-        }
+		if (GITHUB_TOKEN != null) {
+			add(::GithubExtension)
+		}
 
-        sentry {
-            distribution = "dev"
-        }
-    }
+		sentry {
+			distribution = "dev"
+		}
+	}
 }
 
 suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
-    common()
-    database(true)
-    settings()
+	common()
+	database(true)
+	settings()
 
-    intents {
-        +Intents.all
-    }
+	intents {
+		+Intents.all
+	}
 
-    members {
-        all()
+	members {
+		all()
 
-        fillPresences = true
-    }
+		fillPresences = true
+	}
 
-    extensions {
-        add(::FilterExtension)
-        add(::LogParsingExtension)
-        add(::MessageLogExtension)
-        add(::MinecraftExtension)
-        add(::PKExtension)
-        add(::SettingsExtension)
-        add(::ShowcaseExtension)
-        add(::SuggestionsExtension)
-        add(::SyncExtension)
-        add(::UtilityExtension)
+	extensions {
+		add(::FilterExtension)
+		add(::LogParsingExtension)
+		add(::MessageLogExtension)
+		add(::MinecraftExtension)
+		add(::PKExtension)
+		add(::SettingsExtension)
+		add(::ShowcaseExtension)
+		add(::SuggestionsExtension)
+		add(::SyncExtension)
+		add(::UtilityExtension)
 
-        welcomeChannel(getKoin().get<WelcomeChannelCollection>()) {
-            staffCommandCheck {
-                hasBaseModeratorRole()
-            }
+		welcomeChannel(getKoin().get<WelcomeChannelCollection>()) {
+			staffCommandCheck {
+				hasBaseModeratorRole()
+			}
 
-            getLogChannel { _, guild ->
-                guild.channels
-                    .filterIsInstance<GuildMessageChannel>()
-                    .filter { it.name == "cozy-logs" }
-                    .lastOrNull()
-            }
+			getLogChannel { _, guild ->
+				guild.channels
+					.filterIsInstance<GuildMessageChannel>()
+					.filter { it.name == "cozy-logs" }
+					.lastOrNull()
+			}
 
-            refreshDuration = 5.minutes
-        }
+			refreshDuration = 5.minutes
+		}
 
-        tags(getKoin().get<TagsCollection>()) {
-            loggingChannelName = "cozy-logs"
+		tags(getKoin().get<TagsCollection>()) {
+			loggingChannelName = "cozy-logs"
 
-            userCommandCheck {
-                inQuiltGuild()
-            }
+			userCommandCheck {
+				inQuiltGuild()
+			}
 
-            staffCommandCheck {
-                hasBaseModeratorRole()
-            }
-        }
+			staffCommandCheck {
+				hasBaseModeratorRole()
+			}
+		}
 
-        extPhishing {
-            appName = "QuiltMC's Cozy Bot"
-            detectionAction = DetectionAction.Kick
-            logChannelName = "cozy-logs"
-            requiredCommandPermission = null
+		extPhishing {
+			appName = "QuiltMC's Cozy Bot"
+			detectionAction = DetectionAction.Kick
+			logChannelName = "cozy-logs"
+			requiredCommandPermission = null
 
-            check { inQuiltGuild() }
-            check { notHasBaseModeratorRole() }
-        }
+			check { inQuiltGuild() }
+			check { notHasBaseModeratorRole() }
+		}
 
-        userCleanup {
-            maxPendingDuration = 3.days
-            taskDelay = 1.days
-            loggingChannelName = "cozy-logs"
+		userCleanup {
+			maxPendingDuration = 3.days
+			taskDelay = 1.days
+			loggingChannelName = "cozy-logs"
 
-            runAutomatically = true
+			runAutomatically = true
 
-            guildPredicate {
-                val servers = getKoin().get<ServerSettingsCollection>()
-                val serverEntry = servers.get(it.id)
+			guildPredicate {
+				val servers = getKoin().get<ServerSettingsCollection>()
+				val serverEntry = servers.get(it.id)
 
-                serverEntry?.quiltServerType != null
-            }
+				serverEntry?.quiltServerType != null
+			}
 
-            commandCheck { hasPermission(Permission.Administrator) }
-        }
+			commandCheck { hasPermission(Permission.Administrator) }
+		}
 
-        moderation {
-            loggingChannelName = "cozy-logs"
+		moderation {
+			loggingChannelName = "cozy-logs"
 
-            commandCheck { inQuiltGuild() }
-            commandCheck { hasBaseModeratorRole() }
-        }
+			commandCheck { inQuiltGuild() }
+			commandCheck { hasBaseModeratorRole() }
+		}
 
-        rolesync {
-            roleToSync(
-                TOOLCHAIN_DEVELOPER_ROLE,
-                COMMUNITY_DEVELOPER_ROLE
-            )
+		rolesync {
+			roleToSync(
+				TOOLCHAIN_DEVELOPER_ROLE,
+				COMMUNITY_DEVELOPER_ROLE
+			)
 
-            commandCheck { inQuiltGuild() }
-            commandCheck { hasBaseModeratorRole() }
-        }
+			commandCheck { inQuiltGuild() }
+			commandCheck { hasBaseModeratorRole() }
+		}
 
-        sentry {
-            distribution = "community"
-        }
-    }
+		sentry {
+			distribution = "community"
+		}
+	}
 }
 
 suspend fun setupShowcase() = ExtensibleBot(DISCORD_TOKEN) {
-    common()
-    database()
-    settings()
+	common()
+	database()
+	settings()
 
-    extensions {
-        sentry {
-            distribution = "showcase"
-        }
-    }
+	extensions {
+		sentry {
+			distribution = "showcase"
+		}
+	}
 }
 
 suspend fun main() {
-    val bot = when (MODE) {
-        "dev" -> setupDev()
-        "collab" -> setupCollab()
-        "quilt" -> setupQuilt()
-        "showcase" -> setupShowcase()
+	val bot = when (MODE) {
+		"dev" -> setupDev()
+		"collab" -> setupCollab()
+		"quilt" -> setupQuilt()
+		"showcase" -> setupShowcase()
 
-        else -> error("Invalid mode: $MODE")
-    }
+		else -> error("Invalid mode: $MODE")
+	}
 
-    bot.start()
+	bot.start()
 }

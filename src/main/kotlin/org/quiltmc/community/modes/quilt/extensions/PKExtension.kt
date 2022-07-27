@@ -24,68 +24,68 @@ import org.quiltmc.community.userField
 private const val PK_DELAY_MILLIS: Long = 500
 
 class PKExtension : Extension() {
-    override val name: String = "pluralkit"
+	override val name: String = "pluralkit"
 
-    private val pluralKit = PluralKit()
+	private val pluralKit = PluralKit()
 
-    private val userFlags: UserFlagsCollection by inject()
-    private val settings: ServerSettingsCollection by inject()
+	private val userFlags: UserFlagsCollection by inject()
+	private val settings: ServerSettingsCollection by inject()
 
-    override suspend fun setup() {
-        event<MessageCreateEvent> {
-            check { failIf(event.message.data.webhookId.value == null) }
-            check { failIf(event.message.interaction != null) }
+	override suspend fun setup() {
+		event<MessageCreateEvent> {
+			check { failIf(event.message.data.webhookId.value == null) }
+			check { failIf(event.message.interaction != null) }
 
-            action {
-                delay(PK_DELAY_MILLIS)  // To allow the PK API to catch up
+			action {
+				delay(PK_DELAY_MILLIS)  // To allow the PK API to catch up
 
-                val pkMessage = pluralKit.getMessageOrNull(event.message.id) ?: return@action
-                val flags = userFlags.get(pkMessage.sender) ?: UserFlags(pkMessage.sender, false)
+				val pkMessage = pluralKit.getMessageOrNull(event.message.id) ?: return@action
+				val flags = userFlags.get(pkMessage.sender) ?: UserFlags(pkMessage.sender, false)
 
-                if (!flags.hasUsedPK) {
-                    flags.hasUsedPK = true
-                    flags.save()
+				if (!flags.hasUsedPK) {
+					flags.hasUsedPK = true
+					flags.save()
 
-                    settings.getCommunity()?.getConfiguredLogChannel()?.createMessage {
-                        embed {
-                            title = "New PK user"
-                            color = DISCORD_FUCHSIA
+					settings.getCommunity()?.getConfiguredLogChannel()?.createMessage {
+						embed {
+							title = "New PK user"
+							color = DISCORD_FUCHSIA
 
-                            description = "A message has been sent by a PluralKit user for the first time."
+							description = "A message has been sent by a PluralKit user for the first time."
 
-                            userField(kord.getUser(pkMessage.sender)!!, "Discord Account")
+							userField(kord.getUser(pkMessage.sender)!!, "Discord Account")
 
-                            field {
-                                name = "Channel"
-                                value = "${event.message.channel.mention} (`${event.message.channelId}`)"
-                            }
+							field {
+								name = "Channel"
+								value = "${event.message.channel.mention} (`${event.message.channelId}`)"
+							}
 
-                            field {
-                                name = "Message URL"
-                                value = event.message.getJumpUrl()
-                            }
+							field {
+								name = "Message URL"
+								value = event.message.getJumpUrl()
+							}
 
-                            field {
-                                name = "PK Member"
+							field {
+								name = "PK Member"
 
-                                value = "${pkMessage.member.name} (`${pkMessage.system.id}` / " +
-                                        "`${pkMessage.system.uuid}`)"
+								value = "${pkMessage.member.name} (`${pkMessage.system.id}` / " +
+										"`${pkMessage.system.uuid}`)"
 
-                                inline = true
-                            }
+								inline = true
+							}
 
-                            field {
-                                name = "PK System"
+							field {
+								name = "PK System"
 
-                                value = (pkMessage.system.name ?: "**No system name**") +
-                                        " (`${pkMessage.system.id}` / `${pkMessage.system.uuid}`)"
+								value = (pkMessage.system.name ?: "**No system name**") +
+										" (`${pkMessage.system.id}` / `${pkMessage.system.uuid}`)"
 
-                                inline = true
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+								inline = true
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 }

@@ -17,26 +17,26 @@ import org.quiltmc.community.database.Database
 import org.quiltmc.community.database.entities.Suggestion
 
 class SuggestionsCollection : KordExKoinComponent {
-    private val database: Database by inject()
-    private val col = database.mongo.getCollection<Suggestion>(name)
+	private val database: Database by inject()
+	private val col = database.mongo.getCollection<Suggestion>(name)
 
-    suspend fun get(id: Snowflake) =
-        col.findOne(Suggestion::_id eq id)
+	suspend fun get(id: Snowflake) =
+		col.findOne(Suggestion::_id eq id)
 
-    suspend fun getByMessage(id: Snowflake) =
-        col.findOne(Suggestion::message eq id)
+	suspend fun getByMessage(id: Snowflake) =
+		col.findOne(Suggestion::message eq id)
 
-    suspend fun getByThread(id: Snowflake) =
-        col.findOne(Suggestion::thread eq id)
+	suspend fun getByThread(id: Snowflake) =
+		col.findOne(Suggestion::thread eq id)
 
-    suspend fun getByMessage(message: MessageBehavior) =
-        getByMessage(message.id)
+	suspend fun getByMessage(message: MessageBehavior) =
+		getByMessage(message.id)
 
-    suspend fun find(filter: Bson) =
-        col.find(filter)
+	suspend fun find(filter: Bson) =
+		col.find(filter)
 
-    suspend fun set(suggestion: Suggestion) =
-        col.save(suggestion)
+	suspend fun set(suggestion: Suggestion) =
+		col.save(suggestion)
 
-    companion object : Collection("suggestions")
+	companion object : Collection("suggestions")
 }

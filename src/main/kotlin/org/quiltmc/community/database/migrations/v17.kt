@@ -9,5 +9,5 @@ package org.quiltmc.community.database.migrations
 import org.litote.kmongo.coroutine.CoroutineDatabase
 
 suspend fun v17(db: CoroutineDatabase) {
-    db.createCollection("adapted_data")
+	db.createCollection("adapted_data")
 }

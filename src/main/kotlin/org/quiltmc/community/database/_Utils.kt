@@ -12,7 +12,7 @@ import org.quiltmc.community.database.collections.ServerSettingsCollection
 import org.quiltmc.community.database.entities.ServerSettings
 
 suspend fun GuildBehavior.getSettings(): ServerSettings? {
-    val settingsColl = getKoin().get<ServerSettingsCollection>()
+	val settingsColl = getKoin().get<ServerSettingsCollection>()
 
-    return settingsColl.get(id)
+	return settingsColl.get(id)
 }

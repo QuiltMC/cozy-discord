@@ -13,10 +13,10 @@ import org.quiltmc.community.database.collections.TagsCollection
 import org.quiltmc.community.database.entities.TagEntity
 
 suspend fun v14(db: CoroutineDatabase) {
-    with(db.getCollection<TagEntity>(TagsCollection.name)) {
-        updateMany(
-            TagEntity::image exists false,
-            setValue(TagEntity::image, null),
-        )
-    }
+	with(db.getCollection<TagEntity>(TagsCollection.name)) {
+		updateMany(
+			TagEntity::image exists false,
+			setValue(TagEntity::image, null),
+		)
+	}
 }

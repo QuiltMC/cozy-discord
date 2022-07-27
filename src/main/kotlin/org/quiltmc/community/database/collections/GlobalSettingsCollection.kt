@@ -14,22 +14,22 @@ import org.quiltmc.community.database.Database
 import org.quiltmc.community.database.entities.GlobalSettings
 
 class GlobalSettingsCollection : KordExKoinComponent {
-    private val database: Database by inject()
-    private val col = database.mongo.getCollection<GlobalSettings>(name)
+	private val database: Database by inject()
+	private val col = database.mongo.getCollection<GlobalSettings>(name)
 
-    suspend fun get() =
-        col.findOne()
+	suspend fun get() =
+		col.findOne()
 
-    suspend fun set(settings: GlobalSettings): UpdateResult? {
-        var newSettings = settings
-        val current = get()
+	suspend fun set(settings: GlobalSettings): UpdateResult? {
+		var newSettings = settings
+		val current = get()
 
-        if (current != null) {
-            newSettings = newSettings.copy(_id = current._id)
-        }
+		if (current != null) {
+			newSettings = newSettings.copy(_id = current._id)
+		}
 
-        return col.save(newSettings)
-    }
+		return col.save(newSettings)
+	}
 
-    companion object : Collection("global-settings")
+	companion object : Collection("global-settings")
 }

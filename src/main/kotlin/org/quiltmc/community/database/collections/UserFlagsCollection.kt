@@ -15,14 +15,14 @@ import org.quiltmc.community.database.Database
 import org.quiltmc.community.database.entities.UserFlags
 
 class UserFlagsCollection : KordExKoinComponent {
-    private val database: Database by inject()
-    private val col = database.mongo.getCollection<UserFlags>(name)
+	private val database: Database by inject()
+	private val col = database.mongo.getCollection<UserFlags>(name)
 
-    suspend fun get(id: Snowflake) =
-        col.findOne(UserFlags::_id eq id)
+	suspend fun get(id: Snowflake) =
+		col.findOne(UserFlags::_id eq id)
 
-    suspend fun set(userFlags: UserFlags) =
-        col.save(userFlags)
+	suspend fun set(userFlags: UserFlags) =
+		col.save(userFlags)
 
-    companion object : Collection("user-flags")
+	companion object : Collection("user-flags")
 }

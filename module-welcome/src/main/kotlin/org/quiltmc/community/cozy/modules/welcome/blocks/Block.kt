@@ -16,12 +16,12 @@ import kotlinx.serialization.Transient
 @Suppress("UnnecessaryAbstractClass")
 @Serializable
 public abstract class Block {
-    @Transient
-    public lateinit var channel: GuildMessageChannel
+	@Transient
+	public lateinit var channel: GuildMessageChannel
 
-    @Transient
-    public lateinit var guild: Guild
+	@Transient
+	public lateinit var guild: Guild
 
-    public abstract suspend fun create(builder: MessageCreateBuilder)
-    public abstract suspend fun edit(builder: MessageModifyBuilder)
+	public abstract suspend fun create(builder: MessageCreateBuilder)
+	public abstract suspend fun edit(builder: MessageModifyBuilder)
 }

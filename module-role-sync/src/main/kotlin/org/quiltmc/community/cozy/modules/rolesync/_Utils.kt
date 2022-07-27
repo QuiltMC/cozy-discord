@@ -19,11 +19,11 @@ import org.quiltmc.community.cozy.modules.rolesync.config.SimpleRoleSyncConfig
 
 @OptIn(FlowPreview::class)
 public suspend fun getGuildForRoleSnowflake(roleId: Snowflake, bot: ExtensibleBot): Role =
-    bot.getKoin().get<Kord>().guilds.flatMapConcat { it.roles }.first { it.id == roleId }
+	bot.getKoin().get<Kord>().guilds.flatMapConcat { it.roles }.first { it.id == roleId }
 
 public fun ExtensibleBotBuilder.ExtensionsBuilder.rolesync(config: RoleSyncConfig) {
-    add { RoleSyncExtension(config) }
+	add { RoleSyncExtension(config) }
 }
 
 public fun ExtensibleBotBuilder.ExtensionsBuilder.rolesync(body: SimpleRoleSyncConfig.Builder.() -> Unit): Unit =
-    rolesync(SimpleRoleSyncConfig(body))
+	rolesync(SimpleRoleSyncConfig(body))

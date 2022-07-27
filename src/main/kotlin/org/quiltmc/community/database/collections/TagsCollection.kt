@@ -19,78 +19,78 @@ import org.quiltmc.community.database.Database
 import org.quiltmc.community.database.entities.TagEntity
 
 class TagsCollection : KordExKoinComponent, TagsData {
-    private val database: Database by inject()
-    private val col = database.mongo.getCollection<TagEntity>(name)
+	private val database: Database by inject()
+	private val col = database.mongo.getCollection<TagEntity>(name)
 
-    override suspend fun getTagByKey(key: String, guildId: Snowflake?): Tag? =
-        col.findOne(
-            or(TagEntity::guildId eq null, TagEntity::guildId eq guildId),
-            TagEntity::_id eq key.lowercase()
-        )?.toTag()
+	override suspend fun getTagByKey(key: String, guildId: Snowflake?): Tag? =
+		col.findOne(
+			or(TagEntity::guildId eq null, TagEntity::guildId eq guildId),
+			TagEntity::_id eq key.lowercase()
+		)?.toTag()
 
-    override suspend fun getTagsByCategory(category: String, guildId: Snowflake?): List<Tag> =
-        col.find(
-            or(TagEntity::guildId eq null, TagEntity::guildId eq guildId),
-            TagEntity::category eq category.lowercase()
-        )
-            .toList()
-            .map { it.toTag() }
+	override suspend fun getTagsByCategory(category: String, guildId: Snowflake?): List<Tag> =
+		col.find(
+			or(TagEntity::guildId eq null, TagEntity::guildId eq guildId),
+			TagEntity::category eq category.lowercase()
+		)
+			.toList()
+			.map { it.toTag() }
 
-    override suspend fun getTagsByPartialKey(partialKey: String, guildId: Snowflake?): List<Tag> =
-        col.find(or(TagEntity::guildId eq null, TagEntity::guildId eq guildId))
-            .toList()
-            .filter { it._id.contains(partialKey, true) }
-            .map { it.toTag() }
+	override suspend fun getTagsByPartialKey(partialKey: String, guildId: Snowflake?): List<Tag> =
+		col.find(or(TagEntity::guildId eq null, TagEntity::guildId eq guildId))
+			.toList()
+			.filter { it._id.contains(partialKey, true) }
+			.map { it.toTag() }
 
-    override suspend fun getTagsByPartialTitle(partialTitle: String, guildId: Snowflake?): List<Tag> =
-        col.find(or(TagEntity::guildId eq null, TagEntity::guildId eq guildId))
-            .toList()
-            .filter { it.title.contains(partialTitle, true) }
-            .map { it.toTag() }
+	override suspend fun getTagsByPartialTitle(partialTitle: String, guildId: Snowflake?): List<Tag> =
+		col.find(or(TagEntity::guildId eq null, TagEntity::guildId eq guildId))
+			.toList()
+			.filter { it.title.contains(partialTitle, true) }
+			.map { it.toTag() }
 
-    override suspend fun getAllCategories(guildId: Snowflake?): Set<String> =
-        col.distinct(
-            TagEntity::category,
-            or(TagEntity::guildId eq null, TagEntity::guildId eq guildId)
-        ).toList().toSet()
+	override suspend fun getAllCategories(guildId: Snowflake?): Set<String> =
+		col.distinct(
+			TagEntity::category,
+			or(TagEntity::guildId eq null, TagEntity::guildId eq guildId)
+		).toList().toSet()
 
-    override suspend fun findTags(category: String?, guildId: Snowflake?, key: String?): List<Tag> {
-        val criteria = mutableListOf<Bson>()
+	override suspend fun findTags(category: String?, guildId: Snowflake?, key: String?): List<Tag> {
+		val criteria = mutableListOf<Bson>()
 
-        if (category != null) {
-            criteria.add(TagEntity::category eq category.lowercase())
-        }
+		if (category != null) {
+			criteria.add(TagEntity::category eq category.lowercase())
+		}
 
-        if (guildId != null) {
-            criteria.add(TagEntity::guildId eq guildId)
-        }
+		if (guildId != null) {
+			criteria.add(TagEntity::guildId eq guildId)
+		}
 
-        if (key != null) {
-            criteria.add(TagEntity::_id eq key.lowercase())
-        }
+		if (key != null) {
+			criteria.add(TagEntity::_id eq key.lowercase())
+		}
 
-        @Suppress("SpreadOperator")
-        val tags = col.find(
-            *criteria.toTypedArray()
-        ).toList()
+		@Suppress("SpreadOperator")
+		val tags = col.find(
+			*criteria.toTypedArray()
+		).toList()
 
-        return tags.map { it.toTag() }
-    }
+		return tags.map { it.toTag() }
+	}
 
-    override suspend fun setTag(tag: Tag) {
-        col.save(TagEntity.fromTag(tag))
-    }
+	override suspend fun setTag(tag: Tag) {
+		col.save(TagEntity.fromTag(tag))
+	}
 
-    override suspend fun deleteTagByKey(key: String, guildId: Snowflake?): Tag? {
-        val tag = getTagByKey(key, guildId) ?: return null
+	override suspend fun deleteTagByKey(key: String, guildId: Snowflake?): Tag? {
+		val tag = getTagByKey(key, guildId) ?: return null
 
-        col.deleteOne(
-            TagEntity::_id eq key,
-            TagEntity::guildId eq guildId
-        )
+		col.deleteOne(
+			TagEntity::_id eq key,
+			TagEntity::guildId eq guildId
+		)
 
-        return tag
-    }
+		return tag
+	}
 
-    companion object : Collection("tags")
+	companion object : Collection("tags")
 }

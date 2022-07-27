@@ -13,17 +13,17 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 enum class SuggestionStatus(override val readableName: String, val color: Color) : ChoiceEnum {
-    Open("Open", DISCORD_BLURPLE),
+	Open("Open", DISCORD_BLURPLE),
 
-    Approved("Approved", DISCORD_FUCHSIA),
+	Approved("Approved", DISCORD_FUCHSIA),
 
-    Denied("Denied", DISCORD_RED),
-    Invalid("Invalid", DISCORD_RED),
-    Spam("Spam", DISCORD_RED),
+	Denied("Denied", DISCORD_RED),
+	Invalid("Invalid", DISCORD_RED),
+	Spam("Spam", DISCORD_RED),
 
-    Future("Future Concern", DISCORD_YELLOW),
-    Stale("Stale", DISCORD_YELLOW),
+	Future("Future Concern", DISCORD_YELLOW),
+	Stale("Stale", DISCORD_YELLOW),
 
-    Duplicate("Duplicate", DISCORD_BLACK),
-    Implemented("Implemented", DISCORD_GREEN),
+	Duplicate("Duplicate", DISCORD_BLACK),
+	Implemented("Implemented", DISCORD_GREEN),
 }

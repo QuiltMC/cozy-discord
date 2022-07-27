@@ -5,10 +5,10 @@
  */
 
 pluginManagement {
-    repositories {
-        google()
-        gradlePluginPortal()
-    }
+	repositories {
+		google()
+		gradlePluginPortal()
+	}
 }
 
 rootProject.name = "CozyDiscord"
@@ -16,11 +16,11 @@ rootProject.name = "CozyDiscord"
 enableFeaturePreview("VERSION_CATALOGS")
 
 dependencyResolutionManagement {
-    versionCatalogs {
-        create("libs") {
-            from(files("libs.versions.toml"))
-        }
-    }
+	versionCatalogs {
+		create("libs") {
+			from(files("libs.versions.toml"))
+		}
+	}
 }
 
 include(":module-moderation")

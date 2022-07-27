@@ -11,12 +11,12 @@ import dev.kord.core.entity.Message
 import java.nio.charset.Charset
 
 class AttachmentLogRetriever : BaseLogRetriever {
-    override suspend fun getLogContent(message: Message): List<String> =
-        message.attachments.filter {
-            it.filename.endsWith(".log") ||
-                    it.filename.endsWith(".txt") ||
-                    "." !in it.filename
-        }.map {
-            it.download().toString(Charset.forName("UTF-8"))
-        }
+	override suspend fun getLogContent(message: Message): List<String> =
+		message.attachments.filter {
+			it.filename.endsWith(".log") ||
+					it.filename.endsWith(".txt") ||
+					"." !in it.filename
+		}.map {
+			it.download().toString(Charset.forName("UTF-8"))
+		}
 }

@@ -11,9 +11,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 public enum class ThreadListType(public val humanReadable: String) {
-    @SerialName("active")
-    ACTIVE("Active"),
+	@SerialName("active")
+	ACTIVE("Active"),
 
-    @SerialName("newest")
-    NEWEST("Recently Created")
+	@SerialName("newest")
+	NEWEST("Recently Created")
 }

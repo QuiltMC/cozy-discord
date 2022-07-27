@@ -15,23 +15,23 @@ import org.quiltmc.community.database.entities.FilterEntry
 import java.util.*
 
 class FilterCollection : KordExKoinComponent {
-    private val database: Database by inject()
-    private val col = database.mongo.getCollection<FilterEntry>(name)
+	private val database: Database by inject()
+	private val col = database.mongo.getCollection<FilterEntry>(name)
 
-    suspend fun get(id: UUID) =
-        col.findOne(FilterEntry::_id eq id)
+	suspend fun get(id: UUID) =
+		col.findOne(FilterEntry::_id eq id)
 
-    suspend fun getAll() =
-        col.find().toList()
+	suspend fun getAll() =
+		col.find().toList()
 
-    suspend fun set(filter: FilterEntry) =
-        col.save(filter)
+	suspend fun set(filter: FilterEntry) =
+		col.save(filter)
 
-    suspend fun remove(filter: FilterEntry) =
-        col.deleteOne(FilterEntry::_id eq filter._id)
+	suspend fun remove(filter: FilterEntry) =
+		col.deleteOne(FilterEntry::_id eq filter._id)
 
-    suspend fun remove(id: UUID) =
-        col.deleteOne(FilterEntry::_id eq id)
+	suspend fun remove(id: UUID) =
+		col.deleteOne(FilterEntry::_id eq id)
 
-    companion object : Collection("filters")
+	companion object : Collection("filters")
 }

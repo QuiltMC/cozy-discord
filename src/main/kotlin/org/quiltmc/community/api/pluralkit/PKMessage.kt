@@ -12,12 +12,12 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PKMessage(
-    val timestamp: Instant,
-    val id: Snowflake,
-    val original: Snowflake,
-    val sender: Snowflake,
-    val channel: Snowflake,
+	val timestamp: Instant,
+	val id: Snowflake,
+	val original: Snowflake,
+	val sender: Snowflake,
+	val channel: Snowflake,
 
-    val system: PKSystem,
-    val member: PKMember,
+	val system: PKSystem,
+	val member: PKMember,
 )

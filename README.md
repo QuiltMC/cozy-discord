@@ -5,7 +5,8 @@ Its features include, but are not limited to:
 
 * A fully-featured suggestions system, with PluralKit support
 * A thread ownership system that allows users to manage and transfer their own threads
-* Moderation tools, such as server and channel locking, mute role permissions syncing, adding staff to threads, and message logging
+* Moderation tools, such as server and channel locking, mute role permissions syncing, adding staff to threads, and
+  message logging
 * GitHub repository management tools
 * A robust message alerting and filtering system
 * Minecraft snapshot alerting and tracking tools
@@ -30,11 +31,16 @@ If you're here to help out, here's what you'll need. Firstly:
 
 * A JDK, **Java 15 or later** - if you need one, try [Adoptium](https://adoptium.net/)
 * An IDE suitable for Kotlin **and Gradle** work
-  * [IntelliJ IDEA](https://www.jetbrains.com/idea/): Community Edition should be plenty
-  * [Eclipse](https://www.eclipse.org/ide/): Install the latest version of [the Kotlin plugin](https://marketplace.eclipse.org/content/kotlin-plugin-eclipse), then go to the `Window` menu, `Preferences`, `Kotlin`, `Compiler` and make sure you set up the `JDK_HOME` and JVM target version
-* A MongoDB server: [Download](https://www.mongodb.com/try/download/community) and install | [Docker](https://hub.docker.com/_/mongo) | [Hosted](https://www.mongodb.com/atlas/database) (there's a free tier)
-  * You may also want [MongoDB Compass](https://www.mongodb.com/products/compass) if you're doing database-related work
-* A Discord bot application, created at [the developer dashboard](https://discord.com/developers/applications). Make sure you turn on all the privileged intents - different modes require different intents!
+	* [IntelliJ IDEA](https://www.jetbrains.com/idea/): Community Edition should be plenty
+	* [Eclipse](https://www.eclipse.org/ide/): Install the latest version
+	  of [the Kotlin plugin](https://marketplace.eclipse.org/content/kotlin-plugin-eclipse), then go to the `Window`
+	  menu, `Preferences`, `Kotlin`, `Compiler` and make sure you set up the `JDK_HOME` and JVM target version
+* A MongoDB server: [Download](https://www.mongodb.com/try/download/community) and install
+  | [Docker](https://hub.docker.com/_/mongo) | [Hosted](https://www.mongodb.com/atlas/database) (there's a free tier)
+	* You may also want [MongoDB Compass](https://www.mongodb.com/products/compass) if you're doing database-related
+	  work
+* A Discord bot application, created at [the developer dashboard](https://discord.com/developers/applications). Make
+  sure you turn on all the privileged intents - different modes require different intents!
 
 # Setting Up
 
@@ -51,13 +57,16 @@ ENVIRONMENT=dev
 ```
 
 **Required settings:**
+
 * `TOKEN`: Your Discord bot token, which you can get from the developer dashboard linked above
 * `DB_URL`: MongoDB database URL- for a local server, you might use `mongodb://localhost:27017/` for example
 
 **Logging settings:**
+
 * `ENVIRONMENT`: `prod` (default) for info logging on SystemErr, `dev` for debug logging on SystemOut
- 
+
 **Settings used by all modes:**
+
 * `COMMUNITY_GUILD_ID`: ID of your "community" server
 * `TOOLCHAIN_GUILD_ID`: ID of your "toolchain" server
 * `GUILDS`: A comma-separated list of guild IDs, if not just the two above
@@ -66,10 +75,12 @@ ENVIRONMENT=dev
 * `MODERATOR_ROLES`: A comma-separated list of moderator role IDs, if not just the two above
 
 **Settings used by mode:** `quilt`
+
 * `SUGGESTION_CHANNEL_ID`: ID of the channel to use for the suggestions system
 * `MESSAGE_LOG_CATEGORIES`: A comma-separated list of category IDs to use for message logging
 
 **Settings used by mode:** `dev`
+
 * `GITHUB_TOKEN`: GitHub auth token, for the GitHub project management commands
 
 Once you've filled out your `.env` file, you can use the `run` gradle task to launch the bot. If this is your first
@@ -88,48 +99,51 @@ you to fix this problem - so try to bear it in mind. Let's see some examples...
 
 ```kotlin
 override suspend fun unload() {
-    super.unload()
-    if (::task.isInitialized) { task.cancel() }
+	super.unload()
+	if (::task.isInitialized) {
+		task.cancel()
+	}
 }
 ```
 
 ```kotlin
 action {
-    val channel = channel.asChannel() as ThreadChannel
-    val member = user.asMember(guild!!.id)
-    val roles = member.roles.toList().map { it.id }
-    if (MODERATOR_ROLES.any { it in roles }) {
-        targetMessages.forEach { it.pin("Pinned by ${member.tag}") }
-        edit { content = "Messages pinned." }
-        return@action
-    }
-    if (channel.ownerId != user.id && threads.isOwner(channel, user) != true) {
-        respond { content = "**Error:** This is not your thread." }
-        return@action
-    }
-    targetMessages.forEach { it.pin("Pinned by ${member.tag}") }
-    edit { content = "Messages pinned." }
+	val channel = channel.asChannel() as ThreadChannel
+	val member = user.asMember(guild!!.id)
+	val roles = member.roles.toList().map { it.id }
+	if (MODERATOR_ROLES.any { it in roles }) {
+		targetMessages.forEach { it.pin("Pinned by ${member.tag}") }
+		edit { content = "Messages pinned." }
+		return@action
+	}
+	if (channel.ownerId != user.id && threads.isOwner(channel, user) != true) {
+		respond { content = "**Error:** This is not your thread." }
+		return@action
+	}
+	targetMessages.forEach { it.pin("Pinned by ${member.tag}") }
+	edit { content = "Messages pinned." }
 }
 ```
 
 ```kotlin
 action {
-    if (this.member?.asMemberOrNull()?.mayManageRole(arguments.role) == true) {
-        arguments.targetUser.removeRole(arguments.role.id,
-            "${this.user.asUserOrNull()?.tag ?: this.user.id} used /team remove"
-        )
-        respond {
-            content = "Successfully removed ${arguments.targetUser.mention} from " +
-                    "${arguments.role.mention}."
-            allowedMentions { }
-        }
-    } else {
-        respond {
-            content = "Your team needs to be above ${arguments.role.mention} in order to remove " +
-                    "anyone from it."
-            allowedMentions { }
-        }
-    }
+	if (this.member?.asMemberOrNull()?.mayManageRole(arguments.role) == true) {
+		arguments.targetUser.removeRole(
+			arguments.role.id,
+			"${this.user.asUserOrNull()?.tag ?: this.user.id} used /team remove"
+		)
+		respond {
+			content = "Successfully removed ${arguments.targetUser.mention} from " +
+					"${arguments.role.mention}."
+			allowedMentions { }
+		}
+	} else {
+		respond {
+			content = "Your team needs to be above ${arguments.role.mention} in order to remove " +
+					"anyone from it."
+			allowedMentions { }
+		}
+	}
 }
 ```
 
@@ -137,62 +151,62 @@ action {
 
 ```kotlin
 override suspend fun unload() {
-    super.unload()
+	super.unload()
 
-    if (::task.isInitialized) {
-        task.cancel()
-    }
+	if (::task.isInitialized) {
+		task.cancel()
+	}
 }
 ```
 
 ```kotlin
 action {
-    val channel = channel.asChannel() as ThreadChannel
-    val member = user.asMember(guild!!.id)
-    val roles = member.roles.toList().map { it.id }
+	val channel = channel.asChannel() as ThreadChannel
+	val member = user.asMember(guild!!.id)
+	val roles = member.roles.toList().map { it.id }
 
-    if (MODERATOR_ROLES.any { it in roles }) {
-        targetMessages.forEach { it.pin("Pinned by ${member.tag}") }
-        edit { content = "Messages pinned." }
+	if (MODERATOR_ROLES.any { it in roles }) {
+		targetMessages.forEach { it.pin("Pinned by ${member.tag}") }
+		edit { content = "Messages pinned." }
 
-        return@action
-    }
+		return@action
+	}
 
-    if (channel.ownerId != user.id && threads.isOwner(channel, user) != true) {
-        respond { content = "**Error:** This is not your thread." }
+	if (channel.ownerId != user.id && threads.isOwner(channel, user) != true) {
+		respond { content = "**Error:** This is not your thread." }
 
-        return@action
-    }
+		return@action
+	}
 
-    targetMessages.forEach { it.pin("Pinned by ${member.tag}") }
+	targetMessages.forEach { it.pin("Pinned by ${member.tag}") }
 
-    edit { content = "Messages pinned." }
+	edit { content = "Messages pinned." }
 }
 ```
 
 ```kotlin
 action {
-    if (this.member?.asMemberOrNull()?.mayManageRole(arguments.role) == true) {
-        arguments.targetUser.removeRole(
-            arguments.role.id,
-      
-            "${this.user.asUserOrNull()?.tag ?: this.user.id} used /team remove"
-        )
-    
-        respond {
-            content = "Successfully removed ${arguments.targetUser.mention} from " +
-                    "${arguments.role.mention}."
-      
-            allowedMentions { }
-        }
-    } else {
-        respond {
-            content = "Your team needs to be above ${arguments.role.mention} in order to remove " +
-                    "anyone from it."
-      
-            allowedMentions { }
-        }
-    }
+	if (this.member?.asMemberOrNull()?.mayManageRole(arguments.role) == true) {
+		arguments.targetUser.removeRole(
+			arguments.role.id,
+
+			"${this.user.asUserOrNull()?.tag ?: this.user.id} used /team remove"
+		)
+
+		respond {
+			content = "Successfully removed ${arguments.targetUser.mention} from " +
+					"${arguments.role.mention}."
+
+			allowedMentions { }
+		}
+	} else {
+		respond {
+			content = "Your team needs to be above ${arguments.role.mention} in order to remove " +
+					"anyone from it."
+
+			allowedMentions { }
+		}
+	}
 }
 ```
 

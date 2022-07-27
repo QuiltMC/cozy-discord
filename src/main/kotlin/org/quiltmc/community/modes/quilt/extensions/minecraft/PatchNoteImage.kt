@@ -10,6 +10,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PatchNoteImage(
-    val title: String,
-    val url: String,
+	val title: String,
+	val url: String,
 )

@@ -14,15 +14,15 @@ import kotlinx.serialization.Serializable
 @Serializable
 @SerialName("text")
 public data class TextBlock(
-    val text: String
+	val text: String
 ) : Block() {
-    override suspend fun create(builder: MessageCreateBuilder) {
-        builder.content = text
-    }
+	override suspend fun create(builder: MessageCreateBuilder) {
+		builder.content = text
+	}
 
-    override suspend fun edit(builder: MessageModifyBuilder) {
-        builder.content = text
-        builder.embeds = mutableListOf()
-        builder.components = mutableListOf()
-    }
+	override suspend fun edit(builder: MessageModifyBuilder) {
+		builder.content = text
+		builder.embeds = mutableListOf()
+		builder.components = mutableListOf()
+	}
 }

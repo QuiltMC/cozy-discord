@@ -5,11 +5,11 @@
  */
 
 plugins {
-    kotlin("jvm")
+	kotlin("jvm")
 }
 
 tasks {
-    kotlin {
-        explicitApi()
-    }
+	kotlin {
+		explicitApi()
+	}
 }
