@@ -59,6 +59,7 @@ object Migrations : KordExKoinComponent {
 					16 -> ::v16
 					17 -> ::v17
 					18 -> ::v18
+					19 -> ::v19
 
 					else -> break
 				}(db.mongo)

@@ -401,7 +401,6 @@ class SuggestionsExtension : Extension() {
 	}
 
 	suspend fun sendSuggestion(suggestion: Suggestion) {
-		println("Sending suggestion: ${suggestion.message}")
 		val channel = getChannel()
 
 		if (suggestion.message == null) {
