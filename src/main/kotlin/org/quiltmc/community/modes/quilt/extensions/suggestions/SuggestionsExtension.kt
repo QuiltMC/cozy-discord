@@ -11,15 +11,17 @@
 package org.quiltmc.community.modes.quilt.extensions.suggestions
 
 import com.kotlindiscord.kord.extensions.checks.hasRole
-import com.kotlindiscord.kord.extensions.checks.inChannel
 import com.kotlindiscord.kord.extensions.checks.inTopChannel
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.converters.impl.optionalEnumChoice
 import com.kotlindiscord.kord.extensions.commands.converters.impl.coalescingString
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalString
+import com.kotlindiscord.kord.extensions.events.interfaces.MessageEvent
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.extensions.event
+import com.kotlindiscord.kord.extensions.modules.extra.pluralkit.events.ProxiedMessageCreateEvent
+import com.kotlindiscord.kord.extensions.modules.extra.pluralkit.events.UnProxiedMessageCreateEvent
 import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.*
 import dev.kord.common.annotation.KordPreview
@@ -27,7 +29,6 @@ import dev.kord.common.entity.ButtonStyle
 import dev.kord.common.entity.MessageType
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.channel.createMessage
-import dev.kord.core.behavior.channel.withTyping
 import dev.kord.core.behavior.edit
 import dev.kord.core.behavior.getChannelOf
 import dev.kord.core.behavior.interaction.response.createEphemeralFollowup
@@ -51,7 +52,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.toList
 import org.koin.core.component.inject
 import org.quiltmc.community.*
-import org.quiltmc.community.api.pluralkit.PluralKit
 import org.quiltmc.community.database.collections.OwnedThreadCollection
 import org.quiltmc.community.database.collections.SuggestionsCollection
 import org.quiltmc.community.database.entities.OwnedThread
@@ -72,7 +72,6 @@ private const val THREAD_INTRO = "This message is at the top of the thread.\n\n"
 private const val COMMENT_SIZE_LIMIT: Long = 800
 private const val SUGGESTION_SIZE_LIMIT: Long = 1000
 private const val THIRTY_SECONDS: Long = 30_000
-private const val TUPPERBOX_DELAY: Long = 5
 
 private const val GITHUB_EMOJI: String = "<:github:864972399111569468>"
 
@@ -88,12 +87,10 @@ class SuggestionsExtension : Extension() {
 	private val suggestions: SuggestionsCollection by inject()
 	private val threads: OwnedThreadCollection by inject()
 
-	private val pluralKit = PluralKit()
-
 	override suspend fun setup() {
 		// region: Events
 
-		event<MessageCreateEvent> {
+		event<UnProxiedMessageCreateEvent> {
 			check {
 				failIfNot {
 					event.message.type == MessageType.Default ||
@@ -101,95 +98,73 @@ class SuggestionsExtension : Extension() {
 				}
 			}
 
-			check { failIf(event.message.data.authorId == event.kord.selfId) }
-			check { failIf(event.message.author?.isBot == true) }
 			check { failIf(event.message.content.trim().isEmpty()) }
 			check { failIf(event.message.interaction != null) }
+			check { failIf(event.message.data.authorId == event.kord.selfId) }
+			check { failIf(event.message.author?.isBot == true) }
 
-			check { inChannel(SUGGESTION_CHANNEL) }
+			// TODO: switch back to inChannel once the bug is fixed
+			// Currently, due to a lack of support for the pluralkit events, inChannel
+			// will always return false.
+			check { failIf(event.message.channelId != SUGGESTION_CHANNEL) }
 
 			action {
-				event.message.channel.withTyping {
-					delay(TUPPERBOX_DELAY.seconds)
-
-					// If it's been yeeted, it's probably been moderated or proxied
-					event.message.channel.getMessageOrNull(event.message.id) ?: return@action
-				}
-
 				val id = event.message.id
+				val suggestion = Suggestion(
+					_id = id,
+					text = event.message.content,
 
-				val suggestion = if (event.message.webhookId != null) {
-					val pkMessage = pluralKit.getMessageOrNull(event.message.id)
+					owner = event.message.author!!.id,
+					ownerAvatar = event.message.author!!.avatar?.url,
+					ownerName = event.message.author!!.asMember(event.message.getGuild().id).displayName,
 
-					if (pkMessage != null) {
-						Suggestion(
-							_id = id,
-							text = event.message.content,
+					positiveVoters = mutableListOf(event.message.author!!.id)
+				)
 
-							owner = pkMessage.sender,
-							ownerAvatar = "https://cdn.discordapp.com/avatars/" +
-									"${event.message.data.author.id.value}/" +
-									"${event.message.data.author.avatar}.webp",
-							ownerName = event.message.data.author.username,
-
-							positiveVoters = mutableListOf(pkMessage.sender),
-
-							isTupper = true
-						)
-					} else {
-						null
-					}
-				} else {
-					val pkMessage = pluralKit.getMessageOrNull(event.message.id)
-
-					if (pkMessage == null) {
-						Suggestion(
-							_id = id,
-							text = event.message.content,
-
-							owner = event.message.author!!.id,
-							ownerAvatar = event.message.author!!.avatar?.url,
-							ownerName = event.message.author!!.asMember(event.message.getGuild().id).displayName,
-
-							positiveVoters = mutableListOf(event.message.author!!.id)
-						)
-					} else {
-						null
-					}
-				} ?: return@action
-
-				if (suggestion.text.length > SUGGESTION_SIZE_LIMIT) {
-					val user = kord.getUser(suggestion.owner)
-
-					val resentText = if (suggestion.text.length > 1800) {
-						suggestion.text.substring(0, 1797) + "..."
-					} else {
-						suggestion.text
-					}
-
-					val errorMessage = "The suggestion you posted was too long (${suggestion.text.length} / " +
-							"$SUGGESTION_SIZE_LIMIT characters)\n\n```\n$resentText\n```"
-
-					val dm = user?.dm {
-						content = errorMessage
-					}
-
-					if (dm != null) {
-						event.message.delete()
-					} else {
-						event.message.reply {
-							content = errorMessage
-						}.delete(THIRTY_SECONDS)
-
-						event.message.delete(THIRTY_SECONDS)
-					}
-
-					return@action
+				if (checkSuggestionLength(suggestion, event)) {
+					suggestions.set(suggestion)
+					sendSuggestion(suggestion)
+					event.message.delete()
 				}
+			}
+		}
 
-				suggestions.set(suggestion)
-				sendSuggestion(suggestion)
-				event.message.delete()
+		event<ProxiedMessageCreateEvent> {
+			check {
+				failIfNot {
+					event.message.type == MessageType.Default ||
+							event.message.type == MessageType.Reply
+				}
+			}
+
+			check { failIf(event.message.content.trim().isEmpty()) }
+			check { failIf(event.message.interaction != null) }
+			check { failIf(event.message.data.authorId == event.kord.selfId) }
+			check { failIf(event.message.author?.isBot == true) }
+
+			// TODO: switch back to inChannel once the bug is fixed
+			check { failIf(event.message.channelId != SUGGESTION_CHANNEL) }
+
+			action {
+				val id = event.message.id
+				val suggestion = Suggestion(
+					_id = id,
+					text = event.message.content,
+
+					owner = event.pkMessage.sender,
+					ownerAvatar = event.pkMessage.member.avatarUrl,
+					ownerName = event.pkMessage.member.name,
+
+					positiveVoters = mutableListOf(event.pkMessage.sender),
+
+					isPluralkit = true
+				)
+
+				if (checkSuggestionLength(suggestion, event)) {
+					suggestions.set(suggestion)
+					sendSuggestion(suggestion)
+					event.message.delete()
+				}
 			}
 		}
 
@@ -393,7 +368,40 @@ class SuggestionsExtension : Extension() {
 		// endregion
 	}
 
+	suspend fun checkSuggestionLength(suggestion: Suggestion, event: MessageEvent): Boolean {
+		if (suggestion.text.length > SUGGESTION_SIZE_LIMIT) {
+			val user = kord.getUser(suggestion.owner)
+
+			val resentText = if (suggestion.text.length > 1800) {
+				suggestion.text.substring(0, 1797) + "..."
+			} else {
+				suggestion.text
+			}
+
+			val errorMessage = "The suggestion you posted was too long (${suggestion.text.length} / " +
+					"$SUGGESTION_SIZE_LIMIT characters)\n\n```\n$resentText\n```"
+
+			val dm = user?.dm {
+				content = errorMessage
+			}
+
+			if (dm != null) {
+				event.message?.delete()
+			} else {
+				event.message?.reply {
+					content = errorMessage
+				}?.delete(THIRTY_SECONDS)
+
+				event.message?.delete(THIRTY_SECONDS)
+			}
+
+			return false
+		}
+		return true
+	}
+
 	suspend fun sendSuggestion(suggestion: Suggestion) {
+		println("Sending suggestion: ${suggestion.message}")
 		val channel = getChannel()
 
 		if (suggestion.message == null) {
@@ -553,7 +561,7 @@ class SuggestionsExtension : Extension() {
 					icon = suggestion.ownerAvatar
 				}
 
-				description = if (suggestion.isTupper) {
+				description = if (suggestion.isPluralkit) {
 					"@${suggestion.ownerName} (<@${suggestion.owner.value}>)\n\n"
 				} else {
 					"<@${suggestion.owner.value}>\n\n"
@@ -625,7 +633,7 @@ class SuggestionsExtension : Extension() {
 					icon = suggestion.ownerAvatar
 				}
 
-				description = if (suggestion.isTupper) {
+				description = if (suggestion.isPluralkit) {
 					"@${suggestion.ownerName} (<@${suggestion.owner.value}>)\n\n"
 				} else {
 					"<@${suggestion.owner.value}>\n\n"

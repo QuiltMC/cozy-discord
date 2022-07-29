@@ -67,7 +67,3 @@ internal val SUGGESTION_CHANNEL = Snowflake(
 internal val GALLERY_CHANNEL = Snowflake(
 	envOrNull("GALLERY_CHANNEL_ID")?.toLong() ?: 832348385997619300
 )
-
-internal val SHOWCASE_CATEGORY = Snowflake(
-	envOrNull("SHOWCASE_CATEGORY_ID")?.toLong() ?: 832351105898905602
-)
