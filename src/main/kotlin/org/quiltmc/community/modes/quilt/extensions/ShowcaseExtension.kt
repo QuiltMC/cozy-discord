@@ -17,6 +17,8 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.extensions.event
+import com.kotlindiscord.kord.extensions.modules.extra.pluralkit.events.PKMessageCreateEvent
+import com.kotlindiscord.kord.extensions.modules.extra.pluralkit.events.ProxiedMessageCreateEvent
 import com.kotlindiscord.kord.extensions.storage.StorageType
 import com.kotlindiscord.kord.extensions.storage.StorageUnit
 import com.kotlindiscord.kord.extensions.types.respond
@@ -36,7 +38,6 @@ import dev.kord.core.behavior.edit
 import dev.kord.core.entity.channel.CategorizableChannel
 import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.entity.channel.thread.TextChannelThread
-import dev.kord.core.event.message.MessageCreateEvent
 import dev.kord.core.event.message.ReactionAddEvent
 import kotlinx.coroutines.delay
 import kotlinx.datetime.Clock
@@ -78,7 +79,7 @@ class ShowcaseExtension : Extension() {
 	private val homoglyphs = HomoglyphBuilder.build()
 
 	override suspend fun setup() {
-		event<MessageCreateEvent> {
+		event<PKMessageCreateEvent> {
 			check {
 				failIfNot {
 					event.message.type == MessageType.Default ||
@@ -87,12 +88,13 @@ class ShowcaseExtension : Extension() {
 			}
 
 			check { failIf(event.message.data.authorId == event.kord.selfId) }
-			check { failIf(event.message.author == null) }
-			check { failIf(event.message.author?.isBot == true) }
 			check { failIf(event.message.content.trim().isEmpty()) }
 			check { failIf(event.message.interaction != null) }
 
-			check { inChannel(GALLERY_CHANNEL) }
+			// TODO: switch back to inChannel once the bug is fixed
+			// Currently, due to a lack of support for the pluralkit events, inChannel
+			// will always return false.
+			check { failIf(event.message.channelId != GALLERY_CHANNEL) }
 
 			check {
 				// Don't do anything if the message mentions a thread in the same channel.
@@ -118,7 +120,7 @@ class ShowcaseExtension : Extension() {
 					else -> return@action
 				}
 
-				val author = event.message.author!!
+				val authorId = event.message.author?.id ?: (event as ProxiedMessageCreateEvent).pkMessage.sender
 				val channel = event.message.channel.asChannelOf<TextChannel>()
 
 				@Suppress("SpreadOperator")  // What choice do I have, exactly?
@@ -137,7 +139,7 @@ class ShowcaseExtension : Extension() {
 				)
 
 				threads.set(
-					OwnedThread(thread.id, author.id, guild.id)
+					OwnedThread(thread.id, authorId, guild.id)
 				)
 
 				val message = thread.createMessage {
@@ -160,7 +162,7 @@ class ShowcaseExtension : Extension() {
 				}
 
 				message.edit {
-					content = "Welcome to your new gallery thread, ${author.mention}! This message is at the " +
+					content = "Welcome to your new gallery thread, <@$authorId>! This message is at the " +
 							"start of the thread. Remember, you're welcome to use the `/thread` commands to manage " +
 							"your thread as needed.\n\n" +
 

@@ -65,6 +65,7 @@ dependencies {
 	implementation(libs.kordex.core)
 	implementation(libs.kordex.mappings)
 	implementation(libs.kordex.phishing)
+	implementation(libs.kordex.pluralkit)
 
 	implementation(libs.commons.text)
 	implementation(libs.homoglyph)

@@ -35,7 +35,7 @@ data class Suggestion(
 	val positiveVoters: MutableList<Snowflake> = mutableListOf(),
 	val negativeVoters: MutableList<Snowflake> = mutableListOf(),
 
-	val isTupper: Boolean = false,
+	val isPluralkit: Boolean = false,
 ) : Entity<Snowflake> {
 	val positiveVotes get() = positiveVoters.size
 	val negativeVotes get() = negativeVoters.size

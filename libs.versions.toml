@@ -32,6 +32,7 @@ kordex-annotationProcessor = { module = "com.kotlindiscord.kord.extensions:annot
 kordex-core = { module = "com.kotlindiscord.kord.extensions:kord-extensions", version.ref = "kordex" }
 kordex-mappings = { module = "com.kotlindiscord.kord.extensions:extra-mappings", version.ref = "kordex" }
 kordex-phishing = { module = "com.kotlindiscord.kord.extensions:extra-phishing", version.ref = "kordex" }
+kordex-pluralkit = { module = "com.kotlindiscord.kord.extensions:extra-pluralkit", version.ref = "kordex" }
 kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8" }
 kx-ser = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kx-ser" }
