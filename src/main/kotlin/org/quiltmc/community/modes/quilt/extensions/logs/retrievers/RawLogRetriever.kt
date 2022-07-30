@@ -22,7 +22,8 @@ private val strategyMap: Map<Regex, String> = mutableMapOf(
 	"pastes.dev/$SLUG".toRegex() to "https://api.pastes.dev/$1",
 	"termbin.com/$SLUG".toRegex() to "https://termbin.com/$1",
 	"hastebin.com/$SLUG".toRegex() to "https://hastebin.com/raw/$1",
-	"https://www.toptal.com/developers/hastebin/$SLUG".toRegex() to "https://www.toptal.com/developers/hastebin/raw/$1"
+	"toptal.com/developers/hastebin/$SLUG".toRegex() to "https://www.toptal.com/developers/hastebin/raw/$1",
+	"hst.sh/$SLUG".toRegex() to "https://hst.sh/raw/$1",
 
 	"gist.github.com/$SLUG/$SLUG".toRegex() to "https://gist.githubusercontent.com/raw/$2",
 	"gist.github.com/$SLUG".toRegex() to "https://gist.githubusercontent.com/raw/$1",
