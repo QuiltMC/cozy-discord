@@ -18,6 +18,7 @@ import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
 import dev.kord.core.behavior.edit
 import dev.kord.core.behavior.interaction.response.respond
+import dev.kord.core.entity.Role
 import dev.kord.core.event.interaction.ButtonInteractionCreateEvent
 import dev.kord.core.event.interaction.InteractionCreateEvent
 import dev.kord.core.event.interaction.SelectMenuInteractionCreateEvent
@@ -82,11 +83,16 @@ public data class RolesBlock(
 		}
 	}
 
-	private suspend fun getGuildRoles() =
-		guild.roles
+	private suspend fun getGuildRoles(): Map<Snowflake, Role> {
+		// Each role ID in the order they appear in the YAML
+		val sortedRoleIds = roles.toList().map { it.first }
+
+		return guild.roles
 			.filter { it.id in roles.keys }
 			.toList()
+			.sortedBy { sortedRoleIds.indexOf(it.id) }
 			.associateBy { it.id }
+	}
 
 	private fun generateButtonId(): String =
 		"roles/button/${channel.id}/$id"
