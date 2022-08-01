@@ -141,9 +141,9 @@
       description: "Get pinged when a new Minecraft snapshot or release is published in <#838805249271267398>."
       emoji: "📢"
 
-      976082711817113610:
-        description: "Let people know that you're using a translator to talk."
-        emoji: "<:via_translator:976173251720015922>"
+    976082711817113610:
+      description: "Let people know that you're using a translator to talk."
+      emoji: "<:via_translator:976173251720015922>"
 
 - type: links
 
