@@ -324,7 +324,13 @@ class MinecraftExtension : Extension() {
 	}
 
 	private suspend fun TopGuildMessageChannel.relay(patchNote: PatchNote, maxLength: Int = 1000) {
-		val message = createMessage { embed { patchNotes(patchNote, maxLength) } }
+		val message = createMessage {
+			// If we are in the community guild, ping the update role
+			if (guildId == COMMUNITY_GUILD) {
+				content = "<@$MINECRAFT_UPDATE_PING_ROLE>"
+			}
+			embed { patchNotes(patchNote, maxLength) }
+		}
 
 		val title = if (patchNote.title.startsWith("minecraft ", true)) {
 			patchNote.title.split(" ", limit = 2).last()

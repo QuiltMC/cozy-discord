@@ -49,6 +49,9 @@ internal val MODERATOR_ROLES: List<Snowflake> =
 		?.map { Snowflake(it.trim()) }
 		?: listOf(COMMUNITY_MODERATOR_ROLE, TOOLCHAIN_MODERATOR_ROLE)
 
+internal val MINECRAFT_UPDATE_PING_ROLE = envOrNull("MINECRAFT_UPDATE_PING_ROLE")?.let { Snowflake(it) }
+	?: Snowflake(1003614007237816361)
+
 internal val COMMUNITY_GUILD = Snowflake(
 	envOrNull("COMMUNITY_GUILD_ID")?.toLong() ?: 817576132726620200
 )
