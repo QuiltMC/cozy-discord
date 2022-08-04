@@ -327,7 +327,7 @@ class MinecraftExtension : Extension() {
 		val message = createMessage {
 			// If we are in the community guild, ping the update role
 			if (guildId == COMMUNITY_GUILD) {
-				content = "<@$MINECRAFT_UPDATE_PING_ROLE>"
+				content = "<@&$MINECRAFT_UPDATE_PING_ROLE>"
 			}
 			embed { patchNotes(patchNote, maxLength) }
 		}
