@@ -70,3 +70,6 @@ internal val SUGGESTION_CHANNEL = Snowflake(
 internal val GALLERY_CHANNEL = Snowflake(
 	envOrNull("GALLERY_CHANNEL_ID")?.toLong() ?: 832348385997619300
 )
+
+internal val COMMUNITY_RELEASE_CHANNELS = envOrNull("COMMUNITY_RELEASE_CHANNELS")?.split(',')
+	?.map { Snowflake(it.trim()) } ?: listOf()

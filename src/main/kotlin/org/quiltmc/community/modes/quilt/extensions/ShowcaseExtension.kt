@@ -53,14 +53,6 @@ import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
 private val THREAD_DELAY = 3.seconds
-private const val CHANNEL_NAME_LENGTH = 75
-
-private val THREAD_DELIMITERS = arrayOf(
-	",", ".",
-	"(", ")",
-	"<", ">",
-	"[", "]",
-)
 
 private val CHANNEL_REGEX = "<#(\\d)+>".toRegex()
 
@@ -123,15 +115,7 @@ class ShowcaseExtension : Extension() {
 				val authorId = event.message.author?.id ?: (event as ProxiedMessageCreateEvent).pkMessage.sender
 				val channel = event.message.channel.asChannelOf<TextChannel>()
 
-				@Suppress("SpreadOperator")  // What choice do I have, exactly?
-				val title = event.message.content.trim()
-					.split("\n")
-					.firstOrNull()
-					?.split(*THREAD_DELIMITERS)
-					?.firstOrNull()
-					?.take(CHANNEL_NAME_LENGTH)
-
-					?: "Gallery | ${event.message.id}"
+				val title = event.message.contentToThreadName("Gallery")
 
 				val thread = channel.startPublicThreadWithMessage(
 					event.message.id,

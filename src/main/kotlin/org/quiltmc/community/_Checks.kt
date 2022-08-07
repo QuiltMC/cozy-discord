@@ -159,3 +159,24 @@ suspend fun CheckContext<*>.notHasBaseModeratorRole() {
 		}
 	}
 }
+
+suspend fun CheckContext<*>.inReleaseChannel() {
+	if (!passed) {
+		return
+	}
+
+	val logger = KotlinLogging.logger("org.quiltmc.community.inReleaseChannel")
+	val message = messageFor(event)?.asMessageOrNull()
+
+	if (message == null) {
+		logger.nullMessage(event)
+
+		fail()
+	} else {
+		if (message.channelId !in COMMUNITY_RELEASE_CHANNELS) {
+			logger.failed("Message not in a release chanel")
+
+			fail("Message must be in a release channel")
+		}
+	}
+}
