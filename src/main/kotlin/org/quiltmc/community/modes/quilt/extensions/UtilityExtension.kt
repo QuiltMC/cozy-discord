@@ -178,6 +178,7 @@ class UtilityExtension : Extension() {
 			check { inQuiltGuild() }
 			check { failIf(event.channel.ownerId == kord.selfId) }
 			check { failIf(event.channel.member != null) }  // We only want thread creation, not join
+			check { failIf(event.channel.member?.asUserOrNull()?.isBot == true) }
 
 			action {
 				val owner = event.channel.owner.asUser()
