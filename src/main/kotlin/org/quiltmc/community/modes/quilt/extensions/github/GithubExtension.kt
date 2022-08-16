@@ -101,6 +101,8 @@ class GithubExtension : Extension() {
 				requirePermission(Permission.BanMembers)
 
 				group("blocks") {
+					description = "Organization block management commands"
+
 					ephemeralSubCommand(::OrgArgs) {
 						name = "list"
 						description = "List all users that are blocked from the organization"
@@ -189,7 +191,7 @@ class GithubExtension : Extension() {
 				}
 
 				group("issues") {
-					description = "GitHub issue management commands"
+					description = "Issue management commands"
 
 					ephemeralSubCommand(::DeleteIssueArgs) {
 						name = "delete"
