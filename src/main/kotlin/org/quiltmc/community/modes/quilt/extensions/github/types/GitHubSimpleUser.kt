@@ -11,17 +11,18 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class GitHubSimpleUser(
-	val email: String?,
 	val id: Int,
 	val login: String,
-	val name: String?,
 	val type: String,
+
+	val email: String? = null,
+	val name: String? = null,
 
 	@SerialName("avatar_url")
 	val avatarUrl: String,
 
 	@SerialName("gravatar_id")
-	val gravatarId: String?,
+	val gravatarId: String? = null,
 
 	@SerialName("site_admin")
 	val isSiteAdmin: Boolean,
