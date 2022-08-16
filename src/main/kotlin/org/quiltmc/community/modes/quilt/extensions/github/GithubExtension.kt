@@ -10,12 +10,14 @@ import com.expediagroup.graphql.client.ktor.GraphQLKtorClient
 import com.kotlindiscord.kord.extensions.DISCORD_RED
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
+import com.kotlindiscord.kord.extensions.commands.application.slash.group
 import com.kotlindiscord.kord.extensions.commands.converters.impl.int
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalString
 import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
+import dev.kord.common.entity.Permission
 import dev.kord.core.behavior.channel.createEmbed
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
@@ -42,85 +44,90 @@ class GithubExtension : Extension() {
 	override suspend fun setup() {
 		for (guildId in GUILDS) {
 			ephemeralSlashCommand {
-				name = "github-issue"
-				description = "Manage issues on GitHub"
-
-				guild(guildId)
+				name = "github"
+				description = "GitHub management commands"
 
 				check { hasBaseModeratorRole() }
 
-				ephemeralSubCommand(::DeleteIssueArgs) {
-					name = "delete"
-					description = "Delete the given issue"
+				guild(guildId)
+				requirePermission(Permission.BanMembers)
 
-					action {
-						val repo = client
-							.execute(FindIssueId(FindIssueId.Variables(arguments.repo, arguments.issue)))
-							.data
-							?.repository
+				group("issues") {
+					description = "GitHub issue management commands"
 
-						when {
-							repo == null -> respond {
-								content = "Repository ${arguments.repo} not found!"
-							}
+					ephemeralSubCommand(::DeleteIssueArgs) {
+						name = "delete"
+						description = "Delete the given issue"
 
-							repo.pullRequest != null -> respond {
-								content = "#${arguments.issue} appears to be a pull request. " +
-										"Github does not allow deleting pull requests! " +
-										"Please contact Github Support."
-							}
+						action {
+							val repo = client
+								.execute(FindIssueId(FindIssueId.Variables(arguments.repo, arguments.issue)))
+								.data
+								?.repository
 
-							repo.issue != null -> {
-								// try to delete the issue
-								val response = client.execute(DeleteIssue(DeleteIssue.Variables(repo.issue.id)))
+							when {
+								repo == null -> respond {
+									content = "Repository ${arguments.repo} not found!"
+								}
 
-								if (response.errors.isNullOrEmpty()) {
-									respond {
-										content = "Issue #${arguments.issue} in repository ${arguments.repo}" +
-												" deleted successfully!"
-									}
+								repo.pullRequest != null -> respond {
+									content = "#${arguments.issue} appears to be a pull request. " +
+											"Github does not allow deleting pull requests! " +
+											"Please contact Github Support."
+								}
 
-									// log the deletion
-									// TODO: Github's webhooks do provide a way to automatically log all deletions
-									//      through a webhook, but there is no filter.
-									//      In the future, we could set something up on Cozy to automatically
-									//      filter the github webhook to create an action log.
-									getGithubLogChannel()?.createEmbed {
-										val issue = repo.issue
+								repo.issue != null -> {
+									// try to delete the issue
+									val response = client.execute(DeleteIssue(DeleteIssue.Variables(repo.issue.id)))
 
-										title = "Issue Deleted: ${issue.title}"
-										color = DISCORD_RED
-										description = issue.body
-
-										field {
-											val loginAndId = getActorLoginAndId(issue.author!!)
-
-											name = "Issue Author"
-											value = "${loginAndId.first} (${loginAndId.second})"
+									if (response.errors.isNullOrEmpty()) {
+										respond {
+											content = "Issue #${arguments.issue} in repository ${arguments.repo}" +
+													" deleted successfully!"
 										}
 
-										userField(user, "Moderator")
+										// log the deletion
+										// TODO: Github's webhooks do provide a way to automatically log all deletions
+										//      through a webhook, but there is no filter.
+										//      In the future, we could set something up on Cozy to automatically
+										//      filter the github webhook to create an action log.
+										getGithubLogChannel()?.createEmbed {
+											val issue = repo.issue
 
-										if (arguments.reason != null) {
+											title = "Issue Deleted: ${issue.title}"
+											color = DISCORD_RED
+											description = issue.body
+
 											field {
-												name = "Reason"
-												value = arguments.reason!!
+												val loginAndId = getActorLoginAndId(issue.author!!)
+
+												name = "Issue Author"
+												value = "${loginAndId.first} (${loginAndId.second})"
+											}
+
+											userField(user, "Moderator")
+
+											if (arguments.reason != null) {
+												field {
+													name = "Reason"
+													value = arguments.reason!!
+												}
+											}
+										}
+									} else {
+										respond {
+											// TODO: need a prettier way to report errors
+											content = "Could not delete issue due to errors:"
+											response.errors!!.forEach {
+												content += "\n" + it.message
 											}
 										}
 									}
-								} else {
-									respond {
-										// TODO: need a prettier way to report errors
-										content = "Could not delete issue due to errors:"
-										response.errors!!.forEach {
-											content += "\n" + it.message
-										}
-									}
 								}
-							}
 
-							else -> respond {
-								content = "Could not find issue #${arguments.issue} in repository ${arguments.repo}"
+								else -> respond {
+									content = "Could not find issue #${arguments.issue} in repository ${arguments.repo}"
+								}
 							}
 						}
 					}
