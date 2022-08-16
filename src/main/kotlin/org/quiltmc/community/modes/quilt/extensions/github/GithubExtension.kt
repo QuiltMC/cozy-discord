@@ -112,6 +112,8 @@ class GithubExtension : Extension() {
 							val blocks = try {
 								getOrgBlocks(arguments.org)
 							} catch (e: Exception) {
+								logger.error(e) { "Failed to retrieve blocked users for ${arguments.org}" }
+
 								respond {
 									content = "Failed to retrieve blocked users for `${arguments.org}` - does the " +
 											"bot have permission?"
