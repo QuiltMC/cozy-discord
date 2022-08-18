@@ -9,7 +9,6 @@ package org.quiltmc.community.cozy.modules.moderation
 import com.kotlindiscord.kord.extensions.DISCORD_BLURPLE
 import com.kotlindiscord.kord.extensions.annotations.DoNotChain
 import com.kotlindiscord.kord.extensions.checks.anyGuild
-import com.kotlindiscord.kord.extensions.checks.isNotInThread
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
 import com.kotlindiscord.kord.extensions.commands.converters.impl.duration
@@ -82,7 +81,6 @@ public class ModerationExtension(
 			description = "Manage slowmode of the current channel or thread"
 
 			check { anyGuild() }
-			check { isNotInThread() }
 
 			config.getCommandChecks().forEach(::check)
 
