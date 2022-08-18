@@ -23,8 +23,11 @@ import com.kotlindiscord.kord.extensions.utils.timeout
 import dev.kord.core.behavior.channel.asChannelOf
 import dev.kord.core.behavior.channel.createEmbed
 import dev.kord.core.behavior.channel.edit
+import dev.kord.core.behavior.channel.threads.edit
 import dev.kord.core.entity.Member
+import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.core.entity.channel.TextChannel
+import dev.kord.core.entity.channel.thread.ThreadChannel
 import kotlinx.datetime.DateTimePeriod
 import org.quiltmc.community.cozy.modules.moderation.config.ModerationConfig
 import kotlin.time.Duration
@@ -76,7 +79,7 @@ public class ModerationExtension(
 
 		ephemeralSlashCommand {
 			name = "slowmode"
-			description = "Manage slowmode of the current channel"
+			description = "Manage slowmode of the current channel or thread"
 
 			check { anyGuild() }
 			check { isNotInThread() }
@@ -85,24 +88,30 @@ public class ModerationExtension(
 
 			ephemeralSubCommand {
 				name = "get"
-				description = "Get the slowmode of the channel"
+				description = "Get the slowmode of the channel or thread"
 
 				action {
 					respond {
 						content = "Slowmode is currently " +
-								"${channel.asChannelOf<TextChannel>().userRateLimit} second(s)."
+								"${channel.asChannelOf<GuildMessageChannel>().data.rateLimitPerUser.value ?: 0} " +
+								"second(s)."
 					}
 				}
 			}
 
 			ephemeralSubCommand {
 				name = "reset"
-				description = "Reset the slowmode of the channel back to 0"
+				description = "Reset the slowmode of the channel or thread back to 0"
 
 				action {
-					val channel = channel.asChannel() as TextChannel
+					val channel = this.channel.asChannel() as? TextChannel
+					val thread = this.channel.asChannel() as? ThreadChannel
 
-					channel.edit {
+					thread?.edit {
+						rateLimitPerUser = Duration.ZERO
+					}
+
+					channel?.edit {
 						rateLimitPerUser = Duration.ZERO
 					}
 
@@ -114,12 +123,17 @@ public class ModerationExtension(
 
 			ephemeralSubCommand(::SlowmodeEditArguments) {
 				name = "set"
-				description = "Set the slowmode of the channel"
+				description = "Set the slowmode of the channel or thread"
 
 				action {
-					val channel = channel.asChannel() as TextChannel
+					val channel = this.channel.asChannel() as? TextChannel
+					val thread = this.channel.asChannel() as? ThreadChannel
 
-					channel.edit {
+					thread?.edit {
+						rateLimitPerUser = arguments.duration.toTotalSeconds().seconds
+					}
+
+					channel?.edit {
 						rateLimitPerUser = arguments.duration.toTotalSeconds().seconds
 					}
 
@@ -131,7 +145,7 @@ public class ModerationExtension(
 						field {
 							inline = true
 							name = "Channel"
-							value = channel.mention
+							value = channel?.mention ?: thread!!.mention
 						}
 
 						field {
