@@ -56,8 +56,11 @@ private val CURSEFORGE_URL_REGEX = Regex("curseforge\\.com/minecraft/mc-mods/([\
 // So that even the most unlucky people should hopefully be caught by this
 val TIME_BETWEEN_PROJECT_STATUS_CHECKS = 60.minutes
 const val MAX_RETRY_FOR_CHECKING_PROJECTS = 72
+const val POLLING_SECONDS_FOR_PROCESSING = 15L
 
 private val THREAD_DELAY = 3.seconds
+
+private val unitsToProcess = mutableListOf<ModHostingVerificationProcessingUnit>()
 
 class ModHostingVerificationExtension : Extension() {
 	override val name: String = "Mod Hosting Verification"
@@ -104,6 +107,15 @@ class ModHostingVerificationExtension : Extension() {
 				handleMessage(event.message, event.author!!)
 			}
 		}
+
+		scheduler.schedule(
+			TIME_BETWEEN_PROJECT_STATUS_CHECKS,
+			true,
+			"Mod hosting checker",
+			POLLING_SECONDS_FOR_PROCESSING,
+			true,
+			::processUnits
+		)
 	}
 
 	/**
@@ -112,7 +124,7 @@ class ModHostingVerificationExtension : Extension() {
 	 * If [ProjectStateCollection.anyMarkedAsQuiltCompatible] is true, this method may have
 	 * returned early and the other collections are incomplete, which works with our processing logic.
 	 */
-	private suspend fun getStateOfProjects(projects: List<Project>): ProjectStateCollection {
+	internal suspend fun getStateOfProjects(projects: List<Project>): ProjectStateCollection {
 		// Keep track of any failures so that we can maybe queue up a delayed check later after some more checks
 		val projectStates = ProjectStateCollection()
 
@@ -189,41 +201,15 @@ class ModHostingVerificationExtension : Extension() {
 
 		// Found some projects that are missing files to check against
 		if (states.missingFiles.isNotEmpty()) {
-			waitForFiles(author, message, states.missingFiles.toMutableList(), MAX_RETRY_FOR_CHECKING_PROJECTS)
-		}
-	}
-
-	private fun waitForFiles(
-		author: User,
-		message: Message,
-		projectsMissingFiles: MutableList<Project>,
-		remainingRetries: Int
-	) {
-		scheduler.schedule(
-			TIME_BETWEEN_PROJECT_STATUS_CHECKS,
-			pollingSeconds = 30
-		) {
-			val states = getStateOfProjects(projectsMissingFiles)
-
-			if (states.anyMarkedAsQuiltCompatible) {
-				return@schedule
-			}
-
-			// We only found projects not marked as quilt compatible
-			if (states.missingFiles.isEmpty() && states.notMarkedCompatible.isNotEmpty()) {
-				messageUserAboutAddingCompat(
+			// Queue for future processing
+			unitsToProcess.add(
+				ModHostingVerificationProcessingUnit(
 					author,
 					message,
-					states.notMarkedCompatible
+					states.missingFiles.toMutableList(),
+					MAX_RETRY_FOR_CHECKING_PROJECTS
 				)
-
-				return@schedule
-			}
-
-			// Found some projects that are missing files to check against
-			if (states.missingFiles.isNotEmpty() && remainingRetries - 1 >= 0) {
-				waitForFiles(author, message, states.missingFiles, remainingRetries - 1)
-			}
+			)
 		}
 	}
 
@@ -265,10 +251,9 @@ class ModHostingVerificationExtension : Extension() {
 	}
 
 	/**
-	 * Makes a proxied call to the curseforge API for the project files, checks each to see if any are marked as quilt
+	 * Makes a proxied call to the curseforge API for the project files, checks each to
+	 * see if any of the recent ones are marked as quilt compatible
 	 * and returns the proper status.
-	 *
-	 * Files older than 1 week are not checked.
 	 */
 	private suspend fun checkCurseforge(projectSlug: String): ProjectState {
 		val queryUrl = "https://api.cfwidget.com/minecraft/mc-mods/$projectSlug"
@@ -431,5 +416,38 @@ class ModHostingVerificationExtension : Extension() {
 				}
 			}
 		}
+	}
+
+	private suspend fun processUnits() {
+		val toRequeue = mutableListOf<ModHostingVerificationProcessingUnit>()
+
+		unitsToProcess.forEach {
+			val states = getStateOfProjects(it.missingFiles)
+
+			// Found a project marked compatible, don't do anything
+			if (states.anyMarkedAsQuiltCompatible) {
+				return@forEach
+			}
+
+			// We only found projects not marked as quilt compatible
+			if (states.missingFiles.isEmpty() && states.notMarkedCompatible.isNotEmpty()) {
+				messageUserAboutAddingCompat(
+					it.author,
+					it.message,
+					states.notMarkedCompatible
+				)
+
+				return@forEach
+			}
+
+			// Found some projects that are missing files to check against
+			if (states.missingFiles.isNotEmpty() && it.remainingAttempts - 1 >= 0) {
+				// Requeue for future processing
+				unitsToProcess.add(it.copy(remainingAttempts = it.remainingAttempts - 1))
+			}
+		}
+
+		unitsToProcess.clear()
+		unitsToProcess.addAll(toRequeue)
 	}
 }
