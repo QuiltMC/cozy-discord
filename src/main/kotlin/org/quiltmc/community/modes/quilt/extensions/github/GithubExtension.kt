@@ -194,6 +194,10 @@ class GithubExtension : Extension() {
 
 								userField(user, "Moderator")
 							}
+
+							respond {
+								content = "User `${arguments.username}` is now blocked from `${arguments.org}`"
+							}
 						}
 					}
 
@@ -217,6 +221,10 @@ class GithubExtension : Extension() {
 								color = DISCORD_GREEN
 
 								userField(user, "Moderator")
+							}
+
+							respond {
+								content = "User `${arguments.username}` is now unblocked from `${arguments.org}`"
 							}
 						}
 					}
