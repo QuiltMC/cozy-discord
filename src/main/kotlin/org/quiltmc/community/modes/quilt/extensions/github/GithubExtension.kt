@@ -4,6 +4,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+@file:Suppress("MagicNumber")
+
 package org.quiltmc.community.modes.quilt.extensions.github
 
 import com.expediagroup.graphql.client.ktor.GraphQLKtorClient
@@ -28,6 +30,7 @@ import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 import mu.KotlinLogging
@@ -72,22 +75,49 @@ class GithubExtension : Extension() {
 		expectSuccess = false
 	}
 
-	private suspend fun getOrgBlocks(org: String): List<GitHubSimpleUser> =
-		client
-			.get(BLOCKS_URL.replace("{ORG}", org))
-			.body()
+	private suspend fun getOrgBlocks(org: String): List<GitHubSimpleUser> {
+		val response = client.get(BLOCKS_URL.replace("{ORG}", org))
+
+		logger.info { "GET $BLOCKS_URL -> ${response.status.value}; {ORG} = $org" }
+
+		if (response.status.value >= 400) {
+			val text = response.bodyAsText()
+
+			logger.error { "Response content:\n\n$text" }
+		}
+
+		return response.body()
+	}
 
 	@Suppress("MagicNumber")
-	private suspend fun addOrgBlock(org: String, user: String): Boolean =
-		client
-			.get(BLOCKS_URL.replace("{ORG}", org) + "/$user")
-			.status.value == 204
+	private suspend fun addOrgBlock(org: String, user: String): Boolean {
+		val response = client.put(BLOCKS_URL.replace("{ORG}", org) + "/$user")
+
+		logger.info { "PUT $BLOCKS_URL/{USER} -> ${response.status.value}; {ORG} = $org, {USER} = $user" }
+
+		if (response.status.value >= 400) {
+			val text = response.bodyAsText()
+
+			logger.error { "Response content:\n\n$text" }
+		}
+
+		return response.status.value == 204
+	}
 
 	@Suppress("MagicNumber")
-	private suspend fun removeOrgBlock(org: String, user: String): Boolean =
-		client
-			.get(BLOCKS_URL.replace("{ORG}", org) + "/$user")
-			.status.value == 204
+	private suspend fun removeOrgBlock(org: String, user: String): Boolean {
+		val response = client.delete(BLOCKS_URL.replace("{ORG}", org) + "/$user")
+
+		logger.info { "DELETE $BLOCKS_URL/{USER} -> ${response.status.value}; {ORG} = $org, {USER} = $user" }
+
+		if (response.status.value >= 400) {
+			val text = response.bodyAsText()
+
+			logger.error { "Response content:\n\n$text" }
+		}
+
+		return response.status.value == 204
+	}
 
 	override suspend fun setup() {
 		for (guildId in GUILDS) {
