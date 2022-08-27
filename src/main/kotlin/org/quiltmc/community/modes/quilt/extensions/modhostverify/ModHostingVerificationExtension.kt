@@ -124,7 +124,7 @@ class ModHostingVerificationExtension : Extension() {
 	 * If [ProjectStateCollection.anyMarkedAsQuiltCompatible] is true, this method may have
 	 * returned early and the other collections are incomplete, which works with our processing logic.
 	 */
-	internal suspend fun getStateOfProjects(projects: List<Project>): ProjectStateCollection {
+	private suspend fun getStateOfProjects(projects: List<Project>): ProjectStateCollection {
 		// Keep track of any failures so that we can maybe queue up a delayed check later after some more checks
 		val projectStates = ProjectStateCollection()
 
@@ -179,8 +179,6 @@ class ModHostingVerificationExtension : Extension() {
 			}
 		}
 
-		logger.info { foundProjects }
-
 		val states = getStateOfProjects(foundProjects)
 
 		// Don't have to do anything if we found a project marked as quilt compatible
@@ -190,6 +188,10 @@ class ModHostingVerificationExtension : Extension() {
 
 		// We only found projects not marked as quilt compatible
 		if (states.missingFiles.isEmpty() && states.notMarkedCompatible.isNotEmpty()) {
+			logger.info {
+				"Only found projects not marked as quilt compatible in message ${message.id}, messaging user ${author.id}"
+			}
+
 			messageUserAboutAddingCompat(
 				author,
 				message,
@@ -201,6 +203,8 @@ class ModHostingVerificationExtension : Extension() {
 
 		// Found some projects that are missing files to check against
 		if (states.missingFiles.isNotEmpty()) {
+			logger.info { "Missing some files/projects in message ${message.id}, adding to queue to attempt again later" }
+
 			// Queue for future processing
 			unitsToProcess.add(
 				ModHostingVerificationProcessingUnit(
@@ -421,8 +425,10 @@ class ModHostingVerificationExtension : Extension() {
 	private suspend fun processUnits() {
 		val toRequeue = mutableListOf<ModHostingVerificationProcessingUnit>()
 
-		unitsToProcess.forEach {
-			val states = getStateOfProjects(it.missingFiles)
+		val failed = mutableListOf<ModHostingVerificationProcessingUnit>()
+
+		unitsToProcess.forEach { processingUnit ->
+			val states = getStateOfProjects(processingUnit.missingFiles)
 
 			// Found a project marked compatible, don't do anything
 			if (states.anyMarkedAsQuiltCompatible) {
@@ -431,9 +437,11 @@ class ModHostingVerificationExtension : Extension() {
 
 			// We only found projects not marked as quilt compatible
 			if (states.missingFiles.isEmpty() && states.notMarkedCompatible.isNotEmpty()) {
+				failed.add(processingUnit)
+
 				messageUserAboutAddingCompat(
-					it.author,
-					it.message,
+					processingUnit.author,
+					processingUnit.message,
 					states.notMarkedCompatible
 				)
 
@@ -441,13 +449,29 @@ class ModHostingVerificationExtension : Extension() {
 			}
 
 			// Found some projects that are missing files to check against
-			if (states.missingFiles.isNotEmpty() && it.remainingAttempts - 1 >= 0) {
+			if (states.missingFiles.isNotEmpty() && processingUnit.remainingAttempts - 1 >= 0) {
 				// Requeue for future processing
-				unitsToProcess.add(it.copy(remainingAttempts = it.remainingAttempts - 1))
+				unitsToProcess.add(processingUnit.copy(remainingAttempts = processingUnit.remainingAttempts - 1))
 			}
 		}
 
 		unitsToProcess.clear()
 		unitsToProcess.addAll(toRequeue)
+
+		logger.info {
+			buildString {
+				if (failed.isNotEmpty()) {
+					appendLine("Failed projects:")
+					failed.forEach {
+						appendLine(" - Message ${it.message.id} Author ${it.author.id} Projects ${it.missingFiles}")
+					}
+
+					appendLine("Requeued projects:")
+					failed.forEach {
+						appendLine(" - Message ${it.message.id} Author ${it.author.id} Projects ${it.missingFiles}")
+					}
+				}
+			}
+		}
 	}
 }
