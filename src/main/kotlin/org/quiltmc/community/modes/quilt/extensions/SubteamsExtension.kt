@@ -34,6 +34,8 @@ class SubteamsExtension : Extension() {
 			name = "team"
 			description = "Manage your teams"
 
+			allowInDms = false
+
 			guild(TOOLCHAIN_GUILD)
 
 			publicSubCommand(::TeamArguments) {
@@ -94,6 +96,8 @@ class SubteamsExtension : Extension() {
 		publicSlashCommand {
 			name = "manage-teams"
 			description = "Change which roles can manage each other"
+
+			allowInDms = false
 
 			guild(TOOLCHAIN_GUILD)
 

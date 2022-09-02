@@ -86,6 +86,8 @@ class MinecraftExtension : Extension() {
 				name = "mc"
 				description = "Commands related to Minecraft updates"
 
+				allowInDms = false
+
 				guild(guildId)
 
 				ephemeralSubCommand(::CheckArguments) {

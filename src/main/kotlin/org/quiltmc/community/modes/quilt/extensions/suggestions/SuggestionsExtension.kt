@@ -290,6 +290,8 @@ class SuggestionsExtension : Extension() {
 			name = "edit-suggestion"
 			description = "Edit one of your suggestions"
 
+			allowInDms = false
+
 			guild(COMMUNITY_GUILD)
 
 			action {
@@ -315,6 +317,8 @@ class SuggestionsExtension : Extension() {
 		ephemeralSlashCommand(::SuggestionStateArguments) {
 			name = "suggestion"
 			description = "Suggestion state change command; \"clear\" to remove comment"
+
+			allowInDms = false
 
 			guild(COMMUNITY_GUILD)
 

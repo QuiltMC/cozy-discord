@@ -52,6 +52,8 @@ public class ModerationExtension(
 			name = "timeout"
 			description = "Remove or apply a timeout to a user"
 
+			allowInDms = false
+
 			config.getCommandChecks().forEach(::check)
 
 			action {
@@ -79,6 +81,8 @@ public class ModerationExtension(
 		ephemeralSlashCommand {
 			name = "slowmode"
 			description = "Manage slowmode of the current channel or thread"
+
+			allowInDms = false
 
 			check { anyGuild() }
 

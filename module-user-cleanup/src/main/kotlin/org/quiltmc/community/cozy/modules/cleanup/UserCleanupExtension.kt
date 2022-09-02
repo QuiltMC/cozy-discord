@@ -66,6 +66,8 @@ public class UserCleanupExtension(
 			name = "cleanup-users"
 			description = "Clean up user accounts that haven't passed member screening"
 
+			allowInDms = false
+
 			check { anyGuild() }
 
 			config.getCommandChecks().forEach(::check)

@@ -257,6 +257,8 @@ class UtilityExtension : Extension() {
 			ephemeralMessageCommand {
 				name = "Raw JSON"
 
+				allowInDms = false
+
 				guild(guildId)
 
 				check { hasBaseModeratorRole() }
@@ -275,6 +277,8 @@ class UtilityExtension : Extension() {
 
 			ephemeralMessageCommand {
 				name = "Pin in thread"
+
+				allowInDms = false
 
 				guild(guildId)
 
@@ -307,6 +311,8 @@ class UtilityExtension : Extension() {
 			ephemeralMessageCommand {
 				name = "Unpin in thread"
 
+				allowInDms = false
+
 				guild(guildId)
 
 				check { isInThread() }
@@ -338,6 +344,8 @@ class UtilityExtension : Extension() {
 			ephemeralSlashCommand {
 				name = "thread"
 				description = "Thread management commands"
+
+				allowInDms = false
 
 				guild(guildId)
 
@@ -840,6 +848,8 @@ class UtilityExtension : Extension() {
 				name = "say"
 				description = "Send a message."
 
+				allowInDms = false
+
 				guild(guildId)
 
 				check { hasBaseModeratorRole() }
@@ -873,6 +883,8 @@ class UtilityExtension : Extension() {
 			ephemeralSlashCommand(::MuteRoleArguments) {
 				name = "fix-mute-role"
 				description = "Fix the permissions for the mute role on this server."
+
+				allowInDms = false
 
 				guild(guildId)
 
@@ -979,6 +991,8 @@ class UtilityExtension : Extension() {
 				name = "lock-server"
 				description = "Lock the server, preventing anyone but staff from talking"
 
+				allowInDms = false
+
 				guild(guildId)
 
 				check { hasPermission(Permission.Administrator) }
@@ -1034,6 +1048,8 @@ class UtilityExtension : Extension() {
 				name = "unlock-server"
 				description = "Unlock the server, allowing users to talk again"
 
+				allowInDms = false
+
 				guild(guildId)
 
 				check { hasPermission(Permission.Administrator) }
@@ -1088,6 +1104,8 @@ class UtilityExtension : Extension() {
 			ephemeralSlashCommand(::LockArguments) {
 				name = "lock"
 				description = "Lock a channel, so only moderators can interact in it"
+
+				allowInDms = false
 
 				guild(guildId)
 
@@ -1150,6 +1168,8 @@ class UtilityExtension : Extension() {
 			ephemeralSlashCommand(::LockArguments) {
 				name = "unlock"
 				description = "Unlock a previously locked channel"
+
+				allowInDms = false
 
 				guild(guildId)
 

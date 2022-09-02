@@ -71,6 +71,8 @@ public class WelcomeExtension : Extension() {
 			name = "welcome-channels"
 			description = "Manage welcome channels"
 
+			allowInDms = false
+
 			config.getStaffCommandChecks().forEach(::check)
 
 			ephemeralSlashCommand(::ChannelArgs) {

@@ -125,6 +125,8 @@ class GithubExtension : Extension() {
 				name = "github"
 				description = "GitHub management commands"
 
+				allowInDms = false
+
 				check { hasBaseModeratorRole() }
 
 				guild(guildId)

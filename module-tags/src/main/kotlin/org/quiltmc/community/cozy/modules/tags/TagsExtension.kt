@@ -184,6 +184,8 @@ public class TagsExtension : Extension() {
 			name = "manage-tags"
 			description = "Tag management commands"
 
+			allowInDms = false
+
 			check {
 				anyGuild()
 			}

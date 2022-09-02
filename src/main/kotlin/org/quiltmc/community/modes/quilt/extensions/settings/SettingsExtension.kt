@@ -172,6 +172,8 @@ class SettingsExtension : Extension() {
 			name = "global-config"
 			description = "Global Cozy configuration commands"
 
+			allowInDms = false
+
 			check { hasPermissionInMainGuild(Permission.Administrator) }
 
 			ephemeralSubCommand {
@@ -313,6 +315,8 @@ class SettingsExtension : Extension() {
 		ephemeralSlashCommand {
 			name = "server-config"
 			description = "Server-specific Cozy configuration commands"
+
+			allowInDms = false
 
 			check { anyGuild() }
 			check {
