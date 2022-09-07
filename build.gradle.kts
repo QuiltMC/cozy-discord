@@ -58,6 +58,7 @@ dependencies {
 
 	ksp(libs.kordex.annotationProcessor)
 
+	implementation(libs.excelkt)
 	implementation(libs.kmongo)
 	implementation(libs.rgxgen)
 

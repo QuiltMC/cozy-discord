@@ -48,14 +48,22 @@ import dev.kord.rest.builder.message.create.embed
 import dev.kord.rest.builder.message.modify.MessageModifyBuilder
 import dev.kord.rest.builder.message.modify.actionRow
 import dev.kord.rest.builder.message.modify.embed
+import io.github.evanrupert.excelkt.Sheet
+import io.github.evanrupert.excelkt.workbook
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.toList
+import org.apache.poi.ss.usermodel.FillPatternType
+import org.apache.poi.ss.usermodel.IndexedColors
+import org.apache.poi.xssf.usermodel.XSSFColor
 import org.koin.core.component.inject
+import org.litote.kmongo.exists
 import org.quiltmc.community.*
 import org.quiltmc.community.database.collections.OwnedThreadCollection
 import org.quiltmc.community.database.collections.SuggestionsCollection
 import org.quiltmc.community.database.entities.OwnedThread
 import org.quiltmc.community.database.entities.Suggestion
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
@@ -286,6 +294,38 @@ class SuggestionsExtension : Extension() {
 
 		// region: Commands
 
+		ephemeralSlashCommand {
+			name = "suggestion-spreadsheet"
+			description = "Download a copy of the suggestions as a spreadsheet."
+
+			allowInDms = false
+
+			guild(COMMUNITY_GUILD)
+
+			check { hasRole(COMMUNITY_MODERATOR_ROLE) }
+
+			action {
+				val suggestions = suggestions.find(Suggestion::_id exists true).toList()
+				val outputStream = ByteArrayOutputStream()
+
+				val book = workbook {
+					sheet("Suggestions") {
+						suggestionHeader()
+
+						suggestions.forEach { suggestionRow(it) }
+					}
+				}
+
+				book.xssfWorkbook.write(outputStream)
+
+				respond {
+					content = "Wrote ${suggestions.size} suggestions to an Excel spreadsheet."
+
+					addFile("suggestions.xlsx", ByteArrayInputStream(outputStream.toByteArray()))
+				}
+			}
+		}
+
 		ephemeralSlashCommand(::SuggestionEditArguments) {
 			name = "edit-suggestion"
 			description = "Edit one of your suggestions"
@@ -370,6 +410,54 @@ class SuggestionsExtension : Extension() {
 //            }
 
 		// endregion
+	}
+
+	private fun Sheet.suggestionHeader() {
+		val headings = listOf("ID", "Status", "Text", "+", "-", "=", "Staff Comment")
+
+		val style = createCellStyle {
+			setFont(
+				createFont {
+					color = IndexedColors.WHITE.index
+					bold = true
+				}
+			)
+
+			fillPattern = FillPatternType.SOLID_FOREGROUND
+			fillForegroundColor = IndexedColors.BLACK.index
+		}
+
+		row(style) {
+			headings.forEach(::cell)
+		}
+	}
+
+	private fun Sheet.suggestionRow(suggestion: Suggestion) {
+		val statusStyle = createCellStyle {
+			setFont(
+				createFont {
+					val color = XSSFColor(
+						byteArrayOf(
+							suggestion.status.color.red.toByte(),
+							suggestion.status.color.green.toByte(),
+							suggestion.status.color.blue.toByte()
+						)
+					)
+
+					setColor(color)
+				}
+			)
+		}
+
+		row {
+			cell(suggestion._id.toString())
+			cell(suggestion.status.readableName, statusStyle)
+			cell(suggestion.text)
+			cell(suggestion.positiveVotes)
+			cell(suggestion.negativeVotes)
+			cell(suggestion.voteDifference)
+			cell(suggestion.comment ?: "")
+		}
 	}
 
 	suspend fun checkSuggestionLength(suggestion: Suggestion, event: MessageEvent): Boolean {
