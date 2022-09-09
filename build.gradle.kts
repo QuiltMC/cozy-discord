@@ -83,6 +83,8 @@ dependencies {
 	implementation(libs.kx.ser)
 	implementation(libs.graphql)
 
+    implementation(libs.sxml)
+
 	implementation(project(":module-moderation"))
 	implementation(project(":module-role-sync"))
 	implementation(project(":module-tags"))
