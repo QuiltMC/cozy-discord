@@ -65,6 +65,7 @@ suspend fun setupDev() = ExtensibleBot(DISCORD_TOKEN) {
 
 	extensions {
 		add(::SubteamsExtension)
+		add(::JavadocExtension)
 
 		extMappings { }
 
