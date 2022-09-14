@@ -6,7 +6,9 @@
 
 package org.quiltmc.community.modes.quilt.extensions
 
-import com.kotlindiscord.kord.extensions.commands.application.slash.publicSubCommand
+import com.kotlindiscord.kord.extensions.commands.Arguments
+import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalString
+import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
@@ -37,7 +39,7 @@ class JavadocExtension : Extension() {
 	override suspend fun setup() {
 		GUILDS.forEach { guildId ->
 			publicSlashCommand {
-				name = "javadoc"
+				name = "javadoc-common"
 				description = "Get Javadocs for common Quilt Projects"
 
 				allowInDms = true
@@ -48,7 +50,12 @@ class JavadocExtension : Extension() {
 					val urls = commonProjects.map {
 						val version = getLatestVersion(it)
 						val url = getJavadoc(it, version)
-						"[$it ($version)]($url/)"
+
+						if (url.isNullOrBlank()) {
+							"No javadoc found for $it at version $version."
+						} else {
+							"[$it ($version)]($url/)"
+						}
 					}
 
 					respond {
@@ -58,27 +65,59 @@ class JavadocExtension : Extension() {
 						}
 					}
 				}
+			}
 
-				publicSubCommand {
-					name = "all"
-					description = "Get Javadocs for all Quilt Projects"
+			publicSlashCommand {
+				name = "javadoc-all"
+				description = "Get Javadocs for all Quilt Projects"
 
-					allowInDms = true
+				allowInDms = true
 
-					guild(guildId)
+				guild(guildId)
 
-					action {
-						val urls = getProjects().map {
-							val version = getLatestVersion(it)
-							val url = getJavadoc(it, version)
+				action {
+					val urls = getProjects().map {
+						val version = getLatestVersion(it)
+						val url = getJavadoc(it, version)
+
+						if (url.isNullOrBlank()) {
+							"No javadoc found for $it at version $version."
+						} else {
 							"[$it ($version)]($url/)"
 						}
+					}
 
-						respond {
-							embed {
-								title = "Latest Javadoc Versions"
-								description = urls.joinToString("\n")
-							}
+					respond {
+						embed {
+							title = "Latest Javadoc Versions"
+							description = urls.joinToString("\n")
+						}
+					}
+				}
+			}
+
+			publicSlashCommand(::ProjectArguments) {
+				name = "javadoc"
+				description = "Get Javadocs for all Quilt Projects"
+
+				allowInDms = true
+
+				guild(guildId)
+
+				action {
+					val it = arguments.name
+					val version = if (arguments.version == null) getLatestVersion(it) else arguments.version!!
+					val url = getJavadoc(it, version)
+					val desc = if (url.isNullOrBlank()) {
+						"No javadoc found for $it at version $version."
+					} else {
+						"[$it ($version)]($url/)"
+					}
+
+					respond {
+						embed {
+							title = "Javadoc for $it version: $version"
+							description = desc
 						}
 					}
 				}
@@ -90,11 +129,9 @@ class JavadocExtension : Extension() {
 	private fun getProjects(): Array<String> =
 		arrayOf("qsl", "quilt-mappings", "quilt-loader", "quilt-config", "quilt-json5")
 
-	private suspend fun getVersions(project: String): List<String> =
-		getVersionMetadata(project).versioning.versions
+	private suspend fun getVersions(project: String): List<String> = getVersionMetadata(project).versioning.versions
 
-	private suspend fun getLatestVersion(project: String): String =
-		getVersionMetadata(project).versioning.latest
+	private suspend fun getLatestVersion(project: String): String = getVersionMetadata(project).versioning.latest
 
 	private suspend fun getVersionMetadata(project: String): MavenMetadata =
 		xmlSerializer.read(
@@ -105,14 +142,30 @@ class JavadocExtension : Extension() {
 	private fun getProjectUrl(project: String): String =
 		"https://maven.quiltmc.org/repository/release/org/quiltmc/$project"
 
-	private suspend fun getJavadoc(project: String, version: String): String {
+	private suspend fun getJavadoc(project: String, version: String): String? {
 		var url = "${getProjectUrl(project)}/$version/$project-$version-javadoc.jar"
 
 		if (client.get(url).status == HttpStatusCode.NotFound) {
 			url = "${getProjectUrl(project)}/$version/$project-$version-fat-javadoc.jar"
+
+			if (client.get(url).status == HttpStatusCode.NotFound) {
+				return null
+			}
 		}
 
 		return url
+	}
+
+	inner class ProjectArguments : Arguments() {
+		val name by string {
+			name = "name"
+			description = "The project name"
+		}
+
+		val version by optionalString {
+			name = "version"
+			description = "The project version"
+		}
 	}
 
 	@Root(name = "metadata", strict = false)
