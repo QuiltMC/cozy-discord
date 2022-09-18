@@ -10,7 +10,6 @@
 
 package org.quiltmc.community.modes.quilt.extensions.suggestions
 
-import com.kotlindiscord.kord.extensions.checks.hasRole
 import com.kotlindiscord.kord.extensions.checks.inTopChannel
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.converters.impl.optionalEnumChoice
@@ -302,7 +301,7 @@ class SuggestionsExtension : Extension() {
 
 			guild(COMMUNITY_GUILD)
 
-			check { hasRole(COMMUNITY_MODERATOR_ROLE) }
+			check { hasBaseModeratorRole() }
 
 			action {
 				val suggestions = suggestions.find(Suggestion::_id exists true).toList()
@@ -362,7 +361,7 @@ class SuggestionsExtension : Extension() {
 
 			guild(COMMUNITY_GUILD)
 
-			check { hasRole(COMMUNITY_MODERATOR_ROLE) }
+			check { hasBaseModeratorRole() }
 
 			action {
 				val status = arguments.status
@@ -533,6 +532,13 @@ class SuggestionsExtension : Extension() {
 					else -> return
 				}
 
+				val managerRole = when (thread.guildId) {
+					COMMUNITY_GUILD -> thread.guild.getRole(COMMUNITY_MANAGER_ROLE)
+					TOOLCHAIN_GUILD -> thread.guild.getRole(TOOLCHAIN_MANAGER_ROLE)
+
+					else -> return
+				}
+
 				val pingMessage = thread.createMessage {
 					content = "Oh right, better get the mods in..."
 				}
@@ -540,8 +546,8 @@ class SuggestionsExtension : Extension() {
 				delay(3.seconds)
 
 				pingMessage.edit {
-					content = "Oh right, better get the mods in...\n" +
-							"Hey, ${modRole.mention}! Squirrel!"
+					content = "Oh right, better get the staff in...\n" +
+							"Hey, ${modRole.mention} and ${managerRole.mention}! Squirrel!"
 				}
 
 				delay(3.seconds)

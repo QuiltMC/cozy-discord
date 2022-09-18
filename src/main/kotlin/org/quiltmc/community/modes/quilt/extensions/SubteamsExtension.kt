@@ -6,7 +6,6 @@
 
 package org.quiltmc.community.modes.quilt.extensions
 
-import com.kotlindiscord.kord.extensions.checks.hasRole
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
 import com.kotlindiscord.kord.extensions.commands.application.slash.publicSubCommand
@@ -20,9 +19,9 @@ import dev.kord.core.entity.Role
 import dev.kord.rest.builder.message.create.allowedMentions
 import org.koin.core.component.inject
 import org.quiltmc.community.TOOLCHAIN_GUILD
-import org.quiltmc.community.TOOLCHAIN_MODERATOR_ROLE
 import org.quiltmc.community.database.collections.TeamCollection
 import org.quiltmc.community.database.entities.Team
+import org.quiltmc.community.hasBaseModeratorRole
 
 class SubteamsExtension : Extension() {
 	override val name: String = "subteams"
@@ -101,7 +100,7 @@ class SubteamsExtension : Extension() {
 
 			guild(TOOLCHAIN_GUILD)
 
-			check { hasRole(TOOLCHAIN_MODERATOR_ROLE) }
+			check { hasBaseModeratorRole() }
 
 			ephemeralSubCommand(::ManageTeamAllowArguments) {
 				name = "allow"
