@@ -127,7 +127,7 @@ class GithubExtension : Extension() {
 
 				allowInDms = false
 
-				check { hasBaseModeratorRole() }
+				check { hasBaseModeratorRole(false) }
 
 				guild(guildId)
 				requirePermission(Permission.BanMembers)
