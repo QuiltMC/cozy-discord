@@ -21,6 +21,8 @@ class TeamCollection : KordExKoinComponent {
 	private val database: Database by inject()
 	private val col = database.mongo.getCollection<Team>(name)
 
+	suspend fun getAll(): List<Team> = col.find().toList()
+
 	suspend fun get(id: Snowflake) =
 		col.findOne(Team::_id eq id)
 
