@@ -8,13 +8,16 @@ package org.quiltmc.community.cozy.modules.moderation.config
 
 import com.kotlindiscord.kord.extensions.checks.types.Check
 import dev.kord.core.entity.Guild
+import dev.kord.core.entity.Role
 import dev.kord.core.entity.channel.GuildMessageChannel
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.flow.lastOrNull
 
 public class SimpleModerationConfig(builder: Builder) : ModerationConfig() {
 	private val loggingChannelName: String = builder.loggingChannelName!!
+	private val temporaryRoleName: String = builder.temporaryRoleName!!
 	private val commandChecks: MutableList<Check<*>> = builder.commandChecks
 
 	override suspend fun getLoggingChannelOrNull(guild: Guild): GuildMessageChannel? =
@@ -23,11 +26,16 @@ public class SimpleModerationConfig(builder: Builder) : ModerationConfig() {
 			.filter { channel -> channel.name.equals(loggingChannelName, true) }
 			.lastOrNull()
 
+	override suspend fun getTemporaryRole(guild: Guild): Role =
+		guild.roles.filter { role -> role.name.equals(temporaryRoleName, true) }
+			.last()
+
 	override suspend fun getCommandChecks(): List<Check<*>> =
 		commandChecks
 
 	public class Builder {
 		public var loggingChannelName: String? = null
+		public var temporaryRoleName: String? = null
 
 		internal val commandChecks: MutableList<Check<*>> = mutableListOf()
 

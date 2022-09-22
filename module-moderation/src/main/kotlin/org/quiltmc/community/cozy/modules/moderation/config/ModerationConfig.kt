@@ -8,6 +8,7 @@ package org.quiltmc.community.cozy.modules.moderation.config
 
 import com.kotlindiscord.kord.extensions.checks.types.Check
 import dev.kord.core.entity.Guild
+import dev.kord.core.entity.Role
 import dev.kord.core.entity.channel.GuildMessageChannel
 
 /**
@@ -27,4 +28,9 @@ public abstract class ModerationConfig {
 	 * Override this to provide a list of KordEx [Check]s that must pass for moderation commands to be executed.
 	 */
 	public open suspend fun getCommandChecks(): List<Check<*>> = listOf()
+
+	/**
+	 * Provide a temporary role without any permission that can be used by the extension.
+	 */
+	public abstract suspend fun getTemporaryRole(guild: Guild): Role
 }

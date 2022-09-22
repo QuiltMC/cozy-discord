@@ -39,7 +39,9 @@ public const val MAX_TIMEOUT_SECS: Int = 60 * 60 * 24 * 28
  * Moderation, extension, provides different moderation related tools.
  *
  * Currently includes:
- * - Slowmode command
+ * - Slowmode
+ * - Timeout
+ * - Force verify
  */
 public class ModerationExtension(
 	private val config: ModerationConfig
@@ -163,6 +165,51 @@ public class ModerationExtension(
 				}
 			}
 		}
+
+		ephemeralSlashCommand(::ForceVerifyArguments) {
+			name = "force-verify"
+			description = "Make a user bypass Discord's verification process"
+
+			allowInDms = false
+
+			check { anyGuild() }
+
+			config.getCommandChecks().forEach(::check)
+
+			action {
+				val member = guild!!.getMemberOrNull(arguments.user.id)
+
+				if (member == null) {
+					respond {
+						content = "User is not in this guild."
+					}
+				} else {
+					member.addRole(config.getTemporaryRole(guild!!.asGuild()).id, "Force verified by ${user.asUser().tag}")
+					member.removeRole(config.getTemporaryRole(guild!!.asGuild()).id)
+
+					config.getLoggingChannelOrNull(guild!!.asGuild())?.createEmbed {
+						title = "User force verified"
+						color = DISCORD_BLURPLE
+
+						field {
+							inline = true
+							name = "Moderator"
+							value = "${user.asUser().tag} (${user.mention})"
+						}
+
+						field {
+							inline = true
+							name = "User"
+							value = "${member.tag} (${member.mention})"
+						}
+					}
+
+					respond {
+						content = "User ${member.mention} has been force verified."
+					}
+				}
+			}
+		}
 	}
 
 	public inner class SlowmodeEditArguments : Arguments() {
@@ -193,6 +240,13 @@ public class ModerationExtension(
 					"Timeouts must be for less than 28 days"
 				) { value != null && value!!.toTotalSeconds() >= MAX_TIMEOUT_SECS }
 			}
+		}
+	}
+
+	public inner class ForceVerifyArguments : Arguments() {
+		public val user: Member by member {
+			name = "member"
+			description = "Member to verify"
 		}
 	}
 }

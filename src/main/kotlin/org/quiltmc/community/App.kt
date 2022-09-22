@@ -163,6 +163,7 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
 
 		moderation {
 			loggingChannelName = "cozy-logs"
+			temporaryRoleName = "Verification Role"
 
 			commandCheck { inQuiltGuild() }
 			commandCheck { hasBaseModeratorRole() }
