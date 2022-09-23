@@ -13,7 +13,6 @@ import com.kotlindiscord.kord.extensions.commands.application.slash.publicSubCom
 import com.kotlindiscord.kord.extensions.commands.converters.impl.member
 import com.kotlindiscord.kord.extensions.commands.converters.impl.role
 import com.kotlindiscord.kord.extensions.extensions.Extension
-import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.common.entity.Permission
@@ -139,7 +138,7 @@ class SubteamsExtension : Extension() {
 				}
 			}
 
-			ephemeralSlashCommand {
+			ephemeralSubCommand {
 				name = "list-relationships"
 				description = "List all the relationships between roles"
 
