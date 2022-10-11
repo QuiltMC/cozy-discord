@@ -16,4 +16,5 @@ enum class MatchType(override val readableName: String) : ChoiceEnum {
 	REGEX("Target exactly matches this regular expression"),
 	REGEX_CONTAINS("Target contains this regular expression"),
 	INVITE("Target contains an invite for this guild ID"),
+	YUBICO_OTP("Target is a valid Yubico OTP using this client ID"),
 }

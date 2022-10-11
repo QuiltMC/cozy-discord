@@ -45,6 +45,10 @@ import dev.kord.core.event.message.MessageUpdateEvent
 import dev.kord.core.event.user.UserUpdateEvent
 import dev.kord.rest.builder.message.EmbedBuilder
 import dev.kord.rest.builder.message.create.embed
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.request.*
+import io.ktor.http.*
 import mu.KotlinLogging
 import net.codebox.homoglyph.HomoglyphBuilder
 import org.koin.core.component.inject
@@ -55,6 +59,7 @@ import org.quiltmc.community.database.collections.GlobalSettingsCollection
 import org.quiltmc.community.database.collections.ServerSettingsCollection
 import org.quiltmc.community.database.entities.FilterEntry
 import java.util.*
+import kotlin.random.Random
 
 const val FILTERS_PER_PAGE = 2
 
@@ -75,6 +80,14 @@ val INVITE_REGEX = (
 				""
 		).toRegex(RegexOption.IGNORE_CASE)
 
+val OTP_REGEX = "(cc|vv|en)[cbdefghijklnrtuv]{42}".toRegex()
+
+val OTP_BAD = setOf("BAD_OTP", "REPLAYED_OTP")
+
+const val OTP_NONCE_BYTES = 15
+
+const val OTP_URL = "https://api.yubico.com/wsapi/2.0/verify"
+
 class FilterExtension : Extension() {
 	override val name: String = "filter"
 	private val logger = KotlinLogging.logger { }
@@ -86,6 +99,8 @@ class FilterExtension : Extension() {
 	private val serverSettings: ServerSettingsCollection by inject()
 
 	private val homoglyphs = HomoglyphBuilder.build()
+
+	private val client = HttpClient()
 
 	init {
 		RgxGenOption.INFINITE_PATTERN_REPETITION.setInProperties(rgxProperties, 2)
@@ -1015,6 +1030,7 @@ class FilterExtension : Extension() {
 		MatchType.REGEX -> match.toRegex(RegexOption.IGNORE_CASE).matches(content)
 		MatchType.REGEX_CONTAINS -> content.contains(match.toRegex(RegexOption.IGNORE_CASE))
 		MatchType.INVITE -> content.containsInviteFor(Snowflake(match))
+		MatchType.YUBICO_OTP -> content.validateYubicoOtp(match)
 	}
 
 	suspend fun String.containsInviteFor(guild: Snowflake): Boolean {
@@ -1040,6 +1056,59 @@ class FilterExtension : Extension() {
 				return true
 			}
 		}
+
+		return false
+	}
+
+	suspend fun String.validateYubicoOtp(clientId: String): Boolean {
+		if (!OTP_REGEX.matches(this)) {
+			return false
+		}
+
+		val otp = this
+
+		val prefix = otp.substring(0, 2)
+
+		if (prefix == "en") { // not yubicloud
+			return true
+		}
+
+		val nonceBytes = Random.nextBytes(OTP_NONCE_BYTES)
+		val nonce = HexFormat.of().formatHex(nonceBytes)
+
+		val responseText: String = client.get(OTP_URL) {
+			url {
+				parameters.append("id", clientId)
+				parameters.append("nonce", nonce)
+				parameters.append("otp", otp)
+			}
+		}.body()
+
+		val response = responseText
+			.trim()
+			.lines()
+			.map { it.split("=", limit = 2) }
+			.map { it.first() to it.last() }
+			.toMap()
+
+		if (response["nonce"] != nonce) {
+			logger.error { "Invalid nonce from Yubicloud: ${response["nonce"]}" }
+			return false
+		}
+
+		if (response["status"] == "OK") {
+			logger.debug { "Validated OTP $otp" }
+
+			return true
+		}
+
+		if (response["status"] in OTP_BAD) {
+			logger.debug { "OTP $otp invalid: ${response["status"]}" }
+
+			return false
+		}
+
+		logger.warn { "Unexpected status for OTP $otp: ${response["status"]}" }
 
 		return false
 	}
