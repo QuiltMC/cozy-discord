@@ -16,6 +16,7 @@ import com.kotlindiscord.kord.extensions.utils.getParentMessage
 import com.kotlindiscord.kord.extensions.utils.scheduling.Scheduler
 import dev.kord.common.entity.MessageType
 import dev.kord.core.behavior.channel.asChannelOf
+import dev.kord.core.behavior.channel.createEmbed
 import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.behavior.channel.withTyping
 import dev.kord.core.behavior.edit
@@ -41,6 +42,7 @@ import mu.KotlinLogging
 import org.koin.core.component.inject
 import org.quiltmc.community.*
 import org.quiltmc.community.database.collections.OwnedThreadCollection
+import org.quiltmc.community.database.collections.ServerSettingsCollection
 import org.quiltmc.community.database.entities.OwnedThread
 import org.quiltmc.community.modes.quilt.extensions.modhostverify.curseforge.CurseforgeProject
 import org.quiltmc.community.modes.quilt.extensions.modhostverify.modrinth.ModrinthProjectVersion
@@ -65,6 +67,8 @@ private val unitsToProcess = mutableListOf<ModHostingVerificationProcessingUnit>
 class ModHostingVerificationExtension : Extension() {
 	override val name: String = "Mod Hosting Verification"
 
+	private val settings: ServerSettingsCollection by inject()
+
 	private val logger = KotlinLogging.logger { }
 	private val scheduler = Scheduler()
 	private val threads: OwnedThreadCollection by inject()
@@ -81,7 +85,7 @@ class ModHostingVerificationExtension : Extension() {
 
 		// Required by Modrinth, also just good in general
 		install(UserAgent) {
-			agent = "QuiltMC Cozy Discord Bot (Silver Dev Env hiii)"
+			agent = "QuiltMC Cozy Discord Bot"
 		}
 
 		// Custom handling for error states that doesn't fit nicely into
@@ -322,6 +326,44 @@ class ModHostingVerificationExtension : Extension() {
 	) {
 		val sentDm = author.dm {
 			attachQuiltCompatEmbed(author, message, projects, false)
+		}
+
+		val reportChannelId = settings.get(message.getGuild().id)?.cozyLogChannel
+		val messageChannel = message.channel.asChannelOf<TextChannel>()
+
+		if (reportChannelId != null) {
+			kord.getChannelOf<TextChannel>(reportChannelId)?.createEmbed {
+				title = "Mod release not marked as quilt compatible!"
+				color = DISCORD_RED
+
+				field {
+					name = "Author:"
+					value = "${author.mention} (`${author.username}#${author.discriminator}`)"
+				}
+
+				field {
+					name = "Message:"
+					value = "https://discord.com/channels/${messageChannel.guildId}/${messageChannel.id}/${message.id}"
+				}
+
+				field {
+					name = "Contact:"
+
+					value = if (sentDm == null) {
+						"Failed to DM, falling back to thread"
+					} else {
+						"User notified in DMs"
+					}
+				}
+			}
+		}
+
+		logger.info {
+			"Mod release by " +
+					"${author.id} (${author.username}#${author.discriminator}) at " +
+					"https://discord.com/channels/${messageChannel.guildId}/${messageChannel.id}/${message.id} " +
+					"is not quilt compatible, " +
+					if (sentDm == null) { "failed to DM, falling back to thread" } else { "user notified in DMs" }
 		}
 
 		if (sentDm == null) {
