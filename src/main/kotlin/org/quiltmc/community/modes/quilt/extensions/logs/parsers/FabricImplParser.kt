@@ -44,7 +44,7 @@ class FabricImplParser : BaseLogParser {
 		if (
 			suspectedMod != null &&
 			suspectedPackage != null &&
-			".fabricmc." in suspectedPackage && ".impl." in suspectedPackage
+			".fabricmc." in suspectedPackage && (".impl." in suspectedPackage || ".mixin." in suspectedPackage)
 		) {
 			messages.add(
 				"Mod `$suspectedMod` may be using Fabric internals:\n`$suspectedPackage`"
