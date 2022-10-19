@@ -41,9 +41,9 @@ class PKExtension : Extension() {
 
 							description = "A message has been sent by a PluralKit user for the first time."
 
-							if (event.pkMessage.system.avatarUrl != null) {
+							if (event.pkMessage.system?.avatarUrl != null) {
 								thumbnail {
-									url = event.pkMessage.system.avatarUrl!!
+									url = event.pkMessage.system!!.avatarUrl!!
 								}
 							}
 
@@ -62,7 +62,11 @@ class PKExtension : Extension() {
 							field {
 								name = "PK Member"
 
-								value = "${event.pkMessage.member.name} (`${event.pkMessage.member.id}`)"
+								value = if (event.pkMessage.member != null) {
+									"Unknown; private member"
+								} else {
+									"${event.pkMessage.member?.name} (`${event.pkMessage.member?.id}`)"
+								}
 
 								inline = true
 							}
@@ -70,8 +74,12 @@ class PKExtension : Extension() {
 							field {
 								name = "PK System"
 
-								value = (event.pkMessage.system.name ?: "**No system name**") +
-										" (`${event.pkMessage.system.id}`)"
+								value = if (event.pkMessage.system != null) {
+									"Unknown; private system"
+								} else {
+									(event.pkMessage.system?.name ?: "**No system name**") +
+											" (`${event.pkMessage.system?.id}`)"
+								}
 
 								inline = true
 							}

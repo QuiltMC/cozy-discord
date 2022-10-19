@@ -54,6 +54,8 @@ import dev.kord.core.event.guild.MemberUpdateEvent
 import dev.kord.core.event.message.MessageCreateEvent
 import dev.kord.rest.builder.message.create.embed
 import dev.kord.rest.builder.message.modify.embed
+import io.ktor.client.request.forms.*
+import io.ktor.utils.io.jvm.javaio.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.toList
@@ -270,7 +272,11 @@ class UtilityExtension : Extension() {
 					respond {
 						content = "Raw message data attached below."
 
-						addFile("message.json", data.byteInputStream())
+						addFile(
+							"message.json",
+
+							ChannelProvider { data.byteInputStream().toByteReadChannel() }
+						)
 					}
 				}
 			}
@@ -480,7 +486,11 @@ class UtilityExtension : Extension() {
 						respond {
 							content = "**Thread backup created by ${user.mention}.**"
 
-							addFile("thread.md", messageBuilder.toString().byteInputStream())
+							addFile(
+								"thread.md",
+
+								ChannelProvider { messageBuilder.toString().byteInputStream().toByteReadChannel() }
+							)
 						}
 					}
 				}

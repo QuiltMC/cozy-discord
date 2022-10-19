@@ -17,6 +17,7 @@ dependencies {
 
 	implementation(libs.kordex.annotations)
 	implementation(libs.kordex.core)
+	implementation(libs.kordex.pluralkit)
 
 	implementation(libs.logging)
 

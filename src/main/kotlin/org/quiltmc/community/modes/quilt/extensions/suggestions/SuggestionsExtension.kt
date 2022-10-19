@@ -49,6 +49,8 @@ import dev.kord.rest.builder.message.modify.actionRow
 import dev.kord.rest.builder.message.modify.embed
 import io.github.evanrupert.excelkt.Sheet
 import io.github.evanrupert.excelkt.workbook
+import io.ktor.client.request.forms.*
+import io.ktor.utils.io.jvm.javaio.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.toList
 import org.apache.poi.ss.usermodel.FillPatternType
@@ -159,8 +161,8 @@ class SuggestionsExtension : Extension() {
 					text = event.message.content,
 
 					owner = event.pkMessage.sender,
-					ownerAvatar = event.pkMessage.member.avatarUrl,
-					ownerName = event.pkMessage.member.name,
+					ownerAvatar = event.pkMessage.member?.avatarUrl,
+					ownerName = event.pkMessage.member?.name ?: event.author.displayName,
 
 					positiveVoters = mutableListOf(event.pkMessage.sender),
 
@@ -320,7 +322,11 @@ class SuggestionsExtension : Extension() {
 				respond {
 					content = "Wrote ${suggestions.size} suggestions to an Excel spreadsheet."
 
-					addFile("suggestions.xlsx", ByteArrayInputStream(outputStream.toByteArray()))
+					addFile(
+						"suggestions.xlsx",
+
+						ChannelProvider { ByteArrayInputStream(outputStream.toByteArray()).toByteReadChannel() }
+					)
 				}
 			}
 		}

@@ -29,6 +29,8 @@ import dev.kord.core.event.message.MessageUpdateEvent
 import dev.kord.rest.builder.message.EmbedBuilder
 import dev.kord.rest.builder.message.create.allowedMentions
 import dev.kord.rest.builder.message.create.embed
+import io.ktor.client.request.forms.*
+import io.ktor.utils.io.jvm.javaio.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -174,7 +176,11 @@ class MessageLogExtension : Extension() {
 					LogMessage(event.guild!!.asGuild()) {
 						allowedMentions { }
 
-						addFile("messages.md", messages.byteInputStream())
+						addFile(
+							"messages.md",
+
+							ChannelProvider { messages.byteInputStream().toByteReadChannel() }
+						)
 					}
 				)
 
@@ -303,7 +309,11 @@ class MessageLogExtension : Extension() {
 						LogMessage(event.guild!!.asGuild()) {
 							allowedMentions { }
 
-							addFile("old.md", splitContent(message.content).byteInputStream())
+							addFile(
+								"old.md",
+
+								ChannelProvider { splitContent(message.content).byteInputStream().toByteReadChannel() }
+							)
 						}
 					)
 				}
@@ -377,11 +387,19 @@ class MessageLogExtension : Extension() {
 							allowedMentions { }
 
 							if (old != null && !canEmbedOld) {
-								addFile("old.md", splitContent(old.content).byteInputStream())
+								addFile(
+									"old.md",
+
+									ChannelProvider { splitContent(old.content).byteInputStream().toByteReadChannel() }
+								)
 							}
 
 							if (!canEmbedNew) {
-								addFile("new.md", splitContent(new.content).byteInputStream())
+								addFile(
+									"new.md",
+
+									ChannelProvider { splitContent(new.content).byteInputStream().toByteReadChannel() }
+								)
 							}
 						}
 					)
