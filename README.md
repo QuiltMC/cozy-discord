@@ -59,7 +59,7 @@ ENVIRONMENT=dev
 **Required settings:**
 
 * `TOKEN`: Your Discord bot token, which you can get from the developer dashboard linked above
-* `DB_URL`: MongoDB database URL- for a local server, you might use `mongodb://localhost:27017/` for example
+* `DB_URL`: MongoDB database URL - for a local server, you might use `mongodb://localhost:27017/` for example
 
 **Logging settings:**
 

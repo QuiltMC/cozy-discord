@@ -9,6 +9,7 @@
 package org.quiltmc.community.cozy.modules.moderation
 
 import com.kotlindiscord.kord.extensions.DISCORD_BLURPLE
+import com.kotlindiscord.kord.extensions.ExtensibleBot
 import com.kotlindiscord.kord.extensions.annotations.DoNotChain
 import com.kotlindiscord.kord.extensions.checks.anyGuild
 import com.kotlindiscord.kord.extensions.commands.Arguments
@@ -25,7 +26,6 @@ import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.deleteIgnoringNotFound
 import com.kotlindiscord.kord.extensions.utils.removeTimeout
 import com.kotlindiscord.kord.extensions.utils.timeout
-import com.kotlindiscord.kord.extensions.utils.waitFor
 import dev.kord.common.Color
 import dev.kord.core.behavior.channel.*
 import dev.kord.core.behavior.channel.threads.edit
@@ -34,6 +34,9 @@ import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.entity.channel.thread.ThreadChannel
 import dev.kord.rest.builder.message.create.embed
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.datetime.DateTimePeriod
 import org.quiltmc.community.cozy.modules.moderation.config.ModerationConfig
 import kotlin.time.Duration
@@ -78,12 +81,12 @@ public class ModerationExtension(
 				}
 
 				val event = channel.withTyping {
-					event.kord.waitFor<PKMessageCreateEvent>(MOD_MODE_DELAY) {
-						author != null &&
-								event.message.author != null &&
-								event.guildId != null &&
-								event.guildId == guildId
-								author!!.id == event.message.author!!.id
+					bot.waitFor<PKMessageCreateEvent>(MOD_MODE_DELAY) {
+						this.author != null &&
+								this.author!!.id == this@action.member!!.id &&
+
+								this.guildId != null &&
+								this.guildId == this@action.guild!!.id
 					}
 				}
 
@@ -111,7 +114,11 @@ public class ModerationExtension(
 						color = MOD_COLOUR
 						description = event.message.content
 
-						title = "Moderator Message"
+						footer {
+							text = "Moderator message"
+							icon = "https://github.com/QuiltMC/art/raw/master/emoji/lil-pineapple/rendered/" +
+									"lil-pineapple.png"
+						}
 
 						author {
 							name = if (event is ProxiedMessageCreateEvent && event.pkMessage.member != null) {
@@ -352,5 +359,16 @@ public class ModerationExtension(
 			name = "member"
 			description = "Member to verify"
 		}
+	}
+}
+
+public suspend inline fun <reified T : Any> ExtensibleBot.waitFor(
+	timeout: Duration? = null,
+	noinline condition: (suspend T.() -> Boolean) = { true }
+): T? = if (timeout == null) {
+	events.filterIsInstance<T>().firstOrNull(condition)
+} else {
+	withTimeoutOrNull(timeout) {
+		events.filterIsInstance<T>().firstOrNull(condition)
 	}
 }
