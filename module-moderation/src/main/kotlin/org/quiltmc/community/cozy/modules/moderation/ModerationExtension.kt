@@ -44,7 +44,7 @@ import kotlin.time.Duration.Companion.seconds
 
 public val MAXIMUM_SLOWMODE_DURATION: DateTimePeriod = DateTimePeriod(hours = 6)
 public const val MAX_TIMEOUT_SECS: Int = 60 * 60 * 24 * 28
-public val MOD_MODE_DELAY: Duration = 20.seconds
+public val MOD_MODE_DELAY: Duration = 25.seconds
 public val MOD_COLOUR: Color = Color(0xe68675)
 
 /**
