@@ -129,6 +129,25 @@
         If you're interested in long-form discussions, development help, news or community project, please feel free
         to join our forum at [https://forum.quiltmc.org](https://forum.quiltmc.org)!
 
+    - title: Community Artists
+
+      url: https://github.com/QuiltMC/art
+      color: 0x5865F2
+
+      description: >
+        We're lucky to have a few talented artists in our community:
+
+        **»** [**Arathain**](https://twitter.com/arathainfarqoe) - Creator of Pineapple-Chan, Quilt-Chan and a few
+        related emotes
+
+        **»** [**Iroseum**](https://iroki-sueun.tumblr.com/) - Our current banners and logo designer
+
+        **»** [**Katto / Digital Whiskers**](https://digital-whiskers.carrd.co/) - Designed a banner and a few other
+        pieces
+
+        We're very grateful to all of them for their amazing work! Don't hesitate to reach out to them if you'd like
+        to commission them for your own projects.
+
 - type: roles
 
   id: community-roles
