@@ -70,8 +70,8 @@ ENVIRONMENT=dev
 * `COMMUNITY_GUILD_ID`: ID of your "community" server
 * `TOOLCHAIN_GUILD_ID`: ID of your "toolchain" server
 * `GUILDS`: A comma-separated list of guild IDs, if not just the two above
-* `COMMUNITY_MODERATOR_ROLE`: ID of your "toolchain moderator" role
-* `TOOLCHAIN_MODERATOR_ROLE`: ID of your "community moderator" role
+* `COMMUNITY_MODERATOR_ROLE`: ID of your "community moderator" role
+* `TOOLCHAIN_MODERATOR_ROLE`: ID of your "toolchain moderator" role
 * `MODERATOR_ROLES`: A comma-separated list of moderator role IDs, if not just the two above
 
 **Settings used by mode:** `quilt`
