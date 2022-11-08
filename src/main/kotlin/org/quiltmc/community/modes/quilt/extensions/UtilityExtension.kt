@@ -94,6 +94,10 @@ class UtilityExtension : Extension() {
 	override val name: String = "utility"
 
 	private val logger = KotlinLogging.logger { }
+	private val privilegedRoles = listOf(
+		MANAGER_ROLES,
+		MODERATOR_ROLES
+	).flatten()
 	private val threads: OwnedThreadCollection by inject()
 
 	private val userFlags: UserFlagsCollection by inject()
@@ -142,8 +146,8 @@ class UtilityExtension : Extension() {
 
 				if (flags.syncNicks) {
 					val otherMember = when (event.guild.id) {
-						COMMUNITY_GUILD -> kord.getGuild(TOOLCHAIN_GUILD)?.getMemberOrNull(event.member.id)
-						TOOLCHAIN_GUILD -> kord.getGuild(COMMUNITY_GUILD)?.getMemberOrNull(event.member.id)
+						COMMUNITY_GUILD -> kord.getGuildOrNull(TOOLCHAIN_GUILD)?.getMemberOrNull(event.member.id)
+						TOOLCHAIN_GUILD -> kord.getGuildOrNull(COMMUNITY_GUILD)?.getMemberOrNull(event.member.id)
 
 						else -> null
 					} ?: return@action
@@ -295,7 +299,7 @@ class UtilityExtension : Extension() {
 					val member = user.asMember(guild!!.id)
 					val roles = member.roles.toList().map { it.id }
 
-					if (MODERATOR_ROLES.any { it in roles }) {
+					if (privilegedRoles.any { it in roles }) {
 						targetMessages.forEach { it.pin("Pinned by ${member.tag}") }
 						edit { content = "Messages pinned." }
 
@@ -328,7 +332,7 @@ class UtilityExtension : Extension() {
 					val member = user.asMember(guild!!.id)
 					val roles = member.roles.toList().map { it.id }
 
-					if (MODERATOR_ROLES.any { it in roles }) {
+					if (privilegedRoles.any { it in roles }) {
 						targetMessages.forEach { it.unpin("Unpinned by ${member.tag}") }
 						edit { content = "Messages unpinned." }
 
@@ -506,7 +510,7 @@ class UtilityExtension : Extension() {
 						val member = user.asMember(guild!!.id)
 						val roles = member.roles.toList().map { it.id }
 
-						if (MODERATOR_ROLES.any { it in roles }) {
+						if (privilegedRoles.any { it in roles }) {
 							channel.edit {
 								name = arguments.name
 
@@ -546,7 +550,7 @@ class UtilityExtension : Extension() {
 						val roles = member.roles.toList().map { it.id }
 						val ownedThread = threads.get(channel)
 
-						if (MODERATOR_ROLES.any { it in roles }) {
+						if (privilegedRoles.any { it in roles }) {
 							if (ownedThread != null) {
 								ownedThread.preventArchiving = false
 								threads.set(ownedThread)
@@ -627,7 +631,7 @@ class UtilityExtension : Extension() {
 							return@action
 						}
 
-						if (MODERATOR_ROLES.any { it in roles }) {
+						if (privilegedRoles.any { it in roles }) {
 							arguments.message.pin("Pinned by ${member.tag}")
 							edit { content = "Message pinned." }
 
@@ -665,7 +669,7 @@ class UtilityExtension : Extension() {
 							return@action
 						}
 
-						if (MODERATOR_ROLES.any { it in roles }) {
+						if (privilegedRoles.any { it in roles }) {
 							arguments.message.unpin("Unpinned by ${member.tag}")
 							edit { content = "Message unpinned." }
 
@@ -764,7 +768,7 @@ class UtilityExtension : Extension() {
 						val previousOwner = thread.owner
 
 						if ((thread.owner != user.id && threads.isOwner(channel, user) != true) &&
-							!MODERATOR_ROLES.any { it in roles }
+							!privilegedRoles.any { it in roles }
 						) {
 							edit { content = "**Error:** This is not your thread." }
 							return@action
@@ -778,7 +782,7 @@ class UtilityExtension : Extension() {
 							return@action
 						}
 
-						if (MODERATOR_ROLES.any { it in roles }) {
+						if (privilegedRoles.any { it in roles }) {
 							thread.owner = arguments.user.id
 							threads.set(thread)
 
