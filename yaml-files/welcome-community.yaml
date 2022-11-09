@@ -44,8 +44,9 @@
 - type: rules
 
   rules:
-    Follow Quilt's Code of Conduct: >
-      Everyone is expected to read and abide by our [Code of Conduct](http://quiltmc.org/community/code-of-conduct)
+    Follow Quilt's Community Documents: >
+      Everyone is expected to read and abide by our [Code of Conduct](https://quiltmc.org/community/code-of-conduct)
+      and [NSFW Content Policy](https://quiltmc.org/community/nsfw-policy/)
 
     Follow Discord's rules: >
       As a Discord-based community, we require everyone to follow Discord's
