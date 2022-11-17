@@ -110,6 +110,20 @@
 
         This list will change over time, and we're equally likely to add or remove things as the way people approach
         these subjects online changes.
+    
+    - title: ModMail
+      color: 0xf54058
+
+      description: >
+        Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the Quilt Moderators
+        by privately messaging the <@836548129763098674> ModMail bot. This will open a private channel between you
+        and the Moderators. 
+
+        You can also right-click (or long-tap on mobile) a message and select Apps > Report message to quickly forward
+        that message to the Moderators. The bot will prompt you to add more comments if you would like to.
+
+        Your interactions with ModMail are subject to the [ModMail Privacy Policy](https://quiltmc.org/en/legal/modmail-privacy-policy/).
+        By using ModMail, you have read, understood, and agreed for your data to be processed under this Policy.
 
 - type: text
   text: https://cdn.discordapp.com/attachments/863707104903561216/977162805373435925/forum-header-community.png
