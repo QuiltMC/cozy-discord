@@ -33,7 +33,7 @@ import org.quiltmc.community.modes.quilt.extensions.settings.SettingsExtension
 @Suppress("MagicNumber")  // It's the status code...
 suspend fun Kord.getGuildIgnoring403(id: Snowflake) =
 	try {
-		getGuild(id)
+		getGuildOrNull(id)
 	} catch (e: RestRequestException) {
 		if (e.status.code != 403) {
 			throw (e)

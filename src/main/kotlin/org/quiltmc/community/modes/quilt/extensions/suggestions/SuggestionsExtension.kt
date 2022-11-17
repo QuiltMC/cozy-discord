@@ -589,7 +589,7 @@ class SuggestionsExtension : Extension() {
 		val user = kord.getUser(suggestion.owner) ?: return
 
 		val suggestionMessage = if (suggestion.message != null) {
-			kord.getGuild(COMMUNITY_GUILD)
+			kord.getGuildOrNull(COMMUNITY_GUILD)
 				?.getChannelOf<GuildMessageChannel>(SUGGESTION_CHANNEL)
 				?.getMessageOrNull(suggestion.message!!)
 		} else {

@@ -792,7 +792,7 @@ class SettingsExtension : Extension() {
 					}
 
 					if (settings.leaveServer) {
-						event.kord.getGuild(settings._id)?.leave()
+						event.kord.getGuildOrNull(settings._id)?.leave()
 					}
 				}
 			}
