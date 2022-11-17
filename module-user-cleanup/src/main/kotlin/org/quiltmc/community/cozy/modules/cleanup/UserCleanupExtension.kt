@@ -23,6 +23,8 @@ import com.kotlindiscord.kord.extensions.utils.scheduling.Task
 import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.entity.Guild
 import dev.kord.core.entity.Member
+import io.ktor.client.request.forms.*
+import io.ktor.utils.io.jvm.javaio.*
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.toList
 import kotlinx.datetime.Clock
@@ -157,7 +159,7 @@ public class UserCleanupExtension(
 					content = "**User Cleanup:** Cleaned up ${removed.size} users that didn't pass member " +
 							"screening quickly enough."
 
-					addFile("users.md", table.byteInputStream())
+					addFile("users.md", ChannelProvider { table.byteInputStream().toByteReadChannel() })
 				}
 			}
 		}
