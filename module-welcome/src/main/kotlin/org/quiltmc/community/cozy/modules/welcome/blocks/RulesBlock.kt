@@ -48,7 +48,7 @@ public data class RulesBlock(
 	override suspend fun create(builder: MessageCreateBuilder) {
 		builder.content = text
 
-		var currentIndex = 0
+		var currentIndex = startingIndex - 1
 		var humanIndex = currentIndex + 1
 
 		rules.forEach { (rule, text) ->
@@ -68,7 +68,7 @@ public data class RulesBlock(
 		builder.content = text
 		builder.components = mutableListOf()
 
-		var currentIndex = 0
+		var currentIndex = startingIndex - 1
 		var humanIndex = currentIndex + 1
 
 		rules.forEach { (rule, text) ->
