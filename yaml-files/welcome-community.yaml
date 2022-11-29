@@ -111,24 +111,16 @@
         This list will change over time, and we're equally likely to add or remove things as the way people approach
         these subjects online changes.
 
-- type: text
-  text: https://cdn.discordapp.com/attachments/863707104903561216/977162805373435925/forum-header-community.png
-
-- type: embed
-
-  embeds:
-    - title: The Quilt Forum
-
-      url: "https://forum.quiltmc.org"
-      color: 0x5865F2
+    - title: ModMail
+      color: 0xf54058
 
       description: >
-        This isn't our only social space - we believe that Discord isn't the best platform for long-form
-        discussions, and that important information should be available to people that aren't here.
+        Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the Quilt Moderation Team
+        by privately messaging the <@836548129763098674> ModMail bot. This will open a private channel between you
+        and the Moderators.
 
-
-        If you're interested in long-form discussions, development help, news or community project, please feel free
-        to join our forum at [https://forum.quiltmc.org](https://forum.quiltmc.org)!
+        You can also right-click (or long-tap on mobile) a message and select Apps > Report message to quickly forward
+        that message to the Moderators. The bot will prompt you to add more comments if you would like to.
 
     - title: Community Artists
 
@@ -148,6 +140,34 @@
 
         We're very grateful to all of them for their amazing work! Don't hesitate to reach out to them if you'd like
         to commission them for your own projects.
+
+    - title: Privacy Policies
+
+      color: 0x5865F2
+
+      description: By interacting with this server or by DMing the ModMail bot, you certify that you have read,
+        understood and agreed for your data to be processed under our [Privacy Policies](https://quiltmc.org/en/legal/).
+
+        For any question or request regarding your data, please contact us at privacy@quiltmc.org.
+
+- type: text
+  text: https://cdn.discordapp.com/attachments/863707104903561216/977162805373435925/forum-header-community.png
+
+- type: embed
+
+  embeds:
+    - title: The Quilt Forum
+
+      url: "https://forum.quiltmc.org"
+      color: 0x5865F2
+
+      description: >
+        This isn't our only social space - we believe that Discord isn't the best platform for long-form
+        discussions, and that important information should be available to people that aren't here.
+
+
+        If you're interested in long-form discussions, development help, news or community project, please feel free
+        to join our forum at [https://forum.quiltmc.org](https://forum.quiltmc.org)!
 
 - type: roles
 
