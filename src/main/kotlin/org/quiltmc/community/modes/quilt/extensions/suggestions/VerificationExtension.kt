@@ -8,11 +8,15 @@ package org.quiltmc.community.modes.quilt.extensions.suggestions
 
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.event
+import dev.kord.core.event.guild.GuildCreateEvent
 import dev.kord.core.event.guild.MemberUpdateEvent
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.filter
 import mu.KotlinLogging
 import org.koin.core.component.inject
 import org.quiltmc.community.database.collections.ServerSettingsCollection
 import org.quiltmc.community.inQuiltGuild
+import kotlin.time.Duration.Companion.minutes
 
 class VerificationExtension : Extension() {
 	override val name: String = "verification"
@@ -21,6 +25,32 @@ class VerificationExtension : Extension() {
 	private val serverSettings: ServerSettingsCollection by inject()
 
 	override suspend fun setup() {
+		event<GuildCreateEvent> {
+			check { inQuiltGuild() }
+
+			action {
+				val roleId = serverSettings.get(event.guild.id)?.verificationRole
+				val guild = event.guild
+
+				if (roleId == null) {
+					logger.debug { "Guild ${guild.name} (${guild.id}) has no verification role set." }
+
+					return@action
+				}
+
+				logger.debug { "Waiting for a minute before syncing verification roles..." }
+
+				delay(1.minutes)
+
+				guild.members
+					.filter { !it.isPending && roleId !in it.roleIds }
+					.collect {
+						it.addRole(roleId, "Member has passed screening")
+						logger.debug { "Verification role applied to user: ${it.id}" }
+					}
+			}
+		}
+
 		event<MemberUpdateEvent> {
 			check { inQuiltGuild() }
 			check { failIf(event.member.isPending, "Member is pending") }

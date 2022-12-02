@@ -12,26 +12,22 @@
 package org.quiltmc.community
 
 import com.kotlindiscord.kord.extensions.ExtensibleBot
-import com.kotlindiscord.kord.extensions.checks.hasPermission
 import com.kotlindiscord.kord.extensions.modules.extra.mappings.extMappings
 import com.kotlindiscord.kord.extensions.modules.extra.phishing.DetectionAction
 import com.kotlindiscord.kord.extensions.modules.extra.phishing.extPhishing
 import com.kotlindiscord.kord.extensions.modules.extra.pluralkit.extPluralKit
 import com.kotlindiscord.kord.extensions.utils.envOrNull
 import com.kotlindiscord.kord.extensions.utils.getKoin
-import dev.kord.common.entity.Permission
 import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.gateway.Intents
 import dev.kord.gateway.PrivilegedIntent
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.lastOrNull
-import org.quiltmc.community.cozy.modules.cleanup.userCleanup
 import org.quiltmc.community.cozy.modules.moderation.moderation
 import org.quiltmc.community.cozy.modules.rolesync.rolesync
 import org.quiltmc.community.cozy.modules.tags.tags
 import org.quiltmc.community.cozy.modules.welcome.welcomeChannel
-import org.quiltmc.community.database.collections.ServerSettingsCollection
 import org.quiltmc.community.database.collections.TagsCollection
 import org.quiltmc.community.database.collections.WelcomeChannelCollection
 import org.quiltmc.community.modes.quilt.extensions.*
@@ -43,7 +39,6 @@ import org.quiltmc.community.modes.quilt.extensions.minecraft.MinecraftExtension
 import org.quiltmc.community.modes.quilt.extensions.settings.SettingsExtension
 import org.quiltmc.community.modes.quilt.extensions.suggestions.SuggestionsExtension
 import org.quiltmc.community.modes.quilt.extensions.suggestions.VerificationExtension
-import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.minutes
 
 val MODE = envOrNull("MODE")?.lowercase() ?: "quilt"
@@ -146,22 +141,22 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
 			check { notHasBaseModeratorRole() }
 		}
 
-		userCleanup {
-			maxPendingDuration = 3.days
-			taskDelay = 1.days
-			loggingChannelName = "cozy-logs"
-
-			runAutomatically = true
-
-			guildPredicate {
-				val servers = getKoin().get<ServerSettingsCollection>()
-				val serverEntry = servers.get(it.id)
-
-				serverEntry?.quiltServerType != null
-			}
-
-			commandCheck { hasPermission(Permission.Administrator) }
-		}
+//		userCleanup {
+//			maxPendingDuration = 3.days
+//			taskDelay = 1.days
+//			loggingChannelName = "cozy-logs"
+//
+//			runAutomatically = true
+//
+//			guildPredicate {
+//				val servers = getKoin().get<ServerSettingsCollection>()
+//				val serverEntry = servers.get(it.id)
+//
+//				serverEntry?.quiltServerType != null
+//			}
+//
+//			commandCheck { hasPermission(Permission.Administrator) }
+//		}
 
 		moderation {
 			loggingChannelName = "cozy-logs"
