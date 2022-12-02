@@ -262,7 +262,7 @@ public class WelcomeExtension : Extension() {
 
 					welcomeChannel.log {
 						embed {
-							title = "Welcome channel removed"
+							title = "Welcome channel created/edited"
 							color = DISCORD_YELLOW
 
 							description = buildString {
