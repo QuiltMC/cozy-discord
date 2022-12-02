@@ -29,6 +29,7 @@ data class ServerSettings(
 
 	var commandPrefix: String? = "?",
 	val moderatorRoles: MutableSet<Snowflake> = mutableSetOf(),
+	var verificationRole: Snowflake? = null,
 
 	var cozyLogChannel: Snowflake? = null,
 	var filterLogChannel: Snowflake? = null,
@@ -119,6 +120,14 @@ data class ServerSettings(
 			builder.append("Yes")
 		} else {
 			builder.append("No")
+		}
+
+		builder.append("**Verification role:** ")
+
+		if (verificationRole != null) {
+			builder.append("<@&$verificationRole>")
+		} else {
+			builder.append("N/A")
 		}
 
 		builder.append("\n\n")

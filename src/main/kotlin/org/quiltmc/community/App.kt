@@ -42,6 +42,7 @@ import org.quiltmc.community.modes.quilt.extensions.messagelog.MessageLogExtensi
 import org.quiltmc.community.modes.quilt.extensions.minecraft.MinecraftExtension
 import org.quiltmc.community.modes.quilt.extensions.settings.SettingsExtension
 import org.quiltmc.community.modes.quilt.extensions.suggestions.SuggestionsExtension
+import org.quiltmc.community.modes.quilt.extensions.suggestions.VerificationExtension
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.minutes
 
@@ -104,6 +105,7 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
 		add(::SuggestionsExtension)
 		add(::SyncExtension)
 		add(::UtilityExtension)
+		add(::VerificationExtension)
 
 		extPluralKit()
 

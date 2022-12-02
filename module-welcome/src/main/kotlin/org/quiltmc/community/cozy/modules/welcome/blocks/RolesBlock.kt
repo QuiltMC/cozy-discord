@@ -114,7 +114,7 @@ public data class RolesBlock(
 			content = "Please select your roles using the menu below."
 
 			actionRow {
-				selectMenu(generateMenuId()) {
+				stringSelect(generateMenuId()) {
 					guildRoles.forEach { (id, role) ->
 						val emojiString = roles[id]!!.emoji
 

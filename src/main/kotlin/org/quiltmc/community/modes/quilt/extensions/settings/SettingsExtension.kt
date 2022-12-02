@@ -767,6 +767,40 @@ class SettingsExtension : Extension() {
 				}
 			}
 
+			ephemeralSubCommand(::SingleRoleArg) {
+				name = "verification-role"
+				description = "For Quilt servers: Set (or clear) the verification role"
+
+				check { hasPermissionInMainGuild(Permission.Administrator) }
+
+				action {
+					val settings = if (arguments.serverId == null) {
+						serverSettings.get(guild!!.id)
+					} else {
+						serverSettings.get(arguments.serverId!!)
+					}
+
+					if (settings == null) {
+						respond {
+							content = ":x: Unknown guild ID: `${arguments.serverId?.value}`"
+						}
+
+						return@action
+					}
+
+					settings.verificationRole = arguments.role?.id
+					settings.save()
+
+					respond {
+						content = if (settings.verificationRole == null) {
+							"**Verification role unset**"
+						} else {
+							"**Verification role set:** <@&${settings.verificationRole}>"
+						}
+					}
+				}
+			}
+
 			ephemeralSubCommand(::ShouldLeaveArg) {
 				name = "set-leave-server"
 				description = "For Quilt servers: Set whether Cozy should automatically leave a server"
@@ -954,6 +988,18 @@ class SettingsExtension : Extension() {
 		val role by role {
 			name = "role"
 			description = "Role to add/remove"
+		}
+
+		val serverId by optionalSnowflake {
+			name = "server"
+			description = "Server ID, if not the current one"
+		}
+	}
+
+	inner class SingleRoleArg : Arguments() {
+		val role by optionalRole {
+			name = "role"
+			description = "Role to set, omit to clear"
 		}
 
 		val serverId by optionalSnowflake {
