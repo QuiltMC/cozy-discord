@@ -280,7 +280,7 @@ class UtilityExtension : Extension() {
 						.toDiscord(TimestampType.LongDateTime)
 
 					edit {
-						content = "You've requested a timeout, which will end in $relative (at $absolute).\n\n" +
+						content = "You've requested a timeout, which will end $relative (at $absolute).\n\n" +
 
 								"This timeout will be applied as soon as you click the button below. However, please " +
 								"note that **we will not be removing timeouts you set on yourself** in most " +
@@ -325,7 +325,7 @@ class UtilityExtension : Extension() {
 									}
 
 									respond {
-										content = "Your timeout has been applied. See you in $relative!"
+										content = "Your timeout has been applied. See you $relative!"
 									}
 
 									components.cancel()
