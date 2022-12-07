@@ -190,6 +190,10 @@
       description: "Let people know that you're using a translator to talk."
       emoji: "<:via_translator:976173251720015922>"
 
+    1050037117075603466:
+      description: "Remove yourself from the meta channel."
+      emoji: "🚫"
+
 - type: links
 
   title: Useful Links
