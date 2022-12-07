@@ -202,9 +202,9 @@ suspend fun Guild.getFilterLogChannel(): GuildMessageChannel? {
 	return getChannelOf(channelId)
 }
 
-suspend fun EmbedBuilder.userField(user: UserBehavior, role: String, inline: Boolean = false) {
+suspend fun EmbedBuilder.userField(user: UserBehavior, role: String? = null, inline: Boolean = false) {
 	field {
-		name = role
+		name = role ?: "User"
 		value = "${user.mention} (`${user.id}` / `${user.asUser().tag}`)"
 
 		this.inline = inline

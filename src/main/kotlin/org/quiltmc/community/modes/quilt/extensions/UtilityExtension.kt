@@ -23,21 +23,20 @@ import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
 import com.kotlindiscord.kord.extensions.commands.application.slash.publicSubCommand
 import com.kotlindiscord.kord.extensions.commands.converters.impl.*
+import com.kotlindiscord.kord.extensions.components.ComponentContainer
 import com.kotlindiscord.kord.extensions.components.components
 import com.kotlindiscord.kord.extensions.components.ephemeralButton
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralMessageCommand
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.extensions.event
+import com.kotlindiscord.kord.extensions.i18n.SupportedLocales
 import com.kotlindiscord.kord.extensions.time.TimestampType
 import com.kotlindiscord.kord.extensions.time.toDiscord
 import com.kotlindiscord.kord.extensions.types.edit
 import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.types.respondEphemeral
-import com.kotlindiscord.kord.extensions.utils.authorId
-import com.kotlindiscord.kord.extensions.utils.deleteIgnoringNotFound
-import com.kotlindiscord.kord.extensions.utils.envOrNull
-import com.kotlindiscord.kord.extensions.utils.setNickname
+import com.kotlindiscord.kord.extensions.utils.*
 import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.*
 import dev.kord.core.behavior.channel.*
@@ -59,16 +58,14 @@ import io.ktor.utils.io.jvm.javaio.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.toList
-import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toJavaLocalDateTime
-import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.*
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import mu.KotlinLogging
 import org.koin.core.component.inject
 import org.quiltmc.community.*
+import org.quiltmc.community.cozy.modules.moderation.compareTo
 import org.quiltmc.community.database.collections.OwnedThreadCollection
 import org.quiltmc.community.database.collections.UserFlagsCollection
 import org.quiltmc.community.database.entities.OwnedThread
@@ -260,6 +257,98 @@ class UtilityExtension : Extension() {
 		}
 
 		GUILDS.forEach { guildId ->
+			ephemeralSlashCommand(::SelfTimeoutArguments) {
+				name = "self-timeout"
+				description = "Time yourself out for up to three days"
+
+				allowInDms = false
+
+				guild(guildId)
+
+				check { inQuiltGuild() }
+				check { notHasBaseModeratorRole() }
+
+				action {
+					lateinit var components: ComponentContainer
+
+					val relative = Clock.System.now()
+						.plus(arguments.duration, TimeZone.UTC)
+						.toDiscord(TimestampType.RelativeTime)
+
+					val absolute = Clock.System.now()
+						.plus(arguments.duration, TimeZone.UTC)
+						.toDiscord(TimestampType.LongDateTime)
+
+					edit {
+						content = "You've requested a timeout, which will end in $relative (at $absolute).\n\n" +
+
+								"This timeout will be applied as soon as you click the button below. However, please " +
+								"note that **we will not be removing timeouts you set on yourself** in most " +
+								"situations, even if you request it. You should avoid setting timeouts you're not " +
+								"sure about.\n\n" +
+
+								"Are you sure you'd like to apply this timeout?"
+
+						components = components {
+							ephemeralButton {
+								label = "Confirm"
+								style = ButtonStyle.Danger
+
+								@OptIn(DoNotChain::class)
+								action {
+									member!!.asMember()
+										.timeout(
+											arguments.duration,
+											reason = "Requested using /self-timeout"
+										)
+
+									guild?.asGuild()?.getCozyLogChannel()?.createEmbed {
+										title = "Requested timeout automatically applied"
+										color = DISCORD_BLURPLE
+
+										userField(user.asUser())
+
+										field {
+											name = "Duration"
+											value = arguments.duration.format(SupportedLocales.ENGLISH)
+										}
+
+										field {
+											name = "Relative ending time"
+											value = relative
+										}
+
+										field {
+											name = "Absolute ending time"
+											value = absolute
+										}
+									}
+
+									respond {
+										content = "Your timeout has been applied. See you in $relative!"
+									}
+
+									components.cancel()
+								}
+							}
+
+							ephemeralButton {
+								label = "Cancel"
+								style = ButtonStyle.Secondary
+
+								action {
+									respond {
+										content = "Your timeout has been cancelled."
+									}
+
+									components.cancel()
+								}
+							}
+						}
+					}
+				}
+			}
+
 			ephemeralMessageCommand {
 				name = "Raw JSON"
 
@@ -1234,6 +1323,21 @@ class UtilityExtension : Extension() {
 	suspend fun Guild.getCozyLogChannel() =
 		channels.firstOrNull { it.name == "cozy-logs" }
 			?.asChannelOrNull() as? GuildMessageChannel
+
+	inner class SelfTimeoutArguments : Arguments() {
+		val duration by duration {
+			name = "duration"
+			description = "How long to time yourself out for; no more than three days"
+
+			positiveOnly = true
+
+			validate {
+				if (value > DateTimePeriod(days = 3)) {
+					fail("You may not time yourself out for more than three days.")
+				}
+			}
+		}
+	}
 
 	inner class PinMessageArguments : Arguments() {
 		val message by message {
