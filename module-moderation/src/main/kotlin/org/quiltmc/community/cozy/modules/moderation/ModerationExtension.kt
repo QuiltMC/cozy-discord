@@ -290,7 +290,6 @@ public class ModerationExtension(
 						config.getTemporaryRole(guild!!.asGuild()).id,
 						"Force verified by ${user.asUser().tag}"
 					)
-					member.removeRole(config.getTemporaryRole(guild!!.asGuild()).id)
 
 					config.getLoggingChannelOrNull(guild!!.asGuild())?.createEmbed {
 						title = "User force verified"

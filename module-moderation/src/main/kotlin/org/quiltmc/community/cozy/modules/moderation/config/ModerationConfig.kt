@@ -30,7 +30,7 @@ public abstract class ModerationConfig {
 	public open suspend fun getCommandChecks(): List<Check<*>> = listOf()
 
 	/**
-	 * Provide a temporary role without any permission that can be used by the extension.
+	 * Provide the role given to verified users.
 	 */
-	public abstract suspend fun getTemporaryRole(guild: Guild): Role
+	public abstract suspend fun getVerifiedRole(guild: Guild): Role
 }

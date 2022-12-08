@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.lastOrNull
 
 public class SimpleModerationConfig(builder: Builder) : ModerationConfig() {
 	private val loggingChannelName: String = builder.loggingChannelName!!
-	private val temporaryRoleName: String = builder.temporaryRoleName!!
+	private val verifiedRoleName: String = builder.verifiedRoleName!!
 	private val commandChecks: MutableList<Check<*>> = builder.commandChecks
 
 	override suspend fun getLoggingChannelOrNull(guild: Guild): GuildMessageChannel? =
@@ -26,8 +26,8 @@ public class SimpleModerationConfig(builder: Builder) : ModerationConfig() {
 			.filter { channel -> channel.name.equals(loggingChannelName, true) }
 			.lastOrNull()
 
-	override suspend fun getTemporaryRole(guild: Guild): Role =
-		guild.roles.filter { role -> role.name.equals(temporaryRoleName, true) }
+	override suspend fun getVerifiedRole(guild: Guild): Role =
+		guild.roles.filter { role -> role.name.equals(verifiedRoleName, true) }
 			.last()
 
 	override suspend fun getCommandChecks(): List<Check<*>> =
@@ -35,7 +35,7 @@ public class SimpleModerationConfig(builder: Builder) : ModerationConfig() {
 
 	public class Builder {
 		public var loggingChannelName: String? = null
-		public var temporaryRoleName: String? = null
+		public var verifiedRoleName: String? = null
 
 		internal val commandChecks: MutableList<Check<*>> = mutableListOf()
 
