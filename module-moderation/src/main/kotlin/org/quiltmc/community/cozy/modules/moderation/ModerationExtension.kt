@@ -287,7 +287,7 @@ public class ModerationExtension(
 					}
 				} else {
 					member.addRole(
-						config.getTemporaryRole(guild!!.asGuild()).id,
+						config.getVerifiedRole(guild!!.asGuild()).id,
 						"Force verified by ${user.asUser().tag}"
 					)
 
