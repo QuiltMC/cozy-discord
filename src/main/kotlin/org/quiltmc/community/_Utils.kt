@@ -9,6 +9,7 @@ package org.quiltmc.community
 import com.kotlindiscord.kord.extensions.builders.ExtensibleBotBuilder
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.SlashCommandContext
+import com.kotlindiscord.kord.extensions.components.forms.ModalForm
 import com.kotlindiscord.kord.extensions.utils.env
 import com.kotlindiscord.kord.extensions.utils.envOrNull
 import com.kotlindiscord.kord.extensions.utils.getKoin
@@ -177,8 +178,8 @@ fun Guild.getMaxArchiveDuration(): ArchiveDuration {
 
 // Logging-related extensions
 
-suspend fun <C : SlashCommandContext<C, A>, A : Arguments>
-		SlashCommandContext<C, A>.getGithubLogChannel(): GuildMessageChannel? {
+suspend fun <C : SlashCommandContext<C, A, M>, A : Arguments, M : ModalForm>
+		SlashCommandContext<C, A, M>.getGithubLogChannel(): GuildMessageChannel? {
 	val channelId = getKoin().get<GlobalSettingsCollection>().get()?.githubLogChannel ?: return null
 
 	return event.kord.getChannelOf<GuildMessageChannel>(channelId)
