@@ -10,24 +10,33 @@ import com.kotlindiscord.kord.extensions.checks.anyGuild
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
 import com.kotlindiscord.kord.extensions.commands.converters.impl.*
+import com.kotlindiscord.kord.extensions.components.forms.ModalForm
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
+import com.kotlindiscord.kord.extensions.modules.unsafe.annotations.UnsafeAPI
+import com.kotlindiscord.kord.extensions.modules.unsafe.extensions.unsafeSubCommand
+import com.kotlindiscord.kord.extensions.modules.unsafe.types.InitialSlashCommandResponse
+import com.kotlindiscord.kord.extensions.modules.unsafe.types.ackEphemeral
+import com.kotlindiscord.kord.extensions.modules.unsafe.types.respondEphemeral
 import com.kotlindiscord.kord.extensions.types.editingPaginator
 import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.FilterStrategy
 import com.kotlindiscord.kord.extensions.utils.suggestStringMap
 import dev.kord.core.behavior.channel.createMessage
+import dev.kord.core.behavior.interaction.modal
 import dev.kord.core.behavior.interaction.suggestString
 import dev.kord.rest.builder.message.create.allowedMentions
 import org.koin.core.component.inject
 import org.quiltmc.community.cozy.modules.tags.config.TagsConfig
 import org.quiltmc.community.cozy.modules.tags.data.Tag
 import org.quiltmc.community.cozy.modules.tags.data.TagsData
+import org.quiltmc.community.cozy.modules.tags.nullIfBlank
 
 internal const val POSITIVE_EMOTE = "\uD83D\uDC4D"
 internal const val NEGATIVE_EMOTE = "❌"
 
+@OptIn(UnsafeAPI::class)
 @Suppress("MagicNumber")
 public class TagsExtension : Extension() {
 	override val name: String = "quiltmc-tags"
@@ -192,19 +201,36 @@ public class TagsExtension : Extension() {
 
 			tagsConfig.getStaffCommandChecks().forEach(::check)
 
-			ephemeralSubCommand(::SetArgs) {
+			unsafeSubCommand(::SetArgs) {
 				name = "set"
-				description = "Create or update a tag"
+				description = "Create or replace a tag"
+
+				initialResponse = InitialSlashCommandResponse.None
 
 				action {
+					val modalObj = TagEditModal()
+
+					this@unsafeSubCommand.componentRegistry.register(modalObj)
+
+					event.interaction.modal(
+						modalObj.translateTitle(getLocale(), bundle),
+						modalObj.id
+					) {
+						modalObj.applyToBuilder(this, getLocale(), bundle)
+					}
+
+					interactionResponse = modalObj.awaitCompletion {
+						it?.deferEphemeralResponseUnsafe()
+					} ?: return@action
+
 					val tag = Tag(
 						category = arguments.category,
-						description = arguments.description,
+						description = modalObj.description.value!!,
 						key = arguments.key,
-						title = arguments.title,
+						title = modalObj.tagTitle.value!!,
 						color = arguments.colour,
 						guildId = arguments.guild?.id,
-						image = arguments.image
+						image = modalObj.imageUrl.value.nullIfBlank()
 					)
 
 					tagsData.setTag(tag)
@@ -217,33 +243,56 @@ public class TagsExtension : Extension() {
 						tagsConfig.getTagFormatter().invoke(this, tag)
 					}
 
-					respond {
+					respondEphemeral {
 						content = "$POSITIVE_EMOTE Tag set: ${tag.title}"
 					}
 				}
 			}
 
-			ephemeralSubCommand(::EditArgs) {
+			unsafeSubCommand(::EditArgs) {
 				name = "edit"
 				description = "Edit an existing tag"
+
+				initialResponse = InitialSlashCommandResponse.None
 
 				action {
 					var tag = tagsData.getTagByKey(arguments.key, arguments.guild?.id)
 
 					if (tag == null) {
-						respond {
+						ackEphemeral {
 							content = "$NEGATIVE_EMOTE Tag not found"
 						}
 
 						return@action
 					}
 
-					if (arguments.title != null) {
-						tag = tag.copy(title = arguments.title!!)
+					val modalObj = TagEditModal(
+						true,
+						tag.key,
+						tag.title,
+						tag.description,
+						tag.image
+					)
+
+					this@unsafeSubCommand.componentRegistry.register(modalObj)
+
+					event.interaction.modal(
+						modalObj.translateTitle(getLocale(), bundle),
+						modalObj.id
+					) {
+						modalObj.applyToBuilder(this, getLocale(), bundle)
 					}
 
-					if (arguments.description != null) {
-						tag = tag.copy(description = arguments.description!!)
+					interactionResponse = modalObj.awaitCompletion {
+						it?.deferEphemeralResponseUnsafe()
+					} ?: return@action
+
+					if (!modalObj.tagTitle.value.isNullOrBlank()) {
+						tag = tag.copy(title = modalObj.tagTitle.value!!)
+					}
+
+					if (!modalObj.description.value.isNullOrBlank()) {
+						tag = tag.copy(description = modalObj.description.value!!)
 					}
 
 					if (arguments.category != null) {
@@ -254,12 +303,10 @@ public class TagsExtension : Extension() {
 						tag = tag.copy(color = arguments.colour!!)
 					}
 
-					if (arguments.image != null) {
-						if (arguments.image == "none") {
-							tag = tag.copy(image = null)
-						} else {
-							tag = tag.copy(image = arguments.image)
-						}
+					if (modalObj.imageUrl.value.isNullOrBlank()) {
+						tag = tag.copy(image = null)
+					} else {
+						tag = tag.copy(image = modalObj.imageUrl.value)
 					}
 
 					tagsData.setTag(tag)
@@ -272,7 +319,7 @@ public class TagsExtension : Extension() {
 						tagsConfig.getTagFormatter().invoke(this, tag)
 					}
 
-					respond {
+					respondEphemeral {
 						content = "$POSITIVE_EMOTE Tag edited: ${tag.title}"
 					}
 				}
@@ -396,21 +443,6 @@ public class TagsExtension : Extension() {
 			description = "Unique tag key"
 		}
 
-		val title by string {
-			name = "title"
-			description = "Tag title for display"
-		}
-
-		val description by string {
-			name = "description"
-			description = "Tag content - use \\n for a newline if needed"
-
-			mutate {
-				it.replace("\\n", "\n")
-					.replace("\n ", "\n")
-			}
-		}
-
 		val category by string {
 			name = "category"
 			description = "Category to use for this tag - specify a new one to create it"
@@ -434,11 +466,6 @@ public class TagsExtension : Extension() {
 			name = "guild"
 			description = "Optional guild to limit the tag to - \"this\" for the current guild"
 		}
-
-		val image by optionalString {
-			name = "image"
-			description = "Image URL to embed as part of the tag"
-		}
 	}
 
 	internal class EditArgs(tagsData: TagsData) : Arguments() {
@@ -450,21 +477,6 @@ public class TagsExtension : Extension() {
 		val guild by optionalGuild {
 			name = "guild"
 			description = "Optional guild to use for matching (this can't be edited)"
-		}
-
-		val title by optionalString {
-			name = "title"
-			description = "Tag title for display"
-		}
-
-		val description by optionalString {
-			name = "description"
-			description = "Tag content - use \\n for a newline if needed"
-
-			mutate {
-				it?.replace("\\n", "\n")
-					?.replace("\n ", "\n")
-			}
 		}
 
 		val category by optionalString {
@@ -485,11 +497,6 @@ public class TagsExtension : Extension() {
 			name = "colour"
 			description = "Use hex codes, RGB integers (0 to clear) or Discord colour constants"
 		}
-
-		val image by optionalString {
-			name = "image"
-			description = "Image URL to embed as part of the tag, \"none\" to clear"
-		}
 	}
 
 	internal class ByCategoryArgs(tagsData: TagsData) : Arguments() {
@@ -505,6 +512,41 @@ public class TagsExtension : Extension() {
 					FilterStrategy.Contains
 				)
 			}
+		}
+	}
+
+	internal class TagEditModal(
+		isEditing: Boolean = false,
+		key: String? = null,
+		private val initialTagTitle: String? = null,
+		private val initialDescription: String? = null,
+		private val initialImageUrl: String? = null,
+	) : ModalForm() {
+		override var title: String = if (!isEditing) {
+			"Create tag"
+		} else {
+			"Edit tag"
+		} + if (key != null) {
+			": $key"
+		} else {
+			""
+		}
+
+		val tagTitle = lineText {
+			label = "Title"
+			initialValue = initialTagTitle
+		}
+
+		val description = paragraphText {
+			label = "Tag content"
+			initialValue = initialDescription
+		}
+
+		val imageUrl = lineText {
+			label = "Image URL"
+			initialValue = initialImageUrl
+
+			required = false
 		}
 	}
 
