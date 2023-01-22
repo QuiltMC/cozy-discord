@@ -434,13 +434,14 @@ class ModHostingVerificationExtension : Extension() {
 		failedToDmUser: Boolean
 	) {
 		val channel = message.channel.asChannelOf<TextChannel>()
+
+		if (failedToDmUser) {
+			content = author.mention
+		}
+
 		embed {
 			title = "Are your projects marked as quilt compatible?"
 			color = DISCORD_RED
-
-			if (failedToDmUser) {
-				content = author.mention
-			}
 
 			field {
 				value = if (failedToDmUser) {
