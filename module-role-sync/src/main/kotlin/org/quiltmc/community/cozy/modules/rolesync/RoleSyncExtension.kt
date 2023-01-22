@@ -78,6 +78,8 @@ public class RoleSyncExtension(
 			name = "role-sync"
 			description = "Manually sync roles"
 
+			allowInDms = false
+
 			config.getCommandChecks().forEach(::check)
 
 			action {

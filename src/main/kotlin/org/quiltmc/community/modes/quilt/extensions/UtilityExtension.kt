@@ -23,23 +23,22 @@ import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
 import com.kotlindiscord.kord.extensions.commands.application.slash.publicSubCommand
 import com.kotlindiscord.kord.extensions.commands.converters.impl.*
+import com.kotlindiscord.kord.extensions.components.ComponentContainer
 import com.kotlindiscord.kord.extensions.components.components
 import com.kotlindiscord.kord.extensions.components.ephemeralButton
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralMessageCommand
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.extensions.event
+import com.kotlindiscord.kord.extensions.i18n.SupportedLocales
+import com.kotlindiscord.kord.extensions.time.TimestampType
+import com.kotlindiscord.kord.extensions.time.toDiscord
 import com.kotlindiscord.kord.extensions.types.edit
 import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.types.respondEphemeral
-import com.kotlindiscord.kord.extensions.utils.authorId
-import com.kotlindiscord.kord.extensions.utils.deleteIgnoringNotFound
-import com.kotlindiscord.kord.extensions.utils.setNickname
+import com.kotlindiscord.kord.extensions.utils.*
 import dev.kord.common.annotation.KordPreview
-import dev.kord.common.entity.ChannelType
-import dev.kord.common.entity.MessageType
-import dev.kord.common.entity.Permission
-import dev.kord.common.entity.Permissions
+import dev.kord.common.entity.*
 import dev.kord.core.behavior.channel.*
 import dev.kord.core.behavior.channel.threads.edit
 import dev.kord.core.behavior.edit
@@ -49,23 +48,24 @@ import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.entity.channel.thread.ThreadChannel
 import dev.kord.core.event.channel.thread.TextChannelThreadCreateEvent
 import dev.kord.core.event.channel.thread.ThreadUpdateEvent
+import dev.kord.core.event.gateway.ReadyEvent
 import dev.kord.core.event.guild.MemberUpdateEvent
 import dev.kord.core.event.message.MessageCreateEvent
 import dev.kord.rest.builder.message.create.embed
 import dev.kord.rest.builder.message.modify.embed
+import io.ktor.client.request.forms.*
+import io.ktor.utils.io.jvm.javaio.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.toList
-import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toJavaLocalDateTime
-import kotlinx.datetime.toLocalDateTime
+import kotlinx.datetime.*
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import mu.KotlinLogging
 import org.koin.core.component.inject
 import org.quiltmc.community.*
+import org.quiltmc.community.cozy.modules.moderation.compareTo
 import org.quiltmc.community.database.collections.OwnedThreadCollection
 import org.quiltmc.community.database.collections.UserFlagsCollection
 import org.quiltmc.community.database.entities.OwnedThread
@@ -83,6 +83,7 @@ val SPEAKING_PERMISSIONS: Array<Permission> = arrayOf(
 	Permission.SendMessagesInThreads,
 )
 
+val STATUS_CHANNEL_ID = envOrNull("STATUS_CHANNEL")
 val PIN_DELETE_DELAY = 10.seconds
 val THREAD_CREATE_DELETE_DELAY = 30.minutes
 
@@ -90,6 +91,10 @@ class UtilityExtension : Extension() {
 	override val name: String = "utility"
 
 	private val logger = KotlinLogging.logger { }
+	private val privilegedRoles = listOf(
+		MANAGER_ROLES,
+		MODERATOR_ROLES
+	).flatten()
 	private val threads: OwnedThreadCollection by inject()
 
 	private val userFlags: UserFlagsCollection by inject()
@@ -104,6 +109,24 @@ class UtilityExtension : Extension() {
 	}
 
 	override suspend fun setup() {
+		if (STATUS_CHANNEL_ID != null) {
+			event<ReadyEvent> {
+				action {
+					val channel = kord.getChannelOf<TextChannel>(Snowflake(STATUS_CHANNEL_ID))
+
+					channel?.createMessage {
+						content = buildString {
+							append("**Bot connected:** ")
+							append(Clock.System.now().toDiscord(TimestampType.LongDateTime))
+							append(" (")
+							append(Clock.System.now().toDiscord(TimestampType.RelativeTime))
+							append(")")
+						}
+					}
+				}
+			}
+		}
+
 		event<MemberUpdateEvent> {
 			check { inQuiltGuild() }
 			check { isNotBot() }
@@ -120,8 +143,8 @@ class UtilityExtension : Extension() {
 
 				if (flags.syncNicks) {
 					val otherMember = when (event.guild.id) {
-						COMMUNITY_GUILD -> kord.getGuild(TOOLCHAIN_GUILD)?.getMemberOrNull(event.member.id)
-						TOOLCHAIN_GUILD -> kord.getGuild(COMMUNITY_GUILD)?.getMemberOrNull(event.member.id)
+						COMMUNITY_GUILD -> kord.getGuildOrNull(TOOLCHAIN_GUILD)?.getMemberOrNull(event.member.id)
+						TOOLCHAIN_GUILD -> kord.getGuildOrNull(COMMUNITY_GUILD)?.getMemberOrNull(event.member.id)
 
 						else -> null
 					} ?: return@action
@@ -178,6 +201,7 @@ class UtilityExtension : Extension() {
 			check { inQuiltGuild() }
 			check { failIf(event.channel.ownerId == kord.selfId) }
 			check { failIf(event.channel.member != null) }  // We only want thread creation, not join
+			check { failIf(event.channel.owner.asUserOrNull()?.isBot == true) }
 
 			action {
 				val owner = event.channel.owner.asUser()
@@ -233,8 +257,102 @@ class UtilityExtension : Extension() {
 		}
 
 		GUILDS.forEach { guildId ->
+			ephemeralSlashCommand(::SelfTimeoutArguments) {
+				name = "self-timeout"
+				description = "Time yourself out for up to three days"
+
+				allowInDms = false
+
+				guild(guildId)
+
+				check { inQuiltGuild() }
+				check { notHasBaseModeratorRole() }
+
+				action {
+					lateinit var components: ComponentContainer
+
+					val relative = Clock.System.now()
+						.plus(arguments.duration, TimeZone.UTC)
+						.toDiscord(TimestampType.RelativeTime)
+
+					val absolute = Clock.System.now()
+						.plus(arguments.duration, TimeZone.UTC)
+						.toDiscord(TimestampType.LongDateTime)
+
+					edit {
+						content = "You've requested a timeout, which will end $relative (at $absolute).\n\n" +
+
+								"This timeout will be applied as soon as you click the button below. However, please " +
+								"note that **we will not be removing timeouts you set on yourself** in most " +
+								"situations, even if you request it. You should avoid setting timeouts you're not " +
+								"sure about.\n\n" +
+
+								"Are you sure you'd like to apply this timeout?"
+
+						components = components {
+							ephemeralButton {
+								label = "Confirm"
+								style = ButtonStyle.Danger
+
+								@OptIn(DoNotChain::class)
+								action {
+									member!!.asMember()
+										.timeout(
+											arguments.duration,
+											reason = "Requested using /self-timeout"
+										)
+
+									guild?.asGuild()?.getCozyLogChannel()?.createEmbed {
+										title = "Requested timeout automatically applied"
+										color = DISCORD_BLURPLE
+
+										userField(user.asUser())
+
+										field {
+											name = "Duration"
+											value = arguments.duration.format(SupportedLocales.ENGLISH)
+										}
+
+										field {
+											name = "Relative ending time"
+											value = relative
+										}
+
+										field {
+											name = "Absolute ending time"
+											value = absolute
+										}
+									}
+
+									respond {
+										content = "Your timeout has been applied. See you $relative!"
+									}
+
+									components.cancel()
+								}
+							}
+
+							ephemeralButton {
+								label = "Cancel"
+								style = ButtonStyle.Secondary
+
+								action {
+									respond {
+										content = "Your timeout has been cancelled."
+									}
+
+									components.cancel()
+								}
+							}
+						}
+					}
+				}
+			}
+
 			ephemeralMessageCommand {
 				name = "Raw JSON"
+
+				allowInDms = false
 
 				guild(guildId)
 
@@ -247,13 +365,19 @@ class UtilityExtension : Extension() {
 					respond {
 						content = "Raw message data attached below."
 
-						addFile("message.json", data.byteInputStream())
+						addFile(
+							"message.json",
+
+							ChannelProvider { data.byteInputStream().toByteReadChannel() }
+						)
 					}
 				}
 			}
 
 			ephemeralMessageCommand {
 				name = "Pin in thread"
+
+				allowInDms = false
 
 				guild(guildId)
 
@@ -264,7 +388,7 @@ class UtilityExtension : Extension() {
 					val member = user.asMember(guild!!.id)
 					val roles = member.roles.toList().map { it.id }
 
-					if (MODERATOR_ROLES.any { it in roles }) {
+					if (privilegedRoles.any { it in roles }) {
 						targetMessages.forEach { it.pin("Pinned by ${member.tag}") }
 						edit { content = "Messages pinned." }
 
@@ -286,6 +410,8 @@ class UtilityExtension : Extension() {
 			ephemeralMessageCommand {
 				name = "Unpin in thread"
 
+				allowInDms = false
+
 				guild(guildId)
 
 				check { isInThread() }
@@ -295,7 +421,7 @@ class UtilityExtension : Extension() {
 					val member = user.asMember(guild!!.id)
 					val roles = member.roles.toList().map { it.id }
 
-					if (MODERATOR_ROLES.any { it in roles }) {
+					if (privilegedRoles.any { it in roles }) {
 						targetMessages.forEach { it.unpin("Unpinned by ${member.tag}") }
 						edit { content = "Messages unpinned." }
 
@@ -317,6 +443,8 @@ class UtilityExtension : Extension() {
 			ephemeralSlashCommand {
 				name = "thread"
 				description = "Thread management commands"
+
+				allowInDms = false
 
 				guild(guildId)
 
@@ -451,7 +579,11 @@ class UtilityExtension : Extension() {
 						respond {
 							content = "**Thread backup created by ${user.mention}.**"
 
-							addFile("thread.md", messageBuilder.toString().byteInputStream())
+							addFile(
+								"thread.md",
+
+								ChannelProvider { messageBuilder.toString().byteInputStream().toByteReadChannel() }
+							)
 						}
 					}
 				}
@@ -467,7 +599,7 @@ class UtilityExtension : Extension() {
 						val member = user.asMember(guild!!.id)
 						val roles = member.roles.toList().map { it.id }
 
-						if (MODERATOR_ROLES.any { it in roles }) {
+						if (privilegedRoles.any { it in roles }) {
 							channel.edit {
 								name = arguments.name
 
@@ -507,7 +639,7 @@ class UtilityExtension : Extension() {
 						val roles = member.roles.toList().map { it.id }
 						val ownedThread = threads.get(channel)
 
-						if (MODERATOR_ROLES.any { it in roles }) {
+						if (privilegedRoles.any { it in roles }) {
 							if (ownedThread != null) {
 								ownedThread.preventArchiving = false
 								threads.set(ownedThread)
@@ -588,7 +720,7 @@ class UtilityExtension : Extension() {
 							return@action
 						}
 
-						if (MODERATOR_ROLES.any { it in roles }) {
+						if (privilegedRoles.any { it in roles }) {
 							arguments.message.pin("Pinned by ${member.tag}")
 							edit { content = "Message pinned." }
 
@@ -626,7 +758,7 @@ class UtilityExtension : Extension() {
 							return@action
 						}
 
-						if (MODERATOR_ROLES.any { it in roles }) {
+						if (privilegedRoles.any { it in roles }) {
 							arguments.message.unpin("Unpinned by ${member.tag}")
 							edit { content = "Message unpinned." }
 
@@ -725,7 +857,7 @@ class UtilityExtension : Extension() {
 						val previousOwner = thread.owner
 
 						if ((thread.owner != user.id && threads.isOwner(channel, user) != true) &&
-							!MODERATOR_ROLES.any { it in roles }
+							!privilegedRoles.any { it in roles }
 						) {
 							edit { content = "**Error:** This is not your thread." }
 							return@action
@@ -739,7 +871,7 @@ class UtilityExtension : Extension() {
 							return@action
 						}
 
-						if (MODERATOR_ROLES.any { it in roles }) {
+						if (privilegedRoles.any { it in roles }) {
 							thread.owner = arguments.user.id
 							threads.set(thread)
 
@@ -819,6 +951,8 @@ class UtilityExtension : Extension() {
 				name = "say"
 				description = "Send a message."
 
+				allowInDms = false
+
 				guild(guildId)
 
 				check { hasBaseModeratorRole() }
@@ -852,6 +986,8 @@ class UtilityExtension : Extension() {
 			ephemeralSlashCommand(::MuteRoleArguments) {
 				name = "fix-mute-role"
 				description = "Fix the permissions for the mute role on this server."
+
+				allowInDms = false
 
 				guild(guildId)
 
@@ -958,6 +1094,8 @@ class UtilityExtension : Extension() {
 				name = "lock-server"
 				description = "Lock the server, preventing anyone but staff from talking"
 
+				allowInDms = false
+
 				guild(guildId)
 
 				check { hasPermission(Permission.Administrator) }
@@ -1013,6 +1151,8 @@ class UtilityExtension : Extension() {
 				name = "unlock-server"
 				description = "Unlock the server, allowing users to talk again"
 
+				allowInDms = false
+
 				guild(guildId)
 
 				check { hasPermission(Permission.Administrator) }
@@ -1067,6 +1207,8 @@ class UtilityExtension : Extension() {
 			ephemeralSlashCommand(::LockArguments) {
 				name = "lock"
 				description = "Lock a channel, so only moderators can interact in it"
+
+				allowInDms = false
 
 				guild(guildId)
 
@@ -1130,6 +1272,8 @@ class UtilityExtension : Extension() {
 				name = "unlock"
 				description = "Unlock a previously locked channel"
 
+				allowInDms = false
+
 				guild(guildId)
 
 				check { hasBaseModeratorRole() }
@@ -1179,6 +1323,21 @@ class UtilityExtension : Extension() {
 	suspend fun Guild.getCozyLogChannel() =
 		channels.firstOrNull { it.name == "cozy-logs" }
 			?.asChannelOrNull() as? GuildMessageChannel
+
+	inner class SelfTimeoutArguments : Arguments() {
+		val duration by duration {
+			name = "duration"
+			description = "How long to time yourself out for; no more than three days"
+
+			positiveOnly = true
+
+			validate {
+				if (value > DateTimePeriod(days = 3)) {
+					fail("You may not time yourself out for more than three days.")
+				}
+			}
+		}
+	}
 
 	inner class PinMessageArguments : Arguments() {
 		val message by message {

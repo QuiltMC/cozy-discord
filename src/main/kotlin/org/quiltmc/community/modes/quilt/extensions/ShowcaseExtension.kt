@@ -219,6 +219,8 @@ class ShowcaseExtension : Extension() {
 			name = "showcase"
 			description = "Showcase channel configuration commands"
 
+			allowInDms = false
+
 			check { anyGuild() }
 			check { hasPermission(Permission.ManageGuild) }
 

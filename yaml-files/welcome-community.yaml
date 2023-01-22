@@ -44,8 +44,9 @@
 - type: rules
 
   rules:
-    Follow Quilt's Code of Conduct: >
-      Everyone is expected to read and abide by our [Code of Conduct](http://quiltmc.org/community/code-of-conduct)
+    Follow Quilt's Community Documents: >
+      Everyone is expected to read and abide by our [Code of Conduct](https://quiltmc.org/community/code-of-conduct)
+      and [NSFW Content Policy](https://quiltmc.org/community/nsfw-policy/)
 
     Follow Discord's rules: >
       As a Discord-based community, we require everyone to follow Discord's
@@ -98,12 +99,56 @@
         look "wrong" in any way.
 
 
-        **»** Anything relating to Mojang's new Java Edition chat reporting features outside <#989073615670628352>.
-        Moderators reserve the rights to lock the thread if the discussion gets too heated, please keep it civil.
+        **»** Anything relating to Mojang's new Java Edition chat reporting features, including discussions relating to
+        potential exploits, or mods that make use of them. As an exception to this rule, you may discuss strategies
+        and mods for mitigating the usage of exploits on your servers, and good-faith mods that allow you to control
+        how chat reporting works on your servers.
+
+
+        **»** Anything related to the death of Queen Elizabeth II
 
 
         This list will change over time, and we're equally likely to add or remove things as the way people approach
         these subjects online changes.
+
+    - title: ModMail
+      color: 0xf54058
+
+      description: >
+        Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the Quilt Moderation Team
+        by privately messaging the <@836548129763098674> ModMail bot. This will open a private channel between you
+        and the Moderators.
+
+        You can also right-click (or long-tap on mobile) a message and select Apps > Report message to quickly forward
+        that message to the Moderators. The bot will prompt you to add more comments if you would like to.
+
+    - title: Community Artists
+
+      url: https://github.com/QuiltMC/art
+      color: 0x5865F2
+
+      description: >
+        We're lucky to have a few talented artists in our community:
+
+        **»** [**Arathain**](https://twitter.com/arathainfarqoe) - Creator of Pineapple-Chan, Quilt-Chan and a few
+        related emotes
+
+        **»** [**Iro**](https://iroki-sueun.tumblr.com/) - Our current banners and logo designer
+
+        **»** [**Katto / Digital Whiskers**](https://digital-whiskers.carrd.co/) - Designed a banner and a few other
+        pieces
+
+        We're very grateful to all of them for their amazing work! Don't hesitate to reach out to them if you'd like
+        to commission them for your own projects.
+
+    - title: Privacy Policies
+
+      color: 0x5865F2
+
+      description: By interacting with this server or by DMing the ModMail bot, you certify that you have read,
+        understood and agreed for your data to be processed under our [Privacy Policies](https://quiltmc.org/en/legal/).
+
+        For any question or request regarding your data, please contact us at privacy@quiltmc.org.
 
 - type: text
   text: https://cdn.discordapp.com/attachments/863707104903561216/977162805373435925/forum-header-community.png
@@ -144,6 +189,10 @@
     976082711817113610:
       description: "Let people know that you're using a translator to talk."
       emoji: "<:via_translator:976173251720015922>"
+
+    1050037117075603466:
+      description: "Remove yourself from the meta channel."
+      emoji: "🚫"
 
 - type: links
 

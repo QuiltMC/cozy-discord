@@ -19,6 +19,7 @@ public abstract class WelcomeChannelConfig {
 	public val defaultSerializersModule: SerializersModule =
 		SerializersModule {
 			polymorphic(Block::class) {
+				subclass(ComplianceBlock::class)
 				subclass(EmbedBlock::class)
 				subclass(LinksBlock::class)
 				subclass(RolesBlock::class)

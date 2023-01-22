@@ -24,3 +24,10 @@ public fun ExtensibleBotBuilder.ExtensionsBuilder.tags(config: TagsConfig, data:
 public fun ExtensibleBotBuilder.ExtensionsBuilder.tags(data: TagsData, body: SimpleTagsConfig.Builder.() -> Unit) {
 	tags(SimpleTagsConfig(body), data)
 }
+
+public fun String?.nullIfBlank(): String? =
+	if (isNullOrBlank()) {
+		null
+	} else {
+		this
+	}

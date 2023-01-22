@@ -148,7 +148,7 @@ class FilterExtension : Extension() {
 
 			action {
 				val guilds = serverSettings.getByQuiltServers().toList().mapNotNull {
-					kord.getGuild(it._id)
+					kord.getGuildOrNull(it._id)
 				}
 
 				val members = guilds.mapNotNull { it.getMemberOrNull(event.user.id) }.toList()
@@ -162,7 +162,9 @@ class FilterExtension : Extension() {
 				name = "filters"
 				description = "Filter management commands"
 
-				check { hasBaseModeratorRole() }
+				allowInDms = false
+
+				check { hasBaseModeratorRole(false) }
 
 				guild(guildId)
 
@@ -185,7 +187,7 @@ class FilterExtension : Extension() {
 						filters.set(filter)
 						filterCache[filter._id] = filter
 
-						this@FilterExtension.kord.getGuild(COMMUNITY_GUILD)
+						this@FilterExtension.kord.getGuildOrNull(COMMUNITY_GUILD)
 							?.getCozyLogChannel()
 							?.createEmbed {
 								color = DISCORD_GREEN
@@ -229,7 +231,7 @@ class FilterExtension : Extension() {
 						filters.set(filter)
 						filterCache[filter._id] = filter
 
-						this@FilterExtension.kord.getGuild(COMMUNITY_GUILD)
+						this@FilterExtension.kord.getGuildOrNull(COMMUNITY_GUILD)
 							?.getCozyLogChannel()
 							?.createEmbed {
 								color = DISCORD_GREEN
@@ -292,7 +294,7 @@ class FilterExtension : Extension() {
 						filters.set(filter)
 						filterCache[filter._id] = filter
 
-						this@FilterExtension.kord.getGuild(COMMUNITY_GUILD)
+						this@FilterExtension.kord.getGuildOrNull(COMMUNITY_GUILD)
 							?.getCozyLogChannel()
 							?.createEmbed {
 								color = DISCORD_GREEN
@@ -345,7 +347,7 @@ class FilterExtension : Extension() {
 						filters.set(filter)
 						filterCache[filter._id] = filter
 
-						this@FilterExtension.kord.getGuild(COMMUNITY_GUILD)
+						this@FilterExtension.kord.getGuildOrNull(COMMUNITY_GUILD)
 							?.getCozyLogChannel()
 							?.createEmbed {
 								color = DISCORD_GREEN
@@ -389,7 +391,7 @@ class FilterExtension : Extension() {
 						filters.set(filter)
 						filterCache[filter._id] = filter
 
-						this@FilterExtension.kord.getGuild(COMMUNITY_GUILD)
+						this@FilterExtension.kord.getGuildOrNull(COMMUNITY_GUILD)
 							?.getCozyLogChannel()
 							?.createEmbed {
 								color = DISCORD_GREEN
@@ -442,7 +444,7 @@ class FilterExtension : Extension() {
 						filters.set(filter)
 						filterCache[filter._id] = filter
 
-						this@FilterExtension.kord.getGuild(COMMUNITY_GUILD)
+						this@FilterExtension.kord.getGuildOrNull(COMMUNITY_GUILD)
 							?.getCozyLogChannel()
 							?.createEmbed {
 								color = DISCORD_GREEN
@@ -506,7 +508,7 @@ class FilterExtension : Extension() {
 						filters.set(filter)
 						filterCache[filter._id] = filter
 
-						this@FilterExtension.kord.getGuild(COMMUNITY_GUILD)
+						this@FilterExtension.kord.getGuildOrNull(COMMUNITY_GUILD)
 							?.getCozyLogChannel()
 							?.createEmbed {
 								color = DISCORD_GREEN
@@ -549,7 +551,7 @@ class FilterExtension : Extension() {
 						filters.remove(filter)
 						filterCache.remove(filter._id)
 
-						this@FilterExtension.kord.getGuild(COMMUNITY_GUILD)
+						this@FilterExtension.kord.getGuildOrNull(COMMUNITY_GUILD)
 							?.getCozyLogChannel()
 							?.createEmbed {
 								title = "Filter deleted"

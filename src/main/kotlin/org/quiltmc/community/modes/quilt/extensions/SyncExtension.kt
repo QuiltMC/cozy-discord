@@ -91,6 +91,8 @@ class SyncExtension : Extension() {
 			name = "sync"
 			description = "Synchronisation commands."
 
+			allowInDms = false
+
 			check { inQuiltGuild() }
 			check { hasBanOrRolePerms() }
 
@@ -299,5 +301,5 @@ class SyncExtension : Extension() {
 		}
 	}
 
-	private suspend fun getGuilds() = GUILDS.mapNotNull { kord.getGuild(it) }
+	private suspend fun getGuilds() = GUILDS.mapNotNull { kord.getGuildOrNull(it) }
 }

@@ -49,7 +49,7 @@ public data class RulesBlock(
 		builder.content = text
 
 		var currentIndex = 0
-		var humanIndex = currentIndex + 1
+		var humanIndex = currentIndex + startingIndex
 
 		rules.forEach { (rule, text) ->
 			builder.embed {
@@ -60,7 +60,7 @@ public data class RulesBlock(
 			}
 
 			currentIndex += 1
-			humanIndex = currentIndex + 1
+			humanIndex = currentIndex + startingIndex
 		}
 	}
 
@@ -69,7 +69,7 @@ public data class RulesBlock(
 		builder.components = mutableListOf()
 
 		var currentIndex = 0
-		var humanIndex = currentIndex + 1
+		var humanIndex = currentIndex + startingIndex
 
 		rules.forEach { (rule, text) ->
 			builder.embed {
@@ -80,7 +80,7 @@ public data class RulesBlock(
 			}
 
 			currentIndex += 1
-			humanIndex = currentIndex + 1
+			humanIndex = currentIndex + startingIndex
 		}
 	}
 }

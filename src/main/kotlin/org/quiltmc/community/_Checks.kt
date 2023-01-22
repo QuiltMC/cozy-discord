@@ -71,7 +71,7 @@ suspend fun CheckContext<*>.hasPermissionInMainGuild(perm: Permission) {
 		return
 	}
 
-	val guild = event.kord.getGuild(MAIN_GUILD)!!
+	val guild = event.kord.getGuildOrNull(MAIN_GUILD)!!
 	val member = guild.getMemberOrNull(user.id)
 
 	if (member == null) {
@@ -114,7 +114,7 @@ suspend fun CheckContext<*>.inQuiltGuild() {
 	}
 }
 
-suspend fun CheckContext<*>.hasBaseModeratorRole() {
+suspend fun CheckContext<*>.hasBaseModeratorRole(includeCommunityManagers: Boolean = true) {
 	if (!passed) {
 		return
 	}
@@ -130,16 +130,21 @@ suspend fun CheckContext<*>.hasBaseModeratorRole() {
 
 			fail()
 		} else {
-			if (!member.roleIds.any { it in MODERATOR_ROLES }) {
-				logger.failed("Member does not have a Quilt base moderator role")
+			val hasModeratorRole = member.roleIds.any { it in MODERATOR_ROLES }
+			val hasCommunityManagerRole = member.roleIds.any { it in MANAGER_ROLES }
 
-				fail("Must be a Quilt moderator, with the `Moderators` role")
+			if (!hasModeratorRole && (!hasCommunityManagerRole || !includeCommunityManagers)) {
+				val roleDescription = if (includeCommunityManagers) "Moderator or Community Manager" else "Moderator"
+
+				logger.failed("Member does not have a Quilt $roleDescription role")
+
+				fail("Must be a Quilt $roleDescription")
 			}
 		}
 	}
 }
 
-suspend fun CheckContext<*>.notHasBaseModeratorRole() {
+suspend fun CheckContext<*>.notHasBaseModeratorRole(includeCommunityManagers: Boolean = true) {
 	if (!passed) {
 		return
 	}
@@ -152,10 +157,15 @@ suspend fun CheckContext<*>.notHasBaseModeratorRole() {
 
 		fail()
 	} else {
-		if (member.roleIds.any { it in MODERATOR_ROLES }) {
-			logger.failed("Member has a Quilt base moderator role")
+		val hasModeratorRole = member.roleIds.any { it in MODERATOR_ROLES }
+		val hasCommunityManagerRole = member.roleIds.any { it in MANAGER_ROLES }
 
-			fail("Must **not** be a Quilt moderator")
+		if (hasModeratorRole || (hasCommunityManagerRole && includeCommunityManagers)) {
+			val roleDescription = if (includeCommunityManagers) "Moderator or Community Manager" else "Moderator"
+
+			logger.failed("Member has a Quilt $roleDescription role")
+
+			fail("Must **not** be a Quilt $roleDescription")
 		}
 	}
 }

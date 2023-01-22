@@ -238,8 +238,8 @@ formatting:
   ChainWrapping:
     active: true
     autoCorrect: true
-  CommentSpacing:
-    active: true
+  CommentSpacing:  # This is buggy!
+    active: false
     autoCorrect: true
   EnumEntryNameCase:
     active: true

@@ -9,6 +9,7 @@ package org.quiltmc.community
 import com.kotlindiscord.kord.extensions.builders.ExtensibleBotBuilder
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.SlashCommandContext
+import com.kotlindiscord.kord.extensions.components.forms.ModalForm
 import com.kotlindiscord.kord.extensions.utils.env
 import com.kotlindiscord.kord.extensions.utils.envOrNull
 import com.kotlindiscord.kord.extensions.utils.getKoin
@@ -34,7 +35,7 @@ import org.quiltmc.community.modes.quilt.extensions.settings.SettingsExtension
 @Suppress("MagicNumber")  // It's the status code...
 suspend fun Kord.getGuildIgnoring403(id: Snowflake) =
 	try {
-		getGuild(id)
+		getGuildOrNull(id)
 	} catch (e: RestRequestException) {
 		if (e.status.code != 403) {
 			throw (e)
@@ -178,8 +179,8 @@ fun Guild.getMaxArchiveDuration(): ArchiveDuration {
 
 // Logging-related extensions
 
-suspend fun <C : SlashCommandContext<C, A>, A : Arguments>
-		SlashCommandContext<C, A>.getGithubLogChannel(): GuildMessageChannel? {
+suspend fun <C : SlashCommandContext<C, A, M>, A : Arguments, M : ModalForm>
+		SlashCommandContext<C, A, M>.getGithubLogChannel(): GuildMessageChannel? {
 	val channelId = getKoin().get<GlobalSettingsCollection>().get()?.githubLogChannel ?: return null
 
 	return event.kord.getChannelOf<GuildMessageChannel>(channelId)
@@ -203,9 +204,9 @@ suspend fun Guild.getFilterLogChannel(): GuildMessageChannel? {
 	return getChannelOf(channelId)
 }
 
-suspend fun EmbedBuilder.userField(user: UserBehavior, role: String, inline: Boolean = false) {
+suspend fun EmbedBuilder.userField(user: UserBehavior, role: String? = null, inline: Boolean = false) {
 	field {
-		name = role
+		name = role ?: "User"
 		value = "${user.mention} (`${user.id}` / `${user.asUser().tag}`)"
 
 		this.inline = inline

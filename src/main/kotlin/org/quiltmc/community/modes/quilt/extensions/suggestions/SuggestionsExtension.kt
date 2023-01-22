@@ -10,7 +10,6 @@
 
 package org.quiltmc.community.modes.quilt.extensions.suggestions
 
-import com.kotlindiscord.kord.extensions.checks.hasRole
 import com.kotlindiscord.kord.extensions.checks.inTopChannel
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.converters.impl.optionalEnumChoice
@@ -48,14 +47,24 @@ import dev.kord.rest.builder.message.create.embed
 import dev.kord.rest.builder.message.modify.MessageModifyBuilder
 import dev.kord.rest.builder.message.modify.actionRow
 import dev.kord.rest.builder.message.modify.embed
+import io.github.evanrupert.excelkt.Sheet
+import io.github.evanrupert.excelkt.workbook
+import io.ktor.client.request.forms.*
+import io.ktor.utils.io.jvm.javaio.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.toList
+import org.apache.poi.ss.usermodel.FillPatternType
+import org.apache.poi.ss.usermodel.IndexedColors
+import org.apache.poi.xssf.usermodel.XSSFColor
 import org.koin.core.component.inject
+import org.litote.kmongo.exists
 import org.quiltmc.community.*
 import org.quiltmc.community.database.collections.OwnedThreadCollection
 import org.quiltmc.community.database.collections.SuggestionsCollection
 import org.quiltmc.community.database.entities.OwnedThread
 import org.quiltmc.community.database.entities.Suggestion
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
 
@@ -152,8 +161,8 @@ class SuggestionsExtension : Extension() {
 					text = event.message.content,
 
 					owner = event.pkMessage.sender,
-					ownerAvatar = event.pkMessage.member.avatarUrl,
-					ownerName = event.pkMessage.member.name,
+					ownerAvatar = event.pkMessage.member?.avatarUrl,
+					ownerName = event.pkMessage.member?.name ?: event.author.displayName,
 
 					positiveVoters = mutableListOf(event.pkMessage.sender),
 
@@ -286,9 +295,47 @@ class SuggestionsExtension : Extension() {
 
 		// region: Commands
 
+		ephemeralSlashCommand {
+			name = "suggestion-spreadsheet"
+			description = "Download a copy of the suggestions as a spreadsheet."
+
+			allowInDms = false
+
+			guild(COMMUNITY_GUILD)
+
+			check { hasBaseModeratorRole() }
+
+			action {
+				val suggestions = suggestions.find(Suggestion::_id exists true).toList()
+				val outputStream = ByteArrayOutputStream()
+
+				val book = workbook {
+					sheet("Suggestions") {
+						suggestionHeader()
+
+						suggestions.forEach { suggestionRow(it) }
+					}
+				}
+
+				book.xssfWorkbook.write(outputStream)
+
+				respond {
+					content = "Wrote ${suggestions.size} suggestions to an Excel spreadsheet."
+
+					addFile(
+						"suggestions.xlsx",
+
+						ChannelProvider { ByteArrayInputStream(outputStream.toByteArray()).toByteReadChannel() }
+					)
+				}
+			}
+		}
+
 		ephemeralSlashCommand(::SuggestionEditArguments) {
 			name = "edit-suggestion"
 			description = "Edit one of your suggestions"
+
+			allowInDms = false
 
 			guild(COMMUNITY_GUILD)
 
@@ -316,9 +363,11 @@ class SuggestionsExtension : Extension() {
 			name = "suggestion"
 			description = "Suggestion state change command; \"clear\" to remove comment"
 
+			allowInDms = false
+
 			guild(COMMUNITY_GUILD)
 
-			check { hasRole(COMMUNITY_MODERATOR_ROLE) }
+			check { hasBaseModeratorRole() }
 
 			action {
 				val status = arguments.status
@@ -366,6 +415,54 @@ class SuggestionsExtension : Extension() {
 //            }
 
 		// endregion
+	}
+
+	private fun Sheet.suggestionHeader() {
+		val headings = listOf("ID", "Status", "Text", "+", "-", "=", "Staff Comment")
+
+		val style = createCellStyle {
+			setFont(
+				createFont {
+					color = IndexedColors.WHITE.index
+					bold = true
+				}
+			)
+
+			fillPattern = FillPatternType.SOLID_FOREGROUND
+			fillForegroundColor = IndexedColors.BLACK.index
+		}
+
+		row(style) {
+			headings.forEach(::cell)
+		}
+	}
+
+	private fun Sheet.suggestionRow(suggestion: Suggestion) {
+		val statusStyle = createCellStyle {
+			setFont(
+				createFont {
+					val color = XSSFColor(
+						byteArrayOf(
+							suggestion.status.color.red.toByte(),
+							suggestion.status.color.green.toByte(),
+							suggestion.status.color.blue.toByte()
+						)
+					)
+
+					setColor(color)
+				}
+			)
+		}
+
+		row {
+			cell(suggestion._id.toString())
+			cell(suggestion.status.readableName, statusStyle)
+			cell(suggestion.text)
+			cell(suggestion.positiveVotes)
+			cell(suggestion.negativeVotes)
+			cell(suggestion.voteDifference)
+			cell(suggestion.comment ?: "")
+		}
 	}
 
 	suspend fun checkSuggestionLength(suggestion: Suggestion, event: MessageEvent): Boolean {
@@ -441,6 +538,13 @@ class SuggestionsExtension : Extension() {
 					else -> return
 				}
 
+				val managerRole = when (thread.guildId) {
+					COMMUNITY_GUILD -> thread.guild.getRole(COMMUNITY_MANAGER_ROLE)
+					TOOLCHAIN_GUILD -> thread.guild.getRole(TOOLCHAIN_MANAGER_ROLE)
+
+					else -> return
+				}
+
 				val pingMessage = thread.createMessage {
 					content = "Oh right, better get the mods in..."
 				}
@@ -448,8 +552,8 @@ class SuggestionsExtension : Extension() {
 				delay(3.seconds)
 
 				pingMessage.edit {
-					content = "Oh right, better get the mods in...\n" +
-							"Hey, ${modRole.mention}! Squirrel!"
+					content = "Oh right, better get the staff in...\n" +
+							"Hey, ${modRole.mention} and ${managerRole.mention}! Squirrel!"
 				}
 
 				delay(3.seconds)
@@ -485,7 +589,7 @@ class SuggestionsExtension : Extension() {
 		val user = kord.getUser(suggestion.owner) ?: return
 
 		val suggestionMessage = if (suggestion.message != null) {
-			kord.getGuild(COMMUNITY_GUILD)
+			kord.getGuildOrNull(COMMUNITY_GUILD)
 				?.getChannelOf<GuildMessageChannel>(SUGGESTION_CHANNEL)
 				?.getMessageOrNull(suggestion.message!!)
 		} else {

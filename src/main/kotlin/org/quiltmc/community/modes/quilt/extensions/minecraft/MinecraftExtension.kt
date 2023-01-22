@@ -9,7 +9,6 @@ package org.quiltmc.community.modes.quilt.extensions.minecraft
 import com.kotlindiscord.kord.extensions.DISCORD_FUCHSIA
 import com.kotlindiscord.kord.extensions.DISCORD_GREEN
 import com.kotlindiscord.kord.extensions.checks.hasPermission
-import com.kotlindiscord.kord.extensions.checks.hasRole
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalString
@@ -86,6 +85,8 @@ class MinecraftExtension : Extension() {
 				name = "mc"
 				description = "Commands related to Minecraft updates"
 
+				allowInDms = false
+
 				guild(guildId)
 
 				ephemeralSubCommand(::CheckArguments) {
@@ -154,10 +155,7 @@ class MinecraftExtension : Extension() {
 					name = "forget"
 					description = "Forget a version (the last one by default), allowing it to be relayed again."
 
-					when (guildId) {
-						COMMUNITY_GUILD -> check { hasRole(COMMUNITY_MODERATOR_ROLE) }
-						TOOLCHAIN_GUILD -> check { hasRole(TOOLCHAIN_MODERATOR_ROLE) }
-					}
+					check { hasBaseModeratorRole() }
 
 					check { hasPermission(Permission.Administrator) }
 
@@ -190,10 +188,7 @@ class MinecraftExtension : Extension() {
 					name = "run"
 					description = "Run the check task now, without waiting for it."
 
-					when (guildId) {
-						COMMUNITY_GUILD -> check { hasRole(COMMUNITY_MODERATOR_ROLE) }
-						TOOLCHAIN_GUILD -> check { hasRole(TOOLCHAIN_MODERATOR_ROLE) }
-					}
+					check { hasBaseModeratorRole() }
 
 					action {
 						respond { content = "Checking now..." }

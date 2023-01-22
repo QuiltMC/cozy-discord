@@ -1,0 +1,55 @@
+- type: embed
+
+  embeds:
+    - title: Welcome to the Server!
+      color: 0xe68675
+
+      description: >
+        If you can see this channel, you're likely new to our community. **Welcome!**
+
+
+        There are many other channels available to verified users. To gain access to them, you'll need to verify
+        yourself by passing our member screening process. We require all users to go through this process, as our
+        community contains many members that belong to vulnerable minority groups, and we're subject to a lot of
+        harassment by those that would seek to harm them.
+
+
+        Firstly, you should read over our rules, which you'll find in <#817583713423982664>. **By submitting an
+        application, you're stating that you understand and agree to our rules.** We will not accept ignorance of our
+        rules as an excuse for breaking them.
+
+    - title: Getting Started
+      color: 0x2ac48e
+
+      description: >
+        To get started (if you haven't done so already), you'll need to answer some questions. Click/tap on the
+        **Continue** button you'll see at the bottom of this channel, and you'll be given a form to fill out. When
+        doing so, please bear the following points in mind:
+
+
+        **»** Detailed answers are more likely to get you accepted than minimum-effort answers
+
+        **»** If you're referring to a YouTube video, website or similar in your answers, please link it if possible
+
+        **»** If someone else referred you to the server, please let us know who it was
+
+
+        Once you've filled out the form, all you need to do is sit back and relax, and we'll respond to it as soon as
+        we can. Please remember that everyone on our Community Team is a volunteer, so it's unlikely that you'll be
+        verified immediately - but we try to get through our applications as quickly as we can.
+
+    - title: Contacting the Moderators
+      color: 0xe5aa01
+
+      description: >
+        If you need to contact a member of our Moderator team urgently in the meantime, please send a direct message
+        to <@836548129763098674> and we'll be with you as soon as possible. However, please note that **ModMail is
+        not to be used to badger us about your application** - we'll get to it when we can!
+
+    - title: The Legal Stuff
+      color: 0x565ef0
+
+      description: >
+        **By submitting an application or sending a message to <@836548129763098674>, you certify that you've
+        read and accepted [our privacy policies](https://quiltmc.org/en/legal/), and consent to QuiltMC processing your
+        data under those policies.** You can find a direct link to them here: https://quiltmc.org/en/legal/

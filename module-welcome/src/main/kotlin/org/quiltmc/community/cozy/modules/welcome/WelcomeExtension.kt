@@ -71,6 +71,8 @@ public class WelcomeExtension : Extension() {
 			name = "welcome-channels"
 			description = "Manage welcome channels"
 
+			allowInDms = false
+
 			config.getStaffCommandChecks().forEach(::check)
 
 			ephemeralSlashCommand(::ChannelArgs) {
@@ -260,7 +262,7 @@ public class WelcomeExtension : Extension() {
 
 					welcomeChannel.log {
 						embed {
-							title = "Welcome channel removed"
+							title = "Welcome channel created/edited"
 							color = DISCORD_YELLOW
 
 							description = buildString {
