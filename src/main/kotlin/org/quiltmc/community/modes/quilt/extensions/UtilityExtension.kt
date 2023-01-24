@@ -26,10 +26,7 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.*
 import com.kotlindiscord.kord.extensions.components.ComponentContainer
 import com.kotlindiscord.kord.extensions.components.components
 import com.kotlindiscord.kord.extensions.components.ephemeralButton
-import com.kotlindiscord.kord.extensions.extensions.Extension
-import com.kotlindiscord.kord.extensions.extensions.ephemeralMessageCommand
-import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
-import com.kotlindiscord.kord.extensions.extensions.event
+import com.kotlindiscord.kord.extensions.extensions.*
 import com.kotlindiscord.kord.extensions.i18n.SupportedLocales
 import com.kotlindiscord.kord.extensions.time.TimestampType
 import com.kotlindiscord.kord.extensions.time.toDiscord
@@ -1311,6 +1308,306 @@ class UtilityExtension : Extension() {
 					respond {
 						content = "Channel unlocked."
 					}
+				}
+			}
+		}
+
+		chatCommand(::SelfTimeoutArguments) {
+			name = "self-timeout"
+			description = "Time yourself out for up to three days"
+
+			check { inQuiltGuild() }
+			check { notHasBaseModeratorRole() }
+
+			action {
+				lateinit var components: ComponentContainer
+
+				val relative = Clock.System.now()
+					.plus(arguments.duration, TimeZone.UTC)
+					.toDiscord(TimestampType.RelativeTime)
+
+				val absolute = Clock.System.now()
+					.plus(arguments.duration, TimeZone.UTC)
+					.toDiscord(TimestampType.LongDateTime)
+
+				message.respond {
+					content = "You've requested a timeout, which will end $relative (at $absolute).\n\n" +
+
+							"This timeout will be applied as soon as you click the button below. However, please " +
+							"note that **we will not be removing timeouts you set on yourself** in most " +
+							"situations, even if you request it. You should avoid setting timeouts you're not " +
+							"sure about.\n\n" +
+
+							"Are you sure you'd like to apply this timeout?"
+
+					components = components {
+						ephemeralButton {
+							label = "Confirm"
+							style = ButtonStyle.Danger
+
+							@OptIn(DoNotChain::class)
+							action {
+								member!!.asMember()
+									.timeout(
+										arguments.duration,
+										reason = "Requested using /self-timeout"
+									)
+
+								guild?.asGuild()?.getCozyLogChannel()?.createEmbed {
+									title = "Requested timeout automatically applied"
+									color = DISCORD_BLURPLE
+
+									userField(user.asUser())
+
+									field {
+										name = "Duration"
+										value = arguments.duration.format(SupportedLocales.ENGLISH)
+									}
+
+									field {
+										name = "Relative ending time"
+										value = relative
+									}
+
+									field {
+										name = "Absolute ending time"
+										value = absolute
+									}
+								}
+
+								respond {
+									content = "Your timeout has been applied. See you $relative!"
+								}
+
+								components.cancel()
+							}
+						}
+
+						ephemeralButton {
+							label = "Cancel"
+							style = ButtonStyle.Secondary
+
+							action {
+								respond {
+									content = "Your timeout has been cancelled."
+								}
+
+								components.cancel()
+							}
+						}
+					}
+				}
+			}
+		}
+
+		chatCommand {
+			name = "lock-server"
+			description = "Lock the server, preventing anyone but staff from talking"
+
+			check { inQuiltGuild() }
+			check { hasPermission(Permission.Administrator) }
+
+			action {
+				val roleId = when (guild!!.id) {
+					COMMUNITY_GUILD -> COMMUNITY_MODERATOR_ROLE
+					TOOLCHAIN_GUILD -> TOOLCHAIN_MODERATOR_ROLE
+
+					else -> throw DiscordRelayedException("Incorrect server ID: ${guild?.id?.value}")
+				}
+
+				val moderatorRole = guild!!.getRole(roleId)
+				val everyoneRole = guild!!.getRole(guild!!.id)
+
+				everyoneRole.edit {
+					permissions = everyoneRole.permissions
+						.minus(Permission.AddReactions)
+						.minus(Permission.CreatePrivateThreads)
+						.minus(Permission.CreatePublicThreads)
+						.minus(Permission.SendMessages)
+						.minus(Permission.SendMessagesInThreads)
+
+					reason = "Server locked down by ${user?.asUser()?.tag}"
+				}
+
+				moderatorRole.edit {
+					permissions = moderatorRole.permissions
+						.plus(Permission.AddReactions)
+						.plus(Permission.CreatePrivateThreads)
+						.plus(Permission.CreatePublicThreads)
+						.plus(Permission.SendMessages)
+						.plus(Permission.SendMessagesInThreads)
+
+					reason = "Server locked down by ${user?.asUser()?.tag}"
+				}
+
+				guild?.asGuildOrNull()?.getModLogChannel()?.createEmbed {
+					title = "Server locked"
+					color = DISCORD_RED
+
+					description = "Server was locked by ${user?.mention}."
+					timestamp = Clock.System.now()
+				}
+
+				message.respond {
+					content = "Server locked."
+				}
+			}
+		}
+
+		chatCommand {
+			name = "unlock-server"
+			description = "Unlock the server, allowing users to talk again"
+
+			check { inQuiltGuild() }
+			check { hasPermission(Permission.Administrator) }
+
+			action {
+				val roleId = when (guild!!.id) {
+					COMMUNITY_GUILD -> COMMUNITY_MODERATOR_ROLE
+					TOOLCHAIN_GUILD -> TOOLCHAIN_MODERATOR_ROLE
+
+					else -> throw DiscordRelayedException("Incorrect server ID: ${guild?.id?.value}")
+				}
+
+				val moderatorRole = guild!!.getRole(roleId)
+				val everyoneRole = guild!!.getRole(guild!!.id)
+
+				everyoneRole.edit {
+					permissions = everyoneRole.permissions
+						.plus(Permission.AddReactions)
+						.plus(Permission.CreatePrivateThreads)
+						.plus(Permission.CreatePublicThreads)
+						.plus(Permission.SendMessages)
+						.plus(Permission.SendMessagesInThreads)
+
+					reason = "Server unlocked by ${user?.asUser()?.tag}"
+				}
+
+				moderatorRole.edit {
+					permissions = moderatorRole.permissions
+						.minus(Permission.AddReactions)
+						.minus(Permission.CreatePrivateThreads)
+						.minus(Permission.CreatePublicThreads)
+						.minus(Permission.SendMessages)
+						.minus(Permission.SendMessagesInThreads)
+
+					reason = "Server unlocked by ${user?.asUser()?.tag}"
+				}
+
+				guild?.asGuildOrNull()?.getModLogChannel()?.createEmbed {
+					title = "Server unlocked"
+					color = DISCORD_GREEN
+
+					description = "Server was unlocked by ${user?.mention}."
+					timestamp = Clock.System.now()
+				}
+
+				message.respond {
+					content = "Server unlocked."
+				}
+			}
+		}
+
+		chatCommand(::LockArguments) {
+			name = "lock"
+			description = "Lock a channel, so only moderators can interact in it"
+
+			check { inQuiltGuild() }
+			check { hasBaseModeratorRole() }
+
+			action {
+				var channelObj = arguments.channel ?: channel.asChannel()
+
+				if (channelObj is ThreadChannel) {
+					channelObj = (channelObj as ThreadChannel).parent.asChannel()
+				}
+
+				if (channelObj !is TextChannel) {  // Should never happen, but we handle it for safety
+					message.respond {
+						content = "This command can only be run in a guild text channel."
+					}
+				}
+
+				val staffRoleId = when (guild?.id) {
+					COMMUNITY_GUILD -> COMMUNITY_MODERATOR_ROLE
+					TOOLCHAIN_GUILD -> TOOLCHAIN_MODERATOR_ROLE
+
+					else -> null
+				}
+
+				val ch = channelObj as TextChannel
+
+				if (staffRoleId != null) {
+					ch.editRolePermission(staffRoleId) {
+						SPEAKING_PERMISSIONS.forEach { allowed += it }
+
+						reason = "Channel locked by ${user?.asUser()?.tag}"
+					}
+				}
+
+				ch.editRolePermission(guild!!.id) {
+					SPEAKING_PERMISSIONS.forEach { denied += it }
+
+					reason = "Channel locked by ${user?.asUser()?.tag}"
+				}
+
+				ch.createMessage {
+					content = "Channel locked by a moderator."
+				}
+
+				guild?.asGuildOrNull()?.getModLogChannel()?.createEmbed {
+					title = "Channel locked"
+					color = DISCORD_RED
+
+					description = "Channel ${ch.mention} was locked by ${user?.mention}."
+					timestamp = Clock.System.now()
+				}
+
+				message.respond {
+					content = "Channel locked."
+				}
+			}
+		}
+
+		chatCommand(::LockArguments) {
+			name = "unlock"
+			description = "Unlock a previously locked channel"
+
+			check { inQuiltGuild() }
+			check { hasBaseModeratorRole() }
+
+			action {
+				var channelObj = arguments.channel ?: channel.asChannel()
+
+				if (channelObj is ThreadChannel) {
+					channelObj = (channelObj as ThreadChannel).parent.asChannel()
+				}
+
+				if (channelObj !is TextChannel) {  // Should never happen, but we handle it for safety
+					message.respond {
+						content = "This command can only be run in a guild text channel."
+					}
+				}
+
+				val ch = channelObj as TextChannel
+
+				ch.getPermissionOverwritesForRole(guild!!.id)
+					?.delete("Channel unlocked by ${user?.asUser()?.tag}")
+
+				ch.createMessage {
+					content = "Channel unlocked by a moderator."
+				}
+
+				guild?.asGuildOrNull()?.getModLogChannel()?.createEmbed {
+					title = "Channel unlocked"
+					color = DISCORD_GREEN
+
+					description = "Channel ${ch.mention} was unlocked by ${user?.mention}."
+					timestamp = Clock.System.now()
+				}
+
+				message.respond {
+					content = "Channel unlocked."
 				}
 			}
 		}

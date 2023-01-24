@@ -79,6 +79,11 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
 	database(true)
 	settings()
 
+	chatCommands {
+		defaultPrefix = "%"
+		enabled = true
+	}
+
 	intents {
 		+Intents.all
 	}
