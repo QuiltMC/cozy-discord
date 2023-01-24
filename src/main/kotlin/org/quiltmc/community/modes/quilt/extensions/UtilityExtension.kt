@@ -263,7 +263,6 @@ class UtilityExtension : Extension() {
 				guild(guildId)
 
 				check { inQuiltGuild() }
-				check { notHasBaseModeratorRole() }
 
 				action {
 					lateinit var components: ComponentContainer
@@ -1317,7 +1316,6 @@ class UtilityExtension : Extension() {
 			description = "Time yourself out for up to three days"
 
 			check { inQuiltGuild() }
-			check { notHasBaseModeratorRole() }
 
 			action {
 				lateinit var components: ComponentContainer
