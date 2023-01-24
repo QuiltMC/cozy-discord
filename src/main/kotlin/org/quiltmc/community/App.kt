@@ -111,6 +111,10 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
 
 		extPluralKit()
 
+		help {
+			enableBundledExtension = true
+		}
+
 		welcomeChannel(getKoin().get<WelcomeChannelCollection>()) {
 			staffCommandCheck {
 				hasBaseModeratorRole()
