@@ -21,6 +21,7 @@ import dev.kord.core.behavior.UserBehavior
 import dev.kord.core.behavior.channel.MessageChannelBehavior
 import dev.kord.core.behavior.getChannelOf
 import dev.kord.core.entity.Guild
+import dev.kord.core.entity.Message
 import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.rest.builder.message.EmbedBuilder
 import dev.kord.rest.request.RestRequestException
@@ -219,4 +220,30 @@ fun EmbedBuilder.channelField(channel: MessageChannelBehavior, title: String, in
 
 		this.inline = inline
 	}
+}
+
+private const val CHANNEL_NAME_LENGTH = 75
+
+private val THREAD_DELIMITERS = arrayOf(
+	",", ".",
+	"(", ")",
+	"<", ">",
+	"[", "]",
+)
+
+/**
+ * Attempts to generate a thread name based on the message's content.
+ *
+ * Failing that, it returns a string of format `"$fallbackPrefix | ${message.id}"`
+ */
+fun Message.contentToThreadName(fallbackPrefix: String): String {
+	@Suppress("SpreadOperator")
+	return content.trim()
+		.split("\n")
+		.firstOrNull()
+		?.split(*THREAD_DELIMITERS)
+		?.firstOrNull()
+		?.take(CHANNEL_NAME_LENGTH)
+
+		?: "$fallbackPrefix | $id"
 }
