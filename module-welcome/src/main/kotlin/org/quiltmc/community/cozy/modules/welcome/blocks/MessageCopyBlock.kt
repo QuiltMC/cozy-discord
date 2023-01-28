@@ -1,0 +1,97 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
+package org.quiltmc.community.cozy.modules.welcome.blocks
+
+import com.kotlindiscord.kord.extensions.DISCORD_BLURPLE
+import com.kotlindiscord.kord.extensions.koin.KordExKoinComponent
+import dev.kord.common.Color
+import dev.kord.common.entity.Snowflake
+import dev.kord.core.Kord
+import dev.kord.core.behavior.getChannelOfOrNull
+import dev.kord.core.entity.Message
+import dev.kord.core.entity.channel.GuildMessageChannel
+import dev.kord.rest.builder.message.create.MessageCreateBuilder
+import dev.kord.rest.builder.message.create.embed
+import dev.kord.rest.builder.message.modify.MessageModifyBuilder
+import dev.kord.rest.builder.message.modify.embed
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import org.koin.core.component.inject
+
+@Suppress("MagicNumber")
+@Serializable
+@SerialName("message_copy")
+public data class MessageCopyBlock(
+	@SerialName("message_url")
+	val messageUrl: String,
+
+	val color: Color = DISCORD_BLURPLE,
+	val template: String = "{TEXT}",
+	val title: String? = null,
+
+	@SerialName("use_embed")
+	val useEmbed: Boolean = false,
+) : Block(), KordExKoinComponent {
+	val kord: Kord by inject()
+
+	init {
+		if ("{TEXT}" !in template) {
+			error("Must provide a {TEXT} placeholder in the template")
+		}
+	}
+
+	override suspend fun create(builder: MessageCreateBuilder) {
+		val message = retrieveMessage(messageUrl)
+
+		val content = template.replace("{TEXT}", message.content)
+
+		if (useEmbed) {
+			builder.embed {
+				this@embed.color = this@MessageCopyBlock.color
+				this@embed.description = content
+
+				if (!this@MessageCopyBlock.title.isNullOrBlank()) {
+					this@embed.title = this@MessageCopyBlock.title
+				}
+			}
+		} else {
+			builder.content = content
+		}
+	}
+
+	override suspend fun edit(builder: MessageModifyBuilder) {
+		val message = retrieveMessage(messageUrl)
+
+		val content = template.replace("{TEXT}", message.content)
+
+		if (useEmbed) {
+			builder.embed {
+				this@embed.color = this@MessageCopyBlock.color
+				this@embed.description = content
+
+				if (!this@MessageCopyBlock.title.isNullOrBlank()) {
+					this@embed.title = this@MessageCopyBlock.title
+				}
+			}
+		} else {
+			builder.content = content
+		}
+	}
+}
+
+@Suppress("MagicNumber")
+public suspend fun MessageCopyBlock.retrieveMessage(url: String): Message {
+	val ids = url.split("channels/", limit = 2)
+		.last()
+		.split("/")
+		.map { Snowflake(it) }
+
+	return kord.getGuildOrNull(ids[1])
+		?.getChannelOfOrNull<GuildMessageChannel>(ids[2])
+		?.getMessageOrNull(ids[3])
+		?: error("Unable to get message at URL: $messageUrl")
+}

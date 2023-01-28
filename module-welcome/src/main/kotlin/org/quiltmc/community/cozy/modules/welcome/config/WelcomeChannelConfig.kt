@@ -22,6 +22,7 @@ public abstract class WelcomeChannelConfig {
 				subclass(ComplianceBlock::class)
 				subclass(EmbedBlock::class)
 				subclass(LinksBlock::class)
+				subclass(MessageCopyBlock::class)
 				subclass(RolesBlock::class)
 				subclass(RulesBlock::class)
 				subclass(TextBlock::class)
