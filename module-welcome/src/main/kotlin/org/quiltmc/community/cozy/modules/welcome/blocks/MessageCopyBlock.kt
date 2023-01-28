@@ -90,8 +90,14 @@ public suspend fun MessageCopyBlock.retrieveMessage(url: String): Message {
 		.split("/")
 		.map { Snowflake(it) }
 
-	return kord.getGuildOrNull(ids[1])
+	val message = kord.getGuildOrNull(ids[1])
 		?.getChannelOfOrNull<GuildMessageChannel>(ids[2])
 		?.getMessageOrNull(ids[3])
 		?: error("Unable to get message at URL: $messageUrl")
+
+	if (message.getGuild().id != guild.id) {
+		error("Message is not from the current server:  $messageUrl")
+	}
+
+	return message
 }
