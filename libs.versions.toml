@@ -1,26 +1,27 @@
 [versions]
-detekt = "1.21.0-RC2"
-kotlin = "1.7.10"
-graphql = "5.3.2"
+detekt = "1.22.0"
+kotlin = "1.8.0"
+graphql = "6.3.5"
 
-commons-text = "1.9"
+commons-text = "1.10.0"
 excelkt = "1.0.2"
-groovy = "3.0.9"
-homoglyph = "1.1.1"
+groovy = "3.0.14"
+homoglyph = "1.2.0"
 jansi = "2.4.0"
-jsoup = "1.15.2"
-kaml = "0.43.0"
-kmongo = "4.5.1"
+jsoup = "1.15.3"
+kaml = "0.50.0"
+kmongo = "4.8.0"
 kordex = "1.5.6-SNAPSHOT"
-kx-ser = "1.3.3"
-logback = "1.2.5"
+kx-ser = "1.4.1"
+logback = "1.2.8"
 logging = "2.1.23"
-rgxgen = "1.3"
-semver = "1.3.0"
+rgxgen = "1.4"
+semver = "1.4.2"
 
 [libraries]
 commons-text = { module = "org.apache.commons:commons-text", version.ref = "commons-text" }
 detekt = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
+detekt-libraries = { module = "io.gitlab.arturbosch.detekt:detekt-rules-libraries", version.ref = "detekt" }
 excelkt = { module = "io.github.evanrupert:excelkt", version.ref = "excelkt" }
 graphql = { module = "com.expediagroup:graphql-kotlin-ktor-client", version.ref = "graphql" }
 groovy = { module = "org.codehaus.groovy:groovy", version.ref = "groovy" }

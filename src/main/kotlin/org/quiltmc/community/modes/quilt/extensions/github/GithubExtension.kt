@@ -283,7 +283,8 @@ class GithubExtension : Extension() {
 												val loginAndId = getActorLoginAndId(issue.author!!)
 
 												name = "Issue Author"
-												value = "${loginAndId.first} (${loginAndId.second})"
+												value = "${loginAndId?.first} " +
+														"(${loginAndId?.second ?: "Unable to get actor login and id"})"
 											}
 
 											userField(user, "Moderator")
@@ -320,13 +321,14 @@ class GithubExtension : Extension() {
 	}
 
 	// Yes, this is stupid.
-	private fun getActorLoginAndId(actor: Actor): Pair<String, String> {
+	private fun getActorLoginAndId(actor: Actor): Pair<String, String>? {
 		return when (actor) {
 			is EnterpriseUserAccount -> Pair(actor.login, actor.id)
 			is Organization -> Pair(actor.login, actor.id)
 			is Bot -> Pair(actor.login, actor.id)
 			is Mannequin -> Pair(actor.login, actor.id)
 			is User -> Pair(actor.login, actor.id)
+			else -> null
 		}
 	}
 
