@@ -23,6 +23,7 @@ import com.kotlindiscord.kord.extensions.types.editingPaginator
 import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.FilterStrategy
 import com.kotlindiscord.kord.extensions.utils.suggestStringMap
+import dev.kord.common.annotation.KordUnsafe
 import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.behavior.interaction.modal
 import dev.kord.core.behavior.interaction.suggestString
@@ -201,6 +202,7 @@ public class TagsExtension : Extension() {
 
 			tagsConfig.getStaffCommandChecks().forEach(::check)
 
+			@OptIn(KordUnsafe::class)
 			unsafeSubCommand(::SetArgs) {
 				name = "set"
 				description = "Create or replace a tag"
@@ -249,6 +251,7 @@ public class TagsExtension : Extension() {
 				}
 			}
 
+			@OptIn(KordUnsafe::class)
 			unsafeSubCommand(::EditArgs) {
 				name = "edit"
 				description = "Edit an existing tag"
