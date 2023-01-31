@@ -85,14 +85,13 @@ public data class MessageCopyBlock(
 
 @Suppress("MagicNumber")
 public suspend fun MessageCopyBlock.retrieveMessage(url: String): Message {
-	val ids = url.split("channels/", limit = 2)
-		.last()
+	val ids = url.substringAfter("channels/")
 		.split("/")
 		.map { Snowflake(it) }
 
-	val message = kord.getGuildOrNull(ids[1])
-		?.getChannelOfOrNull<GuildMessageChannel>(ids[2])
-		?.getMessageOrNull(ids[3])
+	val message = kord.getGuildOrNull(ids[0])
+		?.getChannelOfOrNull<GuildMessageChannel>(ids[1])
+		?.getMessageOrNull(ids[2])
 		?: error("Unable to get message at URL: $messageUrl")
 
 	if (message.getGuild().id != guild.id) {
