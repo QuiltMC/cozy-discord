@@ -494,7 +494,7 @@ class ModHostingVerificationExtension : Extension() {
 			// Found some projects that are missing files to check against
 			if (states.missingFiles.isNotEmpty() && processingUnit.remainingAttempts - 1 >= 0) {
 				// Requeue for future processing
-				unitsToProcess.add(processingUnit.copy(remainingAttempts = processingUnit.remainingAttempts - 1))
+				toRequeue.add(processingUnit.copy(remainingAttempts = processingUnit.remainingAttempts - 1))
 			}
 		}
 
@@ -510,7 +510,7 @@ class ModHostingVerificationExtension : Extension() {
 					}
 
 					appendLine("Requeued projects:")
-					failed.forEach {
+					toRequeue.forEach {
 						appendLine(" - Message ${it.message.id} Author ${it.author.id} Projects ${it.missingFiles}")
 					}
 				}
