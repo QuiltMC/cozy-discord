@@ -150,6 +150,7 @@ public class WelcomeChannel(
 
 		val messages = channel.withStrategy(EntitySupplyStrategy.rest)
 			.messages
+			.filter { it.author?.id == channel.kord.selfId }
 			.filter { it.type == MessageType.Default }
 			.toList()
 			.sortedBy { it.id.timestamp }
