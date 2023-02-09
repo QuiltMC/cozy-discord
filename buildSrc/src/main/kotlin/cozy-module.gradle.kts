@@ -27,18 +27,13 @@ repositories {
 	google()
 
 	maven {
-		name = "Kotlin Discord (Snapshots)"
-		url = uri("https://maven.kotlindiscord.com/repository/maven-snapshots/")
+		name = "Sonatype Snapshots"
+		url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots")
 	}
 
 	maven {
-		name = "Kotlin Discord (Public)"
-		url = uri("https://maven.kotlindiscord.com/repository/maven-public/")
-	}
-
-	maven {
-		name = "Fabric"
-		url = uri("https://maven.fabricmc.net")
+		name = "Sonatype Snapshots (Legacy)"
+		url = uri("https://oss.sonatype.org/content/repositories/snapshots")
 	}
 
 	maven {
@@ -49,6 +44,16 @@ repositories {
 	maven {
 		name = "QuiltMC (Snapshots)"
 		url = uri("https://maven.quiltmc.org/repository/snapshot/")
+	}
+
+	maven {
+		name = "Shedaniel"
+		url = uri("https://maven.shedaniel.me")
+	}
+
+	maven {
+		name = "Fabric"
+		url = uri("https://maven.fabricmc.net")
 	}
 
 	maven {
