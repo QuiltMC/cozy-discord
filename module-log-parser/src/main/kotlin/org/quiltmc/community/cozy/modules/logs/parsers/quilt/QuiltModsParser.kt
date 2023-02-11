@@ -1,0 +1,68 @@
+package org.quiltmc.community.cozy.modules.logs.parsers.quilt
+
+import com.kotlindiscord.kord.extensions.parser.Cursor
+import org.quiltmc.community.cozy.modules.logs.Version
+import org.quiltmc.community.cozy.modules.logs.data.LoaderType
+import org.quiltmc.community.cozy.modules.logs.data.Log
+import org.quiltmc.community.cozy.modules.logs.data.Mod
+import org.quiltmc.community.cozy.modules.logs.data.Order
+import org.quiltmc.community.cozy.modules.logs.types.LogParser
+
+private val OPENING_LINE = "Loading \\d+ mods:\n".toRegex(RegexOption.IGNORE_CASE)
+private val CLOSE = "\n[^|]".toRegex(RegexOption.IGNORE_CASE)
+
+public class QuiltModsParser : LogParser() {
+	override val identifier: String = "mods-quilt"
+	override val order: Order = Order.Default
+
+	override suspend fun predicate(log: Log): Boolean =
+		log.getLoaderVersion(LoaderType.Quilt) != null
+
+	override suspend fun process(log: Log) {
+		val start = log.content.split(OPENING_LINE, 2).last()
+		val table = start.split(CLOSE, 2).first().trim()
+
+		val lines = table
+			.split("\n")
+			.map { it.trim('|') }  // Don't strip spaces here, but do remove border pipes
+			.toMutableList()
+
+		// The first line is the headers
+		val headerNames = lines
+			.removeFirst()
+			.split("|")
+			.map { it.trim().lowercase() }
+
+		// The second line gives us the separators, which we can use to figure out how wide each column is
+		val separatorLengths = lines
+			.removeFirst()
+			.split("|")
+			.map { it.count() }
+
+		// The last line is also always just separators
+		lines.removeLast()
+
+		lines.forEach { line ->
+			// We can't split as individual entries may contain pipe chars, so we need to do this by column width.
+			val mod: MutableMap<String, String> = mutableMapOf()
+			val cursor = Cursor(line)  // KordEx string-parsing cursor is a good match for this
+
+			headerNames.forEachIndexed { index, header ->
+				val width = separatorLengths[index]
+
+				mod[header] = cursor.consumeNumber(width).trim()
+
+				cursor.nextOrNull()  // Advance the cursor
+			}
+
+			log.addMod(
+				Mod(
+					mod["id"]!!,
+					Version(mod["version"]!!)
+				)
+			)
+		}
+
+		log.environment.javaVersion = log.getMod("java")!!.version.string
+	}
+}

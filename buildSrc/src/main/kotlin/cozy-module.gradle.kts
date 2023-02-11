@@ -27,6 +27,15 @@ repositories {
 	google()
 
 	maven {
+		name = "Sleeping Town"
+		url = uri("https://repo.sleeping.town")
+
+		content {
+			includeGroup("com.unascribed")
+		}
+	}
+
+	maven {
 		name = "Sonatype Snapshots"
 		url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots")
 	}

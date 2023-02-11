@@ -1,0 +1,62 @@
+# comment
+
+variables:
+  SLUG: '([^/?#]*)'
+
+raw:
+  - '0x0\.st/$SLUG'
+  - 'bytebin\.lucko.me/$SLUG'
+  - 'termbin\.com/$SLUG'
+
+url-transform:
+  - match: 'mclo\.gs/$SLUG'
+    output: 'https://api.mclo.gs/1/raw/$1'
+
+  - match: 'paste\.ee/[pd]/$SLUG'
+    output: 'https://paste.ee/d/$1'
+
+  - match: 'pastes\.dev/$SLUG'
+    output: 'https://api.pastes.dev/$1'
+
+  - match: 'hastebin\.com/$SLUG'
+    output: 'https://hastebin.com/raw/$1'
+
+  - match: 'toptal\.com/developers/hastebin/$SLUG'
+    output: 'https://www.toptal.com/developers/hastebin/raw/$1'
+
+  - match: 'hst\.sh/$SLUG'
+    output: 'https://hst.sh/raw/$1'
+
+  - match: 'gist\.github\.com/$SLUG/$SLUG'
+    output: 'https://gist.githubusercontent.com/raw/$2'
+
+  - match: 'gist\.github\.com/$SLUG'
+    output: 'https://gist.githubusercontent.com/raw/$1'
+
+  - match: 'gist\.githubusercontent\.com/$SLUG/$SLUG'
+    output: 'https://gist.githubusercontent.com/raw/$2'
+
+  - match: 'gist\.githubusercontent\.com/$SLUG'
+    output: 'https://gist.githubusercontent.com/raw/$1'
+
+  - match: 'pastebin\.com/(raw|dl|clone|embed|print)/$SLUG'
+    output: 'https://pastebin.com/dl/$2'
+
+  - match: 'pastebin\.com/$SLUG'
+    output: 'https://pastebin.com/dl/$1'
+
+  - match: 'pastery\.net/$SLUG.*'
+    output: 'https://www.pastery.net/$1/raw/'
+
+    split:
+      group: 1
+      string: '+'
+
+scrape:
+  - match: 'paste\.atlauncher\.com/view/$SLUG'
+    type: 'first-element'
+    selector: 'code'
+
+  - match: 'paste\.gg/p/$SLUG/$SLUG'
+    type: 'hrefs'
+    selector: '.box-title a'

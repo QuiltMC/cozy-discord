@@ -3,8 +3,10 @@ detekt = "1.22.0"
 kotlin = "1.8.0"
 graphql = "6.3.5"
 
+autolink = "0.10.1"
 commons-text = "1.10.0"
 excelkt = "1.0.2"
+flexver = "1.1.0"
 groovy = "3.0.14"
 homoglyph = "1.2.0"
 jansi = "2.4.0"
@@ -12,17 +14,22 @@ jsoup = "1.15.3"
 kaml = "0.50.0"
 kmongo = "4.8.0"
 kordex = "1.5.6-SNAPSHOT"
+kotlintest = "3.4.2"
+ktor = "2.2.1"
 kx-ser = "1.4.1"
 logback = "1.2.8"
 logging = "2.1.23"
+moshi = "1.13.0"
 rgxgen = "1.4"
 semver = "1.4.2"
 
 [libraries]
+autolink = { module = "org.nibor.autolink:autolink", version.ref = "autolink" }
 commons-text = { module = "org.apache.commons:commons-text", version.ref = "commons-text" }
 detekt = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
 detekt-libraries = { module = "io.gitlab.arturbosch.detekt:detekt-rules-libraries", version.ref = "detekt" }
 excelkt = { module = "io.github.evanrupert:excelkt", version.ref = "excelkt" }
+flexver = { module = "com.unascribed:flexver-java", version.ref = "flexver" }
 graphql = { module = "com.expediagroup:graphql-kotlin-ktor-client", version.ref = "graphql" }
 groovy = { module = "org.codehaus.groovy:groovy", version.ref = "groovy" }
 homoglyph = { module = "net.codebox:homoglyph", version.ref = "homoglyph" }
@@ -38,9 +45,15 @@ kordex-phishing = { module = "com.kotlindiscord.kord.extensions:extra-phishing",
 kordex-pluralkit = { module = "com.kotlindiscord.kord.extensions:extra-pluralkit", version.ref = "kordex" }
 kordex-unsafe = { module = "com.kotlindiscord.kord.extensions:unsafe", version.ref = "kordex" }
 kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom" }
+kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8" }
+kotlintest = { module = "io.kotlintest:kotlintest-runner-junit5", version.ref = "kotlintest" }
+ktor-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 kx-ser = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kx-ser" }
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 logging = { module = "io.github.microutils:kotlin-logging", version.ref = "logging" }
+moshi-adapters = { module = "com.squareup.moshi:moshi-adapters", version.ref = "moshi" }
+moshi-kotlin = { module = "com.squareup.moshi:moshi-kotlin", version.ref = "moshi" }
 rgxgen = { module = "com.github.curious-odd-man:rgxgen", version.ref = "rgxgen" }
 semver = { module = "io.github.z4kn4fein:semver", version.ref = "semver" }
