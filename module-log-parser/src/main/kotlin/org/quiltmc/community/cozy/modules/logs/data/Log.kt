@@ -6,6 +6,7 @@
 
 package org.quiltmc.community.cozy.modules.logs.data
 
+import dev.kord.core.entity.channel.Channel
 import org.quiltmc.community.cozy.modules.logs.Version
 import java.net.URL
 
@@ -22,6 +23,10 @@ public open class Log {
 	private val urls: MutableList<URL> = mutableListOf()
 
 	public lateinit var content: String
+
+	public lateinit var channel: Channel
+		internal set
+
 	public var minecraftVersion: Version? = null
 	public var hasProblems: Boolean = false
 
@@ -30,6 +35,9 @@ public open class Log {
 
 	public val aborted: Boolean get() =
 		abortReason != null
+
+	public var fromCommand: Boolean = false
+		internal set
 
 	public open fun abort(message: String) {
 		abortReason = message
