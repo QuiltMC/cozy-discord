@@ -10,7 +10,10 @@ private val PATTERNS = mapOf(
 	Launcher.MultiMC to "MultiMC version: (\\S+)".toRegex(RegexOption.IGNORE_CASE),
 	Launcher.Prism to "Prism Launcher version: (\\S+)".toRegex(RegexOption.IGNORE_CASE),
 	Launcher.PolyMC to "PolyMC version: (\\S+)".toRegex(RegexOption.IGNORE_CASE),
-	Launcher.Technic to "api.technicpack.net resolves to".toRegex(RegexOption.IGNORE_CASE)
+	Launcher.Technic to "api\\.technicpack\\.net resolves to".toRegex(RegexOption.IGNORE_CASE),
+
+	Launcher.TLauncher to "Starting TLauncher ([^\n]+)".toRegex(RegexOption.IGNORE_CASE),
+	Launcher.TLauncher to "tlauncher\\.org".toRegex(RegexOption.IGNORE_CASE),
 )
 
 public class LauncherParser : LogParser() {

@@ -16,5 +16,6 @@ public open class Launcher(
 		public const val Prism: String = "Prism"
 		public const val PolyMC: String = "PolyMC"
 		public const val Technic: String = "Technic"
+		public const val TLauncher: String = "TLauncher"
 	}
 }

@@ -10,6 +10,9 @@ import com.kotlindiscord.kord.extensions.ExtensibleBot
 import com.kotlindiscord.kord.extensions.koin.KordExKoinComponent
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
 import org.koin.core.component.inject
 import org.quiltmc.community.cozy.modules.logs.LogParserExtension
 import org.quiltmc.community.cozy.modules.logs.data.Order
@@ -22,16 +25,23 @@ public abstract class LogRetriever : Ordered, KordExKoinComponent {
 	private val bot: ExtensibleBot by inject()
 	protected val extension: LogParserExtension get() = bot.findExtension()!!
 
-	protected val client: HttpClient = HttpClient(CIO)
+	protected val client: HttpClient = HttpClient(CIO) {
+		install(ContentNegotiation) {
+			json(
+				kotlinx.serialization.json.Json { ignoreUnknownKeys = true },
+				ContentType.Any
+			)
+		}
+	}
 
 	public abstract suspend fun process(url: URL): Set<String>
 
 	public open suspend fun setup() {}
 
-	protected open suspend fun predicate(url: URL) : Boolean =
+	protected open suspend fun predicate(url: URL): Boolean =
 		true
 
 	/** @suppress Internal function; use for intermediary types only. **/
-	public open suspend fun _predicate(url: URL) : Boolean =
+	public open suspend fun _predicate(url: URL): Boolean =
 		predicate(url)
 }
