@@ -885,7 +885,9 @@ class FilterExtension : Extension() {
 					}
 				}
 
-				message.author!!.asMember(message.getGuild().id).timeout(10.minutes, "Triggered filter: $_id")
+				message.author!!
+					.asMember(message.getGuild().id)
+					.timeout(10.minutes, "Triggered filter: $_id")
 			}
 
 			FilterAction.KICK -> {

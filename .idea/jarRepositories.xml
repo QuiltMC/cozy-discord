@@ -81,5 +81,15 @@
       <option name="name" value="MavenRepo" />
       <option name="url" value="https://repo.maven.apache.org/maven2/" />
     </remote-repository>
+    <remote-repository>
+      <option name="id" value="Sonatype Snapshots2" />
+      <option name="name" value="Sonatype Snapshots2" />
+      <option name="url" value="https://s01.oss.sonatype.org/content/repositories/snapshots" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="Shedaniel" />
+      <option name="name" value="Shedaniel" />
+      <option name="url" value="https://maven.shedaniel.me" />
+    </remote-repository>
   </component>
 </project>

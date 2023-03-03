@@ -96,17 +96,18 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
 	}
 
 	extensions {
+		add(::ApplicationsExtension)
 		add(::FilterExtension)
 		add(::LogParsingExtension)
 		add(::MessageLogExtension)
 		add(::MinecraftExtension)
+		add(::ModHostingVerificationExtension)
 		add(::PKExtension)
 		add(::SettingsExtension)
 		add(::ShowcaseExtension)
 		add(::SuggestionsExtension)
 		add(::SyncExtension)
 		add(::UtilityExtension)
-		add(::ModHostingVerificationExtension)
 		add(::VerificationExtension)
 
 		extPluralKit()
