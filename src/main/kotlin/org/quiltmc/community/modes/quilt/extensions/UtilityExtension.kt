@@ -217,6 +217,10 @@ class UtilityExtension : Extension() {
 							"sweet discussion..."
 				}
 
+				// Work around a Discord API race condition - yes, really!
+				// Specifically: "Cannot message this thread until after the post author has sent an initial message."
+				delay(1.seconds)
+
 				event.channel.withTyping {
 					delay(3.seconds)
 				}
