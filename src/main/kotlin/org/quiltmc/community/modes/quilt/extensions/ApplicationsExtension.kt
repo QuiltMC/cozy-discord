@@ -55,8 +55,11 @@ class ApplicationsExtension : Extension() {
 								is GuildJoinRequestResponse.MultipleChoiceResponse ->
 									append(it.choices[it.response])
 
-								is GuildJoinRequestResponse.ParagraphResponse ->
+								is GuildJoinRequestResponse.ParagraphResponse -> {
+									appendLine()
 									appendLine(it.response.prependIndent("  "))
+									appendLine()
+								}
 							}
 
 							appendLine()

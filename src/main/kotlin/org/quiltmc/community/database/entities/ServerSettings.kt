@@ -34,6 +34,7 @@ data class ServerSettings(
 	var cozyLogChannel: Snowflake? = null,
 	var filterLogChannel: Snowflake? = null,
 	var messageLogCategory: Snowflake? = null,
+	var applicationLogChannel: Snowflake? = null,
 
 	var quiltServerType: QuiltServerType? = null,
 	var leaveServer: Boolean = false,
@@ -72,6 +73,15 @@ data class ServerSettings(
 		}
 
 		builder.append("**Command Prefix:** `$commandPrefix`\n\n")
+		builder.append("**Application Logs:** ")
+
+		if (applicationLogChannel != null) {
+			builder.append("<#${applicationLogChannel!!.value}>")
+		} else {
+			builder.append(":x: Not configured")
+		}
+
+		builder.append("\n")
 		builder.append("**Cozy Logs:** ")
 
 		if (cozyLogChannel != null) {
