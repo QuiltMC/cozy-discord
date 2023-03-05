@@ -182,7 +182,7 @@ class ApplicationsExtension : Extension() {
 								)
 								appendLine()
 								appendLine("**Application ID:** `${event.requestId}`")
-								appendLine("**User:** <@${event.requestId}> (`${event.requestId}`)")
+								appendLine("**User:** <@${event.userId}> (`${event.userId}`)")
 							}
 						}
 					}
@@ -191,7 +191,7 @@ class ApplicationsExtension : Extension() {
 
 					message.edit {
 						embed {
-							message.embeds[1].apply(this)
+							message.embeds.first().apply(this)
 
 							title = "Application (Withdrawn)"
 							color = DISCORD_WHITE
