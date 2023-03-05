@@ -212,14 +212,14 @@ class UtilityExtension : Extension() {
 					else -> return@action
 				}
 
+				// Work around a Discord API race condition - yes, really!
+				// Specifically: "Cannot message this thread until after the post author has sent an initial message."
+				delay(1.seconds)
+
 				val message = event.channel.createMessage {
 					content = "Oh hey, that's a nice thread you've got there! Let me just get the mods in on this " +
 							"sweet discussion..."
 				}
-
-				// Work around a Discord API race condition - yes, really!
-				// Specifically: "Cannot message this thread until after the post author has sent an initial message."
-				delay(1.seconds)
 
 				event.channel.withTyping {
 					delay(3.seconds)
