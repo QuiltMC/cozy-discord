@@ -35,6 +35,7 @@ data class ServerSettings(
 	var filterLogChannel: Snowflake? = null,
 	var messageLogCategory: Snowflake? = null,
 	var applicationLogChannel: Snowflake? = null,
+	var applicationThreadsChannel: Snowflake? = null,
 
 	var quiltServerType: QuiltServerType? = null,
 	var leaveServer: Boolean = false,
@@ -77,6 +78,14 @@ data class ServerSettings(
 
 		if (applicationLogChannel != null) {
 			builder.append("<#${applicationLogChannel!!.value}>")
+		} else {
+			builder.append(":x: Not configured")
+		}
+
+		builder.append("**Application threads channel:** ")
+
+		if (applicationThreadsChannel != null) {
+			builder.append("<#${applicationThreadsChannel!!.value}>")
 		} else {
 			builder.append(":x: Not configured")
 		}
@@ -131,6 +140,8 @@ data class ServerSettings(
 		} else {
 			builder.append("No")
 		}
+
+		builder.append("\n")
 
 		builder.append("**Verification role:** ")
 

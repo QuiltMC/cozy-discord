@@ -594,6 +594,67 @@ class SettingsExtension : Extension() {
 			}
 
 			ephemeralSubCommand(::TopMessageChannelGuildArg) {
+				name = "application-threads-channel"
+				description = "Configure the channel Cozy should create server application threads within"
+
+				action {
+					val context = CheckContext(event, getLocale())
+
+					if (arguments.serverId != null) {
+						context.hasPermissionInMainGuild(Permission.Administrator)
+
+						if (!context.passed) {
+							respond {
+								content = ":x: Only Quilt community managers can modify settings for other servers."
+							}
+
+							return@action
+						}
+					}
+
+					val settings = if (arguments.serverId == null) {
+						serverSettings.get(guild!!.id)
+					} else {
+						serverSettings.get(arguments.serverId!!)
+					}
+
+					if (settings == null) {
+						respond {
+							content = ":x: Unknown guild ID: `${arguments.serverId?.value}`"
+						}
+
+						return@action
+					}
+
+					if (arguments.channel == null) {
+						respond {
+							content = "**Current application threads channel:** " +
+									"<#${settings.applicationThreadsChannel?.value}>"
+						}
+
+						return@action
+					}
+
+					val channel = event.kord.getChannelOf<TopGuildMessageChannel>(arguments.channel!!.id)!!
+
+					if (channel.guildId != settings._id) {
+						respond {
+							content = ":x: That channel doesn't belong to the guild with ID: `${settings._id.value}`"
+						}
+
+						return@action
+					}
+
+					settings.applicationThreadsChannel = channel.id
+					settings.save()
+
+					respond {
+						content = "**Application threads channel set:** ${channel.mention}"
+					}
+				}
+			}
+
+			ephemeralSubCommand(::TopMessageChannelGuildArg) {
 				name = "cozy-log-channel"
 				description = "Configure the channel Cozy should send log messages to"
 
