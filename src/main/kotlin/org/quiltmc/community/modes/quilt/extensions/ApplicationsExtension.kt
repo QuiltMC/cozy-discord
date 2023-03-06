@@ -17,6 +17,7 @@ import com.kotlindiscord.kord.extensions.extensions.event
 import com.kotlindiscord.kord.extensions.time.TimestampType
 import com.kotlindiscord.kord.extensions.time.toDiscord
 import com.kotlindiscord.kord.extensions.utils.capitalizeWords
+import com.kotlindiscord.kord.extensions.utils.getJumpUrl
 import com.kotlindiscord.kord.extensions.utils.getOfOrNull
 import dev.kord.common.Color
 import dev.kord.common.entity.ArchiveDuration
@@ -35,6 +36,7 @@ import dev.kord.rest.builder.message.create.actionRow
 import dev.kord.rest.builder.message.create.embed
 import dev.kord.rest.builder.message.modify.embed
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.toList
 import org.koin.core.component.inject
 import org.quiltmc.community.database.collections.ServerApplicationCollection
 import org.quiltmc.community.database.collections.ServerSettingsCollection
@@ -168,6 +170,10 @@ class ApplicationsExtension : Extension() {
 
 				val logChannel = event.getGuild().getChannelOf<TextChannel>(settings.applicationLogChannel!!)
 
+				var previousApplications = applications
+					.findByUser(event.userId)
+					.toList()
+
 				if (application == null) {
 					// Application was deleted that we're not keeping track of
 
@@ -191,12 +197,19 @@ class ApplicationsExtension : Extension() {
 				} else if (application.status == ApplicationStatus.Submitted) {
 					val message = logChannel.getMessage(application.messageId)
 
+					previousApplications = previousApplications
+						.filter { it._id != application._id }
+
 					message.edit {
 						embed {
 							message.embeds.first().apply(this)
 
 							title = "Application (Withdrawn)"
 							color = DISCORD_WHITE
+						}
+
+						if (previousApplications.isNotEmpty()) {
+							embed { addPrevious(previousApplications) }
 						}
 					}
 				}
@@ -230,10 +243,17 @@ class ApplicationsExtension : Extension() {
 				val settings = cache.getOfOrNull<ServerSettings>("serverSettings")!!
 
 				val logChannel = event.getGuild().getChannelOf<TextChannel>(settings.applicationLogChannel!!)
+				var previousApplications = applications
+					.findByUser(event.userId)
+					.toList()
 
 				if (application == null) {
 					val message = logChannel.createMessage {
 						embed { fromEvent(event) }
+
+						if (previousApplications.isNotEmpty()) {
+							embed { addPrevious(previousApplications) }
+						}
 
 						actionRow {
 							interactionButton(ButtonStyle.Secondary, "applicationThread/${event.request.id}") {
@@ -251,14 +271,22 @@ class ApplicationsExtension : Extension() {
 						guildId = event.guildId,
 						messageId = message.id,
 						userId = event.userId,
+						messageLink = message.getJumpUrl()
 					)
 
 					applications.save(application)
 				} else {
+					previousApplications = previousApplications
+						.filter { it._id != application._id }
+
 					val message = logChannel.getMessage(application.messageId)
 
 					message.edit {
 						embed { fromEvent(event) }
+
+						if (previousApplications.isNotEmpty()) {
+							embed { addPrevious(previousApplications) }
+						}
 					}
 
 					application.status = event.request.status
@@ -272,6 +300,18 @@ class ApplicationsExtension : Extension() {
 		ApplicationStatus.Approved -> DISCORD_GREEN
 		ApplicationStatus.Rejected -> DISCORD_RED
 		ApplicationStatus.Submitted -> DISCORD_YELLOW
+	}
+
+	private fun EmbedBuilder.addPrevious(apps: List<ServerApplication>) {
+		title = "Previous Applications: ${apps.size}"
+		color = DISCORD_BLURPLE
+
+		description = buildString {
+			apps.sortedBy { it._id.timestamp }
+				.forEachIndexed { i, app ->
+					appendLine("[App. ${i + 1}](${app.messageLink}): ${app.status.name.capitalizeWords()}")
+				}
+		}
 	}
 
 	private suspend fun EmbedBuilder.fromEvent(event: GuildJoinRequestUpdateEvent) {

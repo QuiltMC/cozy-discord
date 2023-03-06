@@ -29,4 +29,6 @@ data class ServerApplication(
 	val userId: Snowflake,
 	val guildId: Snowflake,
 	val messageId: Snowflake,
+
+	val messageLink: String,
 ) : Entity<Snowflake>
