@@ -161,6 +161,8 @@ class ApplicationsExtension : Extension() {
 			}
 
 			action {
+				delay(1.seconds)  // Just to make sure we get the update first
+
 				val application = cache.getOfOrNull<ServerApplication>("application")
 				val settings = cache.getOfOrNull<ServerSettings>("serverSettings")!!
 
@@ -181,8 +183,8 @@ class ApplicationsExtension : Extension() {
 											"or if the application was being handled by another bot."
 								)
 								appendLine()
+								appendLine("**Applicant:** <@${event.userId}> (`${event.userId}`)")
 								appendLine("**Application ID:** `${event.requestId}`")
-								appendLine("**User:** <@${event.userId}> (`${event.userId}`)")
 							}
 						}
 					}
@@ -281,10 +283,24 @@ class ApplicationsExtension : Extension() {
 		description = buildString {
 			appendLine("**User:** ${user.tag}")
 			appendLine("**Mention:** ${user.mention}")
-			append(
+			appendLine(
 				"**Created:** ${user.id.timestamp.toDiscord(TimestampType.LongDateTime)} " +
 						"(${user.id.timestamp.toDiscord(TimestampType.RelativeTime)})"
 			)
+
+			if (event.request.actionedByUser != null) {
+				val moderator = event.request.actionedByUser!!
+				val time = event.request.actionedAt!!
+
+				appendLine()
+				appendLine(
+					"**Actioned by:** <@${moderator.id}> (`${moderator.username}#${moderator.discriminator}`)"
+				)
+				appendLine(
+					"**Actioned at:** ${time.toDiscord(TimestampType.LongDateTime)} " +
+							"(${time.toDiscord(TimestampType.RelativeTime)})"
+				)
+			}
 		}
 
 		thumbnail {
