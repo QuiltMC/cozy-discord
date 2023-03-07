@@ -176,7 +176,7 @@ class ApplicationsExtension : Extension() {
 									}
 								}
 							}
-						}
+						}.send()
 					}
 				}
 			}
