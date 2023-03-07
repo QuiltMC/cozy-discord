@@ -300,13 +300,12 @@ class ApplicationsExtension : Extension() {
 		event<ButtonInteractionCreateEvent> {
 			check { inQuiltGuild() }
 			check { hasBaseModeratorRole(false) }
-			check { failIfNot(event.interaction.componentId.matches(COMPONENT_REGEX)) }
 
 			check {
 				val match = COMPONENT_REGEX.find(event.interaction.componentId)
 
 				if (match == null) {
-					fail()
+					fail("Button interaction didn't match the component ID regex")
 
 					return@check
 				}
@@ -489,6 +488,17 @@ class ApplicationsExtension : Extension() {
 
 						if (otherApplications.isNotEmpty()) {
 							embed { addOther(otherApplications) }
+						}
+
+						actionRow {
+							interactionButton(
+								ButtonStyle.Secondary,
+								"application/${application._id}/thread"
+							) {
+								emoji(ReactionEmoji.Unicode("✉️"))
+
+								label = "Create Thread"
+							}
 						}
 					}
 
