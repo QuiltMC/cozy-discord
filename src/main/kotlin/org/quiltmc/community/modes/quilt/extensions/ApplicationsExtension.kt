@@ -645,6 +645,8 @@ class ApplicationsExtension : Extension() {
 							.joinToString("\n") { "> $it" }
 					)
 				}
+
+				appendLine()
 			}
 		}
 	}
