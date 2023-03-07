@@ -209,7 +209,10 @@ class ApplicationsExtension : Extension() {
 
 					message.edit {
 						embed { message.embeds.first().apply(this) }
-						embed { addPrevious(previousApplications) }
+
+						if (previousApplications.isNotEmpty()) {
+							embed { addPrevious(previousApplications) }
+						}
 
 						actionRow {
 							interactionButton(
