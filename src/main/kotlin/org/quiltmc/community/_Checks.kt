@@ -184,7 +184,7 @@ suspend fun CheckContext<*>.inReleaseChannel() {
 		fail()
 	} else {
 		if (message.channelId !in COMMUNITY_RELEASE_CHANNELS) {
-			logger.failed("Message not in a release chanel")
+			logger.failed("Message not in a release channel")
 
 			fail("Message must be in a release channel")
 		}

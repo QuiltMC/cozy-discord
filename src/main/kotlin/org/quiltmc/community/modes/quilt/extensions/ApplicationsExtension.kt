@@ -21,10 +21,7 @@ import com.kotlindiscord.kord.extensions.time.TimestampType
 import com.kotlindiscord.kord.extensions.time.toDiscord
 import com.kotlindiscord.kord.extensions.types.editingPaginator
 import com.kotlindiscord.kord.extensions.types.respond
-import com.kotlindiscord.kord.extensions.utils.capitalizeWords
-import com.kotlindiscord.kord.extensions.utils.getJumpUrl
-import com.kotlindiscord.kord.extensions.utils.getOfOrNull
-import com.kotlindiscord.kord.extensions.utils.respond
+import com.kotlindiscord.kord.extensions.utils.*
 import dev.kord.common.Color
 import dev.kord.common.entity.ArchiveDuration
 import dev.kord.common.entity.ButtonStyle
@@ -33,7 +30,7 @@ import dev.kord.core.behavior.channel.createEmbed
 import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.behavior.edit
 import dev.kord.core.behavior.getChannelOf
-import dev.kord.core.behavior.interaction.respondEphemeral
+import dev.kord.core.behavior.interaction.response.createEphemeralFollowup
 import dev.kord.core.builder.components.emoji
 import dev.kord.core.entity.Member
 import dev.kord.core.entity.ReactionEmoji
@@ -334,6 +331,8 @@ class ApplicationsExtension : Extension() {
 			}
 
 			action {
+				val response = event.interaction.ackEphemeral()
+
 				val action = cache.getOfOrNull<String>("action")!!
 				val application = cache.getOfOrNull<ServerApplication>("application")!!
 				val settings = cache.getOfOrNull<ServerSettings>("serverSettings")!!
@@ -342,7 +341,7 @@ class ApplicationsExtension : Extension() {
 				val user = kord.getUser(application.userId)
 
 				if (user == null) {
-					event.interaction.respondEphemeral {
+					response.createEphemeralFollowup {
 						content = "User that created this application can't be found or no longer exists."
 					}
 
@@ -354,7 +353,7 @@ class ApplicationsExtension : Extension() {
 						val threadChannel = guild.getChannelOf<TextChannel>(settings.applicationLogChannel!!)
 
 						if (application.threadId != null) {
-							event.interaction.respondEphemeral {
+							response.createEphemeralFollowup {
 								content = "A thread already exists for this application: <#${application.threadId}>"
 							}
 						} else {
@@ -377,7 +376,7 @@ class ApplicationsExtension : Extension() {
 
 							thread.createMessage("`${user.id}`")
 
-							event.interaction.respondEphemeral {
+							response.createEphemeralFollowup {
 								content = "Thread created: ${thread.mention}"
 							}
 
@@ -388,7 +387,7 @@ class ApplicationsExtension : Extension() {
 
 					"verify" -> {
 						if (settings.verificationRole == null || settings.moderationLogChannel == null) {
-							event.interaction.respondEphemeral {
+							response.createEphemeralFollowup {
 								content =
 									"This server doesn't have a configured verification role or moderation logging " +
 											"channel."
@@ -401,33 +400,39 @@ class ApplicationsExtension : Extension() {
 						val modLog = guild.getChannelOf<TopGuildMessageChannel>(settings.moderationLogChannel!!)
 
 						if (member == null) {
-							event.interaction.respondEphemeral {
+							response.createEphemeralFollowup {
 								content = "User is not in this guild."
 							}
-						} else {
-							member.addRole(settings.verificationRole!!)
 
-							modLog.createEmbed {
-								title = "User force verified"
-								color = DISCORD_BLURPLE
+							return@action
+						}
 
-								field {
-									inline = true
-									name = "Moderator"
-									value = "${user.asUser().tag} (${user.mention})"
-								}
+						member.addRole(settings.verificationRole!!)
 
-								field {
-									inline = true
-									name = "User"
-									value = "${member.tag} (${member.mention})"
-								}
+						modLog.createEmbed {
+							title = "User force verified"
+							color = DISCORD_BLURPLE
+
+							field {
+								inline = true
+								name = "Moderator"
+								value = "${user.asUser().tag} (${user.mention})"
 							}
 
-							event.interaction.respondEphemeral {
-								content = "User ${member.mention} has been force verified."
+							field {
+								inline = true
+								name = "User"
+								value = "${member.tag} (${member.mention})"
 							}
 						}
+
+						response.createEphemeralFollowup {
+							content = "User ${member.mention} has been force verified."
+						}
+					}
+
+					else -> response.createEphemeralFollowup {
+						content = "Unknown application button action: $action"
 					}
 				}
 			}
