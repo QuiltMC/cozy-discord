@@ -7,6 +7,7 @@
 package org.quiltmc.community.modes.quilt.extensions
 
 import com.kotlindiscord.kord.extensions.*
+import com.kotlindiscord.kord.extensions.checks.failed
 import com.kotlindiscord.kord.extensions.checks.guildFor
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
@@ -47,6 +48,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.toList
 import kotlinx.datetime.Instant
+import mu.KotlinLogging
 import org.koin.core.component.inject
 import org.quiltmc.community.GUILDS
 import org.quiltmc.community.database.collections.ServerApplicationCollection
@@ -61,6 +63,8 @@ private val COMPONENT_REGEX = "application/(\\d+)/(thread|verify)".toRegex()
 
 class ApplicationsExtension : Extension() {
 	override val name: String = "applications"
+
+	private val logger = KotlinLogging.logger("org.quiltmc.community.modes.quilt.extensions.ApplicationsExtension")
 
 	private val serverSettings: ServerSettingsCollection by inject()
 	private val applications: ServerApplicationCollection by inject()
@@ -88,6 +92,11 @@ class ApplicationsExtension : Extension() {
 						val settings = serverSettings.get(guild!!.id)
 
 						if (settings?.verificationRole == null || settings.moderationLogChannel == null) {
+							logger.debug {
+								"Guild ${guild?.id} doesn't have a verification role or moderation logging " +
+										"channel configured."
+							}
+
 							respond {
 								content =
 									"This server doesn't have a configured verification role or moderation logging " +
@@ -101,32 +110,40 @@ class ApplicationsExtension : Extension() {
 						val modLog = guild!!.getChannelOf<TopGuildMessageChannel>(settings.moderationLogChannel!!)
 
 						if (member == null) {
+							logger.warn {
+								"User ${arguments.user.id} is not present on guild ${guild?.id}"
+							}
+
 							respond {
 								content = "User is not in this guild."
 							}
-						} else {
-							member.addRole(settings.verificationRole!!)
 
-							modLog.createEmbed {
-								title = "User force verified"
-								color = DISCORD_BLURPLE
+							return@action
+						}
 
-								field {
-									inline = true
-									name = "Moderator"
-									value = "${user.asUser().tag} (${user.mention})"
-								}
+						member.addRole(settings.verificationRole!!)
 
-								field {
-									inline = true
-									name = "User"
-									value = "${member.tag} (${member.mention})"
-								}
+						modLog.createEmbed {
+							title = "User force verified"
+							color = DISCORD_BLURPLE
+
+							field {
+								inline = true
+								name = "Moderator"
+								value = "${user.asUser().tag} (${user.mention})"
 							}
 
-							respond {
-								content = "User ${member.mention} has been force verified."
+							field {
+								inline = true
+								name = "User"
+								value = "${member.tag} (${member.mention})"
 							}
+						}
+
+						logger.info { "User force-verified: ${member.id}" }
+
+						respond {
+							content = "User ${member.mention} has been force verified."
 						}
 					}
 				}
@@ -137,6 +154,16 @@ class ApplicationsExtension : Extension() {
 
 					action {
 						val previousApplications = applications.findByUser(arguments.user.id).toList()
+
+						logger.debug { "Found ${previousApplications.size} applications for user ${arguments.user.id}" }
+
+						if (previousApplications.isEmpty()) {
+							respond {
+								content = "No applications found for ${arguments.user.mention}."
+							}
+
+							return@action
+						}
 
 						editingPaginator {
 							previousApplications.forEach { app ->
@@ -190,6 +217,10 @@ class ApplicationsExtension : Extension() {
 					val application = applications.getByMessage(message.id)
 
 					if (application == null) {
+						logger.debug {
+							"No application found for message: ${message.id}"
+						}
+
 						respond {
 							content = "Unable to find an application for this message."
 						}
@@ -201,6 +232,10 @@ class ApplicationsExtension : Extension() {
 						.findByUser(application.userId)
 						.filter { it._id != application._id }
 						.toList()
+
+					logger.info {
+						"Fixing content and buttons for message ${message.id} with application ${application._id}"
+					}
 
 					message.edit {
 						embed { message.embeds.first().apply(this) }
@@ -250,6 +285,11 @@ class ApplicationsExtension : Extension() {
 				val settings = serverSettings.get(guild!!.id)
 
 				if (settings?.verificationRole == null || settings.moderationLogChannel == null) {
+					logger.debug {
+						"Guild ${guild?.id} doesn't have a verification role or moderation logging " +
+								"channel configured."
+					}
+
 					message.respond {
 						content = "This server doesn't have a configured verification role or moderation logging " +
 								"channel."
@@ -262,6 +302,10 @@ class ApplicationsExtension : Extension() {
 				val modLog = guild!!.getChannelOf<TopGuildMessageChannel>(settings.moderationLogChannel!!)
 
 				if (member == null) {
+					logger.warn {
+						"User ${arguments.user.id} is not present on guild ${guild?.id}"
+					}
+
 					message.respond {
 						content = "User is not in this guild."
 					}
@@ -285,6 +329,8 @@ class ApplicationsExtension : Extension() {
 						}
 					}
 
+					logger.info { "User force-verified: ${member.id}" }
+
 					message.respond {
 						content = "User ${member.mention} has been force verified."
 					}
@@ -297,9 +343,12 @@ class ApplicationsExtension : Extension() {
 			check { hasBaseModeratorRole(false) }
 
 			check {
+				logger.debug { "Received interaction for button: ${event.interaction.componentId}" }
+
 				val match = COMPONENT_REGEX.matchEntire(event.interaction.componentId)
 
 				if (match == null) {
+					logger.failed("Button interaction didn't match the component ID regex")
 					fail("Button interaction didn't match the component ID regex")
 
 					return@check
@@ -309,6 +358,7 @@ class ApplicationsExtension : Extension() {
 				val settings = serverSettings.get(guild.id)
 
 				if (settings?.applicationLogChannel == null || settings.applicationThreadsChannel == null) {
+					logger.failed("Guild ${guild.id} does not have an application log or threads channel configured")
 					fail("Guild ${guild.id} does not have an application log or threads channel configured.")
 
 					return@check
@@ -320,6 +370,7 @@ class ApplicationsExtension : Extension() {
 				val app = applications.get(applicationId)
 
 				if (app == null) {
+					logger.failed("Unknown application: $applicationId")
 					fail("Unknown application: $applicationId")
 
 					return@check
@@ -341,6 +392,10 @@ class ApplicationsExtension : Extension() {
 				val user = kord.getUser(application.userId)
 
 				if (user == null) {
+					logger.warn {
+						"User ${application.userId} that created application ${application._id} can't be found"
+					}
+
 					response.createEphemeralFollowup {
 						content = "User that created this application can't be found or no longer exists."
 					}
@@ -353,10 +408,16 @@ class ApplicationsExtension : Extension() {
 						val threadChannel = guild.getChannelOf<TextChannel>(settings.applicationLogChannel!!)
 
 						if (application.threadId != null) {
+							logger.debug {
+								"Application ${application._id} already has a thread."
+							}
+
 							response.createEphemeralFollowup {
 								content = "A thread already exists for this application: <#${application.threadId}>"
 							}
 						} else {
+							logger.info { "Creating thread for application: ${application._id}" }
+
 							val thread = threadChannel.startPrivateThread(
 								"App: ${user.tag}",
 								ArchiveDuration.Week
@@ -387,6 +448,11 @@ class ApplicationsExtension : Extension() {
 
 					"verify" -> {
 						if (settings.verificationRole == null || settings.moderationLogChannel == null) {
+							logger.debug {
+								"Guild ${guild.id} doesn't have a verification role or moderation logging " +
+										"channel configured."
+							}
+
 							response.createEphemeralFollowup {
 								content =
 									"This server doesn't have a configured verification role or moderation logging " +
@@ -400,6 +466,10 @@ class ApplicationsExtension : Extension() {
 						val modLog = guild.getChannelOf<TopGuildMessageChannel>(settings.moderationLogChannel!!)
 
 						if (member == null) {
+							logger.warn {
+								"User ${application.userId} is not present on guild ${guild.id}"
+							}
+
 							response.createEphemeralFollowup {
 								content = "User is not in this guild."
 							}
@@ -426,13 +496,19 @@ class ApplicationsExtension : Extension() {
 							}
 						}
 
+						logger.info { "User force-verified: ${member.id}" }
+
 						response.createEphemeralFollowup {
 							content = "User ${member.mention} has been force verified."
 						}
 					}
 
-					else -> response.createEphemeralFollowup {
-						content = "Unknown application button action: $action"
+					else -> {
+						logger.warn { "Unknown application button action: $action" }
+
+						response.createEphemeralFollowup {
+							content = "Unknown application button action: $action"
+						}
 					}
 				}
 			}
@@ -446,6 +522,7 @@ class ApplicationsExtension : Extension() {
 				val settings = serverSettings.get(guild.id)
 
 				if (settings?.applicationLogChannel == null || settings.applicationThreadsChannel == null) {
+					logger.failed("Guild ${guild.id} does not have an application log or threads channel configured")
 					fail("Guild ${guild.id} does not have an application log or threads channel configured.")
 
 					return@check
@@ -476,6 +553,8 @@ class ApplicationsExtension : Extension() {
 				// leaves without applying as well, so we can't log it on Discord really
 
 				if (application != null && application.status == ApplicationStatus.Submitted) {
+					logger.debug { "Marking submitted application as withdrawn: ${event.requestId}" }
+
 					val message = logChannel.getMessage(application.messageId)
 
 					otherApplications = otherApplications
@@ -519,6 +598,7 @@ class ApplicationsExtension : Extension() {
 				val settings = serverSettings.get(guild.id)
 
 				if (settings?.applicationLogChannel == null || settings.applicationThreadsChannel == null) {
+					logger.failed("Guild ${guild.id} does not have an application log or threads channel configured")
 					fail("Guild ${guild.id} does not have an application log or threads channel configured.")
 
 					return@check
@@ -543,6 +623,8 @@ class ApplicationsExtension : Extension() {
 					.toList()
 
 				if (application == null) {
+					logger.debug { "Saving new application and sending to channel: ${event.requestId}" }
+
 					val message = logChannel.createMessage {
 						embed { fromEvent(event) }
 
@@ -590,6 +672,8 @@ class ApplicationsExtension : Extension() {
 
 					applications.save(application)
 				} else {
+					logger.debug { "Updating existing application: ${event.requestId}" }
+
 					otherApplications = otherApplications
 						.filter { it._id != application._id }
 
