@@ -300,7 +300,7 @@ class ApplicationsExtension : Extension() {
 			check { hasBaseModeratorRole(false) }
 
 			check {
-				val match = COMPONENT_REGEX.find(event.interaction.componentId)
+				val match = COMPONENT_REGEX.matchEntire(event.interaction.componentId)
 
 				if (match == null) {
 					fail("Button interaction didn't match the component ID regex")
