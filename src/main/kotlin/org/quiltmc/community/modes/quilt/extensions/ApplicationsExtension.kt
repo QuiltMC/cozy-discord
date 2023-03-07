@@ -155,22 +155,20 @@ class ApplicationsExtension : Extension() {
 
 										if (app.actionedAt != null) {
 											appendLine("**Actioned:** ${app.actionedAt!!.longAndRelative}")
+											appendLine()
 										}
 
 										if (app.rejectionReason != null) {
-											appendLine()
 											appendLine("**Rejection reason**")
 											appendLine(
 												app.rejectionReason!!
 													.lines()
 													.joinToString("\n") { "> $it" }
 											)
+											appendLine()
 										}
 
-										appendLine("")
-
 										if (app.messageLink != null) {
-											appendLine()
 											appendLine("[More details...](${app.messageLink})")
 										}
 									}
