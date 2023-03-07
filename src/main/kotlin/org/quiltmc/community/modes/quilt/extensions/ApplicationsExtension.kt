@@ -8,44 +8,59 @@ package org.quiltmc.community.modes.quilt.extensions
 
 import com.kotlindiscord.kord.extensions.*
 import com.kotlindiscord.kord.extensions.checks.guildFor
+import com.kotlindiscord.kord.extensions.commands.Arguments
+import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
+import com.kotlindiscord.kord.extensions.commands.converters.impl.member
+import com.kotlindiscord.kord.extensions.commands.converters.impl.user
 import com.kotlindiscord.kord.extensions.events.extra.GuildJoinRequestDeleteEvent
 import com.kotlindiscord.kord.extensions.events.extra.GuildJoinRequestUpdateEvent
 import com.kotlindiscord.kord.extensions.events.extra.models.ApplicationStatus
 import com.kotlindiscord.kord.extensions.events.extra.models.GuildJoinRequestResponse
-import com.kotlindiscord.kord.extensions.extensions.Extension
-import com.kotlindiscord.kord.extensions.extensions.event
+import com.kotlindiscord.kord.extensions.extensions.*
 import com.kotlindiscord.kord.extensions.time.TimestampType
 import com.kotlindiscord.kord.extensions.time.toDiscord
+import com.kotlindiscord.kord.extensions.types.editingPaginator
+import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.capitalizeWords
 import com.kotlindiscord.kord.extensions.utils.getJumpUrl
 import com.kotlindiscord.kord.extensions.utils.getOfOrNull
+import com.kotlindiscord.kord.extensions.utils.respond
 import dev.kord.common.Color
 import dev.kord.common.entity.ArchiveDuration
 import dev.kord.common.entity.ButtonStyle
 import dev.kord.common.entity.Snowflake
+import dev.kord.core.behavior.channel.createEmbed
 import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.behavior.edit
 import dev.kord.core.behavior.getChannelOf
 import dev.kord.core.behavior.interaction.respondEphemeral
 import dev.kord.core.builder.components.emoji
+import dev.kord.core.entity.Member
 import dev.kord.core.entity.ReactionEmoji
+import dev.kord.core.entity.User
 import dev.kord.core.entity.channel.TextChannel
+import dev.kord.core.entity.channel.TopGuildMessageChannel
 import dev.kord.core.event.interaction.ButtonInteractionCreateEvent
 import dev.kord.rest.builder.message.EmbedBuilder
 import dev.kord.rest.builder.message.create.actionRow
 import dev.kord.rest.builder.message.create.embed
+import dev.kord.rest.builder.message.modify.actionRow
 import dev.kord.rest.builder.message.modify.embed
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.toList
+import kotlinx.datetime.Instant
 import org.koin.core.component.inject
+import org.quiltmc.community.GUILDS
 import org.quiltmc.community.database.collections.ServerApplicationCollection
 import org.quiltmc.community.database.collections.ServerSettingsCollection
 import org.quiltmc.community.database.entities.ServerApplication
 import org.quiltmc.community.database.entities.ServerSettings
+import org.quiltmc.community.hasBaseModeratorRole
 import org.quiltmc.community.inQuiltGuild
 import kotlin.time.Duration.Companion.seconds
 
-private val COMPONENT_REGEX = "applicationThread/(\\d+)".toRegex()
+private val COMPONENT_REGEX = "application/(\\d+)/(thread|verify)".toRegex()
 
 class ApplicationsExtension : Extension() {
 	override val name: String = "applications"
@@ -53,9 +68,230 @@ class ApplicationsExtension : Extension() {
 	private val serverSettings: ServerSettingsCollection by inject()
 	private val applications: ServerApplicationCollection by inject()
 
+	private val Instant.longAndRelative
+		get() = "${toDiscord(TimestampType.LongDateTime)} (${toDiscord(TimestampType.RelativeTime)})"
+
 	override suspend fun setup() {
+		GUILDS.forEach {
+			ephemeralSlashCommand {
+				name = "applications"
+				description = "Commands related to managing server applications"
+				allowInDms = false
+
+				guild(it)
+
+				check { inQuiltGuild() }
+				check { hasBaseModeratorRole(false) }
+
+				ephemeralSubCommand(::ForceVerifyArguments) {
+					name = "force-verify"
+					description = "Make a user bypass Discord's verification process"
+
+					action {
+						val settings = serverSettings.get(guild!!.id)
+
+						if (settings?.verificationRole == null || settings.moderationLogChannel == null) {
+							respond {
+								content =
+									"This server doesn't have a configured verification role or moderation logging " +
+											"channel."
+							}
+
+							return@action
+						}
+
+						val member = guild!!.getMemberOrNull(arguments.user.id)
+						val modLog = guild!!.getChannelOf<TopGuildMessageChannel>(settings.moderationLogChannel!!)
+
+						if (member == null) {
+							respond {
+								content = "User is not in this guild."
+							}
+						} else {
+							member.addRole(settings.verificationRole!!)
+
+							modLog.createEmbed {
+								title = "User force verified"
+								color = DISCORD_BLURPLE
+
+								field {
+									inline = true
+									name = "Moderator"
+									value = "${user.asUser().tag} (${user.mention})"
+								}
+
+								field {
+									inline = true
+									name = "User"
+									value = "${member.tag} (${member.mention})"
+								}
+							}
+
+							respond {
+								content = "User ${member.mention} has been force verified."
+							}
+						}
+					}
+				}
+
+				ephemeralSubCommand(::LookupArguments) {
+					name = "lookup"
+					description = "Look up a user's previous applications"
+
+					action {
+						val previousApplications = applications.findByUser(arguments.user.id).toList()
+
+						editingPaginator {
+							previousApplications.forEach { app ->
+								page {
+									title = "Previous Applications"
+									color = app.status.toColor()
+
+									description = buildString {
+										appendLine("**Created:** ${app._id.timestamp.longAndRelative}")
+										appendLine("**Status:** ${app.status?.name?.capitalizeWords() ?: "Withdrawn"}")
+										appendLine("**User:** <@${app.userId}>")
+										appendLine()
+
+										if (app.actionedAt != null) {
+											appendLine("**Actioned:** ${app.actionedAt!!.longAndRelative}")
+										}
+
+										if (app.rejectionReason != null) {
+											appendLine()
+											appendLine("**Rejection reason**")
+											appendLine(
+												app.rejectionReason!!
+													.lines()
+													.joinToString("\n") { "> $it" }
+											)
+										}
+
+										appendLine("")
+
+										if (app.messageLink != null) {
+											appendLine()
+											appendLine("[More details...](${app.messageLink})")
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		ephemeralMessageCommand {
+			name = "Fix Application Message"
+
+			allowInDms = false
+
+			check { inQuiltGuild() }
+			check { hasBaseModeratorRole(false) }
+
+			action {
+				val message = targetMessages.first()
+				val application = applications.getByMessage(message.id)
+
+				if (application == null) {
+					respond {
+						content = "Unable to find an application for this message."
+					}
+
+					return@action
+				}
+
+				val previousApplications = applications
+					.findByUser(application.userId)
+					.filter { it._id != application._id }
+					.toList()
+
+				message.edit {
+					embed { message.embeds.first().apply(this) }
+					embed { addPrevious(previousApplications) }
+
+					actionRow {
+						interactionButton(
+							ButtonStyle.Secondary,
+							"application/${application._id}/thread"
+						) {
+							emoji(ReactionEmoji.Unicode("✉️"))
+
+							label = "Create Thread"
+						}
+
+						if (application.status == ApplicationStatus.Submitted) {
+							interactionButton(
+								ButtonStyle.Success,
+								"application/${application._id}/verify"
+							) {
+								emoji(ReactionEmoji.Unicode("✅"))
+
+								label = "Force Verify"
+							}
+						}
+					}
+				}
+			}
+		}
+
+		chatCommand(::ForceVerifyArguments) {
+			name = "force-verify"
+			description = "Make a user bypass Discord's verification process"
+
+			check { inQuiltGuild() }
+			check { hasBaseModeratorRole(false) }
+
+			action {
+				val settings = serverSettings.get(guild!!.id)
+
+				if (settings?.verificationRole == null || settings.moderationLogChannel == null) {
+					message.respond {
+						content = "This server doesn't have a configured verification role or moderation logging " +
+								"channel."
+					}
+
+					return@action
+				}
+
+				val member = guild!!.getMemberOrNull(arguments.user.id)
+				val modLog = guild!!.getChannelOf<TopGuildMessageChannel>(settings.moderationLogChannel!!)
+
+				if (member == null) {
+					message.respond {
+						content = "User is not in this guild."
+					}
+				} else {
+					member.addRole(settings.verificationRole!!)
+
+					modLog.createEmbed {
+						title = "User force verified"
+						color = DISCORD_BLURPLE
+
+						field {
+							inline = true
+							name = "Moderator"
+							value = "${user!!.asUser().tag} (${user!!.mention})"
+						}
+
+						field {
+							inline = true
+							name = "User"
+							value = "${member.tag} (${member.mention})"
+						}
+					}
+
+					message.respond {
+						content = "User ${member.mention} has been force verified."
+					}
+				}
+			}
+		}
+
 		event<ButtonInteractionCreateEvent> {
 			check { inQuiltGuild() }
+			check { hasBaseModeratorRole(false) }
 			check { failIfNot(event.interaction.componentId.matches(COMPONENT_REGEX)) }
 
 			check {
@@ -77,6 +313,8 @@ class ApplicationsExtension : Extension() {
 				}
 
 				val applicationId = Snowflake(match.groupValues[1])
+				val action = match.groupValues[2]
+
 				val app = applications.get(applicationId)
 
 				if (app == null) {
@@ -85,11 +323,13 @@ class ApplicationsExtension : Extension() {
 					return@check
 				}
 
+				cache["action"] = action
 				cache["application"] = app
 				cache["serverSettings"] = settings
 			}
 
 			action {
+				val action = cache.getOfOrNull<String>("action")!!
 				val application = cache.getOfOrNull<ServerApplication>("application")!!
 				val settings = cache.getOfOrNull<ServerSettings>("serverSettings")!!
 
@@ -104,38 +344,86 @@ class ApplicationsExtension : Extension() {
 					return@action
 				}
 
-				val threadChannel = guild.getChannelOf<TextChannel>(settings.applicationLogChannel!!)
+				when (action) {
+					"thread" -> {
+						val threadChannel = guild.getChannelOf<TextChannel>(settings.applicationLogChannel!!)
 
-				if (application.threadId != null) {
-					event.interaction.respondEphemeral {
-						content = "A thread already exists for this application: <#${application.threadId}>"
-					}
-				} else {
-					val thread = threadChannel.startPrivateThread(
-						"App: ${user.tag}",
-						ArchiveDuration.Week
-					)
+						if (application.threadId != null) {
+							event.interaction.respondEphemeral {
+								content = "A thread already exists for this application: <#${application.threadId}>"
+							}
+						} else {
+							val thread = threadChannel.startPrivateThread(
+								"App: ${user.tag}",
+								ArchiveDuration.Week
+							)
 
-					val initialMessage = thread.createMessage("Better get the mods in...")
+							val initialMessage = thread.createMessage("Better get the mods in...")
 
-					initialMessage.edit { content = settings.moderatorRoles.joinToString { "<@&$it>" } }
-					delay(2.seconds)
+							initialMessage.edit { content = settings.moderatorRoles.joinToString { "<@&$it>" } }
+							delay(2.seconds)
 
-					initialMessage.edit {
-						content = buildString {
-							appendLine("**Application thread for ${user.tag}**")
-							append("User ID below.")
+							initialMessage.edit {
+								content = buildString {
+									appendLine("**Application thread for ${user.tag}**")
+									append("User ID below.")
+								}
+							}
+
+							thread.createMessage("`${user.id}`")
+
+							event.interaction.respondEphemeral {
+								content = "Thread created: ${thread.mention}"
+							}
+
+							application.threadId = thread.id
+							applications.save(application)
 						}
 					}
 
-					thread.createMessage("`${user.id}`")
+					"verify" -> {
+						if (settings.verificationRole == null || settings.moderationLogChannel == null) {
+							event.interaction.respondEphemeral {
+								content =
+									"This server doesn't have a configured verification role or moderation logging " +
+											"channel."
+							}
 
-					event.interaction.respondEphemeral {
-						content = "Thread created: ${thread.mention}"
+							return@action
+						}
+
+						val member = guild.getMemberOrNull(application.userId)
+						val modLog = guild.getChannelOf<TopGuildMessageChannel>(settings.moderationLogChannel!!)
+
+						if (member == null) {
+							event.interaction.respondEphemeral {
+								content = "User is not in this guild."
+							}
+						} else {
+							member.addRole(settings.verificationRole!!)
+
+							modLog.createEmbed {
+								title = "User force verified"
+								color = DISCORD_BLURPLE
+
+								field {
+									inline = true
+									name = "Moderator"
+									value = "${user.asUser().tag} (${user.mention})"
+								}
+
+								field {
+									inline = true
+									name = "User"
+									value = "${member.tag} (${member.mention})"
+								}
+							}
+
+							event.interaction.respondEphemeral {
+								content = "User ${member.mention} has been force verified."
+							}
+						}
 					}
-
-					application.threadId = thread.id
-					applications.save(application)
 				}
 			}
 		}
@@ -174,27 +462,10 @@ class ApplicationsExtension : Extension() {
 					.findByUser(event.userId)
 					.toList()
 
-				if (application == null) {
-					// Application was deleted that we're not keeping track of
+				// If null, an application was deleted that we're not keeping track of - happens when someone
+				// leaves without applying as well, so we can't log it on Discord really
 
-					logChannel.createMessage {
-						embed {
-							title = "Unknown application deleted"
-							color = DISCORD_FUCHSIA
-
-							description = buildString {
-								appendLine(
-									"An application that this bot wasn't keeping track of has been deleted. " +
-											"This may happen when an application is submitted while the bot is down, " +
-											"or if the application was being handled by another bot."
-								)
-								appendLine()
-								appendLine("**Applicant:** <@${event.userId}> (`${event.userId}`)")
-								appendLine("**Application ID:** `${event.requestId}`")
-							}
-						}
-					}
-				} else if (application.status == ApplicationStatus.Submitted) {
+				if (application != null && application.status == ApplicationStatus.Submitted) {
 					val message = logChannel.getMessage(application.messageId)
 
 					previousApplications = previousApplications
@@ -212,6 +483,9 @@ class ApplicationsExtension : Extension() {
 							embed { addPrevious(previousApplications) }
 						}
 					}
+
+					application.status = null
+					applications.save(application)
 				}
 			}
 		}
@@ -256,10 +530,24 @@ class ApplicationsExtension : Extension() {
 						}
 
 						actionRow {
-							interactionButton(ButtonStyle.Secondary, "applicationThread/${event.request.id}") {
+							interactionButton(
+								ButtonStyle.Secondary,
+								"application/${event.request.id}/thread"
+							) {
 								emoji(ReactionEmoji.Unicode("✉️"))
 
 								label = "Create Thread"
+							}
+
+							if (event.status == ApplicationStatus.Submitted) {
+								interactionButton(
+									ButtonStyle.Success,
+									"application/${event.request.id}/verify"
+								) {
+									emoji(ReactionEmoji.Unicode("✅"))
+
+									label = "Force Verify"
+								}
 							}
 						}
 					}
@@ -273,6 +561,11 @@ class ApplicationsExtension : Extension() {
 						userId = event.userId,
 						messageLink = message.getJumpUrl()
 					)
+
+					if (event.status == ApplicationStatus.Rejected) {
+						application.actionedAt = event.request.actionedAt
+						application.rejectionReason = event.request.rejectionReason
+					}
 
 					applications.save(application)
 				} else {
@@ -289,17 +582,22 @@ class ApplicationsExtension : Extension() {
 						}
 					}
 
+					application.actionedAt = event.request.actionedAt
+					application.rejectionReason = event.request.rejectionReason
 					application.status = event.request.status
+
 					applications.save(application)
 				}
 			}
 		}
 	}
 
-	private fun ApplicationStatus.toColor(): Color = when (this) {
+	private fun ApplicationStatus?.toColor(): Color = when (this) {
 		ApplicationStatus.Approved -> DISCORD_GREEN
 		ApplicationStatus.Rejected -> DISCORD_RED
 		ApplicationStatus.Submitted -> DISCORD_YELLOW
+
+		null -> DISCORD_WHITE
 	}
 
 	private fun EmbedBuilder.addPrevious(apps: List<ServerApplication>) {
@@ -307,10 +605,31 @@ class ApplicationsExtension : Extension() {
 		color = DISCORD_BLURPLE
 
 		description = buildString {
-			apps.sortedBy { it._id.timestamp }
-				.forEachIndexed { i, app ->
-					appendLine("[App. ${i + 1}](${app.messageLink}): ${app.status.name.capitalizeWords()}")
+			apps.sortedBy { it._id.timestamp }.forEachIndexed { i, app ->
+				if (app.messageLink != null) {
+					append("[${i + 1})](${app.messageLink}) ")
+				} else {
+					append("${i + 1}) ")
 				}
+
+				append(app.status?.name?.capitalizeWords() ?: "Withdrawn")
+
+				if (app.actionedAt != null) {
+					append(
+						" at ${app.actionedAt!!.longAndRelative}"
+					)
+				}
+
+				appendLine()
+
+				if (app.rejectionReason != null) {
+					appendLine(
+						app.rejectionReason!!
+							.lines()
+							.joinToString("\n") { "> $it" }
+					)
+				}
+			}
 		}
 	}
 
@@ -324,8 +643,7 @@ class ApplicationsExtension : Extension() {
 			appendLine("**User:** ${user.tag}")
 			appendLine("**Mention:** ${user.mention}")
 			appendLine(
-				"**Created:** ${user.id.timestamp.toDiscord(TimestampType.LongDateTime)} " +
-						"(${user.id.timestamp.toDiscord(TimestampType.RelativeTime)})"
+				"**Created:** ${user.id.timestamp.longAndRelative}"
 			)
 
 			if (event.request.actionedByUser != null) {
@@ -334,12 +652,28 @@ class ApplicationsExtension : Extension() {
 
 				appendLine()
 				appendLine(
-					"**Actioned by:** <@${moderator.id}> (`${moderator.username}#${moderator.discriminator}`)"
+					"**Actioned at:** ${time.longAndRelative}"
 				)
-				appendLine(
-					"**Actioned at:** ${time.toDiscord(TimestampType.LongDateTime)} " +
-							"(${time.toDiscord(TimestampType.RelativeTime)})"
-				)
+
+				if (event.request.requestBypassed) {
+					appendLine(
+						"**Application bypassed via role assignment** "
+					)
+				} else {
+					appendLine(
+						"**Actioned by:** <@${moderator.id}> (`${moderator.username}#${moderator.discriminator}`)"
+					)
+				}
+
+				if (event.request.rejectionReason != null) {
+					appendLine()
+					appendLine("**Rejection reason**")
+					append(
+						event.request.rejectionReason!!
+							.lines()
+							.joinToString("\n") { "> $it" }
+					)
+				}
 			}
 		}
 
@@ -370,6 +704,20 @@ class ApplicationsExtension : Extension() {
 						it.response
 				}
 			}
+		}
+	}
+
+	inner class LookupArguments : Arguments() {
+		val user: User by user {
+			name = "user"
+			description = "Member to look up applications for"
+		}
+	}
+
+	inner class ForceVerifyArguments : Arguments() {
+		val user: Member by member {
+			name = "member"
+			description = "Member to verify"
 		}
 	}
 }

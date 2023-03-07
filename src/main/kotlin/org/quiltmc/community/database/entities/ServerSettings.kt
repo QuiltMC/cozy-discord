@@ -34,6 +34,7 @@ data class ServerSettings(
 	var cozyLogChannel: Snowflake? = null,
 	var filterLogChannel: Snowflake? = null,
 	var messageLogCategory: Snowflake? = null,
+	var moderationLogChannel: Snowflake? = null,
 	var applicationLogChannel: Snowflake? = null,
 	var applicationThreadsChannel: Snowflake? = null,
 
@@ -74,27 +75,30 @@ data class ServerSettings(
 		}
 
 		builder.append("**Command Prefix:** `$commandPrefix`\n\n")
-		builder.append("**Application Logs:** ")
 
-		if (applicationLogChannel != null) {
-			builder.append("<#${applicationLogChannel!!.value}>")
-		} else {
-			builder.append(":x: Not configured")
-		}
+		if (showQuiltSettings) {
+			builder.append("**Application Logs:** ")
 
-		builder.append("**Application threads channel:** ")
+			if (applicationLogChannel != null) {
+				builder.append("<#$applicationLogChannel>")
+			} else {
+				builder.append(":x: Not configured")
+			}
 
-		if (applicationThreadsChannel != null) {
-			builder.append("<#${applicationThreadsChannel!!.value}>")
-		} else {
-			builder.append(":x: Not configured")
+			builder.append("**Application threads channel:** ")
+
+			if (applicationThreadsChannel != null) {
+				builder.append("<#$applicationThreadsChannel>")
+			} else {
+				builder.append(":x: Not configured")
+			}
 		}
 
 		builder.append("\n")
 		builder.append("**Cozy Logs:** ")
 
 		if (cozyLogChannel != null) {
-			builder.append("<#${cozyLogChannel!!.value}>")
+			builder.append("<#$cozyLogChannel>")
 		} else {
 			builder.append(":x: Not configured")
 		}
@@ -104,7 +108,16 @@ data class ServerSettings(
 			builder.append("**Filter Logs:** ")
 
 			if (filterLogChannel != null) {
-				builder.append("<#${filterLogChannel!!.value}>")
+				builder.append("<#$filterLogChannel>")
+			} else {
+				builder.append(":x: Not configured")
+			}
+
+			builder.append("\n")
+			builder.append("**Moderation Logs:** ")
+
+			if (moderationLogChannel != null) {
+				builder.append("<#$moderationLogChannel>")
 			} else {
 				builder.append(":x: Not configured")
 			}
@@ -114,7 +127,7 @@ data class ServerSettings(
 		builder.append("**Message Logs:** ")
 
 		if (messageLogCategory != null) {
-			builder.append("<#${messageLogCategory!!.value}>")
+			builder.append("<#$messageLogCategory>")
 		} else {
 			builder.append(":x: Not configured")
 		}

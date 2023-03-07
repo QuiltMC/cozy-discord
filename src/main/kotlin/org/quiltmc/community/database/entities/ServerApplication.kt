@@ -13,6 +13,7 @@ package org.quiltmc.community.database.entities
 import com.github.jershell.kbson.UUIDSerializer
 import com.kotlindiscord.kord.extensions.events.extra.models.ApplicationStatus
 import dev.kord.common.entity.Snowflake
+import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 import org.quiltmc.community.database.Entity
@@ -23,12 +24,14 @@ import java.util.*
 data class ServerApplication(
 	override val _id: Snowflake,
 
-	var status: ApplicationStatus,
+	var status: ApplicationStatus?,
 	var threadId: Snowflake? = null,
 
 	val userId: Snowflake,
 	val guildId: Snowflake,
 	val messageId: Snowflake,
 
-	val messageLink: String,
+	val messageLink: String? = null,
+	var rejectionReason: String? = null,
+	var actionedAt: Instant? = null,
 ) : Entity<Snowflake>
