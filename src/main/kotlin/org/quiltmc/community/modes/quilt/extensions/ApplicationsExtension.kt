@@ -180,57 +180,62 @@ class ApplicationsExtension : Extension() {
 					}
 				}
 			}
-		}
 
-		ephemeralMessageCommand {
-			name = "Fix Application Message"
+			ephemeralMessageCommand {
+				name = "Fix Application Message"
+				allowInDms = false
 
-			allowInDms = false
+				guild(it)
 
-			check { inQuiltGuild() }
-			check { hasBaseModeratorRole(false) }
+				check { inQuiltGuild() }
+				check { hasBaseModeratorRole(false) }
 
-			action {
-				val message = targetMessages.first()
-				val application = applications.getByMessage(message.id)
+				action {
+					val message = targetMessages.first()
+					val application = applications.getByMessage(message.id)
 
-				if (application == null) {
-					respond {
-						content = "Unable to find an application for this message."
+					if (application == null) {
+						respond {
+							content = "Unable to find an application for this message."
+						}
+
+						return@action
 					}
 
-					return@action
-				}
+					val previousApplications = applications
+						.findByUser(application.userId)
+						.filter { it._id != application._id }
+						.toList()
 
-				val previousApplications = applications
-					.findByUser(application.userId)
-					.filter { it._id != application._id }
-					.toList()
+					message.edit {
+						embed { message.embeds.first().apply(this) }
+						embed { addPrevious(previousApplications) }
 
-				message.edit {
-					embed { message.embeds.first().apply(this) }
-					embed { addPrevious(previousApplications) }
-
-					actionRow {
-						interactionButton(
-							ButtonStyle.Secondary,
-							"application/${application._id}/thread"
-						) {
-							emoji(ReactionEmoji.Unicode("✉️"))
-
-							label = "Create Thread"
-						}
-
-						if (application.status == ApplicationStatus.Submitted) {
+						actionRow {
 							interactionButton(
-								ButtonStyle.Success,
-								"application/${application._id}/verify"
+								ButtonStyle.Secondary,
+								"application/${application._id}/thread"
 							) {
-								emoji(ReactionEmoji.Unicode("✅"))
+								emoji(ReactionEmoji.Unicode("✉️"))
 
-								label = "Force Verify"
+								label = "Create Thread"
+							}
+
+							if (application.status == ApplicationStatus.Submitted) {
+								interactionButton(
+									ButtonStyle.Success,
+									"application/${application._id}/verify"
+								) {
+									emoji(ReactionEmoji.Unicode("✅"))
+
+									label = "Force Verify"
+								}
 							}
 						}
+					}
+
+					respond {
+						content = "Message updated."
 					}
 				}
 			}
