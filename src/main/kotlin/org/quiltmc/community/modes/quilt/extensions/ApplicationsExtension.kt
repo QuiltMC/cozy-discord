@@ -121,6 +121,14 @@ class ApplicationsExtension : Extension() {
 							return@action
 						}
 
+						if (settings.verificationRole in member.roleIds) {
+							respond {
+								content = "This user has already been verified."
+							}
+
+							return@action
+						}
+
 						member.addRole(settings.verificationRole!!)
 
 						modLog.createEmbed {
@@ -310,6 +318,14 @@ class ApplicationsExtension : Extension() {
 						content = "User is not in this guild."
 					}
 				} else {
+					if (settings.verificationRole in member.roleIds) {
+						message.respond {
+							content = "This user has already been verified."
+						}
+
+						return@action
+					}
+
 					member.addRole(settings.verificationRole!!)
 
 					modLog.createEmbed {
@@ -463,7 +479,6 @@ class ApplicationsExtension : Extension() {
 						}
 
 						val member = guild.getMemberOrNull(application.userId)
-						val modLog = guild.getChannelOf<TopGuildMessageChannel>(settings.moderationLogChannel!!)
 
 						if (member == null) {
 							logger.warn {
@@ -477,6 +492,15 @@ class ApplicationsExtension : Extension() {
 							return@action
 						}
 
+						if (settings.verificationRole in member.roleIds) {
+							response.createEphemeralFollowup {
+								content = "This user has already been verified."
+							}
+
+							return@action
+						}
+
+						val modLog = guild.getChannelOf<TopGuildMessageChannel>(settings.moderationLogChannel!!)
 						member.addRole(settings.verificationRole!!)
 
 						modLog.createEmbed {
@@ -684,6 +708,28 @@ class ApplicationsExtension : Extension() {
 
 						if (otherApplications.isNotEmpty()) {
 							embed { addOther(otherApplications) }
+						}
+
+						actionRow {
+							interactionButton(
+								ButtonStyle.Secondary,
+								"application/${event.request.id}/thread"
+							) {
+								emoji(ReactionEmoji.Unicode("✉️"))
+
+								label = "Create Thread"
+							}
+
+							if (event.status == ApplicationStatus.Submitted) {
+								interactionButton(
+									ButtonStyle.Success,
+									"application/${event.request.id}/verify"
+								) {
+									emoji(ReactionEmoji.Unicode("✅"))
+
+									label = "Force Verify"
+								}
+							}
 						}
 					}
 
