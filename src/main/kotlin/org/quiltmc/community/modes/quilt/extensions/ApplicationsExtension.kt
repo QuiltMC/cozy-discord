@@ -486,7 +486,7 @@ class ApplicationsExtension : Extension() {
 							field {
 								inline = true
 								name = "Moderator"
-								value = "${user.asUser().tag} (${user.mention})"
+								value = "${event.interaction.user.tag} (${event.interaction.user.mention})"
 							}
 
 							field {
