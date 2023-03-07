@@ -421,7 +421,7 @@ class ApplicationsExtension : Extension() {
 
 				when (action) {
 					"thread" -> {
-						val threadChannel = guild.getChannelOf<TextChannel>(settings.applicationLogChannel!!)
+						val threadChannel = guild.getChannelOf<TextChannel>(settings.applicationThreadsChannel!!)
 
 						if (application.threadId != null) {
 							logger.debug {
