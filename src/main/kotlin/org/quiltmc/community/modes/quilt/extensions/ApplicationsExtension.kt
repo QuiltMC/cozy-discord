@@ -202,7 +202,7 @@ class ApplicationsExtension : Extension() {
 						return@action
 					}
 
-					val previousApplications = applications
+					val otherApplications = applications
 						.findByUser(application.userId)
 						.filter { it._id != application._id }
 						.toList()
@@ -210,8 +210,8 @@ class ApplicationsExtension : Extension() {
 					message.edit {
 						embed { message.embeds.first().apply(this) }
 
-						if (previousApplications.isNotEmpty()) {
-							embed { addPrevious(previousApplications) }
+						if (otherApplications.isNotEmpty()) {
+							embed { addOther(otherApplications) }
 						}
 
 						actionRow {
@@ -466,7 +466,7 @@ class ApplicationsExtension : Extension() {
 
 				val logChannel = event.getGuild().getChannelOf<TextChannel>(settings.applicationLogChannel!!)
 
-				var previousApplications = applications
+				var otherApplications = applications
 					.findByUser(event.userId)
 					.toList()
 
@@ -476,7 +476,7 @@ class ApplicationsExtension : Extension() {
 				if (application != null && application.status == ApplicationStatus.Submitted) {
 					val message = logChannel.getMessage(application.messageId)
 
-					previousApplications = previousApplications
+					otherApplications = otherApplications
 						.filter { it._id != application._id }
 
 					message.edit {
@@ -487,8 +487,8 @@ class ApplicationsExtension : Extension() {
 							color = DISCORD_WHITE
 						}
 
-						if (previousApplications.isNotEmpty()) {
-							embed { addPrevious(previousApplications) }
+						if (otherApplications.isNotEmpty()) {
+							embed { addOther(otherApplications) }
 						}
 					}
 
@@ -525,7 +525,7 @@ class ApplicationsExtension : Extension() {
 				val settings = cache.getOfOrNull<ServerSettings>("serverSettings")!!
 
 				val logChannel = event.getGuild().getChannelOf<TextChannel>(settings.applicationLogChannel!!)
-				var previousApplications = applications
+				var otherApplications = applications
 					.findByUser(event.userId)
 					.toList()
 
@@ -533,8 +533,8 @@ class ApplicationsExtension : Extension() {
 					val message = logChannel.createMessage {
 						embed { fromEvent(event) }
 
-						if (previousApplications.isNotEmpty()) {
-							embed { addPrevious(previousApplications) }
+						if (otherApplications.isNotEmpty()) {
+							embed { addOther(otherApplications) }
 						}
 
 						actionRow {
@@ -577,7 +577,7 @@ class ApplicationsExtension : Extension() {
 
 					applications.save(application)
 				} else {
-					previousApplications = previousApplications
+					otherApplications = otherApplications
 						.filter { it._id != application._id }
 
 					val message = logChannel.getMessage(application.messageId)
@@ -585,8 +585,8 @@ class ApplicationsExtension : Extension() {
 					message.edit {
 						embed { fromEvent(event) }
 
-						if (previousApplications.isNotEmpty()) {
-							embed { addPrevious(previousApplications) }
+						if (otherApplications.isNotEmpty()) {
+							embed { addOther(otherApplications) }
 						}
 					}
 
@@ -608,8 +608,8 @@ class ApplicationsExtension : Extension() {
 		null -> DISCORD_WHITE
 	}
 
-	private fun EmbedBuilder.addPrevious(apps: List<ServerApplication>) {
-		title = "Previous Applications: ${apps.size}"
+	private fun EmbedBuilder.addOther(apps: List<ServerApplication>) {
+		title = "Other Applications: ${apps.size}"
 		color = DISCORD_BLURPLE
 
 		description = buildString {
