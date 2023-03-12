@@ -8,11 +8,11 @@ import ch.qos.logback.core.joran.spi.ConsoleTarget
 
 def environment = System.getenv().getOrDefault("ENVIRONMENT", "prod")
 
-def defaultLevel = INFO
+def defaultLevel = DEBUG
 def defaultTarget = ConsoleTarget.SystemErr
 
 if (environment == "dev") {
-	defaultLevel = DEBUG
+	defaultLevel = TRACE
 	defaultTarget = ConsoleTarget.SystemOut
 
 	// Silence warning about missing native PRNG

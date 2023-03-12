@@ -29,6 +29,7 @@ public class AttachmentLogRetriever : LogRetriever() {
 	override val identifier: String = "message-attachment"
 	override val order: Order = Order.Earlier
 
+	@Suppress("SpreadOperator")
 	override suspend fun predicate(url: URL): Boolean =
 		url.host in DOMAINS && (
 				url.path.endsWithExtensions(*EXTENSIONS) ||

@@ -1,3 +1,9 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
 package org.quiltmc.community.cozy.modules.logs.parsers.launchers
 
 import org.quiltmc.community.cozy.modules.logs.data.Launcher
@@ -11,8 +17,8 @@ private val JAVA_REGEX = (
 
 private val JAVA_ARGS_REGEX = "Java Arguments:\n\\[([^]]+)]".toRegex(RegexOption.IGNORE_CASE)
 
-private val LIBRARIES_OPEN = "\nLibraries:\n"
-private val LIBRARIES_CLOSE = "\nMods:"
+private const val LIBRARIES_OPEN = "\nLibraries:\n"
+private const val LIBRARIES_CLOSE = "\nMods:"
 
 public class MMCLikeParser : LogParser() {
 	override val identifier: String = "launcher-mmc-like"
@@ -22,6 +28,7 @@ public class MMCLikeParser : LogParser() {
 		// No PolyMC, we don't support nazis
 		log.launcher?.name in arrayOf(Launcher.MultiMC, Launcher.Prism)
 
+	@Suppress("MagicNumber")
 	override suspend fun process(log: Log) {
 		val javaMatch = JAVA_REGEX.find(log.content)
 
@@ -41,17 +48,14 @@ public class MMCLikeParser : LogParser() {
 		val librariesList = librariesStart.substringBefore(LIBRARIES_CLOSE)
 
 		when {
-			"linux" in librariesList -> {
+			"linux" in librariesList ->
 				log.environment.os = "Linux"
-			}
 
-			"macos" in librariesList -> {
+			"macos" in librariesList ->
 				log.environment.os = "MacOS"
-			}
 
-			"windows" in librariesList -> {
+			"windows" in librariesList ->
 				log.environment.os = "Windows"
-			}
 		}
 	}
 }

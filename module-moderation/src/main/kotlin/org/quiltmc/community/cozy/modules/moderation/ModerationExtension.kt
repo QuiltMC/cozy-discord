@@ -14,10 +14,7 @@ import com.kotlindiscord.kord.extensions.annotations.DoNotChain
 import com.kotlindiscord.kord.extensions.checks.anyGuild
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
-import com.kotlindiscord.kord.extensions.commands.converters.impl.duration
-import com.kotlindiscord.kord.extensions.commands.converters.impl.member
-import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalDuration
-import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalString
+import com.kotlindiscord.kord.extensions.commands.converters.impl.*
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.chatCommand
 import com.kotlindiscord.kord.extensions.extensions.chatGroupCommand
@@ -271,53 +268,6 @@ public class ModerationExtension(
 			}
 		}
 
-		ephemeralSlashCommand(::ForceVerifyArguments) {
-			name = "force-verify"
-			description = "Make a user bypass Discord's verification process"
-
-			allowInDms = false
-
-			check { anyGuild() }
-
-			config.getCommandChecks().forEach(::check)
-
-			action {
-				val member = guild!!.getMemberOrNull(arguments.user.id)
-
-				if (member == null) {
-					respond {
-						content = "User is not in this guild."
-					}
-				} else {
-					member.addRole(
-						config.getVerifiedRole(guild!!.asGuild()).id,
-						"Force verified by ${user.asUser().tag}"
-					)
-
-					config.getLoggingChannelOrNull(guild!!.asGuild())?.createEmbed {
-						title = "User force verified"
-						color = DISCORD_BLURPLE
-
-						field {
-							inline = true
-							name = "Moderator"
-							value = "${user.asUser().tag} (${user.mention})"
-						}
-
-						field {
-							inline = true
-							name = "User"
-							value = "${member.tag} (${member.mention})"
-						}
-					}
-
-					respond {
-						content = "User ${member.mention} has been force verified."
-					}
-				}
-			}
-		}
-
 		// Chat commands, if enabled
 
 		chatCommand(::TimeoutArguments) {
@@ -433,51 +383,6 @@ public class ModerationExtension(
 				}
 			}
 		}
-
-		chatCommand(::ForceVerifyArguments) {
-			name = "force-verify"
-			description = "Make a user bypass Discord's verification process"
-
-			check { anyGuild() }
-
-			config.getCommandChecks().forEach(::check)
-
-			action {
-				val member = guild!!.getMemberOrNull(arguments.user.id)
-
-				if (member == null) {
-					message.respond {
-						content = "User is not in this guild."
-					}
-				} else {
-					member.addRole(
-						config.getVerifiedRole(guild!!.asGuild()).id,
-						"Force verified by ${user?.asUser()?.tag}"
-					)
-
-					config.getLoggingChannelOrNull(guild!!.asGuild())?.createEmbed {
-						title = "User force verified"
-						color = DISCORD_BLURPLE
-
-						field {
-							inline = true
-							name = "Moderator"
-							value = "${user?.asUser()?.tag} (${user?.mention})"
-						}
-
-						field {
-							inline = true
-							name = "User"
-							value = "${member.tag} (${member.mention})"
-						}
-					}
-
-					message.respond {
-						content = "User ${member.mention} has been force verified."
-					}
-				}
-			}
-		}
 	}
 
 	public inner class SlowmodeEditArguments : Arguments() {
@@ -514,13 +419,6 @@ public class ModerationExtension(
 			name = "reason"
 			description = "Optional reason for applying this timeout"
 			maxLength = 50
-		}
-	}
-
-	public inner class ForceVerifyArguments : Arguments() {
-		public val user: Member by member {
-			name = "member"
-			description = "Member to verify"
 		}
 	}
 }

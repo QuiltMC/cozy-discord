@@ -7,6 +7,7 @@
 package org.quiltmc.community.cozy.modules.logs.data
 
 // NOTE: Doesn't seem like it's possible to get any of this info reliably
+@Suppress("DataClassShouldBeImmutable")
 public data class Environment(
 	public var glInfo: String? = null,
 	public var os: String? = null,

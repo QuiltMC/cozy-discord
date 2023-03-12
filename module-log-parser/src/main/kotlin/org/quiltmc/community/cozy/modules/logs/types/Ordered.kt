@@ -12,5 +12,5 @@ public interface Ordered {
 	public val order: Order
 }
 
-public fun <T: Ordered, C: Collection<T>> C.sortOrdered(): List<T> =
+public fun <T : Ordered, C : Collection<T>> C.sortOrdered(): List<T> =
 	this.sortedBy { it.order.value }

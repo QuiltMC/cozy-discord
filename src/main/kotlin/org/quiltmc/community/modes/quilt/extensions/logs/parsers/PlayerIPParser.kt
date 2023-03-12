@@ -28,7 +28,6 @@ class PlayerIPParser : BaseLogParser {
 			} catch (e: UnknownHostException) {
 				null
 			}
-
 		}.filter { !it.isLoopbackAddress }.toList()
 
 		if (ips.isNotEmpty()) {

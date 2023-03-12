@@ -18,6 +18,7 @@ import org.quiltmc.community.cozy.modules.logs.LogParserExtension
 import org.quiltmc.community.cozy.modules.logs.data.Log
 import org.quiltmc.community.cozy.modules.logs.data.Order
 
+@Suppress("FunctionNaming")
 public abstract class LogProcessor : Ordered, KordExKoinComponent {
 	public abstract val identifier: String
 	public abstract override val order: Order

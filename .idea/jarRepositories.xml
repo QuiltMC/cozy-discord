@@ -82,46 +82,6 @@
       <option name="url" value="https://repo.maven.apache.org/maven2/" />
     </remote-repository>
     <remote-repository>
-      <option name="id" value="Sleeping Town" />
-      <option name="name" value="Sleeping Town" />
-      <option name="url" value="file:/$PROJECT_DIR$/'https:/repo.sleeping.town" />
-    </remote-repository>
-    <remote-repository>
-      <option name="id" value="Sleeping Town" />
-      <option name="name" value="Sleeping Town" />
-      <option name="url" value="file:/$PROJECT_DIR$/module-role-sync/'https:/repo.sleeping.town" />
-    </remote-repository>
-    <remote-repository>
-      <option name="id" value="Sleeping Town" />
-      <option name="name" value="Sleeping Town" />
-      <option name="url" value="file:/$PROJECT_DIR$/module-welcome/'https:/repo.sleeping.town" />
-    </remote-repository>
-    <remote-repository>
-      <option name="id" value="Sleeping Town" />
-      <option name="name" value="Sleeping Town" />
-      <option name="url" value="file:/$PROJECT_DIR$/module-user-cleanup/'https:/repo.sleeping.town" />
-    </remote-repository>
-    <remote-repository>
-      <option name="id" value="Sleeping Town" />
-      <option name="name" value="Sleeping Town" />
-      <option name="url" value="file:/$PROJECT_DIR$/module-tags/'https:/repo.sleeping.town" />
-    </remote-repository>
-    <remote-repository>
-      <option name="id" value="Sleeping Town" />
-      <option name="name" value="Sleeping Town" />
-      <option name="url" value="file:/$PROJECT_DIR$/module-log-parser/'https:/repo.sleeping.town" />
-    </remote-repository>
-    <remote-repository>
-      <option name="id" value="Sleeping Town" />
-      <option name="name" value="Sleeping Town" />
-      <option name="url" value="file:/$PROJECT_DIR$/module-moderation/'https:/repo.sleeping.town" />
-    </remote-repository>
-    <remote-repository>
-      <option name="id" value="Sleeping Town" />
-      <option name="name" value="Sleeping Town" />
-      <option name="url" value="https://repo.sleeping.town" />
-    </remote-repository>
-    <remote-repository>
       <option name="id" value="Sonatype Snapshots2" />
       <option name="name" value="Sonatype Snapshots2" />
       <option name="url" value="https://s01.oss.sonatype.org/content/repositories/snapshots" />

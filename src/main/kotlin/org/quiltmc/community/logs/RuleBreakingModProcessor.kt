@@ -1,3 +1,9 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
 package org.quiltmc.community.logs
 
 import org.quiltmc.community.cozy.modules.logs.data.Log
@@ -36,7 +42,7 @@ class RuleBreakingModProcessor : LogProcessor() {
 
 				appendLine()
 				append(
-					"For more information, please see [rule 5 on the site](${SITE_LINK}). Please note that we cannot " +
+					"For more information, please see [rule 5 on the site]($SITE_LINK). Please note that we cannot " +
 							"provide you with support while you're using mods that break our rules."
 				)
 			}

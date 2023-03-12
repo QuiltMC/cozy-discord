@@ -109,6 +109,7 @@ suspend fun ExtensibleBotBuilder.database(migrate: Boolean = false) {
 				single { MetaCollection() } bind MetaCollection::class
 				single { OwnedThreadCollection() } bind OwnedThreadCollection::class
 				single { ServerSettingsCollection() } bind ServerSettingsCollection::class
+				single { ServerApplicationCollection() } bind ServerApplicationCollection::class
 				single { SuggestionsCollection() } bind SuggestionsCollection::class
 				single { TeamCollection() } bind TeamCollection::class
 				single { UserFlagsCollection() } bind UserFlagsCollection::class

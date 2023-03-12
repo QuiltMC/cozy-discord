@@ -4,6 +4,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+@file:Suppress("MagicNumber")
+
 package org.quiltmc.community.cozy.modules.logs.data
 
 public open class Order(public val value: Int) {

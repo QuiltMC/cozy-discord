@@ -1,3 +1,9 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
 @file:UseSerializers(MatchRegexSerializer::class)
 
 package org.quiltmc.community.cozy.modules.logs.data
@@ -23,9 +29,11 @@ public data class UrlTransform(
 
 @Serializable
 public enum class ScrapeType {
-	@SerialName("first-element") FirstElement,
+	@SerialName("first-element")
+	FirstElement,
 
-	@SerialName("hrefs") Hrefs
+	@SerialName("hrefs")
+	Hrefs
 }
 
 @Serializable

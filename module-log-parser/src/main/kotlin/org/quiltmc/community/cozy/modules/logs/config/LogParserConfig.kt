@@ -8,14 +8,14 @@ package org.quiltmc.community.cozy.modules.logs.config
 
 import com.kotlindiscord.kord.extensions.checks.types.Check
 
-public abstract class LogParserConfig {
+public interface LogParserConfig {
 	/**
 	 * Get the configured staff command checks, used to ensure a staff-facing command can be run.
 	 */
-	public abstract suspend fun getStaffCommandChecks(): List<Check<*>>
+	public suspend fun getStaffCommandChecks(): List<Check<*>>
 
 	/**
 	 * Get the configured user command checks, used to ensure a user-facing command can be run.
 	 */
-	public abstract suspend fun getUserCommandChecks(): List<Check<*>>
+	public suspend fun getUserCommandChecks(): List<Check<*>>
 }

@@ -53,7 +53,7 @@ public open class Log {
 		loaders[type] = version
 	}
 
-	public open fun getMessages() : List<String> =
+	public open fun getMessages(): List<String> =
 		messages.toList()
 
 	public open fun addMessage(message: String): Boolean =

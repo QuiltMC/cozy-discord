@@ -23,6 +23,7 @@ public fun String.parseUrls(): List<URL> =
 public fun String.versionCompare(other: String): Int =
 	FlexVerComparator.compare(this, other)
 
+@Suppress("SpreadOperator")
 public fun String.endsWithExtensions(vararg extensions: String): Boolean =
 	endsWithAny(*extensions.map { ".$it" }.toTypedArray())
 

@@ -4,6 +4,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+@file:Suppress("MagicNumber")
+
 package org.quiltmc.community.cozy.modules.logs
 
 import com.charleskorn.kaml.Yaml
@@ -44,7 +46,7 @@ public class LogParserExtension : Extension() {
 		}
 
 		event<MessageCreateEvent> {
-
+			// TODO
 		}
 	}
 

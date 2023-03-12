@@ -18,6 +18,7 @@ import org.quiltmc.community.cozy.modules.logs.LogParserExtension
 import org.quiltmc.community.cozy.modules.logs.data.Order
 import java.net.URL
 
+@Suppress("FunctionNaming")
 public abstract class LogRetriever : Ordered, KordExKoinComponent {
 	public abstract val identifier: String
 	public abstract override val order: Order

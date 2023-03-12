@@ -1,3 +1,9 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
 package org.quiltmc.community.cozy.modules.logs.retrievers
 
 import io.ktor.client.request.*
@@ -68,18 +74,17 @@ public class PastebinLogRetriever : LogRetriever() {
 			val elements = soup.select(scrape.selector)
 
 			when (scrape.type) {
-				ScrapeType.FirstElement -> {
+				ScrapeType.FirstElement ->
 					return setOf(
 						elements.firstOrNull()?.text()
 							?: continue
 					)
-				}
 
 				ScrapeType.Hrefs -> {
 					val results: MutableSet<String> = mutableSetOf()
 
 					val links = elements.mapNotNull {
-						if (it.hasAttr("href"))  {
+						if (it.hasAttr("href")) {
 							it.attr("href")
 						} else {
 							null
