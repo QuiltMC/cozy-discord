@@ -20,6 +20,9 @@ dependencies {
 	implementation(libs.kordex.core)
 	implementation(libs.kordex.unsafe)
 
+	// Optional for bots that don't need it
+	compileOnly(libs.kordex.pluralkit)
+
 	implementation(libs.autolink)
 	implementation(libs.flexver)
 	implementation(libs.jsoup)

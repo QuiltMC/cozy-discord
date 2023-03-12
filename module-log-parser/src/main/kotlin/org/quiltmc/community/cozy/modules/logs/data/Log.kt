@@ -14,13 +14,12 @@ public typealias Logs = List<Log>
 
 public open class Log {
 	public val environment: Environment = Environment()
-
 	public var launcher: Launcher? = null
+	public var url: URL? = null
 
 	private val loaders: MutableMap<LoaderType, Version> = mutableMapOf()
 	private val messages: MutableList<String> = mutableListOf()
 	private val mods: MutableMap<String, Mod> = mutableMapOf()
-	private val urls: MutableList<URL> = mutableListOf()
 
 	public lateinit var content: String
 
@@ -67,12 +66,5 @@ public open class Log {
 
 	public open fun addMod(mod: Mod) {
 		mods[mod.id] = mod
-	}
-
-	public open fun getUrls(): List<URL> =
-		urls.toList()
-
-	public open fun addUrl(url: URL) {
-		urls.add(url)
 	}
 }

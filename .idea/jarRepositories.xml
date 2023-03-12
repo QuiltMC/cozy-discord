@@ -91,5 +91,10 @@
       <option name="name" value="Shedaniel" />
       <option name="url" value="https://maven.shedaniel.me" />
     </remote-repository>
+    <remote-repository>
+      <option name="id" value="Sleeping Town" />
+      <option name="name" value="Sleeping Town" />
+      <option name="url" value="https://repo.sleeping.town" />
+    </remote-repository>
   </component>
 </project>
