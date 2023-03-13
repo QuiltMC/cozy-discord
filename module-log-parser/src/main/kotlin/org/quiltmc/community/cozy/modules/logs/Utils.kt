@@ -24,6 +24,12 @@ public fun ExtensibleBotBuilder.ExtensionsBuilder.extLogParser(builder: (SimpleL
 	add(::LogParserExtension)
 }
 
+public fun ExtensibleBotBuilder.ExtensionsBuilder.extLogParser(config: LogParserConfig) {
+	loadModule { single { config } bind LogParserConfig::class }
+
+	add(::LogParserExtension)
+}
+
 public val linkExtractor: LinkExtractor = LinkExtractor.builder()
 	.linkTypes(setOf(LinkType.URL))
 	.build()

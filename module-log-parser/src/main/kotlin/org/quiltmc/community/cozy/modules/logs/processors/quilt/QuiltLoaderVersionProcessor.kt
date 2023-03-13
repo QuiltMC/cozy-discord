@@ -47,7 +47,7 @@ public class QuiltLoaderVersionProcessor : LogProcessor() {
 
 			log.addMessage(
 				"**Quilt Loader is out of date.** Latest version: `$currentMax`\n" +
-						"-> [Installation instructions](https://quiltmc.org/install/)"
+						"**»** [Installation instructions](https://quiltmc.org/install/)"
 			)
 		}
 	}

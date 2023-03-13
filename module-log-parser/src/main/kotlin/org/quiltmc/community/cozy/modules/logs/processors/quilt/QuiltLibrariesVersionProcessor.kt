@@ -44,9 +44,9 @@ public class QuiltLibrariesVersionProcessor : LogProcessor() {
 			log.hasProblems = true
 
 			log.addMessage(
-				"**The QSL/QFAPI bundle is out of date.** Latest version: `$latestVersion`\n" +
-						"-> [Modrinth](https://modrinth.com/mod/qsl/)\n" +
-						"-> [CurseForge](https://www.curseforge.com/minecraft/mc-mods/qsl)"
+				"**QSL/QFAPI is out of date.** Latest version: `$latestVersion`\n" +
+						"**»** [Modrinth](https://modrinth.com/mod/qsl/)\n" +
+						"**»** [CurseForge](https://www.curseforge.com/minecraft/mc-mods/qsl)"
 			)
 		}
 	}

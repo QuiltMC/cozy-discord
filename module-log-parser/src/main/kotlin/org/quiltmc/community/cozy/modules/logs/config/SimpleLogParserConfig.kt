@@ -63,7 +63,7 @@ public class SimpleLogParserConfig(private val builder: Builder) : LogParserConf
 		public var staffCommandChecks: MutableList<Check<*>> = mutableListOf()
 		public var userCommandChecks: MutableList<Check<*>> = mutableListOf()
 
-		public var urlRegex: Regex = "(https?://\\S+)".toRegex(RegexOption.IGNORE_CASE)
+		public var urlRegex: Regex = "(https?://[^\\s>]+)".toRegex(RegexOption.IGNORE_CASE)
 
 		public fun parser(parser: LogParser): Boolean = parsers.add(parser)
 		public fun processor(parser: LogProcessor): Boolean = processors.add(parser)

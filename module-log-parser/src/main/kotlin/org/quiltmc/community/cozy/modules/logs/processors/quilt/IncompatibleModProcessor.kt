@@ -24,7 +24,7 @@ import org.quiltmc.community.cozy.modules.logs.types.LogProcessor
 import kotlin.time.Duration.Companion.minutes
 
 private const val THREAD_LINK = "https://forum.quiltmc.org/t/mod-incompatibility-megathread/261"
-private const val THREAD_JSON = "https://forum.quiltmc.org/t/mod-incompatibility-megathread/261.json"
+private const val THREAD_JSON = "$THREAD_LINK.json"
 
 private val CHECK_DELAY = 15.minutes
 
@@ -80,11 +80,14 @@ public class IncompatibleModProcessor : LogProcessor() {
 
 				typedMods.forEach { (type, mods) ->
 						append("**» ${type.readable}:** ")
-						appendLine(mods.joinToString())
+						appendLine(mods.joinToString { it.name })
 					}
 
 				appendLine()
-				append("For more information, please see [the Quilt mod incompatibility mega-thread]($THREAD_LINK).")
+				append(
+					"**Note:** The list of incompatible mods may not be perfectly up-to-date. For more " +
+							"information, please see [the Quilt mod incompatibility mega-thread]($THREAD_LINK)."
+				)
 			}
 		)
 	}

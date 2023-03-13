@@ -39,10 +39,11 @@ import kotlin.time.Duration.Companion.minutes
 
 public class LogParserExtension : Extension() {
 	override val name: String = "quiltmc-log-parser"
-	public var scheduler: Scheduler? = null
+
+	private var scheduler: Scheduler? = null
 
 	private val configUrl: String = envOrNull("PASTEBIN_CONFIG_URL")
-		?: "https://raw.githubusercontent.com/QuiltMC/cozy-discord/log-parser/module-log-parser/pastebins.yml"
+		?: "https://raw.githubusercontent.com/QuiltMC/cozy-discord/root/module-log-parser/pastebins.yml"
 
 	private val taskDelay: Long = envOrNull("PASTEBIN_REFRESH_MINS")?.toLong()
 		?: 60
@@ -56,23 +57,18 @@ public class LogParserExtension : Extension() {
 
 	private lateinit var eventHandler: EventHandler
 
-	public val hasPastebinConfig: Boolean = ::pastebinConfig.isInitialized
-
 	override suspend fun setup() {
 		// TODO: Add commands
 		// TODO: Add checks for event handling
 
 		scheduler = Scheduler()
-
-		// We have to do this twice b/c the values need to be parsed out of the same file
-		pastebinConfig = getPastebinConfig()
 		pastebinConfig = getPastebinConfig()
 
 		scheduler?.schedule(taskDelay.minutes, repeat = true) {
 			pastebinConfig = getPastebinConfig()
 		}
 
-		eventHandler = if (bot.extensions.containsKey("pluralkit")) {
+		eventHandler = if (bot.extensions.containsKey("ext-pluralkit")) {
 			logger.info { "Loading PluralKit-based event handlers" }
 
 			PKEventHandler(this)
@@ -139,46 +135,70 @@ public class LogParserExtension : Extension() {
 						val mcVersion = log.getMod("minecraft")?.version?.string ?: "Unknown"
 
 						appendLine("**__Environment Info__**")
-						appendLine("**Minecraft Version:** $mcVersion")
 						appendLine()
-						appendLine("**Java Version:** $javaVersion")
-						appendLine("**Java Args:** `$jvmArgs`")
-						appendLine("**JVM Version:** $jvmVersion")
+						appendLine("**Minecraft Version:** `$mcVersion`")
+
+						var addAnotherLine = false
+
+						if (javaVersion != null) {
+							appendLine("**Java Version:** `$javaVersion`")
+
+							addAnotherLine = true
+						}
+
+						if (jvmArgs != null) {
+							appendLine("**Java Args:** `$jvmArgs`")
+
+							addAnotherLine = true
+						}
+
+						if (jvmVersion != null) {
+							appendLine("**JVM Version:** `$jvmVersion`")
+
+							addAnotherLine = true
+						}
 
 						if (glInfo != null) {
-							appendLine("**OpenGL Info:** $glInfo")
-						}
-						if (os != null) {
-							appendLine("**OS:** $os")
+							appendLine("**OpenGL Info:** `$glInfo`")
+
+							addAnotherLine = true
 						}
 
-						appendLine()
+						if (os != null) {
+							appendLine("**OS:** $os")
+
+							addAnotherLine = true
+						}
+
+						if (addAnotherLine) {
+							appendLine()
+						}
 					}
 
 					with(log.launcher) {
 						if (this != null) {
-							appendLine("**$name:** ${version ?: "Unknown version"}")
+							appendLine("**Launcher:** $name (`${version ?: "Unknown Version"}`)")
+							appendLine()
 						}
 					}
 
-					appendLine("**Mods:** ${log.getMods().size}")
-					appendLine()
-
 					if (log.getLoaders().isNotEmpty()) {
-						appendLine("**__Loaders__**")
-
 						log.getLoaders()
 							.toList()
 							.sortedBy { it.first.name }
 							.forEach { (loader, version) ->
-								appendLine("**${loader.name.capitalizeWords()} Version:** `${version.string}`")
+								appendLine("**Loader:** ${loader.name.capitalizeWords()} (`${version.string}`)")
 							}
-
-						appendLine()
 					}
+
+					appendLine("**Mods:** ${log.getMods().size}")
+					appendLine()
 				}.trim()
 
 				val messages = buildString {
+					appendLine("__**Messages**__")
+					appendLine()
+
 					if (log.aborted) {
 						appendLine("__**Log parsing aborted**__")
 						appendLine(log.abortReason)
@@ -190,7 +210,7 @@ public class LogParserExtension : Extension() {
 					}
 				}.trim()
 
-				description = (header + "\n\n" + messages)
+				description = "$header\n\n$messages"
 
 				if (description!!.length > 4000) {
 					description = description!!.take(3994) + "\n[...]"

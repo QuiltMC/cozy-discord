@@ -2,6 +2,8 @@ raw:
   - '0x0\.st/([^/?#]*)'
   - 'bytebin\.lucko.me/([^/?#]*)'
   - 'termbin\.com/([^/?#]*)'
+  - 'cdn\.discordapp\.com/attachments/\d+/\d+/[^\.]\.log'
+  - 'media\.discordapp\.com/attachments/\d+/\d+/[^\.]\.log'
 
 url-transform:
   - match: 'mclo\.gs/([^/?#]*)'

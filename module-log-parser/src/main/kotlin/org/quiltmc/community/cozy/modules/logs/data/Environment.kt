@@ -11,7 +11,7 @@ package org.quiltmc.community.cozy.modules.logs.data
 public data class Environment(
 	public var glInfo: String? = null,
 	public var os: String? = null,
-	public var javaVersion: String = "Unknown",
-	public var jvmVersion: String = "Unknown",
-	public var jvmArgs: String = "Unknown",
+	public var javaVersion: String? = null,
+	public var jvmVersion: String? = null,
+	public var jvmArgs: String? = null,
 )
