@@ -16,6 +16,7 @@ import org.quiltmc.community.cozy.modules.logs.parsers.launchers.MMCLikeParser
 import org.quiltmc.community.cozy.modules.logs.parsers.launchers.TechnicParser
 import org.quiltmc.community.cozy.modules.logs.parsers.quilt.QuiltModsParser
 import org.quiltmc.community.cozy.modules.logs.processors.PlayerIPProcessor
+import org.quiltmc.community.cozy.modules.logs.processors.quilt.FabricImplProcessor
 import org.quiltmc.community.cozy.modules.logs.processors.quilt.IncompatibleModProcessor
 import org.quiltmc.community.cozy.modules.logs.processors.quilt.QuiltLibrariesVersionProcessor
 import org.quiltmc.community.cozy.modules.logs.processors.quilt.QuiltLoaderVersionProcessor
@@ -36,17 +37,18 @@ public class SimpleLogParserConfig(private val builder: Builder) : LogParserConf
 
 	public class Builder {
 		public var parsers: MutableList<LogParser> = mutableListOf(
-			ATLauncherParser(),
 			FabricModsParser(),
+			ATLauncherParser(),
+			MMCLikeParser(),
+			TechnicParser(),
+			QuiltModsParser(),
 			LauncherParser(),
 			LoaderParser(),
-			MMCLikeParser(),
 			MinecraftVersionParser(),
-			QuiltModsParser(),
-			TechnicParser(),
 		)
 
 		public var processors: MutableList<LogProcessor> = mutableListOf(
+			FabricImplProcessor(),
 			IncompatibleModProcessor(),
 			QuiltLibrariesVersionProcessor(),
 			QuiltLoaderVersionProcessor(),
@@ -73,7 +75,7 @@ public class SimpleLogParserConfig(private val builder: Builder) : LogParserConf
 	}
 }
 
-public fun SimpleLogParserConfig(builder: (SimpleLogParserConfig.Builder) -> Unit): SimpleLogParserConfig {
+public fun SimpleLogParserConfig(builder: (SimpleLogParserConfig.Builder).() -> Unit): SimpleLogParserConfig {
 	val builderObj = SimpleLogParserConfig.Builder()
 
 	builder(builderObj)

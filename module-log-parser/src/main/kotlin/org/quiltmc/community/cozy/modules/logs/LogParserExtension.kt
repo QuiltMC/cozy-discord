@@ -126,7 +126,11 @@ public class LogParserExtension : Extension() {
 
 					val header = buildString {
 						with(log.environment) {
+							val mcVersion = log.getMod("minecraft")?.version?.string ?: "Unknown"
+
 							appendLine("**__Environment Info__**")
+							appendLine("**Minecraft Version:** $mcVersion")
+							appendLine()
 							appendLine("**Java Version:** $javaVersion")
 							appendLine("**Java Args:** `$jvmArgs`")
 							appendLine("**JVM Version:** $jvmVersion")
@@ -196,7 +200,7 @@ public class LogParserExtension : Extension() {
 				strings.addAll(retriever.process(link))
 			} catch (e: Exception) {
 				logger.error(e) {
-					"Retriever ${retriever.javaClass.simpleName} threw exception for URL: $link"
+					"Retriever ${retriever.identifier} threw exception for URL: $link"
 				}
 			}
 		}
@@ -216,7 +220,7 @@ public class LogParserExtension : Extension() {
 					}
 				} catch (e: Exception) {
 					logger.error(e) {
-						"Parser ${parser.javaClass.simpleName} threw exception for URL: $link"
+						"Parser ${parser.identifier} threw exception for URL: $link"
 					}
 				}
 			}
@@ -230,7 +234,7 @@ public class LogParserExtension : Extension() {
 					}
 				} catch (e: Exception) {
 					logger.error(e) {
-						"Processor ${processor.javaClass.simpleName} threw exception for URL: $link"
+						"Processor ${processor.identifier} threw exception for URL: $link"
 					}
 				}
 			}

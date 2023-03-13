@@ -71,6 +71,8 @@ public class IncompatibleModProcessor : LogProcessor() {
 
 		typedMods = typedMods.filterValues { it.isNotEmpty() }
 
+		log.hasProblems = true
+
 		log.addMessage(
 			buildString {
 				appendLine("You appear to have the following incompatible mods installed:")

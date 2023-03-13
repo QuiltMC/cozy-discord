@@ -4,20 +4,12 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package org.quiltmc.community.modes.quilt.extensions.logs.misc
+package org.quiltmc.community.cozy.modules.logs.api.models.quiltmeta
 
 import io.github.z4kn4fein.semver.Version
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class LoaderVersion(
-	val loader: LoaderElement,
-)
-
-@Serializable
-data class LoaderElement(
-	val separator: String,
-	val build: Int,
-	val maven: String,
+public data class LoaderElement(
 	val version: Version
 )

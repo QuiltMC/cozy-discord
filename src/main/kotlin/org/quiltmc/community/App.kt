@@ -24,6 +24,9 @@ import dev.kord.gateway.PrivilegedIntent
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.lastOrNull
+import org.quiltmc.community.cozy.modules.logs.extLogParser
+import org.quiltmc.community.cozy.modules.logs.processors.PiracyProcessor
+import org.quiltmc.community.cozy.modules.logs.processors.ProblematicLauncherProcessor
 import org.quiltmc.community.cozy.modules.moderation.moderation
 import org.quiltmc.community.cozy.modules.rolesync.rolesync
 import org.quiltmc.community.cozy.modules.tags.tags
@@ -33,7 +36,6 @@ import org.quiltmc.community.database.collections.WelcomeChannelCollection
 import org.quiltmc.community.modes.quilt.extensions.*
 import org.quiltmc.community.modes.quilt.extensions.filtering.FilterExtension
 import org.quiltmc.community.modes.quilt.extensions.github.GithubExtension
-import org.quiltmc.community.modes.quilt.extensions.logs.LogParsingExtension
 import org.quiltmc.community.modes.quilt.extensions.messagelog.MessageLogExtension
 import org.quiltmc.community.modes.quilt.extensions.minecraft.MinecraftExtension
 import org.quiltmc.community.modes.quilt.extensions.modhostverify.ModHostingVerificationExtension
@@ -98,7 +100,6 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
 	extensions {
 		add(::ApplicationsExtension)
 		add(::FilterExtension)
-		add(::LogParsingExtension)
 		add(::MessageLogExtension)
 		add(::MinecraftExtension)
 		add(::ModHostingVerificationExtension)
@@ -111,6 +112,11 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
 		add(::VerificationExtension)
 
 		extPluralKit()
+
+		extLogParser {
+			processor(PiracyProcessor())
+			processor(ProblematicLauncherProcessor())
+		}
 
 		help {
 			enableBundledExtension = true

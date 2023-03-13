@@ -55,6 +55,8 @@ public class FabricImplProcessor : LogProcessor() {
 			suspectedPackage != null &&
 			".fabricmc." in suspectedPackage && (".impl." in suspectedPackage || ".mixin." in suspectedPackage)
 		) {
+			log.hasProblems = true
+
 			log.addMessage(
 				"Mod `$suspectedMod` may be using Fabric internals:\n`$suspectedPackage`"
 			)

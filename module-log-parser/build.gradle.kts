@@ -28,6 +28,7 @@ dependencies {
 	implementation(libs.jsoup)
 	implementation(libs.kaml)
 	implementation(libs.logging)
+	implementation(libs.semver)
 
 	implementation(platform(libs.kotlin.bom))
 	implementation(libs.kotlin.stdlib)
