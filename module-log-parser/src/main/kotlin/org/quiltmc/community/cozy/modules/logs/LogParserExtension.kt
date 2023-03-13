@@ -56,11 +56,16 @@ public class LogParserExtension : Extension() {
 
 	private lateinit var eventHandler: EventHandler
 
+	public val hasPastebinConfig: Boolean = ::pastebinConfig.isInitialized
+
 	override suspend fun setup() {
 		// TODO: Add commands
 		// TODO: Add checks for event handling
 
 		scheduler = Scheduler()
+
+		// We have to do this twice b/c the values need to be parsed out of the same file
+		pastebinConfig = getPastebinConfig()
 		pastebinConfig = getPastebinConfig()
 
 		scheduler?.schedule(taskDelay.minutes, repeat = true) {
@@ -68,8 +73,12 @@ public class LogParserExtension : Extension() {
 		}
 
 		eventHandler = if (bot.extensions.containsKey("pluralkit")) {
+			logger.info { "Loading PluralKit-based event handlers" }
+
 			PKEventHandler(this)
 		} else {
+			logger.info { "Loading default event handlers, without PluralKit support" }
+
 			DefaultEventHandler(this)
 		}
 
@@ -92,7 +101,7 @@ public class LogParserExtension : Extension() {
 			.map { URL(it) }
 			.map { handleLink(it) }
 			.flatten()
-			.filter { it.aborted || it.hasProblems || it.getMessages().isNotEmpty() }
+//			.filter { it.aborted || it.hasProblems || it.getMessages().isNotEmpty() }
 
 		if (logs.isNotEmpty()) {
 			message.respond(pingInReply = false) {
@@ -107,84 +116,84 @@ public class LogParserExtension : Extension() {
 			content = "**Warning:** I found ${logs.size} logs, but I can't provide results for more than 10 logs at " +
 					"a time. You'll only see results for the first 10 logs below - please " +
 					"limit the number of logs you post at once."
+		}
 
-			logs.forEachIndexed { index, log ->
-				embed {
-					title = "Parsed Log $index"
+		logs.forEach { log ->
+			embed {
+				title = "Parsed Log"
 
-					color = if (log.aborted) {
-						title += ": Aborted"
+				color = if (log.aborted) {
+					title += ": Aborted"
 
-						DISCORD_RED
-					} else if (log.hasProblems) {
-						title += ": Problems Found"
+					DISCORD_RED
+				} else if (log.hasProblems) {
+					title += ": Problems Found"
 
-						DISCORD_YELLOW
-					} else {
-						DISCORD_GREEN
-					}
+					DISCORD_YELLOW
+				} else {
+					DISCORD_GREEN
+				}
 
-					val header = buildString {
-						with(log.environment) {
-							val mcVersion = log.getMod("minecraft")?.version?.string ?: "Unknown"
+				val header = buildString {
+					with(log.environment) {
+						val mcVersion = log.getMod("minecraft")?.version?.string ?: "Unknown"
 
-							appendLine("**__Environment Info__**")
-							appendLine("**Minecraft Version:** $mcVersion")
-							appendLine()
-							appendLine("**Java Version:** $javaVersion")
-							appendLine("**Java Args:** `$jvmArgs`")
-							appendLine("**JVM Version:** $jvmVersion")
-
-							if (glInfo != null) {
-								appendLine("**OpenGL Info:** $glInfo")
-							}
-							if (os != null) {
-								appendLine("**OS:** $os")
-							}
-
-							appendLine()
-						}
-
-						with(log.launcher) {
-							if (this != null) {
-								appendLine("**$name:** ${version ?: "Unknown version"}")
-							}
-						}
-
-						appendLine("**Mods:** ${log.getMods().size}")
+						appendLine("**__Environment Info__**")
+						appendLine("**Minecraft Version:** $mcVersion")
 						appendLine()
+						appendLine("**Java Version:** $javaVersion")
+						appendLine("**Java Args:** `$jvmArgs`")
+						appendLine("**JVM Version:** $jvmVersion")
 
-						if (log.getLoaders().isNotEmpty()) {
-							appendLine("**__Loaders__**")
+						if (glInfo != null) {
+							appendLine("**OpenGL Info:** $glInfo")
+						}
+						if (os != null) {
+							appendLine("**OS:** $os")
+						}
 
-							log.getLoaders()
-								.toList()
-								.sortedBy { it.first.name }
-								.forEach { (loader, version) ->
-									appendLine("**${loader.name.capitalizeWords()}:** $version")
-								}
+						appendLine()
+					}
 
+					with(log.launcher) {
+						if (this != null) {
+							appendLine("**$name:** ${version ?: "Unknown version"}")
+						}
+					}
+
+					appendLine("**Mods:** ${log.getMods().size}")
+					appendLine()
+
+					if (log.getLoaders().isNotEmpty()) {
+						appendLine("**__Loaders__**")
+
+						log.getLoaders()
+							.toList()
+							.sortedBy { it.first.name }
+							.forEach { (loader, version) ->
+								appendLine("**${loader.name.capitalizeWords()} Version:** `${version.string}`")
+							}
+
+						appendLine()
+					}
+				}.trim()
+
+				val messages = buildString {
+					if (log.aborted) {
+						appendLine("__**Log parsing aborted**__")
+						appendLine(log.abortReason)
+					} else {
+						log.getMessages().forEach {
+							appendLine(it)
 							appendLine()
 						}
-					}.trim()
-
-					val messages = buildString {
-						if (log.aborted) {
-							appendLine("__**Log parsing aborted**__")
-							appendLine(log.abortReason)
-						} else {
-							log.getMessages().forEach {
-								appendLine(it)
-								appendLine()
-							}
-						}
-					}.trim()
-
-					description = (header + "\n\n" + messages)
-
-					if (description!!.length > 4000) {
-						description = description!!.take(3994) + "\n[...]"
 					}
+				}.trim()
+
+				description = (header + "\n\n" + messages)
+
+				if (description!!.length > 4000) {
+					description = description!!.take(3994) + "\n[...]"
 				}
 			}
 		}
@@ -195,9 +204,13 @@ public class LogParserExtension : Extension() {
 		val strings: MutableList<String> = mutableListOf()
 		val logs: MutableList<Log> = mutableListOf()
 
-		config.getRetrievers().forEach { retriever ->
+		for (retriever in config.getRetrievers()) {
+			if (!retriever._predicate(link)) {
+				continue
+			}
+
 			try {
-				strings.addAll(retriever.process(link))
+				strings.addAll(retriever.process(link).map { it.replace("\r\n", "\n") })
 			} catch (e: Exception) {
 				logger.error(e) {
 					"Retriever ${retriever.identifier} threw exception for URL: $link"
@@ -212,6 +225,10 @@ public class LogParserExtension : Extension() {
 			log.url = link
 
 			for (parser in config.getParsers()) {
+				if (!parser._predicate(log)) {
+					continue
+				}
+
 				try {
 					parser.process(log)
 
@@ -226,6 +243,10 @@ public class LogParserExtension : Extension() {
 			}
 
 			for (processor in config.getProcessors()) {
+				if (!processor._predicate(log)) {
+					continue
+				}
+
 				try {
 					processor.process(log)
 

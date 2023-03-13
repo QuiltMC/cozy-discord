@@ -1,51 +1,46 @@
-# comment
-
-variables:
-  SLUG: '([^/?#]*)'
-
 raw:
-  - '0x0\.st/$SLUG'
-  - 'bytebin\.lucko.me/$SLUG'
-  - 'termbin\.com/$SLUG'
+  - '0x0\.st/([^/?#]*)'
+  - 'bytebin\.lucko.me/([^/?#]*)'
+  - 'termbin\.com/([^/?#]*)'
 
 url-transform:
-  - match: 'mclo\.gs/$SLUG'
+  - match: 'mclo\.gs/([^/?#]*)'
     output: 'https://api.mclo.gs/1/raw/$1'
 
-  - match: 'paste\.ee/[pd]/$SLUG'
+  - match: 'paste\.ee/[pd]/([^/?#]*)'
     output: 'https://paste.ee/d/$1'
 
-  - match: 'pastes\.dev/$SLUG'
+  - match: 'pastes\.dev/([^/?#]*)'
     output: 'https://api.pastes.dev/$1'
 
-  - match: 'hastebin\.com/$SLUG'
+  - match: 'hastebin\.com/([^/?#]*)'
     output: 'https://hastebin.com/raw/$1'
 
-  - match: 'toptal\.com/developers/hastebin/$SLUG'
+  - match: 'toptal\.com/developers/hastebin/([^/?#]*)'
     output: 'https://www.toptal.com/developers/hastebin/raw/$1'
 
-  - match: 'hst\.sh/$SLUG'
+  - match: 'hst\.sh/([^/?#]*)'
     output: 'https://hst.sh/raw/$1'
 
-  - match: 'gist\.github\.com/$SLUG/$SLUG'
+  - match: 'gist\.github\.com/([^/?#]*)/([^/?#]*)'
     output: 'https://gist.githubusercontent.com/raw/$2'
 
-  - match: 'gist\.github\.com/$SLUG'
+  - match: 'gist\.github\.com/([^/?#]*)'
     output: 'https://gist.githubusercontent.com/raw/$1'
 
-  - match: 'gist\.githubusercontent\.com/$SLUG/$SLUG'
+  - match: 'gist\.githubusercontent\.com/([^/?#]*)/([^/?#]*)'
     output: 'https://gist.githubusercontent.com/raw/$2'
 
-  - match: 'gist\.githubusercontent\.com/$SLUG'
+  - match: 'gist\.githubusercontent\.com/([^/?#]*)'
     output: 'https://gist.githubusercontent.com/raw/$1'
 
-  - match: 'pastebin\.com/(raw|dl|clone|embed|print)/$SLUG'
+  - match: 'pastebin\.com/(raw|dl|clone|embed|print)/([^/?#]*)'
     output: 'https://pastebin.com/dl/$2'
 
-  - match: 'pastebin\.com/$SLUG'
+  - match: 'pastebin\.com/([^/?#]*)'
     output: 'https://pastebin.com/dl/$1'
 
-  - match: 'pastery\.net/$SLUG.*'
+  - match: 'pastery\.net/([^/?#]*).*'
     output: 'https://www.pastery.net/$1/raw/'
 
     split:
@@ -53,10 +48,10 @@ url-transform:
       string: '+'
 
 scrape:
-  - match: 'paste\.atlauncher\.com/view/$SLUG'
+  - match: 'paste\.atlauncher\.com/view/([^/?#]*)'
     type: 'first-element'
     selector: 'code'
 
-  - match: 'paste\.gg/p/$SLUG/$SLUG'
+  - match: 'paste\.gg/p/([^/?#]*)/([^/?#]*)'
     type: 'hrefs'
     selector: '.box-title a'

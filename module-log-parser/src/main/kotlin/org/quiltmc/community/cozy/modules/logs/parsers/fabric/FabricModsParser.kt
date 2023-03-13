@@ -21,7 +21,7 @@ public class FabricModsParser : LogParser() {
 	override val order: Order = Order.Default
 
 	override suspend fun predicate(log: Log): Boolean =
-		log.getLoaderVersion(LoaderType.Quilt) != null
+		log.getLoaderVersion(LoaderType.Fabric) != null
 
 	override suspend fun process(log: Log) {
 		val start = log.content.split(OPENING_LINE, 2).last()

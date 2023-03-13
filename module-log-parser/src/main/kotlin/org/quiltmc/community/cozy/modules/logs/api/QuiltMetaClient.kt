@@ -46,7 +46,7 @@ public class QuiltMetaClient {
 	public suspend fun getLoaderVersions(forceRefresh: Boolean = false): List<Version> {
 		val now = Clock.System.now()
 
-		if (forceRefresh || now - lastRequest < 10.minutes) {
+		if (forceRefresh || now - lastRequest > 10.minutes) {
 			val versions: List<LoaderElement> = client.get(LOADER_VERSIONS).body()
 
 			cache = versions.map { it.version }

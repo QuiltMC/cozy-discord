@@ -41,15 +41,14 @@ public class ModrinthClient {
 
 	private val requestTimes: MutableMap<String, Instant> =
 		mutableMapOf<String, Instant>()
-			.withDefault { Instant.DISTANT_PAST }
 
 	private val caches: MutableMap<String, List<ModrinthVersion>> = mutableMapOf()
 
 	public suspend fun getProjectVersions(project: String, forceRefresh: Boolean = false): List<ModrinthVersion>? {
 		val now = Clock.System.now()
-		val lastRequest = requestTimes[project]!!
+		val lastRequest = requestTimes.getOrDefault(project, Instant.DISTANT_PAST)
 
-		if (forceRefresh || now - lastRequest < 10.minutes) {
+		if (forceRefresh || now - lastRequest > 10.minutes) {
 			val versions: List<ModrinthVersion> = try {
 				client.get(
 					PROJECT_VERSION.replace(":project", project)

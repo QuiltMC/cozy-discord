@@ -8,6 +8,7 @@ package org.quiltmc.community.cozy.modules.logs.retrievers
 
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
+import io.ktor.utils.io.core.*
 import org.quiltmc.community.cozy.modules.logs.data.Order
 import org.quiltmc.community.cozy.modules.logs.endsWithExtensions
 import org.quiltmc.community.cozy.modules.logs.types.LogRetriever
@@ -37,5 +38,5 @@ public class AttachmentLogRetriever : LogRetriever() {
 				)
 
 	override suspend fun process(url: URL): Set<String> =
-		setOf(client.get(url).bodyAsText(Charsets.UTF_8))
+		setOf(client.get(url).bodyAsChannel().readRemaining().readBytes().decodeToString())
 }

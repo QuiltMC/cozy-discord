@@ -45,7 +45,6 @@ public data class Scrape(
 
 @Serializable
 public data class PastebinConfig(
-	public val variables: Map<String, String>,
 	public val raw: List<Regex>,
 
 	@SerialName("url-transform")
