@@ -97,6 +97,14 @@ public class LogParserExtension : Extension() {
 			.map { URL(it) }
 			.map { handleLink(it) }
 			.flatten()
+			.filter {
+				it.aborted ||
+						it.hasProblems ||
+						it.getMessages().isNotEmpty() ||
+						it.minecraftVersion != null ||
+						it.getMods().isNotEmpty()
+			}
+
 //			.filter { it.aborted || it.hasProblems || it.getMessages().isNotEmpty() }
 
 		if (logs.isNotEmpty()) {
@@ -191,26 +199,37 @@ public class LogParserExtension : Extension() {
 							}
 					}
 
-					appendLine("**Mods:** ${log.getMods().size}")
-					appendLine()
-				}.trim()
-
-				val messages = buildString {
-					appendLine("__**Messages**__")
-					appendLine()
-
-					if (log.aborted) {
-						appendLine("__**Log parsing aborted**__")
-						appendLine(log.abortReason)
-					} else {
-						log.getMessages().forEach {
-							appendLine(it)
-							appendLine()
+					appendLine(
+						"**Mods:** " + if (log.getMods().isNotEmpty()) {
+							log.getMods().size
+						} else {
+							"None"
 						}
-					}
+					)
+
+					appendLine()
 				}.trim()
 
-				description = "$header\n\n$messages"
+				if (log.aborted || log.getMessages().isNotEmpty()) {
+					val messages = buildString {
+						appendLine("__**Messages**__")
+						appendLine()
+
+						if (log.aborted) {
+							appendLine("__**Log parsing aborted**__")
+							appendLine(log.abortReason)
+						} else {
+							log.getMessages().forEach {
+								appendLine(it)
+								appendLine()
+							}
+						}
+					}.trim()
+
+					description = "$header\n\n$messages"
+				} else {
+					description = header
+				}
 
 				if (description!!.length > 4000) {
 					description = description!!.take(3994) + "\n[...]"
