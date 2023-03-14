@@ -26,12 +26,23 @@ public class LauncherParser : LogParser() {
 	override val identifier: String = "launcher"
 	override val order: Order = Order.Earlier
 
+	// You tried, Detekt.
+	@Suppress("UnconditionalJumpStatementInLoop")
 	override suspend fun process(log: Log) {
-		for ((launcher, pattern) in PATTERNS) {
-			val match = pattern.find(log.content)
-				?: continue
+		val (launcher, match) = PATTERNS.entries
+			.map { (launcher, pattern) -> Pair(launcher, pattern.find(log.content)) }
+			.firstOrNull() { (_, match) -> match != null }
+			?: return
 
-			log.launcher = Launcher(launcher, match.groups[1]?.value)
+		log.launcher = Launcher(launcher, match!!.groups[1]?.value)
+
+		if (launcher == Launcher.Prism) {
+			log.addMessage(
+				"**It looks like you're using Prism.** Please note that Prism [currently breaks uploaded logs]" +
+						"(https://github.com/PrismLauncher/PrismLauncher/issues/930), and the information " +
+						"provided here may be incomplete. Until this is fixed, please consider manually " +
+						"uploading your `latest.log` file to the channel instead."
+			)
 		}
 	}
 }
