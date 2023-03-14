@@ -67,11 +67,12 @@ class CategoryRotator(private val category: Category, private val modLog: GuildM
 		}
 	}
 
-	suspend fun send(messageBuilder: suspend UserMessageCreateBuilder.() -> Unit) = rotationLock.withLock {
-		channel.createMessage {
-			messageBuilder()
+	suspend fun send(messageBuilder: suspend UserMessageCreateBuilder.() -> Unit) =
+		rotationLock.withLock {
+			channel.createMessage {
+				messageBuilder()
+			}
 		}
-	}
 
 	suspend fun populate() {
 		rotationLock.withLock {

@@ -18,6 +18,7 @@ kotlintest = "3.4.2"
 ktor = "2.2.1"
 kx-ser = "1.4.1"
 logback = "1.2.8"
+logback-groovy = "1.14.0"
 logging = "2.1.23"
 moshi = "1.13.0"
 rgxgen = "1.4"
@@ -52,6 +53,7 @@ ktor-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 kx-ser = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kx-ser" }
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+logback-groovy = { module = "io.github.virtualdogbert:logback-groovy-config", version.ref = "logback-groovy" }
 logging = { module = "io.github.microutils:kotlin-logging", version.ref = "logging" }
 moshi-adapters = { module = "com.squareup.moshi:moshi-adapters", version.ref = "moshi" }
 moshi-kotlin = { module = "com.squareup.moshi:moshi-kotlin", version.ref = "moshi" }

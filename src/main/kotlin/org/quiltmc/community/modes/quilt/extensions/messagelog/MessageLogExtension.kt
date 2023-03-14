@@ -60,7 +60,9 @@ private const val DUAL_MESSAGE_LIMIT = 950
 class MessageLogExtension : Extension() {
 	override val name = "message-log"
 
-	private val logger = KotlinLogging.logger { }
+	private val logger = KotlinLogging.logger(
+		"org.quiltmc.community.modes.quilt.extensions.messagelog.MessageLogExtension"
+	)
 
 	private var loopJob: Job? = null
 	private lateinit var messageChannel: Channel<LogMessage>
@@ -90,6 +92,8 @@ class MessageLogExtension : Extension() {
 			check { inQuiltGuild() }
 
 			action {
+				logger.debug { "Bulk delete event received: ${event.messages.size} messages" }
+
 				// Do this as early as possible so that we can catch the usual creation events
 				event.messages.forEach { bulkDeletedMessages.add(it.id) }
 
@@ -179,7 +183,9 @@ class MessageLogExtension : Extension() {
 						addFile(
 							"messages.md",
 
-							ChannelProvider { messages.byteInputStream().toByteReadChannel() }
+							ChannelProvider {
+								messages.byteInputStream().toByteReadChannel()
+							}
 						)
 					}
 				)
@@ -241,6 +247,8 @@ class MessageLogExtension : Extension() {
 			}
 
 			action {
+				logger.debug { "Single delete event received: `${event.messageId}`" }
+
 				// Wait here in case we get a bulk deletion event
 				delay(1.seconds)
 
@@ -312,7 +320,9 @@ class MessageLogExtension : Extension() {
 							addFile(
 								"old.md",
 
-								ChannelProvider { splitContent(message.content).byteInputStream().toByteReadChannel() }
+								ChannelProvider {
+									splitContent(message.content).byteInputStream().toByteReadChannel()
+								}
 							)
 						}
 					)
@@ -330,6 +340,8 @@ class MessageLogExtension : Extension() {
 			}
 
 			action {
+				logger.debug { "Message edit event received: `${event.messageId}`" }
+
 				val old = event.old
 				val new = event.getMessage()
 
@@ -390,7 +402,9 @@ class MessageLogExtension : Extension() {
 								addFile(
 									"old.md",
 
-									ChannelProvider { splitContent(old.content).byteInputStream().toByteReadChannel() }
+									ChannelProvider {
+										splitContent(old.content).byteInputStream().toByteReadChannel()
+									}
 								)
 							}
 
@@ -398,7 +412,9 @@ class MessageLogExtension : Extension() {
 								addFile(
 									"new.md",
 
-									ChannelProvider { splitContent(new.content).byteInputStream().toByteReadChannel() }
+									ChannelProvider {
+										splitContent(new.content).byteInputStream().toByteReadChannel()
+									}
 								)
 							}
 						}
@@ -493,7 +509,17 @@ class MessageLogExtension : Extension() {
 				continue
 			}
 
+			logger.trace { "Logging message on guild: ${logMessage.guild.name} (${logMessage.guild.id})" }
+
 			rotator.send(logMessage.messageBuilder)
+		}
+
+		logger.warn { "Send loop ended." }
+
+		if (!messageChannel.isClosedForReceive) {
+			logger.info { "Rescheduling send loop." }
+
+			loopJob = kord.launch { sendLoop() }
 		}
 	}
 
