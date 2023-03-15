@@ -32,14 +32,25 @@ appender("CONSOLE", ConsoleAppender) {
 }
 
 if (logUrl != null) {
-	appender("DISCORD", DiscordLogAppender) {
+	appender("DISCORD_ALL", DiscordLogAppender) {
+		url = System.getenv("DISCORD_LOGGER_URL")
+	}
+
+	appender("DISCORD_WARN", DiscordLogAppender) {
+		level = WARN
 		url = System.getenv("DISCORD_LOGGER_URL")
 	}
 
 	logger(
 			"org.quiltmc.community.modes.quilt.extensions.messagelog.MessageLogExtension",
 			TRACE,
-			["CONSOLE", "DISCORD"]
+			["DISCORD_ALL"]
+	)
+
+	logger(
+			"org.quiltmc.community.AppKt.setupQuilt.extLogParser.predicate",
+			DEBUG,
+			["DISCORD_WARN"]
 	)
 }
 

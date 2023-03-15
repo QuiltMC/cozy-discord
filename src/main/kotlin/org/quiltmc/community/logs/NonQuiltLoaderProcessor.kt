@@ -17,14 +17,13 @@ class NonQuiltLoaderProcessor : LogProcessor() {
 	override val order: Order = Order.Early
 
 	override suspend fun predicate(log: Log, event: Event): Boolean =
-		// TODO: Only run this in specific channels somehow?
-		log.getLoaderVersion(LoaderType.Quilt) == null
+		log.getLoaderVersion(LoaderType.Quilt) == null && log.getLoaders().isNotEmpty()
 
 	override suspend fun process(log: Log) {
 		log.hasProblems = true
 
 		log.addMessage(
-			"You appear to be using a loader other than Quilt - please double-check that you have Quilt installed!"
+			"**You don't appear to be using Quilt:** please double-check that you have Quilt installed!"
 		)
 	}
 }

@@ -34,6 +34,7 @@ import org.koin.core.component.inject
 
 class DiscordLogAppender : AppenderBase<ILoggingEvent>(), KordExKoinComponent {
 	lateinit var url: String
+	var level: Level = Level.ALL
 
 	private val webhookId: Snowflake by lazy {
 		val parts = url.split("/").toMutableList()
@@ -56,11 +57,15 @@ class DiscordLogAppender : AppenderBase<ILoggingEvent>(), KordExKoinComponent {
 
 	@Suppress("TooGenericExceptionCaught")
 	override fun append(eventObject: ILoggingEvent) {
+		if (!eventObject.level.isGreaterOrEqual(level)) {
+			return
+		}
+
 		kord.launch {
 			try {
 				webhook.execute(webhookToken) {
 					embed {
-						description = "```\n${eventObject.message}\n```"
+						description = eventObject.message
 						timestamp = Instant.fromEpochMilliseconds(eventObject.timeStamp)
 						title = "Log message: ${eventObject.level.levelStr}"
 

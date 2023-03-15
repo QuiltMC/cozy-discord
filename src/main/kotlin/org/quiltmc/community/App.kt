@@ -12,7 +12,7 @@
 package org.quiltmc.community
 
 import com.kotlindiscord.kord.extensions.ExtensibleBot
-import com.kotlindiscord.kord.extensions.checks.channelFor
+import com.kotlindiscord.kord.extensions.checks.channelSnowflakeFor
 import com.kotlindiscord.kord.extensions.checks.guildFor
 import com.kotlindiscord.kord.extensions.modules.extra.mappings.extMappings
 import com.kotlindiscord.kord.extensions.modules.extra.phishing.DetectionAction
@@ -20,15 +20,13 @@ import com.kotlindiscord.kord.extensions.modules.extra.phishing.extPhishing
 import com.kotlindiscord.kord.extensions.modules.extra.pluralkit.extPluralKit
 import com.kotlindiscord.kord.extensions.utils.envOrNull
 import com.kotlindiscord.kord.extensions.utils.getKoin
-import dev.kord.core.behavior.channel.asChannelOfOrNull
-import dev.kord.core.entity.channel.CategorizableChannel
+import dev.kord.core.Kord
+import dev.kord.core.entity.channel.Category
 import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.core.event.Event
 import dev.kord.gateway.Intents
 import dev.kord.gateway.PrivilegedIntent
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterIsInstance
-import kotlinx.coroutines.flow.lastOrNull
+import kotlinx.coroutines.flow.*
 import mu.KotlinLogging
 import org.quiltmc.community.cozy.modules.logs.extLogParser
 import org.quiltmc.community.cozy.modules.logs.processors.PiracyProcessor
@@ -123,9 +121,11 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
 		extPluralKit()
 
 		extLogParser {
+			// Bundled non-default processors
 			processor(PiracyProcessor())
 			processor(ProblematicLauncherProcessor())
 
+			// Quilt-specific processors
 			processor(NonQuiltLoaderProcessor())
 			processor(RuleBreakingModProcessor())
 
@@ -135,28 +135,41 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
 					"org.quiltmc.community.AppKt.setupQuilt.extLogParser.predicate"
 				)
 
+				val kord: Kord = getKoin().get()
+				val channelId = channelSnowflakeFor(event)
+				val guild = guildFor(event)
+
 				try {
-					val category = channelFor(event)?.asChannelOfOrNull<CategorizableChannel>()?.category
-					val guild = guildFor(event)
-					val isSkippable = identifier in SKIPPABLE_HANDLERS
+					val skippableChannelIds = SKIPPABLE_HANDLER_CATEGORIES.mapNotNull {
+						kord.getChannelOf<Category>(it)
+							?.channels
+							?.map { ch -> ch.id }
+							?.toList()
+					}.flatten()
+
+					val isSkippable = identifier in SKIPPABLE_HANDLER_IDS
 
 					if (guild?.id == TOOLCHAIN_GUILD && isSkippable) {
-						predicateLogger.info { "Skipping handler $identifier: Skippable and within toolchain guild" }
+						predicateLogger.info {
+							"Skipping handler '$identifier' in <#$channelId>: Skippable handler, and on Toolchain"
+						}
 
 						return false
 					}
 
-					if (category?.id in COMMUNITY_DEV_CATEGORIES && isSkippable) {
-						predicateLogger.info { "Skipping handler $identifier: Skippable and within dev category" }
+					if (channelId in skippableChannelIds && isSkippable) {
+						predicateLogger.info {
+							"Skipping handler '$identifier' in <#$channelId>: Skippable handler, and in a dev category"
+						}
 
 						return false
 					}
 
-					predicateLogger.debug { "Passing handler $identifier" }
+					predicateLogger.debug { "Passing handler '$identifier' in <#$channelId>" }
 
 					return true
 				} catch (e: Exception) {
-					predicateLogger.warn(e) { "Skipping processor $identifier due to an error." }
+					predicateLogger.warn(e) { "Skipping processor '$identifier' in <#$channelId> due to an error." }
 
 					return true
 				}

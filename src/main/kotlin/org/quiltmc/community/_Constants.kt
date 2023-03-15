@@ -24,29 +24,36 @@ internal val MAIN_GUILD = Snowflake(
 		?: 817576132726620200U
 )
 
-internal val MESSAGE_LOG_CATEGORIES = envOrNull("MESSAGE_LOG_CATEGORIES")?.split(',')
+internal val MESSAGE_LOG_CATEGORIES = envOrNull("MESSAGE_LOG_CATEGORIES")
+	?.split(',')
 	?.map { Snowflake(it.trim()) } ?: listOf()
 
 internal val COLOUR_BLURPLE = DISCORD_BLURPLE
 internal val COLOUR_NEGATIVE = DISCORD_RED
 internal val COLOUR_POSITIVE = DISCORD_GREEN
 
-internal val COMMUNITY_MODERATOR_ROLE = envOrNull("COMMUNITY_MODERATOR_ROLE")?.let { Snowflake(it) }
+internal val COMMUNITY_MODERATOR_ROLE = envOrNull("COMMUNITY_MODERATOR_ROLE")
+	?.let { Snowflake(it) }
 	?: Snowflake(863767207716192306)
 
-internal val TOOLCHAIN_MODERATOR_ROLE = envOrNull("TOOLCHAIN_MODERATOR_ROLE")?.let { Snowflake(it) }
+internal val TOOLCHAIN_MODERATOR_ROLE = envOrNull("TOOLCHAIN_MODERATOR_ROLE")
+	?.let { Snowflake(it) }
 	?: Snowflake(863767485609541632)
 
-internal val COMMUNITY_MANAGER_ROLE = envOrNull("COMMUNITY_MANAGER_ROLE")?.let { Snowflake(it) }
+internal val COMMUNITY_MANAGER_ROLE = envOrNull("COMMUNITY_MANAGER_ROLE")
+	?.let { Snowflake(it) }
 	?: Snowflake(832332800551813141)
 
-internal val TOOLCHAIN_MANAGER_ROLE = envOrNull("TOOLCHAIN_MANAGER_ROLE")?.let { Snowflake(it) }
+internal val TOOLCHAIN_MANAGER_ROLE = envOrNull("TOOLCHAIN_MANAGER_ROLE")
+	?.let { Snowflake(it) }
 	?: Snowflake(833877938000494602)
 
-internal val COMMUNITY_DEVELOPER_ROLE = envOrNull("COMMUNITY_DEVELOPER_ROLE")?.let { Snowflake(it) }
+internal val COMMUNITY_DEVELOPER_ROLE = envOrNull("COMMUNITY_DEVELOPER_ROLE")
+	?.let { Snowflake(it) }
 	?: Snowflake(972868531844710412)
 
-internal val TOOLCHAIN_DEVELOPER_ROLE = envOrNull("TOOLCHAIN_DEVELOPER_ROLE")?.let { Snowflake(it) }
+internal val TOOLCHAIN_DEVELOPER_ROLE = envOrNull("TOOLCHAIN_DEVELOPER_ROLE")
+	?.let { Snowflake(it) }
 	?: Snowflake(849305976951537725)
 
 internal val MODERATOR_ROLES: List<Snowflake> =
@@ -61,35 +68,50 @@ internal val MANAGER_ROLES: List<Snowflake> =
 		?.map { Snowflake(it.trim()) }
 		?: listOf(COMMUNITY_MANAGER_ROLE, TOOLCHAIN_MANAGER_ROLE)
 
-internal val MINECRAFT_UPDATE_PING_ROLE = envOrNull("MINECRAFT_UPDATE_PING_ROLE")?.let { Snowflake(it) }
+internal val MINECRAFT_UPDATE_PING_ROLE = envOrNull("MINECRAFT_UPDATE_PING_ROLE")
+	?.let { Snowflake(it) }
 	?: Snowflake(1003614007237816361)
 
 internal val COMMUNITY_GUILD = Snowflake(
-	envOrNull("COMMUNITY_GUILD_ID")?.toLong() ?: 817576132726620200
+	envOrNull("COMMUNITY_GUILD_ID")?.toLong()
+		?: 817576132726620200
 )
 
 internal val TOOLCHAIN_GUILD = Snowflake(
-	envOrNull("TOOLCHAIN_GUILD_ID")?.toLong() ?: 833872081585700874
+	envOrNull("TOOLCHAIN_GUILD_ID")?.toLong()
+		?: 833872081585700874
 )
 
-internal val GUILDS = envOrNull("GUILDS")?.split(',')?.map { Snowflake(it.trim()) }
+internal val GUILDS = envOrNull("GUILDS")
+	?.split(',')
+	?.map { Snowflake(it.trim()) }
 	?: listOf(COMMUNITY_GUILD, TOOLCHAIN_GUILD)
 
 internal val SUGGESTION_CHANNEL = Snowflake(
-	envOrNull("SUGGESTION_CHANNEL_ID")?.toLong() ?: 832353359074689084
+	envOrNull("SUGGESTION_CHANNEL_ID")?.toLong()
+		?: 832353359074689084
 )
 
 internal val GALLERY_CHANNEL = Snowflake(
-	envOrNull("GALLERY_CHANNEL_ID")?.toLong() ?: 832348385997619300
+	envOrNull("GALLERY_CHANNEL_ID")?.toLong()
+		?: 832348385997619300
 )
 
-internal val COMMUNITY_RELEASE_CHANNELS = envOrNull("COMMUNITY_RELEASE_CHANNELS")?.split(',')
-	?.map { Snowflake(it.trim()) } ?: listOf()
+internal val COMMUNITY_RELEASE_CHANNELS = envOrNull("COMMUNITY_RELEASE_CHANNELS")
+	?.split(',')
+	?.map { Snowflake(it.trim()) }
+	?: listOf()
 
-internal val COMMUNITY_DEV_CATEGORIES = envOrNull("COMMUNITY_DEV_CATEGORIES")
+internal val SKIPPABLE_HANDLER_CATEGORIES = envOrNull("COMMUNITY_DEV_CATEGORIES")
 	?.split(",")
 	?.map { Snowflake(it) }
-	?: listOf(Snowflake("832344714916659271"))
+	?: listOf(
+		"832344714916659271",  // Mod Development
+		"832333242874986608",  // Community Team
+		"948262230447755305",  // Outreach Team
+		"842018452214382602",  // Quilt Developers (Toolchain)
+	).map { Snowflake(it) }
 
-internal val SKIPPABLE_HANDLERS = envOrNull("SKIPPABLE_HANDLERS")?.split(",")
+internal val SKIPPABLE_HANDLER_IDS = envOrNull("SKIPPABLE_HANDLERS")
+	?.split(",")
 	?: listOf("rule-breaking-mod", "piracy", "problematic-launcher")
