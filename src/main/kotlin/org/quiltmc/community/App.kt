@@ -23,6 +23,7 @@ import com.kotlindiscord.kord.extensions.utils.getKoin
 import dev.kord.core.behavior.channel.asChannelOfOrNull
 import dev.kord.core.entity.channel.CategorizableChannel
 import dev.kord.core.entity.channel.GuildMessageChannel
+import dev.kord.core.event.Event
 import dev.kord.gateway.Intents
 import dev.kord.gateway.PrivilegedIntent
 import kotlinx.coroutines.flow.filter
@@ -32,6 +33,7 @@ import mu.KotlinLogging
 import org.quiltmc.community.cozy.modules.logs.extLogParser
 import org.quiltmc.community.cozy.modules.logs.processors.PiracyProcessor
 import org.quiltmc.community.cozy.modules.logs.processors.ProblematicLauncherProcessor
+import org.quiltmc.community.cozy.modules.logs.types.BaseLogHandler
 import org.quiltmc.community.cozy.modules.moderation.moderation
 import org.quiltmc.community.cozy.modules.rolesync.rolesync
 import org.quiltmc.community.cozy.modules.tags.tags
@@ -121,8 +123,6 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
 		extPluralKit()
 
 		extLogParser {
-			val predicateLogger = KotlinLogging.logger("org.quiltmc.community.AppKt.setupQuilt.logParser.predicate")
-
 			processor(PiracyProcessor())
 			processor(ProblematicLauncherProcessor())
 
@@ -130,24 +130,39 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
 			processor(RuleBreakingModProcessor())
 
 			@Suppress("TooGenericExceptionCaught")
-			globalPredicate { event ->
+			suspend fun predicate(handler: BaseLogHandler, event: Event): Boolean = with(handler) {
+				val predicateLogger = KotlinLogging.logger(
+					"org.quiltmc.community.AppKt.setupQuilt.extLogParser.predicate"
+				)
+
 				try {
 					val category = channelFor(event)?.asChannelOfOrNull<CategorizableChannel>()?.category
 					val guild = guildFor(event)
+					val isSkippable = identifier in SKIPPABLE_HANDLERS
 
-					if (category != null) {
-						// If we're in a dev category and this is a skippable handler, then fail the predicate
-						!(category.id in COMMUNITY_DEV_CATEGORIES && identifier in SKIPPABLE_HANDLERS)
-					} else {
-						// If we're in the toolchain server and this is a skippable handler, then fail the predicate
-						!(guild?.id == TOOLCHAIN_GUILD && identifier in SKIPPABLE_HANDLERS)
+					if (guild?.id == TOOLCHAIN_GUILD && isSkippable) {
+						predicateLogger.info { "Skipping handler $identifier: Skippable and within toolchain guild" }
+
+						return false
 					}
-				} catch (e: Exception) {
-					predicateLogger.warn(e) { "Skipping processor $identifier because of an exception." }
 
-					false
+					if (category?.id in COMMUNITY_DEV_CATEGORIES && isSkippable) {
+						predicateLogger.info { "Skipping handler $identifier: Skippable and within dev category" }
+
+						return false
+					}
+
+					predicateLogger.debug { "Passing handler $identifier" }
+
+					return true
+				} catch (e: Exception) {
+					predicateLogger.warn(e) { "Skipping processor $identifier due to an error." }
+
+					return true
 				}
 			}
+
+			globalPredicate(::predicate)
 		}
 
 		help {

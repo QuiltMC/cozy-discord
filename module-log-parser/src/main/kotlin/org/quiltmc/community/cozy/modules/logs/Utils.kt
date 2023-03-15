@@ -16,7 +16,9 @@ import org.quiltmc.community.cozy.modules.logs.config.LogParserConfig
 import org.quiltmc.community.cozy.modules.logs.config.SimpleLogParserConfig
 import java.net.URL
 
-public fun ExtensibleBotBuilder.ExtensionsBuilder.extLogParser(builder: (SimpleLogParserConfig.Builder).() -> Unit) {
+public inline fun ExtensibleBotBuilder.ExtensionsBuilder.extLogParser(
+	builder: (SimpleLogParserConfig.Builder).() -> Unit
+) {
 	val config = SimpleLogParserConfig(builder)
 
 	loadModule { single { config } bind LogParserConfig::class }

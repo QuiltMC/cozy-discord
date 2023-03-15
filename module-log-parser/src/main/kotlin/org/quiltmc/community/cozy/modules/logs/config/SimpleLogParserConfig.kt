@@ -78,7 +78,7 @@ public class SimpleLogParserConfig(private val builder: Builder) : LogParserConf
 	}
 }
 
-public fun SimpleLogParserConfig(builder: (SimpleLogParserConfig.Builder).() -> Unit): SimpleLogParserConfig {
+public inline fun SimpleLogParserConfig(builder: (SimpleLogParserConfig.Builder).() -> Unit): SimpleLogParserConfig {
 	val builderObj = SimpleLogParserConfig.Builder()
 
 	builder(builderObj)
