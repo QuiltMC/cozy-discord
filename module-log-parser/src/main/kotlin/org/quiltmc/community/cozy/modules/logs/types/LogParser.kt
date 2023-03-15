@@ -6,20 +6,17 @@
 
 package org.quiltmc.community.cozy.modules.logs.types
 
+import dev.kord.core.event.Event
 import org.quiltmc.community.cozy.modules.logs.data.Log
-import org.quiltmc.community.cozy.modules.logs.data.Order
 
 @Suppress("FunctionNaming")
-public abstract class LogParser : Ordered {
-	public abstract val identifier: String
-	public abstract override val order: Order
-
-	protected open suspend fun predicate(log: Log): Boolean =
+public abstract class LogParser : BaseLogHandler {
+	protected open suspend fun predicate(log: Log, event: Event): Boolean =
 		true
 
 	/** @suppress Internal function; use for intermediary types only. **/
-	public open suspend fun _predicate(log: Log): Boolean =
-		predicate(log)
+	public open suspend fun _predicate(log: Log, event: Event): Boolean =
+		predicate(log, event)
 
 	public abstract suspend fun process(log: Log)
 }

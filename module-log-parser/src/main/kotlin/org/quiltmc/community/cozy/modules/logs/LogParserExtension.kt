@@ -18,6 +18,7 @@ import com.kotlindiscord.kord.extensions.utils.envOrNull
 import com.kotlindiscord.kord.extensions.utils.respond
 import com.kotlindiscord.kord.extensions.utils.scheduling.Scheduler
 import dev.kord.core.entity.Message
+import dev.kord.core.event.Event
 import dev.kord.rest.builder.message.create.MessageCreateBuilder
 import dev.kord.rest.builder.message.create.embed
 import io.ktor.client.*
@@ -34,6 +35,7 @@ import org.quiltmc.community.cozy.modules.logs.data.PastebinConfig
 import org.quiltmc.community.cozy.modules.logs.events.DefaultEventHandler
 import org.quiltmc.community.cozy.modules.logs.events.EventHandler
 import org.quiltmc.community.cozy.modules.logs.events.PKEventHandler
+import org.quiltmc.community.cozy.modules.logs.types.BaseLogHandler
 import java.net.URL
 import kotlin.time.Duration.Companion.minutes
 
@@ -88,14 +90,14 @@ public class LogParserExtension : Extension() {
 		scheduler?.shutdown()
 	}
 
-	internal suspend fun handleMessage(message: Message) {
+	internal suspend fun handleMessage(message: Message, event: Event) {
 		if (message.content.isEmpty() && message.attachments.isEmpty()) {
 			return
 		}
 
 		val logs = (parseLinks(message.content) + message.attachments.map { it.url })
 			.map { URL(it) }
-			.map { handleLink(it) }
+			.map { handleLink(it, event) }
 			.flatten()
 			.filter {
 				it.aborted ||
@@ -239,12 +241,12 @@ public class LogParserExtension : Extension() {
 	}
 
 	@Suppress("TooGenericExceptionCaught")
-	private suspend fun handleLink(link: URL): List<Log> {
+	private suspend fun handleLink(link: URL, event: Event): List<Log> {
 		val strings: MutableList<String> = mutableListOf()
 		val logs: MutableList<Log> = mutableListOf()
 
 		for (retriever in config.getRetrievers()) {
-			if (!retriever._predicate(link)) {
+			if (!checkPredicates(retriever, event) || !retriever._predicate(link, event)) {
 				continue
 			}
 
@@ -264,7 +266,7 @@ public class LogParserExtension : Extension() {
 			log.url = link
 
 			for (parser in config.getParsers()) {
-				if (!parser._predicate(log)) {
+				if (!checkPredicates(parser, event) || !parser._predicate(log, event)) {
 					continue
 				}
 
@@ -282,7 +284,7 @@ public class LogParserExtension : Extension() {
 			}
 
 			for (processor in config.getProcessors()) {
-				if (!processor._predicate(log)) {
+				if (!checkPredicates(processor, event) || !processor._predicate(log, event)) {
 					continue
 				}
 
@@ -313,4 +315,7 @@ public class LogParserExtension : Extension() {
 
 		return yaml.decodeFromString(text)
 	}
+
+	private suspend fun checkPredicates(handler: BaseLogHandler, event: Event) =
+		config.getGlobalPredicates().all { it(handler, event) }
 }

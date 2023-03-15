@@ -34,6 +34,7 @@ public class SimpleLogParserConfig(private val builder: Builder) : LogParserConf
 
 	override suspend fun getStaffCommandChecks(): List<Check<*>> = builder.staffCommandChecks
 	override suspend fun getUserCommandChecks(): List<Check<*>> = builder.userCommandChecks
+	override suspend fun getGlobalPredicates(): List<Predicate> = builder.globalPredicates
 
 	public class Builder {
 		public var parsers: MutableList<LogParser> = mutableListOf(
@@ -62,6 +63,7 @@ public class SimpleLogParserConfig(private val builder: Builder) : LogParserConf
 
 		public var staffCommandChecks: MutableList<Check<*>> = mutableListOf()
 		public var userCommandChecks: MutableList<Check<*>> = mutableListOf()
+		public var globalPredicates: MutableList<Predicate> = mutableListOf()
 
 		public var urlRegex: Regex = "(https?://[^\\s>]+)".toRegex(RegexOption.IGNORE_CASE)
 
@@ -70,6 +72,7 @@ public class SimpleLogParserConfig(private val builder: Builder) : LogParserConf
 		public fun retriever(parser: LogRetriever): Boolean = retrievers.add(parser)
 		public fun staffCommandCheck(check: Check<*>): Boolean = staffCommandChecks.add(check)
 		public fun userCommandCheck(check: Check<*>): Boolean = userCommandChecks.add(check)
+		public fun globalPredicate(predicate: Predicate): Boolean = globalPredicates.add(predicate)
 
 		public fun build(): SimpleLogParserConfig = SimpleLogParserConfig(this)
 	}

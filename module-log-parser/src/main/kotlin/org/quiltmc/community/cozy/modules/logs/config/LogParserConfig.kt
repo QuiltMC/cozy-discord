@@ -7,9 +7,13 @@
 package org.quiltmc.community.cozy.modules.logs.config
 
 import com.kotlindiscord.kord.extensions.checks.types.Check
+import dev.kord.core.event.Event
+import org.quiltmc.community.cozy.modules.logs.types.BaseLogHandler
 import org.quiltmc.community.cozy.modules.logs.types.LogParser
 import org.quiltmc.community.cozy.modules.logs.types.LogProcessor
 import org.quiltmc.community.cozy.modules.logs.types.LogRetriever
+
+public typealias Predicate = suspend (BaseLogHandler).(Event) -> Boolean
 
 public interface LogParserConfig {
 	/**
@@ -42,4 +46,7 @@ public interface LogParserConfig {
 	 * Get the configured user command checks, used to ensure a user-facing command can be run.
 	 */
 	public suspend fun getUserCommandChecks(): List<Check<*>>
+
+	/** Get the configured predicates that must pass (return `true`) for any handler to run. **/
+	public suspend fun getGlobalPredicates(): List<Predicate>
 }

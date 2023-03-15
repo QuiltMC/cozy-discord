@@ -28,7 +28,7 @@ class RuleBreakingModProcessor : LogProcessor() {
 			return
 		}
 
-		log.addMessage(
+		log.abort(
 			buildString {
 				append("You appear to have the following rule-breaking mods installed: ")
 
@@ -41,6 +41,7 @@ class RuleBreakingModProcessor : LogProcessor() {
 				)
 
 				appendLine()
+
 				append(
 					"For more information, please see [rule 5 on the site]($SITE_LINK). Please note that we cannot " +
 							"provide you with support while you're using mods that break our rules."

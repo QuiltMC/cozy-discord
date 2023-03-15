@@ -12,18 +12,23 @@
 package org.quiltmc.community
 
 import com.kotlindiscord.kord.extensions.ExtensibleBot
+import com.kotlindiscord.kord.extensions.checks.channelFor
+import com.kotlindiscord.kord.extensions.checks.guildFor
 import com.kotlindiscord.kord.extensions.modules.extra.mappings.extMappings
 import com.kotlindiscord.kord.extensions.modules.extra.phishing.DetectionAction
 import com.kotlindiscord.kord.extensions.modules.extra.phishing.extPhishing
 import com.kotlindiscord.kord.extensions.modules.extra.pluralkit.extPluralKit
 import com.kotlindiscord.kord.extensions.utils.envOrNull
 import com.kotlindiscord.kord.extensions.utils.getKoin
+import dev.kord.core.behavior.channel.asChannelOfOrNull
+import dev.kord.core.entity.channel.CategorizableChannel
 import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.gateway.Intents
 import dev.kord.gateway.PrivilegedIntent
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.lastOrNull
+import mu.KotlinLogging
 import org.quiltmc.community.cozy.modules.logs.extLogParser
 import org.quiltmc.community.cozy.modules.logs.processors.PiracyProcessor
 import org.quiltmc.community.cozy.modules.logs.processors.ProblematicLauncherProcessor
@@ -33,6 +38,8 @@ import org.quiltmc.community.cozy.modules.tags.tags
 import org.quiltmc.community.cozy.modules.welcome.welcomeChannel
 import org.quiltmc.community.database.collections.TagsCollection
 import org.quiltmc.community.database.collections.WelcomeChannelCollection
+import org.quiltmc.community.logs.NonQuiltLoaderProcessor
+import org.quiltmc.community.logs.RuleBreakingModProcessor
 import org.quiltmc.community.modes.quilt.extensions.*
 import org.quiltmc.community.modes.quilt.extensions.filtering.FilterExtension
 import org.quiltmc.community.modes.quilt.extensions.github.GithubExtension
@@ -114,8 +121,33 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
 		extPluralKit()
 
 		extLogParser {
+			val predicateLogger = KotlinLogging.logger("org.quiltmc.community.AppKt.setupQuilt.logParser.predicate")
+
 			processor(PiracyProcessor())
 			processor(ProblematicLauncherProcessor())
+
+			processor(NonQuiltLoaderProcessor())
+			processor(RuleBreakingModProcessor())
+
+			@Suppress("TooGenericExceptionCaught")
+			globalPredicate { event ->
+				try {
+					val category = channelFor(event)?.asChannelOfOrNull<CategorizableChannel>()?.category
+					val guild = guildFor(event)
+
+					if (category != null) {
+						// If we're in a dev category and this is a skippable handler, then fail the predicate
+						!(category.id in COMMUNITY_DEV_CATEGORIES && identifier in SKIPPABLE_HANDLERS)
+					} else {
+						// If we're in the toolchain server and this is a skippable handler, then fail the predicate
+						!(guild?.id == TOOLCHAIN_GUILD && identifier in SKIPPABLE_HANDLERS)
+					}
+				} catch (e: Exception) {
+					predicateLogger.warn(e) { "Skipping processor $identifier because of an exception." }
+
+					false
+				}
+			}
 		}
 
 		help {

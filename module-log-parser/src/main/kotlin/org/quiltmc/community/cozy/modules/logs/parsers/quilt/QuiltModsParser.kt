@@ -7,6 +7,7 @@
 package org.quiltmc.community.cozy.modules.logs.parsers.quilt
 
 import com.kotlindiscord.kord.extensions.parser.Cursor
+import dev.kord.core.event.Event
 import org.quiltmc.community.cozy.modules.logs.Version
 import org.quiltmc.community.cozy.modules.logs.data.LoaderType
 import org.quiltmc.community.cozy.modules.logs.data.Log
@@ -21,7 +22,7 @@ public class QuiltModsParser : LogParser() {
 	override val identifier: String = "mods-quilt"
 	override val order: Order = Order.Default
 
-	override suspend fun predicate(log: Log): Boolean =
+	override suspend fun predicate(log: Log, event: Event): Boolean =
 		log.getLoaderVersion(LoaderType.Quilt) != null
 
 	override suspend fun process(log: Log) {

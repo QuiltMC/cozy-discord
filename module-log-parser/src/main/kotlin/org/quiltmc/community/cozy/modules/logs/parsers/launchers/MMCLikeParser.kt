@@ -6,6 +6,7 @@
 
 package org.quiltmc.community.cozy.modules.logs.parsers.launchers
 
+import dev.kord.core.event.Event
 import org.quiltmc.community.cozy.modules.logs.data.Launcher
 import org.quiltmc.community.cozy.modules.logs.data.Log
 import org.quiltmc.community.cozy.modules.logs.data.Order
@@ -24,7 +25,7 @@ public class MMCLikeParser : LogParser() {
 	override val identifier: String = "launcher-mmc-like"
 	override val order: Order = Order.Early
 
-	override suspend fun predicate(log: Log): Boolean =
+	override suspend fun predicate(log: Log, event: Event): Boolean =
 		// No PolyMC, we don't support nazis
 		log.launcher?.name in arrayOf(Launcher.MultiMC, Launcher.Prism)
 

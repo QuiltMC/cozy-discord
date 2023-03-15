@@ -6,6 +6,7 @@
 
 package org.quiltmc.community.cozy.modules.logs.processors.quilt
 
+import dev.kord.core.event.Event
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -41,7 +42,7 @@ public class IncompatibleModProcessor : LogProcessor() {
 	private var lastCheck: Instant? = null
 	private var incompatibleMods: List<IncompatibleMod> = listOf()
 
-	override suspend fun predicate(log: Log): Boolean =
+	override suspend fun predicate(log: Log, event: Event): Boolean =
 		log.getLoaderVersion(LoaderType.Quilt) != null
 
 	override suspend fun process(log: Log) {
@@ -75,7 +76,7 @@ public class IncompatibleModProcessor : LogProcessor() {
 
 		log.addMessage(
 			buildString {
-				appendLine("You appear to have the following incompatible mods installed:")
+				appendLine("**Potentially incompatible mods installed:**")
 				appendLine()
 
 				typedMods.forEach { (type, mods) ->

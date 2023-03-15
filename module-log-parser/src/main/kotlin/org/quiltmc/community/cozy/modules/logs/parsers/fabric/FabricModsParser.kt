@@ -6,6 +6,7 @@
 
 package org.quiltmc.community.cozy.modules.logs.parsers.fabric
 
+import dev.kord.core.event.Event
 import org.quiltmc.community.cozy.modules.logs.Version
 import org.quiltmc.community.cozy.modules.logs.data.LoaderType
 import org.quiltmc.community.cozy.modules.logs.data.Log
@@ -20,7 +21,7 @@ public class FabricModsParser : LogParser() {
 	override val identifier: String = "mods-fabric"
 	override val order: Order = Order.Default
 
-	override suspend fun predicate(log: Log): Boolean =
+	override suspend fun predicate(log: Log, event: Event): Boolean =
 		log.getLoaderVersion(LoaderType.Fabric) != null
 
 	override suspend fun process(log: Log) {

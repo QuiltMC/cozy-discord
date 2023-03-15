@@ -85,3 +85,11 @@ internal val GALLERY_CHANNEL = Snowflake(
 
 internal val COMMUNITY_RELEASE_CHANNELS = envOrNull("COMMUNITY_RELEASE_CHANNELS")?.split(',')
 	?.map { Snowflake(it.trim()) } ?: listOf()
+
+internal val COMMUNITY_DEV_CATEGORIES = envOrNull("COMMUNITY_DEV_CATEGORIES")
+	?.split(",")
+	?.map { Snowflake(it) }
+	?: listOf(Snowflake("832344714916659271"))
+
+internal val SKIPPABLE_HANDLERS = envOrNull("SKIPPABLE_HANDLERS")?.split(",")
+	?: listOf("rule-breaking-mod", "piracy", "problematic-launcher")

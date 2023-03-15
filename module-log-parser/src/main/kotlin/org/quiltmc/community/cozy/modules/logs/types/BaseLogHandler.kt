@@ -8,9 +8,10 @@ package org.quiltmc.community.cozy.modules.logs.types
 
 import org.quiltmc.community.cozy.modules.logs.data.Order
 
-public interface Ordered {
+public interface BaseLogHandler {
+	public val identifier: String
 	public val order: Order
 }
 
-public fun <T : Ordered, C : Collection<T>> C.sortOrdered(): List<T> =
+public fun <T : BaseLogHandler, C : Collection<T>> C.sortOrdered(): List<T> =
 	this.sortedBy { it.order.value }

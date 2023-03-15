@@ -6,6 +6,7 @@
 
 package org.quiltmc.community.cozy.modules.logs.processors.quilt
 
+import dev.kord.core.event.Event
 import io.github.z4kn4fein.semver.Version
 import org.quiltmc.community.cozy.modules.logs.api.QuiltMetaClient
 import org.quiltmc.community.cozy.modules.logs.data.LoaderType
@@ -19,7 +20,7 @@ public class QuiltLoaderVersionProcessor : LogProcessor() {
 
 	private val metaClient = QuiltMetaClient()
 
-	override suspend fun predicate(log: Log): Boolean =
+	override suspend fun predicate(log: Log, event: Event): Boolean =
 		log.getLoaderVersion(LoaderType.Quilt) != null
 
 	override suspend fun process(log: Log) {

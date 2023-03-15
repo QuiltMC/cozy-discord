@@ -14,7 +14,7 @@ public class PKEventHandler(private val extension: LogParserExtension) : EventHa
 	override suspend fun setup(): Unit = with(extension) {
 		event<PKMessageCreateEvent> {
 			action {
-				handleMessage(event.message)
+				handleMessage(event.message, event)
 			}
 		}
 	}

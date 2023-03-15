@@ -14,7 +14,7 @@ public class DefaultEventHandler(private val extension: LogParserExtension) : Ev
 	override suspend fun setup(): Unit = with(extension) {
 		event<MessageCreateEvent> {
 			action {
-				handleMessage(event.message)
+				handleMessage(event.message, event)
 			}
 		}
 	}

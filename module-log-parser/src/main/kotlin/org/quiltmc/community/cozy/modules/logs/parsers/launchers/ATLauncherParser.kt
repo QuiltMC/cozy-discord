@@ -6,6 +6,7 @@
 
 package org.quiltmc.community.cozy.modules.logs.parsers.launchers
 
+import dev.kord.core.event.Event
 import org.quiltmc.community.cozy.modules.logs.data.Launcher
 import org.quiltmc.community.cozy.modules.logs.data.Log
 import org.quiltmc.community.cozy.modules.logs.data.Order
@@ -20,7 +21,7 @@ public class ATLauncherParser : LogParser() {
 	override val identifier: String = "launcher-atlauncher"
 	override val order: Order = Order.Early
 
-	override suspend fun predicate(log: Log): Boolean =
+	override suspend fun predicate(log: Log, event: Event): Boolean =
 		log.launcher?.name == Launcher.ATLauncher
 
 	override suspend fun process(log: Log) {

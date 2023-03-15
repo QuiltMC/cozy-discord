@@ -6,6 +6,7 @@
 
 package org.quiltmc.community.cozy.modules.logs.retrievers
 
+import dev.kord.core.event.Event
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.utils.io.core.*
@@ -31,7 +32,7 @@ public class AttachmentLogRetriever : LogRetriever() {
 	override val order: Order = Order.Earlier
 
 	@Suppress("SpreadOperator")
-	override suspend fun predicate(url: URL): Boolean =
+	override suspend fun predicate(url: URL, event: Event): Boolean =
 		url.host in DOMAINS && (
 				url.path.endsWithExtensions(*EXTENSIONS) ||
 						'.' !in url.path.substringAfterLast('/')

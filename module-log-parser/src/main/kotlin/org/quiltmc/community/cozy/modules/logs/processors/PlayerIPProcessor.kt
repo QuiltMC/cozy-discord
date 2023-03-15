@@ -7,6 +7,7 @@
 package org.quiltmc.community.cozy.modules.logs.processors
 
 import com.kotlindiscord.kord.extensions.utils.runSuspended
+import dev.kord.core.event.Event
 import org.quiltmc.community.cozy.modules.logs.data.Log
 import org.quiltmc.community.cozy.modules.logs.data.Order
 import org.quiltmc.community.cozy.modules.logs.types.LogProcessor
@@ -26,7 +27,7 @@ public class PlayerIPProcessor : LogProcessor() {
 	override val identifier: String = "player-ip"
 	override val order: Order = Order.Early
 
-	override suspend fun predicate(log: Log): Boolean =
+	override suspend fun predicate(log: Log, event: Event): Boolean =
 		!log.fromCommand
 
 	override suspend fun process(log: Log) {

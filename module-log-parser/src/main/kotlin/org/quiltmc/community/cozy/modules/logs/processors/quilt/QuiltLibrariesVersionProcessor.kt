@@ -6,6 +6,7 @@
 
 package org.quiltmc.community.cozy.modules.logs.processors.quilt
 
+import dev.kord.core.event.Event
 import io.github.z4kn4fein.semver.Version
 import org.quiltmc.community.cozy.modules.logs.api.ModrinthClient
 import org.quiltmc.community.cozy.modules.logs.data.LoaderType
@@ -19,7 +20,7 @@ public class QuiltLibrariesVersionProcessor : LogProcessor() {
 
 	private val modrinthClient = ModrinthClient()
 
-	override suspend fun predicate(log: Log): Boolean =
+	override suspend fun predicate(log: Log, event: Event): Boolean =
 		(log.minecraftVersion != null || log.getMod("minecraft") != null) &&
 				log.getLoaderVersion(LoaderType.Quilt) != null &&
 				log.getMod("quilted_fabric_api") != null

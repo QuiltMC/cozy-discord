@@ -66,6 +66,9 @@ extensions {
 		// this.retrievers: Clear this if you don't want to use the default processors
 		retriever(MyRetriever())  // Call this to add your own retrievers
 
+		// Global predicates that must return `true` for any log handler to be run
+		globalPredicate { event -> true /** this: BaseLogHandler **/ }
+
 		// Not currently implemented; use this to add checks that must pass for staff commands to run
 		staffCommandCheck { hasPermission(Permission.Administrator) }
 
