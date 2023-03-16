@@ -182,6 +182,13 @@
       description: "Get pinged when we post announcements in <#832357051463630947>."
       emoji: "📢"
 
+    1086037902577909870:
+      description: >
+        Get pinged with infrastructure status updates, notifying you about outages and their resolutions in
+        <#1086035355339333752>.
+
+      emoji: "📢"
+
     1003614007237816361:
       description: "Get pinged when a new Minecraft snapshot or release is published in <#838805249271267398>."
       emoji: "📢"
