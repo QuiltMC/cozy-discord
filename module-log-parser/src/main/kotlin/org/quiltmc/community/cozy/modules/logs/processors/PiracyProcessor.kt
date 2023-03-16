@@ -6,16 +6,24 @@
 
 package org.quiltmc.community.cozy.modules.logs.processors
 
+import dev.kord.core.event.Event
 import org.quiltmc.community.cozy.modules.logs.data.Launcher
 import org.quiltmc.community.cozy.modules.logs.data.Log
 import org.quiltmc.community.cozy.modules.logs.data.Order
 import org.quiltmc.community.cozy.modules.logs.types.LogProcessor
 
 private val CHECK_REGEX = "Failed to verify authentication\n.+?401\n".toRegex()
+private const val QUILT_DEV_TEXT = "Loaded Quilt development mappings for mixin remapper!"
+private const val FABRIC_DEV_TEXT = "at net.fabricmc.devlaunchinjector.Main.main(Main.java"
 
 public class PiracyProcessor : LogProcessor() {
 	override val identifier: String = "piracy"
 	override val order: Order = Order.Earlier
+
+	override suspend fun predicate(log: Log, event: Event): Boolean {
+		return QUILT_DEV_TEXT !in log.content &&
+				FABRIC_DEV_TEXT !in log.content
+	}
 
 	override suspend fun process(log: Log) {
 		if (log.launcher?.name == Launcher.TLauncher) {

@@ -12,26 +12,19 @@
 package org.quiltmc.community
 
 import com.kotlindiscord.kord.extensions.ExtensibleBot
-import com.kotlindiscord.kord.extensions.checks.channelSnowflakeFor
-import com.kotlindiscord.kord.extensions.checks.guildFor
 import com.kotlindiscord.kord.extensions.modules.extra.mappings.extMappings
 import com.kotlindiscord.kord.extensions.modules.extra.phishing.DetectionAction
 import com.kotlindiscord.kord.extensions.modules.extra.phishing.extPhishing
 import com.kotlindiscord.kord.extensions.modules.extra.pluralkit.extPluralKit
 import com.kotlindiscord.kord.extensions.utils.envOrNull
 import com.kotlindiscord.kord.extensions.utils.getKoin
-import dev.kord.core.Kord
-import dev.kord.core.entity.channel.Category
 import dev.kord.core.entity.channel.GuildMessageChannel
-import dev.kord.core.event.Event
 import dev.kord.gateway.Intents
 import dev.kord.gateway.PrivilegedIntent
 import kotlinx.coroutines.flow.*
-import mu.KotlinLogging
 import org.quiltmc.community.cozy.modules.logs.extLogParser
 import org.quiltmc.community.cozy.modules.logs.processors.PiracyProcessor
 import org.quiltmc.community.cozy.modules.logs.processors.ProblematicLauncherProcessor
-import org.quiltmc.community.cozy.modules.logs.types.BaseLogHandler
 import org.quiltmc.community.cozy.modules.moderation.moderation
 import org.quiltmc.community.cozy.modules.rolesync.rolesync
 import org.quiltmc.community.cozy.modules.tags.tags
@@ -129,53 +122,53 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
 			processor(NonQuiltLoaderProcessor())
 			processor(RuleBreakingModProcessor())
 
-			@Suppress("TooGenericExceptionCaught")
-			suspend fun predicate(handler: BaseLogHandler, event: Event): Boolean = with(handler) {
-				val predicateLogger = KotlinLogging.logger(
-					"org.quiltmc.community.AppKt.setupQuilt.extLogParser.predicate"
-				)
-
-				val kord: Kord = getKoin().get()
-				val channelId = channelSnowflakeFor(event)
-				val guild = guildFor(event)
-
-				try {
-					val skippableChannelIds = SKIPPABLE_HANDLER_CATEGORIES.mapNotNull {
-						kord.getChannelOf<Category>(it)
-							?.channels
-							?.map { ch -> ch.id }
-							?.toList()
-					}.flatten()
-
-					val isSkippable = identifier in SKIPPABLE_HANDLER_IDS
-
-					if (guild?.id == TOOLCHAIN_GUILD && isSkippable) {
-						predicateLogger.info {
-							"Skipping handler '$identifier' in <#$channelId>: Skippable handler, and on Toolchain"
-						}
-
-						return false
-					}
-
-					if (channelId in skippableChannelIds && isSkippable) {
-						predicateLogger.info {
-							"Skipping handler '$identifier' in <#$channelId>: Skippable handler, and in a dev category"
-						}
-
-						return false
-					}
-
-					predicateLogger.debug { "Passing handler '$identifier' in <#$channelId>" }
-
-					return true
-				} catch (e: Exception) {
-					predicateLogger.warn(e) { "Skipping processor '$identifier' in <#$channelId> due to an error." }
-
-					return true
-				}
-			}
-
-			globalPredicate(::predicate)
+//			@Suppress("TooGenericExceptionCaught")
+//			suspend fun predicate(handler: BaseLogHandler, event: Event): Boolean = with(handler) {
+//				val predicateLogger = KotlinLogging.logger(
+//					"org.quiltmc.community.AppKt.setupQuilt.extLogParser.predicate"
+//				)
+//
+//				val kord: Kord = getKoin().get()
+//				val channelId = channelSnowflakeFor(event)
+//				val guild = guildFor(event)
+//
+//				try {
+//					val skippableChannelIds = SKIPPABLE_HANDLER_CATEGORIES.mapNotNull {
+//						kord.getChannelOf<Category>(it)
+//							?.channels
+//							?.map { ch -> ch.id }
+//							?.toList()
+//					}.flatten()
+//
+//					val isSkippable = identifier in SKIPPABLE_HANDLER_IDS
+//
+//					if (guild?.id == TOOLCHAIN_GUILD && isSkippable) {
+//						predicateLogger.info {
+//							"Skipping handler '$identifier' in <#$channelId>: Skippable handler, and on Toolchain"
+//						}
+//
+//						return false
+//					}
+//
+//					if (channelId in skippableChannelIds && isSkippable) {
+//						predicateLogger.info {
+//							"Skipping handler '$identifier' in <#$channelId>: Skippable handler, and in a dev category"
+//						}
+//
+//						return false
+//					}
+//
+//					predicateLogger.debug { "Passing handler '$identifier' in <#$channelId>" }
+//
+//					return true
+//				} catch (e: Exception) {
+//					predicateLogger.warn(e) { "Skipping processor '$identifier' in <#$channelId> due to an error." }
+//
+//					return true
+//				}
+//			}
+//
+//			globalPredicate(::predicate)
 		}
 
 		help {
