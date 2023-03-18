@@ -42,7 +42,7 @@ yourself.
 
 **Maven repo:** `https://maven.quiltmc.org/repository/snapshot/`
 **Coordinate:** `org.quiltmc.community:module-log-parser`
-**Version:** `1.0-SNAPSHOT`
+**Version:** `1.0.1-SNAPSHOT`
 
 **Note:** If you're using the PluralKit module for KordEx, you need to load it **before** you try to load this module.
 Failure to do this means that it will not be used, and PluralKit messages will not be handled correctly.

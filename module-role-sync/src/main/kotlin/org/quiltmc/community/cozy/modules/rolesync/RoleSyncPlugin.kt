@@ -15,7 +15,7 @@ import org.pf4j.PluginWrapper
  */
 @WiredPlugin(
 	id = RoleSyncPlugin.id,
-	version = "1.0.0-SNAPSHOT",
+	version = "1.0.1-SNAPSHOT",
 
 	author = "QuiltMC",
 	description = "Various moderation tools for the QuiltMC community.",

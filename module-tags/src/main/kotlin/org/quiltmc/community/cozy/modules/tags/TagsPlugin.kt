@@ -11,11 +11,11 @@ import com.kotlindiscord.kord.extensions.plugins.annotations.plugins.WiredPlugin
 import org.pf4j.PluginWrapper
 
 /**
- * Plugin containing the [UserCleanupExtension], which removes pending users after they've lurked for a while.
+ * Plugin containing the [TagsExtension], which removes pending users after they've lurked for a while.
  */
 @WiredPlugin(
 	id = TagsPlugin.id,
-	version = "1.0.0-SNAPSHOT",
+	version = "1.0.1-SNAPSHOT",
 
 	author = "QuiltMC",
 	description = "Tags system, allowing for the addition and display of configurable text snippets.",

@@ -15,7 +15,7 @@ import org.pf4j.PluginWrapper
  */
 @WiredPlugin(
 	id = UserCleanupPlugin.id,
-	version = "1.0.0-SNAPSHOT",
+	version = "1.0.1-SNAPSHOT",
 
 	author = "QuiltMC",
 	description = "Automatic cleanup of lurking users that don't pass member screening",
