@@ -63,6 +63,7 @@ public class IncompatibleModProcessor : LogProcessor() {
 
 			Incompatibility.GAME to mutableListOf(),
 			Incompatibility.OTHERS to mutableListOf(),
+			Incompatibility.WORKAROUND to mutableListOf(),
 			Incompatibility.SELF to mutableListOf(),
 		)
 
@@ -80,9 +81,20 @@ public class IncompatibleModProcessor : LogProcessor() {
 				appendLine()
 
 				typedMods.forEach { (type, mods) ->
-						append("**» ${type.readable}:** ")
-						appendLine(mods.joinToString { it.name })
-					}
+					appendLine("**${type.readable}**")
+					appendLine(
+						mods.joinToString("\n") {
+							"**» ${it.name}**" + if (it.note != null) {
+								": ${it.note}"
+							} else {
+								""
+							}
+						}
+					)
+					appendLine()
+				}
+
+				trim()
 
 				appendLine()
 				append(
@@ -125,7 +137,8 @@ public class IncompatibleModProcessor : LogProcessor() {
 	public enum class Incompatibility(public val order: Int, public val readable: String) {
 		GAME(0, "Breaks the game"),
 		OTHERS(1, "Breaks other mods"),
-		SELF(2, "Non-fatal errors or broken features")
+		WORKAROUND(2, "Requires a work-around"),
+		SELF(3, "Non-fatal errors or broken features")
 	}
 
 	@Serializable
@@ -133,6 +146,7 @@ public class IncompatibleModProcessor : LogProcessor() {
 		public val ids: List<String>,
 		public val name: String,
 		public val type: Incompatibility,
+		public val note: String? = null,
 	)
 
 	@Serializable
