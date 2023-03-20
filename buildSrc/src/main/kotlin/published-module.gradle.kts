@@ -6,6 +6,7 @@
 
 plugins {
 	`maven-publish`
+	signing
 }
 
 val sourceJar: Task by tasks.getting
@@ -49,5 +50,14 @@ publishing {
 			artifact(sourceJar)
 //            artifact(javadocJar)
 		}
+	}
+
+	signing {
+		val signingKey: String? by project ?: return@signing
+		val signingPassword: String? by project
+
+		useInMemoryPgpKeys(signingKey, signingPassword ?: "")
+
+		sign(publishing.publications["maven"])
 	}
 }
