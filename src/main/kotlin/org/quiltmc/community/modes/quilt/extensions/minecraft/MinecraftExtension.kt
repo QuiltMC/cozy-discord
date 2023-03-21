@@ -338,13 +338,14 @@ class MinecraftExtension : Extension() {
 				is TextChannel -> startPublicThreadWithMessage(
 					message.id,
 					title,
-					guild.asGuild().getMaxArchiveDuration()
+					"Thread created for Minecraft update"
 				)
 
 				is NewsChannel -> {
 					startPublicThreadWithMessage(
 						message.id,
 						title,
+						// TODO: This needs a reason, not a duration
 						guild.asGuild().getMaxArchiveDuration()
 					)
 

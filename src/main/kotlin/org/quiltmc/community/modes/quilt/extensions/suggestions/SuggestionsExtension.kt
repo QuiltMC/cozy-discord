@@ -506,7 +506,7 @@ class SuggestionsExtension : Extension() {
 			val thread = (channel as? TextChannel)?.startPublicThreadWithMessage(
 				message.id,
 				name = suggestion._id.toString(),
-				archiveDuration = channel.guild.asGuild().getMaxArchiveDuration()
+				"Suggestion thread created"
 			)
 
 			if (thread != null) {

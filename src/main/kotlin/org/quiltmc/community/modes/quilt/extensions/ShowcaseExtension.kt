@@ -119,7 +119,8 @@ class ShowcaseExtension : Extension() {
 
 				val thread = channel.startPublicThreadWithMessage(
 					event.message.id,
-					title
+					title,
+					"Showcase thread created for ${event.message.author?.tag}"
 				)
 
 				threads.set(
