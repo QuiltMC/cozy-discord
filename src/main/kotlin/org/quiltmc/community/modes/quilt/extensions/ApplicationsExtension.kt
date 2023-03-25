@@ -434,7 +434,7 @@ class ApplicationsExtension : Extension() {
 							logger.info { "Creating thread for application: ${application._id}" }
 
 							// Not actually deprecated, Kord walled themselves into a hole here
-							@Suppress("DEPRECATION")
+							@Suppress("DEPRECATION_ERROR")
 							val thread = threadChannel.startPrivateThread("App: ${user.tag}")
 							val initialMessage = thread.createMessage("Better get the mods in...")
 
