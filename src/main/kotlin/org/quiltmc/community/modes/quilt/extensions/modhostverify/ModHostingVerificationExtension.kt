@@ -382,10 +382,8 @@ class ModHostingVerificationExtension : Extension() {
 			possibleExistingThread.createMessage { attachQuiltCompatEmbed(author, message, projects, true) }
 		} else {
 			val thread = channel.startPublicThreadWithMessage(
-				message.id,
-				message.contentToThreadName(channel.name),
-				"Thread created for compliance purposes"
-			)
+				message.id, message.contentToThreadName(channel.name)
+			) { reason = "Thread created for compliance purposes" }
 
 			threads.set(
 				OwnedThread(thread.id, author.id, message.getGuild().id)

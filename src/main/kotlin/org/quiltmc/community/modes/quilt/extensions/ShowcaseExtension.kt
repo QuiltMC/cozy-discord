@@ -118,10 +118,8 @@ class ShowcaseExtension : Extension() {
 				val title = event.message.contentToThreadName("Gallery")
 
 				val thread = channel.startPublicThreadWithMessage(
-					event.message.id,
-					title,
-					"Showcase thread created for ${event.message.author?.tag}"
-				)
+					event.message.id, title
+				) { reason = "Showcase thread created for ${event.message.author?.tag}" }
 
 				threads.set(
 					OwnedThread(thread.id, authorId, guild.id)

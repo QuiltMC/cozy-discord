@@ -24,7 +24,6 @@ import com.kotlindiscord.kord.extensions.types.editingPaginator
 import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.*
 import dev.kord.common.Color
-import dev.kord.common.entity.ArchiveDuration
 import dev.kord.common.entity.ButtonStyle
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.channel.createEmbed
@@ -434,11 +433,9 @@ class ApplicationsExtension : Extension() {
 						} else {
 							logger.info { "Creating thread for application: ${application._id}" }
 
-							val thread = threadChannel.startPrivateThread(
-								"App: ${user.tag}",
-								ArchiveDuration.Week
-							)
-
+							// Not actually deprecated, Kord walled themselves into a hole here
+							@Suppress("DEPRECATION")
+							val thread = threadChannel.startPrivateThread("App: ${user.tag}")
 							val initialMessage = thread.createMessage("Better get the mods in...")
 
 							initialMessage.edit { content = settings.moderatorRoles.joinToString { "<@&$it>" } }

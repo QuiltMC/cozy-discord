@@ -504,10 +504,8 @@ class SuggestionsExtension : Extension() {
 			val message = channel.createMessage { suggestion(suggestion) }
 
 			val thread = (channel as? TextChannel)?.startPublicThreadWithMessage(
-				message.id,
-				name = suggestion._id.toString(),
-				"Suggestion thread created"
-			)
+				message.id, suggestion._id.toString()
+			) { reason = "Suggestion thread created" }
 
 			if (thread != null) {
 				val threadMessage = thread.createMessage {

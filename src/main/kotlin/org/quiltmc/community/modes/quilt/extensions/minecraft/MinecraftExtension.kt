@@ -336,18 +336,13 @@ class MinecraftExtension : Extension() {
 		if (guildId == COMMUNITY_GUILD) {
 			when (this) {
 				is TextChannel -> startPublicThreadWithMessage(
-					message.id,
-					title,
-					"Thread created for Minecraft update"
-				)
+					message.id, title
+				) { reason = "Thread created for Minecraft update" }
 
 				is NewsChannel -> {
 					startPublicThreadWithMessage(
-						message.id,
-						title,
-						// TODO: This needs a reason, not a duration
-						guild.asGuild().getMaxArchiveDuration()
-					)
+						message.id, title
+					) { reason = "Thread created for Minecraft update" }
 
 					message.publish()
 				}
