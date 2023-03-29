@@ -17,9 +17,9 @@ private const val QUILT_DEV_TEXT = "Loaded Quilt development mappings for mixin 
 private const val FABRIC_DEV_TEXT = "at net.fabricmc.devlaunchinjector.Main.main(Main.java"
 
 private val ALTERNATIVE_AUTH_FRAGMENTS = arrayOf(
-	"[authlib-injector]",
-	"authlib-injector.log",
-	"authlib-injector.jar",
+	"\\[authlib-injector\\]",
+	"authlib-injector\\.log",
+	"authlib-injector\\.jar",
 	"Yggdrasil Public Key Transformer",
 	"Authentication server: https?://\\S",
 ).map { it.toRegex(RegexOption.IGNORE_CASE) }
