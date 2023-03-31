@@ -86,6 +86,7 @@ dependencies {
 	implementation(libs.kx.ser)
 	implementation(libs.graphql)
 
+	implementation(project(":module-ama"))
 	implementation(project(":module-log-parser"))
 	implementation(project(":module-moderation"))
 	implementation(project(":module-role-sync"))

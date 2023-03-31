@@ -22,6 +22,7 @@ import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.gateway.Intents
 import dev.kord.gateway.PrivilegedIntent
 import kotlinx.coroutines.flow.*
+import org.quiltmc.community.cozy.modules.ama.extAma
 import org.quiltmc.community.cozy.modules.logs.extLogParser
 import org.quiltmc.community.cozy.modules.logs.processors.PiracyProcessor
 import org.quiltmc.community.cozy.modules.logs.processors.ProblematicLauncherProcessor
@@ -112,6 +113,8 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
 		add(::VerificationExtension)
 
 		extPluralKit()
+
+		extAma()
 
 		extLogParser {
 			// Bundled non-default processors

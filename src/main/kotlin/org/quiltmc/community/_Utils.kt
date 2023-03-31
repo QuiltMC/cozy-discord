@@ -103,6 +103,7 @@ suspend fun ExtensibleBotBuilder.database(migrate: Boolean = false) {
 			}
 
 			loadModule {
+				single { AmaConfigCollection() } bind AmaConfigCollection::class
 				single { FilterCollection() } bind FilterCollection::class
 				single { FilterEventCollection() } bind FilterEventCollection::class
 				single { GlobalSettingsCollection() } bind GlobalSettingsCollection::class
