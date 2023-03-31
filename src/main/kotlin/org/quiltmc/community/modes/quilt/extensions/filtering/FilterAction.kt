@@ -17,7 +17,7 @@ enum class FilterAction(
 ) : ChoiceEnum {
 	RESPOND(-1, "Respond with the filter note"),
 	DELETE(0, "Delete message"),
-	TIMEOUT(1, "Timeout user", true),
-	KICK(2, "Kick user"),
+	TIMEOUT(1, "Timeout user"),
+	KICK(2, "Kick user", true),
 	BAN(3, "Ban user", true)
 }
