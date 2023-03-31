@@ -126,7 +126,11 @@ public class LogParserExtension : Extension() {
 
 		logs.forEach { log ->
 			embed {
-				title = "Parsed Log"
+				title = if (log.content.startsWith("---- Crashed! ----")) {
+					"Crash Log"
+				} else {
+					"Log File"
+				}
 
 				color = if (log.aborted) {
 					title += ": Aborted"

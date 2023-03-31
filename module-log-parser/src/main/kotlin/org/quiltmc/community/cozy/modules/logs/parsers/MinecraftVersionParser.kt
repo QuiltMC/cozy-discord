@@ -15,6 +15,7 @@ private val PATTERNS = listOf(
 	// Impossible to do this for vanilla; the logs don't contain the MC version for some reason
 
 	": Loading Minecraft (\\S+)".toRegex(RegexOption.IGNORE_CASE), // Fabric, Quilt
+	"\\|[\\s\\d]+\\| Minecraft\\s+\\| minecraft\\s+| (\\S+)".toRegex(RegexOption.IGNORE_CASE), // Quilt mods table
 	"--fml.mcVersion, ([^\\s,]+)".toRegex(RegexOption.IGNORE_CASE), // Forge
 	"--version, ([^,]+),".toRegex(RegexOption.IGNORE_CASE), // ATLauncher
 	" --version (\\S+) ".toRegex(RegexOption.IGNORE_CASE), // MMC, Prism, PolyMC
