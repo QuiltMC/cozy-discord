@@ -146,7 +146,7 @@ public class LogParserExtension : Extension() {
 
 				val header = buildString {
 					with(log.environment) {
-						val mcVersion = log.getMod("minecraft")?.version?.string ?: "Unknown"
+						val mcVersion = log.minecraftVersion?.string ?: "Unknown"
 
 						appendLine("**__Environment Info__**")
 						appendLine()
