@@ -18,6 +18,7 @@ import org.quiltmc.community.cozy.modules.logs.types.LogParser
 private val OPENING_LINES = arrayOf(
 	"Loading \\d+ mods:\n".toRegex(RegexOption.IGNORE_CASE),
 	"-- Mods --\n".toRegex(RegexOption.IGNORE_CASE),
+	"\tQuilt Mods: \n".toRegex(RegexOption.IGNORE_CASE),
 )
 
 private val CLOSE = "\n[^|]".toRegex(RegexOption.IGNORE_CASE)
