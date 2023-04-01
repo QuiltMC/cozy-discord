@@ -339,8 +339,6 @@ public suspend inline fun ComponentContainer.answeringButtons(
 		check {
 			if (event.interaction.user != claimer) {
 				fail("You did not claim this question! ${claimer.tag} did")
-			} else {
-				pass()
 			}
 		}
 
@@ -364,8 +362,6 @@ public suspend inline fun ComponentContainer.answeringButtons(
 		check {
 			if (event.interaction.user != claimer) {
 				fail("You did not claim the question! ${claimer.tag} did")
-			} else {
-				pass()
 			}
 		}
 

@@ -356,7 +356,7 @@ public class AmaExtension : Extension() {
 			requiredChannelTypes = mutableSetOf(ChannelType.GuildText)
 			validate {
 				val checkResult = value.checkPermission(Permissions(Permission.ViewChannel, Permission.SendMessages))
-				failIf(checkResult == false, "The bot cannot see this message")
+				failIf(checkResult == false, "The bot cannot see this channel")
 				failIf(checkResult == null, "Cannot find this channel!")
 			}
 		}
@@ -367,7 +367,7 @@ public class AmaExtension : Extension() {
 			requiredChannelTypes = mutableSetOf(ChannelType.GuildText)
 			validate {
 				val checkResult = value.checkPermission(Permissions(Permission.ViewChannel, Permission.SendMessages))
-				failIf(checkResult == false, "The bot cannot see this message")
+				failIf(checkResult == false, "The bot cannot see this channel")
 				failIf(checkResult == null, "Cannot find this channel!")
 			}
 		}
@@ -378,7 +378,7 @@ public class AmaExtension : Extension() {
 			requiredChannelTypes = mutableSetOf(ChannelType.GuildText)
 			validate {
 				val checkResult = value.checkPermission(Permissions(Permission.ViewChannel, Permission.SendMessages))
-				failIf(checkResult == false, "The bot cannot see this message")
+				failIf(checkResult == false, "The bot cannot see this channel")
 				failIf(checkResult == null, "Cannot find this channel!")
 			}
 		}
@@ -389,7 +389,7 @@ public class AmaExtension : Extension() {
 			requiredChannelTypes = mutableSetOf(ChannelType.GuildText)
 			validate {
 				val checkResult = value.checkPermission(Permissions(Permission.ViewChannel, Permission.SendMessages))
-				failIf(checkResult == false, "The bot cannot see this message")
+				failIf(checkResult == false, "The bot cannot see this channel")
 			}
 		}
 
@@ -399,7 +399,7 @@ public class AmaExtension : Extension() {
 			requiredChannelTypes = mutableSetOf(ChannelType.GuildText)
 			validate {
 				val checkResult = value.checkPermission(Permissions(Permission.ViewChannel, Permission.SendMessages))
-				failIf(checkResult == false, "The bot cannot see this message")
+				failIf(checkResult == false, "The bot cannot see this channel")
 			}
 		}
 	}
