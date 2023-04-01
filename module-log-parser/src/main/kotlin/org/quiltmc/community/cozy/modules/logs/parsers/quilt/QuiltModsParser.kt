@@ -15,7 +15,11 @@ import org.quiltmc.community.cozy.modules.logs.data.Mod
 import org.quiltmc.community.cozy.modules.logs.data.Order
 import org.quiltmc.community.cozy.modules.logs.types.LogParser
 
-private val OPENING_LINE = "Loading \\d+ mods:\n".toRegex(RegexOption.IGNORE_CASE)
+private val OPENING_LINES = arrayOf(
+	"Loading \\d+ mods:\n".toRegex(RegexOption.IGNORE_CASE),
+	"-- Mods --\n".toRegex(RegexOption.IGNORE_CASE),
+)
+
 private val CLOSE = "\n[^|]".toRegex(RegexOption.IGNORE_CASE)
 
 public class QuiltModsParser : LogParser() {
@@ -26,7 +30,9 @@ public class QuiltModsParser : LogParser() {
 		log.getLoaderVersion(LoaderType.Quilt) != null
 
 	override suspend fun process(log: Log) {
-		val start = log.content.split(OPENING_LINE, 2).last()
+		val openingLine = OPENING_LINES.first { it in log.content }
+
+		val start = log.content.split(openingLine, 2).last()
 		val table = start.split(CLOSE, 2).first().trim()
 
 		val lines = table

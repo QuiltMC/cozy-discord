@@ -15,6 +15,7 @@ import org.quiltmc.community.cozy.modules.logs.parsers.launchers.ATLauncherParse
 import org.quiltmc.community.cozy.modules.logs.parsers.launchers.MMCLikeParser
 import org.quiltmc.community.cozy.modules.logs.parsers.launchers.TechnicParser
 import org.quiltmc.community.cozy.modules.logs.parsers.quilt.QuiltModsParser
+import org.quiltmc.community.cozy.modules.logs.processors.MixinErrorProcessor
 import org.quiltmc.community.cozy.modules.logs.processors.PlayerIPProcessor
 import org.quiltmc.community.cozy.modules.logs.processors.quilt.FabricImplProcessor
 import org.quiltmc.community.cozy.modules.logs.processors.quilt.IncompatibleModProcessor
@@ -51,9 +52,10 @@ public class SimpleLogParserConfig(private val builder: Builder) : LogParserConf
 		public var processors: MutableList<LogProcessor> = mutableListOf(
 			FabricImplProcessor(),
 			IncompatibleModProcessor(),
+			MixinErrorProcessor(),
+			PlayerIPProcessor(),
 			QuiltLibrariesVersionProcessor(),
 			QuiltLoaderVersionProcessor(),
-			PlayerIPProcessor(),
 		)
 
 		public var retrievers: MutableList<LogRetriever> = mutableListOf(
