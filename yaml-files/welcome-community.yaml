@@ -27,6 +27,10 @@
         [guide for newcomers](https://quiltmc.org/about/newcomer-guide/).
 
 
+        Additionally, remember that you can self-assign roles and manage which channels are visible by clicking on
+        <id:customize>, or the **Channels & Roles** option at the top of the channel list.
+
+
         We hope you enjoy your time with us!
 
     - title: Quilt Development
@@ -99,13 +103,10 @@
         look "wrong" in any way.
 
 
-        **»** Anything relating to Mojang's new Java Edition chat reporting features, including discussions relating to
+        **»** Anything relating to Mojang's Java Edition chat reporting features, including discussions relating to
         potential exploits, or mods that make use of them. As an exception to this rule, you may discuss strategies
         and mods for mitigating the usage of exploits on your servers, and good-faith mods that allow you to control
         how chat reporting works on your servers.
-
-
-        **»** Anything related to the death of Queen Elizabeth II
 
 
         This list will change over time, and we're equally likely to add or remove things as the way people approach
@@ -168,38 +169,6 @@
 
         If you're interested in long-form discussions, development help, news or community project, please feel free
         to join our forum at [https://forum.quiltmc.org](https://forum.quiltmc.org)!
-
-- type: roles
-
-  id: community-roles
-
-  title: "Role Assignment"
-  description: "Click the button below to assign or remove any of the following roles."
-  template: "{EMOJI} **{NAME}**: {DESCRIPTION}\n"
-
-  roles:
-    976178214269497366:
-      description: "Get pinged when we post announcements in <#832357051463630947>."
-      emoji: "📢"
-
-    1086037902577909870:
-      description: >
-        Get pinged with infrastructure status updates, notifying you about outages and their resolutions in
-        <#1086035355339333752>.
-
-      emoji: "📢"
-
-    1003614007237816361:
-      description: "Get pinged when a new Minecraft snapshot or release is published in <#838805249271267398>."
-      emoji: "📢"
-
-    976082711817113610:
-      description: "Let people know that you're using a translator to talk."
-      emoji: "<:via_translator:976173251720015922>"
-
-    1050037117075603466:
-      description: "Remove yourself from the meta channel."
-      emoji: "🚫"
 
 - type: links
 
