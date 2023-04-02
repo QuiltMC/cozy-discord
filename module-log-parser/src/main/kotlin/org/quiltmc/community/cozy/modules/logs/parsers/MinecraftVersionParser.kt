@@ -18,7 +18,6 @@ private val PATTERNS = listOf(
 		.toRegex(RegexOption.IGNORE_CASE),  // Quilt mods table
 
 	": Loading Minecraft (\\S+)".toRegex(RegexOption.IGNORE_CASE), // Fabric, Quilt
-	"\\|[\\s\\d]+\\| Minecraft\\s+\\| minecraft\\s+| (\\S+)".toRegex(RegexOption.IGNORE_CASE), // Quilt mods table
 	"--fml.mcVersion, ([^\\s,]+)".toRegex(RegexOption.IGNORE_CASE), // Forge
 	"--version, ([^,]+),".toRegex(RegexOption.IGNORE_CASE), // ATLauncher
 	" --version (\\S+) ".toRegex(RegexOption.IGNORE_CASE), // MMC, Prism, PolyMC

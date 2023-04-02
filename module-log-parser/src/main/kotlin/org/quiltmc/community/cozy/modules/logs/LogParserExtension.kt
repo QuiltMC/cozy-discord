@@ -101,10 +101,10 @@ public class LogParserExtension : Extension() {
 			.flatten()
 			.filter {
 				it.aborted ||
-						it.hasProblems ||
-						it.getMessages().isNotEmpty() ||
-						it.minecraftVersion != null ||
-						it.getMods().isNotEmpty()
+					it.hasProblems ||
+					it.getMessages().isNotEmpty() ||
+					it.minecraftVersion != null ||
+					it.getMods().isNotEmpty()
 			}
 
 //			.filter { it.aborted || it.hasProblems || it.getMessages().isNotEmpty() }
@@ -120,8 +120,8 @@ public class LogParserExtension : Extension() {
 	private fun MessageCreateBuilder.addLogs(logs: List<Log>) {
 		if (logs.size > 10) {
 			content = "**Warning:** I found ${logs.size} logs, but I can't provide results for more than 10 logs at " +
-					"a time. You'll only see results for the first 10 logs below - please " +
-					"limit the number of logs you post at once."
+				"a time. You'll only see results for the first 10 logs below - please " +
+				"limit the number of logs you post at once."
 		}
 
 		logs.forEach { log ->
@@ -160,26 +160,68 @@ public class LogParserExtension : Extension() {
 							addAnotherLine = true
 						}
 
-						if (jvmArgs != null) {
-							appendLine("**Java Args:** `$jvmArgs`")
-
-							addAnotherLine = true
-						}
-
 						if (jvmVersion != null) {
 							appendLine("**JVM Version:** `$jvmVersion`")
 
 							addAnotherLine = true
 						}
 
-						if (glInfo != null) {
-							appendLine("**OpenGL Info:** `$glInfo`")
+						if (addAnotherLine) {
+							addAnotherLine = false
+
+							appendLine()
+						}
+
+						if (jvmArgs != null) {
+							appendLine("**Java Args:** `$jvmArgs`")
 
 							addAnotherLine = true
 						}
 
+						if (addAnotherLine) {
+							addAnotherLine = false
+
+							appendLine()
+						}
+
 						if (os != null) {
 							appendLine("**OS:** $os")
+
+							addAnotherLine = true
+						}
+
+						if (cpu != null) {
+							appendLine("**CPU:** `$cpu`")
+
+							addAnotherLine = true
+						}
+
+						if (gpu != null) {
+							appendLine("**GPU:** `$gpu`")
+
+							addAnotherLine = true
+						}
+
+						if (systemMemory != null) {
+							appendLine("**System Memory:** `$systemMemory`")
+
+							addAnotherLine = true
+						}
+
+						if (addAnotherLine) {
+							addAnotherLine = false
+
+							appendLine()
+						}
+
+						if (gameMemory != null) {
+							appendLine("**Game Memory:** `$gameMemory`")
+
+							addAnotherLine = true
+						}
+
+						if (shaderpack != null) {
+							appendLine("**Shaderpack:** `$shaderpack`")
 
 							addAnotherLine = true
 						}

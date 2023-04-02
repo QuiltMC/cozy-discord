@@ -7,6 +7,7 @@
 package org.quiltmc.community.cozy.modules.logs.config
 
 import com.kotlindiscord.kord.extensions.checks.types.Check
+import org.quiltmc.community.cozy.modules.logs.parsers.EnvironmentParser
 import org.quiltmc.community.cozy.modules.logs.parsers.LauncherParser
 import org.quiltmc.community.cozy.modules.logs.parsers.LoaderParser
 import org.quiltmc.community.cozy.modules.logs.parsers.MinecraftVersionParser
@@ -39,14 +40,15 @@ public class SimpleLogParserConfig(private val builder: Builder) : LogParserConf
 
 	public class Builder {
 		public var parsers: MutableList<LogParser> = mutableListOf(
-			FabricModsParser(),
 			ATLauncherParser(),
-			MMCLikeParser(),
-			TechnicParser(),
-			QuiltModsParser(),
+			EnvironmentParser(),
+			FabricModsParser(),
 			LauncherParser(),
 			LoaderParser(),
+			MMCLikeParser(),
 			MinecraftVersionParser(),
+			QuiltModsParser(),
+			TechnicParser(),
 		)
 
 		public var processors: MutableList<LogProcessor> = mutableListOf(
