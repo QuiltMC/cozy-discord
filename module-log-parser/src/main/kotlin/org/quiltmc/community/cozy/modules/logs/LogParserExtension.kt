@@ -117,7 +117,7 @@ public class LogParserExtension : Extension() {
 	}
 
 	@Suppress("MagicNumber")
-	private fun MessageCreateBuilder.addLogs(logs: List<Log>) {
+	private suspend fun MessageCreateBuilder.addLogs(logs: List<Log>) {
 		if (logs.size > 10) {
 			content = "**Warning:** I found ${logs.size} logs, but I can't provide results for more than 10 logs at " +
 				"a time. You'll only see results for the first 10 logs below - please " +
@@ -283,6 +283,28 @@ public class LogParserExtension : Extension() {
 					description = description!!.take(3994) + "\n[...]"
 				}
 			}
+
+			log.extraEmbeds.forEach {
+				embed { it(this) }
+			}
+		}
+
+		if (embeds.size > 10) {
+			val extraEmbeds = embeds.size - 10
+			val allEmbeds = embeds.take(10)
+
+			embeds.clear()
+			embeds.addAll(allEmbeds)
+
+			if (content == null) {
+				content = ""
+			} else {
+				content += "\n\n"
+			}
+
+			content += "**Warning:** $extraEmbeds extra embeds were generated when parsing your logs. Please fix the " +
+				"issues that have been detailed here, and try again with new logs. Alternatively, if you submitted " +
+				"more than one log in the same message, you could try submitting them one at a time."
 		}
 	}
 

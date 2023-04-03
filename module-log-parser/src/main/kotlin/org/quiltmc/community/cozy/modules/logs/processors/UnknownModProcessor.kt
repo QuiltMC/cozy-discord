@@ -6,6 +6,7 @@
 
 package org.quiltmc.community.cozy.modules.logs.processors
 
+import com.kotlindiscord.kord.extensions.DISCORD_YELLOW
 import dev.kord.core.event.Event
 import org.quiltmc.community.cozy.modules.logs.data.LoaderType
 import org.quiltmc.community.cozy.modules.logs.data.Log
@@ -30,12 +31,17 @@ public class UnknownModProcessor : LogProcessor() {
 
 		val mods = matches.map { it.groupValues[1] }
 
-		log.addMessage(
-			"**The following unknown mods were found.** We recommend using separate instance folders for " +
-				"different mod loaders, to avoid confusion and unintended behaviour.\n" +
+		log.embed {
+			title = "Unknown Mods"
+			color = DISCORD_YELLOW
+
+			description = "**The following unknown mods were found.** \n\n" +
+				"This usually means you've installed mods that Quilt doesn't know how to load. We recommend using " +
+				"separate instance folders for different mod loaders, to avoid confusion and unintended " +
+				"behaviour.\n\n" +
 
 				mods.joinToString(", ") { "`$it`" }
-		)
+		}
 
 		log.hasProblems = true
 	}
