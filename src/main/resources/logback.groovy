@@ -5,10 +5,11 @@
  */
 
 import ch.qos.logback.core.joran.spi.ConsoleTarget
+import ch.qos.logback.core.ConsoleAppender
 import org.quiltmc.community.DiscordLogAppender
 
-def environment = System.getenv().getOrDefault("ENVIRONMENT", "prod")
-def logUrl = System.getenv().getOrDefault("DISCORD_LOGGER_URL", null)
+def environment = System.getenv("ENVIRONMENT") ?: "prod"
+def logUrl = System.getenv("DISCORD_LOGGER_URL")
 
 def defaultLevel = INFO
 def defaultTarget = ConsoleTarget.SystemErr
