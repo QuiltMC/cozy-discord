@@ -15,6 +15,7 @@ import com.kotlindiscord.kord.extensions.DISCORD_BLURPLE
 import com.kotlindiscord.kord.extensions.DISCORD_GREEN
 import com.kotlindiscord.kord.extensions.DISCORD_RED
 import com.kotlindiscord.kord.extensions.DISCORD_YELLOW
+import com.kotlindiscord.kord.extensions.annotations.DoNotChain
 import com.kotlindiscord.kord.extensions.checks.isNotBot
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.converters.impl.enumChoice
@@ -885,6 +886,7 @@ class FilterExtension : Extension() {
 					}
 				}
 
+				@OptIn(DoNotChain::class)
 				message.author!!
 					.asMember(message.getGuild().id)
 					.timeout(10.minutes, "Triggered filter: $_id")
