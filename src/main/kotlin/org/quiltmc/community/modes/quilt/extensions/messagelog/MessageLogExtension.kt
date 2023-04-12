@@ -90,6 +90,7 @@ class MessageLogExtension : Extension() {
 
 		event<MessageBulkDeleteEvent> {
 			check { inQuiltGuild() }
+			check { notInStaffChannel() }
 
 			action {
 				logger.debug { "Bulk delete event received: ${event.messages.size} messages" }
@@ -239,6 +240,7 @@ class MessageLogExtension : Extension() {
 
 		event<MessageDeleteEvent> {
 			check { inQuiltGuild() }
+			check { notInStaffChannel() }
 
 			check {
 				failIf(
@@ -332,6 +334,7 @@ class MessageLogExtension : Extension() {
 
 		event<MessageUpdateEvent> {
 			check { inQuiltGuild() }
+			check { notInStaffChannel() }
 
 			check {
 				failIf(

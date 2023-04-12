@@ -11,8 +11,34 @@ import com.kotlindiscord.kord.extensions.checks.types.CheckContext
 import com.kotlindiscord.kord.extensions.utils.hasPermission
 import com.kotlindiscord.kord.extensions.utils.translate
 import dev.kord.common.entity.Permission
+import dev.kord.core.behavior.channel.asChannelOfOrNull
+import dev.kord.core.entity.channel.CategorizableChannel
 import mu.KotlinLogging
 import org.quiltmc.community.database.collections.ServerSettingsCollection
+
+suspend fun CheckContext<*>.notInStaffChannel() {
+	// TODO: This should be configurable but it's a band-aid for now
+	anyGuild()
+
+	if (!passed) {
+		return
+	}
+
+	val logger = KotlinLogging.logger("org.quiltmc.community.notInStaffChannel")
+
+	val channel = channelFor(event)?.asChannelOfOrNull<CategorizableChannel>()
+		?: return
+
+	if (channel.id in STAFF_CHANNELS) {
+		logger.failed("This is a staff channel.")
+		fail("This is a staff channel.")
+	}
+
+	if (channel.categoryId in STAFF_CATEGORIES) {
+		logger.failed("This is a staff channel.")
+		fail("This is a staff channel.")
+	}
+}
 
 suspend fun CheckContext<*>.inCommunity() {
 	anyGuild()

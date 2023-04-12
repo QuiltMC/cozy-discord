@@ -124,7 +124,7 @@ class SuggestionsExtension : Extension() {
 					text = event.message.content,
 
 					owner = event.message.author!!.id,
-					ownerAvatar = event.message.author!!.avatar?.url,
+					ownerAvatar = event.message.author!!.avatar?.cdnUrl?.toUrl(),
 					ownerName = event.message.author!!.asMember(event.message.getGuild().id).displayName,
 
 					positiveVoters = mutableListOf(event.message.author!!.id)
