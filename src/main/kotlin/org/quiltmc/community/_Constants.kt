@@ -24,6 +24,36 @@ internal val MAIN_GUILD = Snowflake(
 		?: 817576132726620200U
 )
 
+internal val STAFF_CATEGORIES = envOrNull("STAFF_CATEGORIES")
+	?.split(',')
+	?.map { Snowflake(it.trim()) }
+	?: listOf(
+		// Community server
+		Snowflake("834516250021330949"),  // Overall bot logs
+		Snowflake("839495849116958780"),  // Cozy message logs
+		Snowflake("817576134535282729"),  // Information
+		Snowflake("1085857118000787496"), // Feeds
+
+		// Toolchain server
+		Snowflake("834517525206925312"),  // Overall bot logs
+		Snowflake("839496251463958548"),  // Cozy message logs
+		Snowflake("833875973366874112"),  // Information
+	)
+
+internal val STAFF_CHANNELS = envOrNull("STAFF_CHANNELS")
+	?.split(',')
+	?.map { Snowflake(it.trim()) }
+	?: listOf(
+		// Community server
+		Snowflake("972487531096592394"),  // Forum post logs
+
+		Snowflake("1047954546992881694"), // Managers channel
+		Snowflake("1086238572887150602"), // Admins channel
+
+		// Toolchain server
+		// Snowflake(""),
+	)
+
 internal val MESSAGE_LOG_CATEGORIES = envOrNull("MESSAGE_LOG_CATEGORIES")
 	?.split(',')
 	?.map { Snowflake(it.trim()) } ?: listOf()

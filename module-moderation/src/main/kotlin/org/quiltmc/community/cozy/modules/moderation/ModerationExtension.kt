@@ -138,11 +138,11 @@ public class ModerationExtension(
 
 							icon = if (event is ProxiedMessageCreateEvent && event.pkMessage.member != null) {
 								event.pkMessage.member?.avatarUrl
-									?: event.author.memberAvatar?.url
-									?: event.author.avatar?.url
+									?: event.author.memberAvatar?.cdnUrl?.toUrl()
+									?: event.author.avatar?.cdnUrl?.toUrl()
 							} else {
-								event.author?.memberAvatar?.url
-									?: event.author?.avatar?.url
+								event.author?.memberAvatar?.cdnUrl?.toUrl()
+									?: event.author?.avatar?.cdnUrl?.toUrl()
 							}
 						}
 					}
