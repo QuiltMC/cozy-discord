@@ -56,6 +56,8 @@ public class VoiceRoomsExtension : Extension() {
 	// 4. When the channel has been empty for a while, archive and delete it
 
 	override suspend fun setup() {
+		// TODO: Make sure users are verified before allowing interactions
+
 		ephemeralSlashCommand {
 			name = "voice-rooms"
 			description = "Commands relating to voice rooms"
