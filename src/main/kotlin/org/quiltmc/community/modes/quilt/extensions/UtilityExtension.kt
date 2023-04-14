@@ -273,17 +273,17 @@ class UtilityExtension : Extension() {
 				action { modal ->
 					val message = targetMessages.first()
 
-					val description = if (modal?.description?.value == null) {
-						"No description provided"
-					} else {
-						modal.description.value
+					if (modal?.description?.value == null) {
+						respond { content = "**Error:** You didn't provide a description." }
+
+						return@action
 					}
 
 					val channel = getGuild()?.asGuild()?.getEventLogChannel()
 
 					if (channel != null) {
 						channel.createMessage {
-							content = "**$description**\n\n" +
+							content = "**${modal.description.value}**\n\n" +
 								"**»** ${message.getJumpUrl()}\n" +
 								"**»** Logged by ${user.mention}\n" +
 								"\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_"
@@ -1673,8 +1673,6 @@ class UtilityExtension : Extension() {
 		val description = lineText {
 			label = "Description"
 			placeholder = "A few words on what's happening"
-
-			required = false
 		}
 	}
 
