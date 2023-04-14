@@ -268,7 +268,7 @@ class UtilityExtension : Extension() {
 
 				guild(guildId)
 
-				check { hasBaseModeratorRole() }
+				check { hasCommunityTeamRole() }
 
 				action { modal ->
 					val message = targetMessages.first()

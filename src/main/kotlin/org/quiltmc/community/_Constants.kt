@@ -78,6 +78,14 @@ internal val TOOLCHAIN_MANAGER_ROLE = envOrNull("TOOLCHAIN_MANAGER_ROLE")
 	?.let { Snowflake(it) }
 	?: Snowflake(833877938000494602)
 
+internal val COMMUNITY_COMMUNITY_TEAM_ROLE = envOrNull("COMMUNITY_COMMUNITY_TEAM_ROLE")
+	?.let { Snowflake(it) }
+	?: Snowflake(863710574650327100)
+
+internal val TOOLCHAIN_COMMUNITY_TEAM_ROLE = envOrNull("TOOLCHAIN_COMMUNITY_TEAM_ROLE")
+	?.let { Snowflake(it) }
+	?: Snowflake(863765983890374656)
+
 internal val COMMUNITY_DEVELOPER_ROLE = envOrNull("COMMUNITY_DEVELOPER_ROLE")
 	?.let { Snowflake(it) }
 	?: Snowflake(972868531844710412)
@@ -97,6 +105,12 @@ internal val MANAGER_ROLES: List<Snowflake> =
 		?.split(',')
 		?.map { Snowflake(it.trim()) }
 		?: listOf(COMMUNITY_MANAGER_ROLE, TOOLCHAIN_MANAGER_ROLE)
+
+internal val COMMUNITY_TEAM_ROLES: List<Snowflake> =
+	envOrNull("COMMUNITY_TEAM_ROLES")
+		?.split(',')
+		?.map { Snowflake(it.trim()) }
+		?: listOf(COMMUNITY_COMMUNITY_TEAM_ROLE, TOOLCHAIN_COMMUNITY_TEAM_ROLE)
 
 internal val MINECRAFT_UPDATE_PING_ROLE = envOrNull("MINECRAFT_UPDATE_PING_ROLE")
 	?.let { Snowflake(it) }

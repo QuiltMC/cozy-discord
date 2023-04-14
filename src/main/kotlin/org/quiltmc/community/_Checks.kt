@@ -141,11 +141,11 @@ suspend fun CheckContext<*>.inQuiltGuild() {
 }
 
 suspend fun CheckContext<*>.hasBaseModeratorRole(includeCommunityManagers: Boolean = true) {
+	inQuiltGuild()
+
 	if (!passed) {
 		return
 	}
-
-	inQuiltGuild()
 
 	if (this.passed) {  // They're on a Quilt guild
 		val logger = KotlinLogging.logger("org.quiltmc.community.hasBaseModeratorRole")
@@ -165,6 +165,33 @@ suspend fun CheckContext<*>.hasBaseModeratorRole(includeCommunityManagers: Boole
 				logger.failed("Member does not have a Quilt $roleDescription role")
 
 				fail("Must be a Quilt $roleDescription")
+			}
+		}
+	}
+}
+
+suspend fun CheckContext<*>.hasCommunityTeamRole() {
+	inQuiltGuild()
+
+	if (!passed) {
+		return
+	}
+
+	if (this.passed) {  // They're on a Quilt guild
+		val logger = KotlinLogging.logger("org.quiltmc.community.hasCommunityTeamRole")
+		val member = memberFor(event)?.asMemberOrNull()
+
+		if (member == null) {  // Shouldn't happen, but you never know
+			logger.nullMember(event)
+
+			fail()
+		} else {
+			val hasCommunityTeamRole = member.roleIds.any { it in COMMUNITY_TEAM_ROLES }
+
+			if (!hasCommunityTeamRole) {
+				logger.failed("Member does not have a Quilt Community Team role")
+
+				fail("Must be a Quilt Community Team member")
 			}
 		}
 	}
@@ -197,6 +224,8 @@ suspend fun CheckContext<*>.notHasBaseModeratorRole(includeCommunityManagers: Bo
 }
 
 suspend fun CheckContext<*>.inReleaseChannel() {
+	inQuiltGuild()
+
 	if (!passed) {
 		return
 	}
