@@ -201,7 +201,7 @@ public class AmaExtension : Extension() {
 							val newComponents = components {
 								ephemeralButton {
 									label = "Ask a question"
-									style = ButtonStyle.Primary
+									style = ButtonStyle.Secondary
 
 									id = config.buttonId
 									disabled = true
