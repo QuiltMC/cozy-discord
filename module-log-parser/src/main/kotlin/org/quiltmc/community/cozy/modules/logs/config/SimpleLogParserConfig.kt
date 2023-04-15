@@ -7,6 +7,7 @@
 package org.quiltmc.community.cozy.modules.logs.config
 
 import com.kotlindiscord.kord.extensions.checks.types.Check
+import org.quiltmc.community.cozy.modules.logs.parsers.EnvironmentParser
 import org.quiltmc.community.cozy.modules.logs.parsers.LauncherParser
 import org.quiltmc.community.cozy.modules.logs.parsers.LoaderParser
 import org.quiltmc.community.cozy.modules.logs.parsers.MinecraftVersionParser
@@ -15,7 +16,9 @@ import org.quiltmc.community.cozy.modules.logs.parsers.launchers.ATLauncherParse
 import org.quiltmc.community.cozy.modules.logs.parsers.launchers.MMCLikeParser
 import org.quiltmc.community.cozy.modules.logs.parsers.launchers.TechnicParser
 import org.quiltmc.community.cozy.modules.logs.parsers.quilt.QuiltModsParser
+import org.quiltmc.community.cozy.modules.logs.processors.MixinErrorProcessor
 import org.quiltmc.community.cozy.modules.logs.processors.PlayerIPProcessor
+import org.quiltmc.community.cozy.modules.logs.processors.UnknownModProcessor
 import org.quiltmc.community.cozy.modules.logs.processors.quilt.FabricImplProcessor
 import org.quiltmc.community.cozy.modules.logs.processors.quilt.IncompatibleModProcessor
 import org.quiltmc.community.cozy.modules.logs.processors.quilt.QuiltLibrariesVersionProcessor
@@ -38,22 +41,25 @@ public class SimpleLogParserConfig(private val builder: Builder) : LogParserConf
 
 	public class Builder {
 		public var parsers: MutableList<LogParser> = mutableListOf(
-			FabricModsParser(),
 			ATLauncherParser(),
-			MMCLikeParser(),
-			TechnicParser(),
-			QuiltModsParser(),
+			EnvironmentParser(),
+			FabricModsParser(),
 			LauncherParser(),
 			LoaderParser(),
+			MMCLikeParser(),
 			MinecraftVersionParser(),
+			QuiltModsParser(),
+			TechnicParser(),
 		)
 
 		public var processors: MutableList<LogProcessor> = mutableListOf(
 			FabricImplProcessor(),
 			IncompatibleModProcessor(),
+			MixinErrorProcessor(),
+			PlayerIPProcessor(),
 			QuiltLibrariesVersionProcessor(),
 			QuiltLoaderVersionProcessor(),
-			PlayerIPProcessor(),
+			UnknownModProcessor(),
 		)
 
 		public var retrievers: MutableList<LogRetriever> = mutableListOf(

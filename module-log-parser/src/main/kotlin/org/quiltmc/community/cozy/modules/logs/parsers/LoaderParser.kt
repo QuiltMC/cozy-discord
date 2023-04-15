@@ -13,11 +13,11 @@ import org.quiltmc.community.cozy.modules.logs.data.Order
 import org.quiltmc.community.cozy.modules.logs.types.LogParser
 
 private val PATTERNS = mapOf(
-	": Loading .+ with Fabric Loader (\\S+)".toRegex(RegexOption.IGNORE_CASE) to LoaderType.Fabric,
+	"\n\\|[\\s\\d]+\\| Quilt Loader\\s+\\| quilt_loader\\s+\\| (\\S+).+\n"
+		.toRegex(RegexOption.IGNORE_CASE) to LoaderType.Quilt,  // Quilt mods table
 
 	": Loading .+ with Quilt Loader (\\S+)".toRegex(RegexOption.IGNORE_CASE) to LoaderType.Quilt,
-	"\\|[\\s\\d]+\\| Quilt Loader\\s+| quilt_loader\\s+| (\\S+)"
-		.toRegex(RegexOption.IGNORE_CASE) to LoaderType.Quilt,  // Quilt mods table
+	": Loading .+ with Fabric Loader (\\S+)".toRegex(RegexOption.IGNORE_CASE) to LoaderType.Fabric,
 
 	"--fml.forgeVersion, ([^\\s,]+)".toRegex(RegexOption.IGNORE_CASE) to LoaderType.Forge,
 	"MinecraftForge v([^\\s,]+) Initialized".toRegex(RegexOption.IGNORE_CASE) to LoaderType.Forge,  // Older versions

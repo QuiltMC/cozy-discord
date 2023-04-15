@@ -828,7 +828,7 @@ class ApplicationsExtension : Extension() {
 		}
 
 		thumbnail {
-			url = (user.avatar ?: user.defaultAvatar).url
+			url = (user.avatar ?: user.defaultAvatar).cdnUrl.toUrl()
 		}
 
 		footer {

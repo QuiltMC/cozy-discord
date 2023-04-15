@@ -7,6 +7,7 @@
 package org.quiltmc.community.cozy.modules.logs.data
 
 import dev.kord.core.entity.channel.Channel
+import dev.kord.rest.builder.message.EmbedBuilder
 import org.quiltmc.community.cozy.modules.logs.Version
 import java.net.URL
 
@@ -16,6 +17,8 @@ public open class Log {
 	public val environment: Environment = Environment()
 	public var launcher: Launcher? = null
 	public var url: URL? = null
+
+	public val extraEmbeds: MutableList<suspend (EmbedBuilder).() -> Unit> = mutableListOf()
 
 	private val loaders: MutableMap<LoaderType, Version> = mutableMapOf()
 	private val messages: MutableList<String> = mutableListOf()
@@ -37,6 +40,10 @@ public open class Log {
 
 	public var fromCommand: Boolean = false
 		internal set
+
+	public open fun embed(body: suspend (EmbedBuilder).() -> Unit) {
+		extraEmbeds.add(body)
+	}
 
 	public open fun abort(message: String) {
 		abortReason = message
