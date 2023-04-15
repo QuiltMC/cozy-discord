@@ -45,13 +45,12 @@ import dev.kord.core.entity.Message
 import dev.kord.core.entity.channel.Channel
 import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.core.entity.channel.TopGuildChannel
-import dev.kord.core.event.interaction.ButtonInteractionCreateEvent
+import dev.kord.core.event.interaction.GuildButtonInteractionCreateEvent
 import dev.kord.rest.builder.message.create.embed
 import org.koin.core.component.inject
 import org.quiltmc.community.cozy.modules.ama.data.AmaConfig
 import org.quiltmc.community.cozy.modules.ama.data.AmaData
 import org.quiltmc.community.cozy.modules.ama.data.AmaEmbedConfig
-import org.quiltmc.community.cozy.modules.ama.data.MemoryAmaData
 import org.quiltmc.community.cozy.modules.ama.enums.QuestionStatusFlag
 
 public class AmaExtension : Extension() {
@@ -132,7 +131,7 @@ public class AmaExtension : Extension() {
 				}
 
 				action {
-					val config = MemoryAmaData().getConfig(guild!!.id)
+					val config = amaData.getConfig(guild!!.id)
 
 					if (config == null) {
 						respond {
@@ -219,7 +218,7 @@ public class AmaExtension : Extension() {
 			}
 		}
 
-		event<ButtonInteractionCreateEvent> {
+		event<GuildButtonInteractionCreateEvent> {
 			check {
 				anyGuild()
 				failIfNot { event.interaction.componentId.contains("ama-button.") }

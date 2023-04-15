@@ -53,7 +53,7 @@ data class AmaEntity(
 				buttonMessage = config.buttonMessage,
 				buttonId = config.buttonId,
 				enabled = config.enabled,
-				_id = Snowflake("") // TODO What is ID for
+				_id = config.guildId // TODO Is this correct i'm not sure
 			)
 	}
 }

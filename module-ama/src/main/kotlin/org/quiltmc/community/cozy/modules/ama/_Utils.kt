@@ -14,6 +14,7 @@ import com.kotlindiscord.kord.extensions.builders.ExtensibleBotBuilder
 import com.kotlindiscord.kord.extensions.components.ComponentContainer
 import com.kotlindiscord.kord.extensions.components.components
 import com.kotlindiscord.kord.extensions.components.ephemeralButton
+import com.kotlindiscord.kord.extensions.utils.loadModule
 import dev.kord.common.entity.ButtonStyle
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.channel.createEmbed
@@ -25,9 +26,13 @@ import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.rest.builder.message.EmbedBuilder
 import dev.kord.rest.builder.message.create.embed
 import dev.kord.rest.builder.message.modify.embed
+import org.koin.dsl.bind
+import org.quiltmc.community.cozy.modules.ama.data.AmaData
 import org.quiltmc.community.cozy.modules.ama.enums.QuestionStatusFlag
 
-public fun ExtensibleBotBuilder.ExtensionsBuilder.extAma() {
+public fun ExtensibleBotBuilder.ExtensionsBuilder.extAma(data: AmaData) {
+	loadModule { single { data } bind AmaData::class }
+
 	add(::AmaExtension)
 }
 
@@ -41,7 +46,7 @@ public fun EmbedBuilder.questionEmbed(
 ) {
 	author {
 		name = "${interactionUser.tag} (${interactionUser.id})"
-		icon = interactionUser.avatar?.url
+		icon = interactionUser.avatar?.cdnUrl?.toUrl()
 	}
 	description = question
 	color = when (flag) {
@@ -57,7 +62,7 @@ public fun EmbedBuilder.questionEmbed(
 			if (flaggedBy != null) {
 				footer {
 					text = "Flagged by ${flaggedBy.tag}"
-					icon = flaggedBy.avatar?.url
+					icon = flaggedBy.avatar?.cdnUrl?.toUrl()
 				}
 			}
 
@@ -65,7 +70,7 @@ public fun EmbedBuilder.questionEmbed(
 			if (claimedOrSkippedBy != null) {
 				footer {
 					text = "Claimed by ${claimedOrSkippedBy.tag}"
-					icon = claimedOrSkippedBy.avatar?.url
+					icon = claimedOrSkippedBy.avatar?.cdnUrl?.toUrl()
 				}
 			}
 
@@ -73,7 +78,7 @@ public fun EmbedBuilder.questionEmbed(
 			if (claimedOrSkippedBy != null) {
 				footer {
 					text = "Skipped by ${claimedOrSkippedBy.tag}"
-					icon = claimedOrSkippedBy.avatar?.url
+					icon = claimedOrSkippedBy.avatar?.cdnUrl?.toUrl()
 				}
 			}
 
@@ -146,7 +151,6 @@ public suspend inline fun ComponentContainer.questionComponents(
 						style = ButtonStyle.Secondary
 
 						action {
-							println("Bubs gay")
 							answerQueueMessage?.edit {
 								embed {
 									questionEmbed(

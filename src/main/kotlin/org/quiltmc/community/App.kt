@@ -30,6 +30,7 @@ import org.quiltmc.community.cozy.modules.moderation.moderation
 import org.quiltmc.community.cozy.modules.rolesync.rolesync
 import org.quiltmc.community.cozy.modules.tags.tags
 import org.quiltmc.community.cozy.modules.welcome.welcomeChannel
+import org.quiltmc.community.database.collections.AmaConfigCollection
 import org.quiltmc.community.database.collections.TagsCollection
 import org.quiltmc.community.database.collections.WelcomeChannelCollection
 import org.quiltmc.community.logs.NonQuiltLoaderProcessor
@@ -114,7 +115,7 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
 
 		extPluralKit()
 
-		extAma()
+		extAma(getKoin().get<AmaConfigCollection>())
 
 		extLogParser {
 			// Bundled non-default processors
