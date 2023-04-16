@@ -81,7 +81,7 @@ class LookupExtension : Extension() {
 							"**Mention:** ${user.mention}\n\n" +
 
 							if (user.avatar != null) {
-								"**Avatar URL:** ${user.avatar?.cdnUrl}\n\n"
+								"**Avatar URL:** ${user.avatar?.cdnUrl?.toUrl()}\n\n"
 							} else {
 								""
 							} +
@@ -99,7 +99,7 @@ class LookupExtension : Extension() {
 
 						author {
 							name = user.tag
-							icon = user.avatar?.cdnUrl.toString()
+							icon = user.avatar?.cdnUrl?.toUrl()
 						}
 
 						timestamp = Clock.System.now()
@@ -275,7 +275,7 @@ class LookupExtension : Extension() {
 							"**Mention:** ${user.mention}\n\n" +
 
 							if (user.avatar != null) {
-								"**Avatar URL:** ${user.avatar?.cdnUrl}\n\n"
+								"**Avatar URL:** ${user.avatar?.cdnUrl?.toUrl()}\n\n"
 							} else {
 								""
 							} +
