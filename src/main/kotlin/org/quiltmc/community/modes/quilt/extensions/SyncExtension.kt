@@ -35,6 +35,7 @@ import kotlinx.datetime.Instant
 import mu.KotlinLogging
 import org.quiltmc.community.GUILDS
 import org.quiltmc.community.inQuiltGuild
+import org.quiltmc.community.notInCollab
 
 private val BAN_PERMS: Array<Permission> = arrayOf(Permission.BanMembers, Permission.Administrator)
 private val TIMEOUT_PERMS: Array<Permission> = arrayOf(Permission.ModerateMembers, Permission.Administrator)
@@ -95,6 +96,7 @@ class SyncExtension : Extension() {
 
 			check { inQuiltGuild() }
 			check { hasBanOrRolePerms() }
+			check { notInCollab() }
 
 			ephemeralSubCommand {
 				name = "bans"
@@ -102,6 +104,7 @@ class SyncExtension : Extension() {
 
 				check { inQuiltGuild() }
 				check { hasBanPerms() }
+				check { notInCollab() }
 
 				requireBotPermissions(Permission.BanMembers)
 
@@ -165,6 +168,7 @@ class SyncExtension : Extension() {
 
 				check { inQuiltGuild() }
 				check { hasBanPerms() }
+				check { notInCollab() }
 
 				requireBotPermissions(Permission.ModerateMembers)
 
@@ -253,6 +257,7 @@ class SyncExtension : Extension() {
 
 		event<BanAddEvent> {
 			check { inQuiltGuild() }
+			check { notInCollab() }
 
 			action {
 				val guilds = getGuilds().filter { it.id != event.guildId }
@@ -270,6 +275,7 @@ class SyncExtension : Extension() {
 
 		event<BanRemoveEvent> {
 			check { inQuiltGuild() }
+			check { notInCollab() }
 
 			action {
 				val guilds = getGuilds().filter { it.id != event.guildId }
@@ -284,6 +290,7 @@ class SyncExtension : Extension() {
 
 		event<MemberUpdateEvent> {
 			check { inQuiltGuild() }
+			check { notInCollab() }
 
 			action {
 				val guilds = getGuilds().filter { it.id != event.guildId }

@@ -12,6 +12,7 @@
 package org.quiltmc.community
 
 import com.kotlindiscord.kord.extensions.ExtensibleBot
+import com.kotlindiscord.kord.extensions.checks.guildFor
 import com.kotlindiscord.kord.extensions.modules.extra.mappings.extMappings
 import com.kotlindiscord.kord.extensions.modules.extra.phishing.DetectionAction
 import com.kotlindiscord.kord.extensions.modules.extra.phishing.extPhishing
@@ -21,7 +22,9 @@ import com.kotlindiscord.kord.extensions.utils.getKoin
 import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.gateway.Intents
 import dev.kord.gateway.PrivilegedIntent
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.lastOrNull
 import org.quiltmc.community.cozy.modules.logs.extLogParser
 import org.quiltmc.community.cozy.modules.logs.processors.PiracyProcessor
 import org.quiltmc.community.cozy.modules.logs.processors.ProblematicLauncherProcessor
@@ -41,7 +44,6 @@ import org.quiltmc.community.modes.quilt.extensions.minecraft.MinecraftExtension
 import org.quiltmc.community.modes.quilt.extensions.modhostverify.ModHostingVerificationExtension
 import org.quiltmc.community.modes.quilt.extensions.settings.SettingsExtension
 import org.quiltmc.community.modes.quilt.extensions.suggestions.SuggestionsExtension
-import org.quiltmc.community.modes.quilt.extensions.suggestions.VerificationExtension
 import kotlin.time.Duration.Companion.minutes
 
 val MODE = envOrNull("MODE")?.lowercase() ?: "quilt"
@@ -122,53 +124,11 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
 			processor(NonQuiltLoaderProcessor())
 			processor(RuleBreakingModProcessor())
 
-//			@Suppress("TooGenericExceptionCaught")
-//			suspend fun predicate(handler: BaseLogHandler, event: Event): Boolean = with(handler) {
-//				val predicateLogger = KotlinLogging.logger(
-//					"org.quiltmc.community.AppKt.setupQuilt.extLogParser.predicate"
-//				)
-//
-//				val kord: Kord = getKoin().get()
-//				val channelId = channelSnowflakeFor(event)
-//				val guild = guildFor(event)
-//
-//				try {
-//					val skippableChannelIds = SKIPPABLE_HANDLER_CATEGORIES.mapNotNull {
-//						kord.getChannelOf<Category>(it)
-//							?.channels
-//							?.map { ch -> ch.id }
-//							?.toList()
-//					}.flatten()
-//
-//					val isSkippable = identifier in SKIPPABLE_HANDLER_IDS
-//
-//					if (guild?.id == TOOLCHAIN_GUILD && isSkippable) {
-//						predicateLogger.info {
-//							"Skipping handler '$identifier' in <#$channelId>: Skippable handler, and on Toolchain"
-//						}
-//
-//						return false
-//					}
-//
-//					if (channelId in skippableChannelIds && isSkippable) {
-//						predicateLogger.info {
-//							"Skipping handler '$identifier' in <#$channelId>: Skippable handler, and in a dev category"
-//						}
-//
-//						return false
-//					}
-//
-//					predicateLogger.debug { "Passing handler '$identifier' in <#$channelId>" }
-//
-//					return true
-//				} catch (e: Exception) {
-//					predicateLogger.warn(e) { "Skipping processor '$identifier' in <#$channelId> due to an error." }
-//
-//					return true
-//				}
-//			}
-//
-//			globalPredicate(::predicate)
+			globalPredicate { event ->
+				val guild = guildFor(event)
+
+				guild?.id != COLLAB_GUILD
+			}
 		}
 
 		help {
@@ -210,24 +170,8 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
 
 			check { inQuiltGuild() }
 			check { notHasBaseModeratorRole() }
+			check { notInCollab() }
 		}
-
-//		userCleanup {
-//			maxPendingDuration = 3.days
-//			taskDelay = 1.days
-//			loggingChannelName = "cozy-logs"
-//
-//			runAutomatically = true
-//
-//			guildPredicate {
-//				val servers = getKoin().get<ServerSettingsCollection>()
-//				val serverEntry = servers.get(it.id)
-//
-//				serverEntry?.quiltServerType != null
-//			}
-//
-//			commandCheck { hasPermission(Permission.Administrator) }
-//		}
 
 		moderation {
 			loggingChannelName = "cozy-logs"
