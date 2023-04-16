@@ -36,6 +36,7 @@ import org.quiltmc.community.database.collections.TagsCollection
 import org.quiltmc.community.database.collections.WelcomeChannelCollection
 import org.quiltmc.community.logs.NonQuiltLoaderProcessor
 import org.quiltmc.community.logs.RuleBreakingModProcessor
+import org.quiltmc.community.modes.collab.extensions.LookupExtension
 import org.quiltmc.community.modes.quilt.extensions.*
 import org.quiltmc.community.modes.quilt.extensions.filtering.FilterExtension
 import org.quiltmc.community.modes.quilt.extensions.github.GithubExtension
@@ -102,6 +103,7 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
 	extensions {
 		add(::ApplicationsExtension)
 		add(::FilterExtension)
+		add(::LookupExtension)
 		add(::MessageLogExtension)
 		add(::MinecraftExtension)
 		add(::ModHostingVerificationExtension)
