@@ -37,7 +37,7 @@ import org.quiltmc.community.replaceParams
 const val WIDGET_URL = "https://discord.com/api/guilds/:id/widget.json"
 
 class LookupExtension : Extension() {
-	override val name = "lookup"
+	override val name = "collab-lookup"
 
 	private val client = HttpClient {
 		install(ContentNegotiation) {

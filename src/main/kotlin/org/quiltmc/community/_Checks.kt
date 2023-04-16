@@ -214,7 +214,7 @@ suspend fun CheckContext<*>.inQuiltGuild() {
 
 		fail("Must be in one of the Quilt servers")
 	} else {
-		if (guild.id !in GUILDS) {
+		if (guild.id !in (GUILDS + COLLAB_GUILD)) {
 			fail("Must be in one of the Quilt servers")
 		}
 	}
