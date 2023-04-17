@@ -130,6 +130,18 @@ internal val MINECRAFT_UPDATE_PING_ROLE = envOrNull("MINECRAFT_UPDATE_PING_ROLE"
 	?.let { Snowflake(it) }
 	?: Snowflake(1003614007237816361)
 
+internal val COLLAB_VERIFIED_ROLE = envOrNull("COLLAB_VERIFIED_ROLE")
+	?.let { Snowflake(it) }
+	?: Snowflake(905218875015188531)
+
+internal val TOOLCHAIN_COLLAB_ROLE = envOrNull("TOOLCHAIN_COLLAB_ROLE")
+	?.let { Snowflake(it) }
+	?: Snowflake(864199536221093889)
+
+internal val COMMUNITY_COLLAB_ROLE = envOrNull("COMMUNITY_COLLAB_ROLE")
+	?.let { Snowflake(it) }
+	?: Snowflake(864178877142925312)
+
 internal val COMMUNITY_GUILD = Snowflake(
 	envOrNull("COMMUNITY_GUILD_ID")?.toLong()
 		?: 817576132726620200

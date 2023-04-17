@@ -188,6 +188,14 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
 				TOOLCHAIN_DEVELOPER_ROLE,
 				COMMUNITY_DEVELOPER_ROLE
 			)
+			roleToSync(
+				COLLAB_VERIFIED_ROLE,
+				TOOLCHAIN_COLLAB_ROLE
+			)
+			roleToSync(
+				COLLAB_VERIFIED_ROLE,
+				COMMUNITY_COLLAB_ROLE
+			)
 
 			commandCheck { inQuiltGuild() }
 			commandCheck { hasBaseModeratorRole() }
