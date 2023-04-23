@@ -1255,7 +1255,16 @@ class UtilityExtension : Extension() {
 				check { hasBaseModeratorRole() }
 
 				action {
-					var channelObj = arguments.channel ?: channel.asChannel()
+					var channelObj = arguments.channel
+						?: channel.asChannelOfOrNull<GuildMessageChannel>()
+
+					if (channelObj == null) {
+						respond {
+							content = "This command can only be run in a guild text channel."
+						}
+
+						return@action
+					}
 
 					if (channelObj is ThreadChannel) {
 						channelObj = channelObj.parent.asChannel()
@@ -1265,6 +1274,8 @@ class UtilityExtension : Extension() {
 						respond {
 							content = "This command can only be run in a guild text channel."
 						}
+
+						return@action
 					}
 
 					val staffRoleId = when (guild?.id) {
@@ -1275,7 +1286,7 @@ class UtilityExtension : Extension() {
 						else -> null
 					}
 
-					val ch = channelObj as TextChannel
+					val ch = channelObj
 
 					if (staffRoleId != null) {
 						ch.editRolePermission(staffRoleId) {
@@ -1320,7 +1331,16 @@ class UtilityExtension : Extension() {
 				check { hasBaseModeratorRole() }
 
 				action {
-					var channelObj = arguments.channel ?: channel.asChannel()
+					var channelObj = arguments.channel
+						?: channel.asChannelOfOrNull<GuildMessageChannel>()
+
+					if (channelObj == null) {
+						respond {
+							content = "This command can only be run in a guild text channel."
+						}
+
+						return@action
+					}
 
 					if (channelObj is ThreadChannel) {
 						channelObj = (channelObj as ThreadChannel).parent.asChannel()
@@ -1330,6 +1350,8 @@ class UtilityExtension : Extension() {
 						respond {
 							content = "This command can only be run in a guild text channel."
 						}
+
+						return@action
 					}
 
 					val ch = channelObj as TextChannel
@@ -1559,7 +1581,16 @@ class UtilityExtension : Extension() {
 			check { hasBaseModeratorRole() }
 
 			action {
-				var channelObj = arguments.channel ?: channel.asChannel()
+				var channelObj = arguments.channel
+					?: channel.asChannelOfOrNull<GuildMessageChannel>()
+
+				if (channelObj == null) {
+					message.respond {
+						content = "This command can only be run in a guild text channel."
+					}
+
+					return@action
+				}
 
 				if (channelObj is ThreadChannel) {
 					channelObj = (channelObj as ThreadChannel).parent.asChannel()
@@ -1569,6 +1600,8 @@ class UtilityExtension : Extension() {
 					message.respond {
 						content = "This command can only be run in a guild text channel."
 					}
+
+					return@action
 				}
 
 				val staffRoleId = when (guild?.id) {
@@ -1621,7 +1654,16 @@ class UtilityExtension : Extension() {
 			check { hasBaseModeratorRole() }
 
 			action {
-				var channelObj = arguments.channel ?: channel.asChannel()
+				var channelObj = arguments.channel
+					?: channel.asChannelOfOrNull<GuildMessageChannel>()
+
+				if (channelObj == null) {
+					message.respond {
+						content = "This command can only be run in a guild text channel."
+					}
+
+					return@action
+				}
 
 				if (channelObj is ThreadChannel) {
 					channelObj = (channelObj as ThreadChannel).parent.asChannel()
@@ -1631,6 +1673,8 @@ class UtilityExtension : Extension() {
 					message.respond {
 						content = "This command can only be run in a guild text channel."
 					}
+
+					return@action
 				}
 
 				val ch = channelObj as TextChannel
