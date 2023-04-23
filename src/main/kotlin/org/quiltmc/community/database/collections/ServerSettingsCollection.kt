@@ -35,6 +35,9 @@ class ServerSettingsCollection : KordExKoinComponent {
 	suspend fun getToolchain() =
 		col.findOne(ServerSettings::quiltServerType eq QuiltServerType.TOOLCHAIN)
 
+	suspend fun getCollab() =
+		col.findOne(ServerSettings::quiltServerType eq QuiltServerType.COLLAB)
+
 	suspend fun set(settings: ServerSettings) =
 		col.save(settings)
 
