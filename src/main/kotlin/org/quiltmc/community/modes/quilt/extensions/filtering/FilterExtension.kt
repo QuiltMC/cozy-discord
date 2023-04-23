@@ -107,6 +107,7 @@ class FilterExtension : Extension() {
 			check { isNotBot() }
 			check { inQuiltGuild() }
 			check { notHasBaseModeratorRole() }
+			check { notInCollab() }
 
 			action {
 				handleMessage(event.message)
@@ -118,6 +119,7 @@ class FilterExtension : Extension() {
 			check { isNotBot() }
 			check { inQuiltGuild() }
 			check { notHasBaseModeratorRole() }
+			check { notInCollab() }
 
 			action {
 				handleMessage(event.message.asMessage())
@@ -128,6 +130,7 @@ class FilterExtension : Extension() {
 			check { isNotBot() }
 			check { inQuiltGuild() }
 			check { notHasBaseModeratorRole() }
+			check { notInCollab() }
 
 			action {
 				handleMember(event.member)
@@ -138,6 +141,7 @@ class FilterExtension : Extension() {
 			check { isNotBot() }
 			check { inQuiltGuild() }
 			check { notHasBaseModeratorRole() }
+			check { notInCollab() }
 
 			action {
 				handleMember(event.member)
@@ -148,6 +152,7 @@ class FilterExtension : Extension() {
 			check { isNotBot() }
 			check { inQuiltGuild() }
 			check { notHasBaseModeratorRole() }
+			check { notInCollab() }
 
 			action {
 				val guilds = serverSettings.getByQuiltServers().toList().mapNotNull {

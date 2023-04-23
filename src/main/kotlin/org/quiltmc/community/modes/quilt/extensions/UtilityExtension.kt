@@ -26,6 +26,7 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.*
 import com.kotlindiscord.kord.extensions.components.ComponentContainer
 import com.kotlindiscord.kord.extensions.components.components
 import com.kotlindiscord.kord.extensions.components.ephemeralButton
+import com.kotlindiscord.kord.extensions.components.forms.ModalForm
 import com.kotlindiscord.kord.extensions.extensions.*
 import com.kotlindiscord.kord.extensions.i18n.SupportedLocales
 import com.kotlindiscord.kord.extensions.time.TimestampType
@@ -48,6 +49,7 @@ import dev.kord.core.event.channel.thread.ThreadUpdateEvent
 import dev.kord.core.event.gateway.ReadyEvent
 import dev.kord.core.event.guild.MemberUpdateEvent
 import dev.kord.core.event.message.MessageCreateEvent
+import dev.kord.rest.builder.message.create.allowedMentions
 import dev.kord.rest.builder.message.create.embed
 import dev.kord.rest.builder.message.modify.embed
 import io.ktor.client.request.forms.*
@@ -83,6 +85,8 @@ val SPEAKING_PERMISSIONS: Array<Permission> = arrayOf(
 val STATUS_CHANNEL_ID = envOrNull("STATUS_CHANNEL")
 val PIN_DELETE_DELAY = 10.seconds
 val THREAD_CREATE_DELETE_DELAY = 30.minutes
+
+const val EVENT_LOGS_CHANNEL = "logged-events"
 
 class UtilityExtension : Extension() {
 	override val name: String = "utility"
@@ -127,6 +131,7 @@ class UtilityExtension : Extension() {
 		event<MemberUpdateEvent> {
 			check { inQuiltGuild() }
 			check { isNotBot() }
+			check { notInCollab() }
 
 			check {
 				failIf {
@@ -186,6 +191,7 @@ class UtilityExtension : Extension() {
 		event<MessageCreateEvent> {
 			check { inQuiltGuild() }
 			check { failIf { event.message.type != MessageType.ThreadCreated } }
+			check { notInCollab() }
 
 			action {
 				delay(THREAD_CREATE_DELETE_DELAY)
@@ -218,11 +224,11 @@ class UtilityExtension : Extension() {
 
 				val message = event.channel.createMessage {
 					content = "Oh hey, that's a nice thread you've got there! Let me just get the mods in on this " +
-							"sweet discussion..."
+						"sweet discussion..."
 				}
 
 				event.channel.withTyping {
-					delay(3.seconds)
+					delay(2.seconds)
 				}
 
 				message.edit {
@@ -230,13 +236,13 @@ class UtilityExtension : Extension() {
 				}
 
 				event.channel.withTyping {
-					delay(3.seconds)
+					delay(2.seconds)
 				}
 
 				message.edit {
 					content = "Welcome to your new thread, ${owner.mention}! This message is at the " +
-							"start of the thread. Remember, you're welcome to use the `/thread` commands to manage " +
-							"your thread as needed."
+						"start of the thread. Remember, you're welcome to use the `/thread` commands to manage " +
+						"your thread as needed."
 				}
 
 				message.pin("First message in the thread.")
@@ -257,7 +263,43 @@ class UtilityExtension : Extension() {
 			}
 		}
 
-		GUILDS.forEach { guildId ->
+		(GUILDS + COLLAB_GUILD).forEach { guildId ->
+			ephemeralMessageCommand(::EventModal) {
+				name = "Log Event"
+				allowInDms = false
+
+				guild(guildId)
+
+				check { hasCommunityTeamRole() }
+
+				action { modal ->
+					val message = targetMessages.first()
+
+					if (modal?.description?.value == null) {
+						respond { content = "**Error:** You didn't provide a description." }
+
+						return@action
+					}
+
+					val channel = getGuild()?.asGuild()?.getEventLogChannel()
+
+					if (channel != null) {
+						channel.createMessage {
+							content = "**${modal.description.value}**\n\n" +
+								"**»** ${message.getJumpUrl()}\n" +
+								"**»** Logged by ${user.mention}\n" +
+								"\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_\\_"
+
+							allowedMentions { }
+						}
+
+						respond { content = "Event logged." }
+					} else {
+						respond { content = "Unable to find a channel named `#$EVENT_LOGS_CHANNEL`" }
+					}
+				}
+			}
+
 			ephemeralSlashCommand(::SelfTimeoutArguments) {
 				name = "self-timeout"
 				description = "Time yourself out for up to three days"
@@ -282,12 +324,12 @@ class UtilityExtension : Extension() {
 					edit {
 						content = "You've requested a timeout, which will end $relative (at $absolute).\n\n" +
 
-								"This timeout will be applied as soon as you click the button below. However, please " +
-								"note that **we will not be removing timeouts you set on yourself** in most " +
-								"situations, even if you request it. You should avoid setting timeouts you're not " +
-								"sure about.\n\n" +
+							"This timeout will be applied as soon as you click the button below. However, please " +
+							"note that **we will not be removing timeouts you set on yourself** in most " +
+							"situations, even if you request it. You should avoid setting timeouts you're not " +
+							"sure about.\n\n" +
 
-								"Are you sure you'd like to apply this timeout?"
+							"Are you sure you'd like to apply this timeout?"
 
 						components = components {
 							ephemeralButton {
@@ -355,8 +397,6 @@ class UtilityExtension : Extension() {
 				allowInDms = false
 
 				guild(guildId)
-
-				check { hasBaseModeratorRole() }
 
 				action {
 					val messages = targetMessages.map { it.data }
@@ -892,8 +932,8 @@ class UtilityExtension : Extension() {
 									color = DISCORD_BLURPLE
 									description =
 										"Are you sure you want to transfer ownership to " +
-												"${arguments.user.mention}? To cancel the" +
-												" transfer, simply ignore this message."
+											"${arguments.user.mention}? To cancel the" +
+											" transfer, simply ignore this message."
 								}
 
 								components(15.seconds) {
@@ -922,7 +962,7 @@ class UtilityExtension : Extension() {
 													color = DISCORD_BLURPLE
 													description =
 														"Updated thread owner to " +
-																arguments.user.mention
+															arguments.user.mention
 												}
 
 												components {
@@ -1000,7 +1040,7 @@ class UtilityExtension : Extension() {
 						respond {
 							content =
 								"Unable to find a role named `Muted` - double-check the list of roles, or provide " +
-										"one as an argument."
+									"one as an argument."
 						}
 						return@action
 					}
@@ -1068,7 +1108,7 @@ class UtilityExtension : Extension() {
 
 							description =
 								"Mute role (${role.mention} / `${role.id}`) permissions updated by " +
-										"${user.mention}."
+									"${user.mention}."
 
 							timestamp = Clock.System.now()
 
@@ -1105,7 +1145,7 @@ class UtilityExtension : Extension() {
 						COMMUNITY_GUILD -> COMMUNITY_MODERATOR_ROLE
 						TOOLCHAIN_GUILD -> TOOLCHAIN_MODERATOR_ROLE
 
-						else -> throw DiscordRelayedException("Incorrect server ID: ${guild?.id?.value}")
+						else -> throw DiscordRelayedException("Unsupported server: ${guild?.asGuildOrNull()?.name}")
 					}
 
 					val moderatorRole = guild!!.getRole(roleId)
@@ -1162,7 +1202,7 @@ class UtilityExtension : Extension() {
 						COMMUNITY_GUILD -> COMMUNITY_MODERATOR_ROLE
 						TOOLCHAIN_GUILD -> TOOLCHAIN_MODERATOR_ROLE
 
-						else -> throw DiscordRelayedException("Incorrect server ID: ${guild?.id?.value}")
+						else -> throw DiscordRelayedException("Unsupported server: ${guild?.asGuildOrNull()?.name}")
 					}
 
 					val moderatorRole = guild!!.getRole(roleId)
@@ -1215,7 +1255,16 @@ class UtilityExtension : Extension() {
 				check { hasBaseModeratorRole() }
 
 				action {
-					var channelObj = arguments.channel ?: channel.asChannel()
+					var channelObj = arguments.channel
+						?: channel.asChannelOfOrNull<GuildMessageChannel>()
+
+					if (channelObj == null) {
+						respond {
+							content = "This command can only be run in a guild text channel."
+						}
+
+						return@action
+					}
 
 					if (channelObj is ThreadChannel) {
 						channelObj = channelObj.parent.asChannel()
@@ -1225,16 +1274,19 @@ class UtilityExtension : Extension() {
 						respond {
 							content = "This command can only be run in a guild text channel."
 						}
+
+						return@action
 					}
 
 					val staffRoleId = when (guild?.id) {
 						COMMUNITY_GUILD -> COMMUNITY_MODERATOR_ROLE
 						TOOLCHAIN_GUILD -> TOOLCHAIN_MODERATOR_ROLE
+						COLLAB_GUILD -> COLLAB_MANAGER_ROLE
 
 						else -> null
 					}
 
-					val ch = channelObj as TextChannel
+					val ch = channelObj
 
 					if (staffRoleId != null) {
 						ch.editRolePermission(staffRoleId) {
@@ -1279,7 +1331,16 @@ class UtilityExtension : Extension() {
 				check { hasBaseModeratorRole() }
 
 				action {
-					var channelObj = arguments.channel ?: channel.asChannel()
+					var channelObj = arguments.channel
+						?: channel.asChannelOfOrNull<GuildMessageChannel>()
+
+					if (channelObj == null) {
+						respond {
+							content = "This command can only be run in a guild text channel."
+						}
+
+						return@action
+					}
 
 					if (channelObj is ThreadChannel) {
 						channelObj = (channelObj as ThreadChannel).parent.asChannel()
@@ -1289,6 +1350,8 @@ class UtilityExtension : Extension() {
 						respond {
 							content = "This command can only be run in a guild text channel."
 						}
+
+						return@action
 					}
 
 					val ch = channelObj as TextChannel
@@ -1335,12 +1398,12 @@ class UtilityExtension : Extension() {
 				message.respond {
 					content = "You've requested a timeout, which will end $relative (at $absolute).\n\n" +
 
-							"This timeout will be applied as soon as you click the button below. However, please " +
-							"note that **we will not be removing timeouts you set on yourself** in most " +
-							"situations, even if you request it. You should avoid setting timeouts you're not " +
-							"sure about.\n\n" +
+						"This timeout will be applied as soon as you click the button below. However, please " +
+						"note that **we will not be removing timeouts you set on yourself** in most " +
+						"situations, even if you request it. You should avoid setting timeouts you're not " +
+						"sure about.\n\n" +
 
-							"Are you sure you'd like to apply this timeout?"
+						"Are you sure you'd like to apply this timeout?"
 
 					components = components {
 						ephemeralButton {
@@ -1414,7 +1477,7 @@ class UtilityExtension : Extension() {
 					COMMUNITY_GUILD -> COMMUNITY_MODERATOR_ROLE
 					TOOLCHAIN_GUILD -> TOOLCHAIN_MODERATOR_ROLE
 
-					else -> throw DiscordRelayedException("Incorrect server ID: ${guild?.id?.value}")
+					else -> throw DiscordRelayedException("Unsupported server: ${guild?.asGuildOrNull()?.name}")
 				}
 
 				val moderatorRole = guild!!.getRole(roleId)
@@ -1468,7 +1531,7 @@ class UtilityExtension : Extension() {
 					COMMUNITY_GUILD -> COMMUNITY_MODERATOR_ROLE
 					TOOLCHAIN_GUILD -> TOOLCHAIN_MODERATOR_ROLE
 
-					else -> throw DiscordRelayedException("Incorrect server ID: ${guild?.id?.value}")
+					else -> throw DiscordRelayedException("Unsupported server: ${guild?.asGuildOrNull()?.name}")
 				}
 
 				val moderatorRole = guild!!.getRole(roleId)
@@ -1518,7 +1581,16 @@ class UtilityExtension : Extension() {
 			check { hasBaseModeratorRole() }
 
 			action {
-				var channelObj = arguments.channel ?: channel.asChannel()
+				var channelObj = arguments.channel
+					?: channel.asChannelOfOrNull<GuildMessageChannel>()
+
+				if (channelObj == null) {
+					message.respond {
+						content = "This command can only be run in a guild text channel."
+					}
+
+					return@action
+				}
 
 				if (channelObj is ThreadChannel) {
 					channelObj = (channelObj as ThreadChannel).parent.asChannel()
@@ -1528,11 +1600,14 @@ class UtilityExtension : Extension() {
 					message.respond {
 						content = "This command can only be run in a guild text channel."
 					}
+
+					return@action
 				}
 
 				val staffRoleId = when (guild?.id) {
 					COMMUNITY_GUILD -> COMMUNITY_MODERATOR_ROLE
 					TOOLCHAIN_GUILD -> TOOLCHAIN_MODERATOR_ROLE
+					COLLAB_GUILD -> COLLAB_MANAGER_ROLE
 
 					else -> null
 				}
@@ -1579,7 +1654,16 @@ class UtilityExtension : Extension() {
 			check { hasBaseModeratorRole() }
 
 			action {
-				var channelObj = arguments.channel ?: channel.asChannel()
+				var channelObj = arguments.channel
+					?: channel.asChannelOfOrNull<GuildMessageChannel>()
+
+				if (channelObj == null) {
+					message.respond {
+						content = "This command can only be run in a guild text channel."
+					}
+
+					return@action
+				}
 
 				if (channelObj is ThreadChannel) {
 					channelObj = (channelObj as ThreadChannel).parent.asChannel()
@@ -1589,6 +1673,8 @@ class UtilityExtension : Extension() {
 					message.respond {
 						content = "This command can only be run in a guild text channel."
 					}
+
+					return@action
 				}
 
 				val ch = channelObj as TextChannel
@@ -1622,6 +1708,19 @@ class UtilityExtension : Extension() {
 	suspend fun Guild.getCozyLogChannel() =
 		channels.firstOrNull { it.name == "cozy-logs" }
 			?.asChannelOrNull() as? GuildMessageChannel
+
+	suspend fun Guild.getEventLogChannel() =
+		channels.firstOrNull { it.name == EVENT_LOGS_CHANNEL }
+			?.asChannelOrNull() as? GuildMessageChannel
+
+	inner class EventModal : ModalForm() {
+		override var title: String = "Log Event"
+
+		val description = lineText {
+			label = "Description"
+			placeholder = "A few words on what's happening"
+		}
+	}
 
 	inner class SelfTimeoutArguments : Arguments() {
 		val duration by duration {

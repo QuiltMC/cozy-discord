@@ -30,6 +30,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import org.koin.core.component.inject
+import org.quiltmc.community.*
+import org.quiltmc.community.COLLAB_GUILD
 import org.quiltmc.community.GUILDS
 import org.quiltmc.community.MAIN_GUILD
 import org.quiltmc.community.database.collections.GlobalSettingsCollection
@@ -39,8 +41,6 @@ import org.quiltmc.community.database.entities.GlobalSettings
 import org.quiltmc.community.database.entities.ServerSettings
 import org.quiltmc.community.database.entities.UserFlags
 import org.quiltmc.community.database.enums.QuiltServerType
-import org.quiltmc.community.hasPermissionInMainGuild
-import org.quiltmc.community.inToolchain
 import org.quiltmc.community.modes.quilt.extensions.messagelog.MessageLogExtension
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
@@ -83,7 +83,7 @@ class SettingsExtension : Extension() {
 			}
 		}
 
-		GUILDS.forEach { guildId ->
+		(GUILDS + COLLAB_GUILD).forEach { guildId ->
 			ephemeralSlashCommand {
 				name = "config"
 				description = "Manage your bot settings"
