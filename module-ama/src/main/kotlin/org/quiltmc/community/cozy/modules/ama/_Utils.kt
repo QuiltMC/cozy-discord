@@ -83,13 +83,10 @@ public fun EmbedBuilder.questionEmbed(
 			}
 
 		QuestionStatusFlag.ANSWERED ->
-			if (viaStage == true && claimedOrSkippedBy != null) {
+			if (claimedOrSkippedBy != null) {
+				val answerMethod = if (viaStage == true) "stage" else "text"
 				footer {
-					text = "Question answered via stage by ${claimedOrSkippedBy.tag}"
-				}
-			} else if (viaStage == false && claimedOrSkippedBy != null) {
-				footer {
-					text = "Question answered via text by ${claimedOrSkippedBy.tag}"
+					text = "Question answered via $answerMethod by ${claimedOrSkippedBy.tag}"
 				}
 			}
 

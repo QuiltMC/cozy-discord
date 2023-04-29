@@ -1,5 +1,5 @@
 plugins {
-    `api-module`
+	`api-module`
 	`cozy-module`
 	`published-module`
 }
