@@ -16,6 +16,7 @@ import com.kotlindiscord.kord.extensions.utils.getKoin
 import com.kotlindiscord.kord.extensions.utils.loadModule
 import dev.kord.common.entity.ArchiveDuration
 import dev.kord.common.entity.Snowflake
+import dev.kord.common.entity.UserFlag
 import dev.kord.core.Kord
 import dev.kord.core.behavior.UserBehavior
 import dev.kord.core.behavior.channel.MessageChannelBehavior
@@ -249,3 +250,37 @@ fun Message.contentToThreadName(fallbackPrefix: String): String {
 
 		?: "$fallbackPrefix | $id"
 }
+
+fun UserFlag.getName(): String = when (this) {
+	UserFlag.ActiveDeveloper -> "Active Developer"
+	UserFlag.BotHttpInteractions -> "HTTP-Based Commands"
+	UserFlag.BugHunterLevel1 -> "Bug Hunter: Level 1"
+	UserFlag.BugHunterLevel2 -> "Bug Hunter: Level 2"
+	UserFlag.DiscordCertifiedModerator -> "Moderator Programs Alumni"
+	UserFlag.DiscordEmployee -> "Discord Employee"
+	UserFlag.DiscordPartner -> "Discord Partner"
+	UserFlag.EarlySupporter -> "Early Supporter"
+	UserFlag.HouseBalance -> "HypeSquad: Balance"
+	UserFlag.HouseBravery -> "HypeSquad: Bravery"
+	UserFlag.HouseBrilliance -> "HypeSquad: Brilliance"
+	UserFlag.HypeSquad -> "HypeSquad"
+	UserFlag.System -> "System User"
+	UserFlag.TeamUser -> "Team User"
+	UserFlag.VerifiedBot -> "Verified Bot"
+	UserFlag.VerifiedBotDeveloper -> "Early Verified Bot Developer"
+}
+
+fun String.replaceParams(vararg pairs: Pair<String, Any?>): String {
+	var result = this
+
+	pairs.forEach {
+		result = result.replace(":${it.first}", it.second.toString())
+	}
+
+	return result
+}
+
+@Suppress("SpreadOperator")
+fun String.replaceParams(pairs: Map<String, Any>): String = this.replaceParams(
+	*pairs.entries.map { it.toPair() }.toTypedArray()
+)

@@ -80,7 +80,7 @@ class MinecraftExtension : Extension() {
 
 		checkTask = scheduler.schedule(CHECK_DELAY, callback = ::checkTask)
 
-		for (guildId in GUILDS) {
+		for (guildId in GUILDS + COLLAB_GUILD) {
 			ephemeralSlashCommand {
 				name = "mc"
 				description = "Commands related to Minecraft updates"

@@ -60,6 +60,26 @@ suspend fun CheckContext<*>.inCommunity() {
 	}
 }
 
+suspend fun CheckContext<*>.notInCommunity() {
+	anyGuild()
+
+	if (!passed) {
+		return
+	}
+
+	val logger = KotlinLogging.logger("org.quiltmc.community.notInCommunity")
+
+	val collection = getKoin().get<ServerSettingsCollection>()
+	val settings = collection.getCommunity()
+
+	if (settings == null) {
+		logger.passed("Community server hasn't been configured yet.")
+		pass()
+	} else {
+		notInGuild(settings._id)
+	}
+}
+
 suspend fun CheckContext<*>.inToolchain() {
 	anyGuild()
 
@@ -67,7 +87,7 @@ suspend fun CheckContext<*>.inToolchain() {
 		return
 	}
 
-	val logger = KotlinLogging.logger("org.quiltmc.community.inCommunity")
+	val logger = KotlinLogging.logger("org.quiltmc.community.inToolchain")
 
 	val collection = getKoin().get<ServerSettingsCollection>()
 	val settings = collection.getToolchain()
@@ -77,6 +97,66 @@ suspend fun CheckContext<*>.inToolchain() {
 		fail("Toolchain server hasn't been configured yet.")
 	} else {
 		inGuild(settings._id)
+	}
+}
+
+suspend fun CheckContext<*>.notInToolchain() {
+	anyGuild()
+
+	if (!passed) {
+		return
+	}
+
+	val logger = KotlinLogging.logger("org.quiltmc.community.notInToolchain")
+
+	val collection = getKoin().get<ServerSettingsCollection>()
+	val settings = collection.getToolchain()
+
+	if (settings == null) {
+		logger.passed("Toolchain server hasn't been configured yet.")
+		pass()
+	} else {
+		notInGuild(settings._id)
+	}
+}
+
+suspend fun CheckContext<*>.inCollab() {
+	anyGuild()
+
+	if (!passed) {
+		return
+	}
+
+	val logger = KotlinLogging.logger("org.quiltmc.community.inCollab")
+
+	val collection = getKoin().get<ServerSettingsCollection>()
+	val settings = collection.getCollab()
+
+	if (settings == null) {
+		logger.failed("Collab server hasn't been configured yet.")
+		fail("Collab server hasn't been configured yet.")
+	} else {
+		inGuild(settings._id)
+	}
+}
+
+suspend fun CheckContext<*>.notInCollab() {
+	anyGuild()
+
+	if (!passed) {
+		return
+	}
+
+	val logger = KotlinLogging.logger("org.quiltmc.community.notInCollab")
+
+	val collection = getKoin().get<ServerSettingsCollection>()
+	val settings = collection.getCollab()
+
+	if (settings == null) {
+		logger.passed("Collab server hasn't been configured yet.")
+		pass()
+	} else {
+		notInGuild(settings._id)
 	}
 }
 
@@ -134,7 +214,7 @@ suspend fun CheckContext<*>.inQuiltGuild() {
 
 		fail("Must be in one of the Quilt servers")
 	} else {
-		if (guild.id !in GUILDS) {
+		if (guild.id !in (GUILDS + COLLAB_GUILD)) {
 			fail("Must be in one of the Quilt servers")
 		}
 	}

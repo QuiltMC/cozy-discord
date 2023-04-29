@@ -85,6 +85,7 @@ data class ServerSettings(
 				builder.append(":x: Not configured")
 			}
 
+			builder.append("\n")
 			builder.append("**Application threads channel:** ")
 
 			if (applicationThreadsChannel != null) {
@@ -186,10 +187,10 @@ data class ServerSettings(
 			description = builder.toString()
 			title = "Settings"
 
-			if (guild != null) {
-				title += ": ${guild.name}"
+			title += if (guild != null) {
+				": ${guild.name}"
 			} else {
-				title += " (${_id.value})"
+				" (${_id.value})"
 			}
 		}
 	}

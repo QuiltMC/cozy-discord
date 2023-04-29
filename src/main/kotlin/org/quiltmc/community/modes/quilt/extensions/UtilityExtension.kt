@@ -131,6 +131,7 @@ class UtilityExtension : Extension() {
 		event<MemberUpdateEvent> {
 			check { inQuiltGuild() }
 			check { isNotBot() }
+			check { notInCollab() }
 
 			check {
 				failIf {
@@ -190,6 +191,7 @@ class UtilityExtension : Extension() {
 		event<MessageCreateEvent> {
 			check { inQuiltGuild() }
 			check { failIf { event.message.type != MessageType.ThreadCreated } }
+			check { notInCollab() }
 
 			action {
 				delay(THREAD_CREATE_DELETE_DELAY)
@@ -226,7 +228,7 @@ class UtilityExtension : Extension() {
 				}
 
 				event.channel.withTyping {
-					delay(3.seconds)
+					delay(2.seconds)
 				}
 
 				message.edit {
@@ -234,7 +236,7 @@ class UtilityExtension : Extension() {
 				}
 
 				event.channel.withTyping {
-					delay(3.seconds)
+					delay(2.seconds)
 				}
 
 				message.edit {
@@ -261,7 +263,7 @@ class UtilityExtension : Extension() {
 			}
 		}
 
-		GUILDS.forEach { guildId ->
+		(GUILDS + COLLAB_GUILD).forEach { guildId ->
 			ephemeralMessageCommand(::EventModal) {
 				name = "Log Event"
 				allowInDms = false
@@ -395,8 +397,6 @@ class UtilityExtension : Extension() {
 				allowInDms = false
 
 				guild(guildId)
-
-				check { hasBaseModeratorRole() }
 
 				action {
 					val messages = targetMessages.map { it.data }
@@ -1145,7 +1145,7 @@ class UtilityExtension : Extension() {
 						COMMUNITY_GUILD -> COMMUNITY_MODERATOR_ROLE
 						TOOLCHAIN_GUILD -> TOOLCHAIN_MODERATOR_ROLE
 
-						else -> throw DiscordRelayedException("Incorrect server ID: ${guild?.id?.value}")
+						else -> throw DiscordRelayedException("Unsupported server: ${guild?.asGuildOrNull()?.name}")
 					}
 
 					val moderatorRole = guild!!.getRole(roleId)
@@ -1202,7 +1202,7 @@ class UtilityExtension : Extension() {
 						COMMUNITY_GUILD -> COMMUNITY_MODERATOR_ROLE
 						TOOLCHAIN_GUILD -> TOOLCHAIN_MODERATOR_ROLE
 
-						else -> throw DiscordRelayedException("Incorrect server ID: ${guild?.id?.value}")
+						else -> throw DiscordRelayedException("Unsupported server: ${guild?.asGuildOrNull()?.name}")
 					}
 
 					val moderatorRole = guild!!.getRole(roleId)
@@ -1255,7 +1255,16 @@ class UtilityExtension : Extension() {
 				check { hasBaseModeratorRole() }
 
 				action {
-					var channelObj = arguments.channel ?: channel.asChannel()
+					var channelObj = arguments.channel
+						?: channel.asChannelOfOrNull<GuildMessageChannel>()
+
+					if (channelObj == null) {
+						respond {
+							content = "This command can only be run in a guild text channel."
+						}
+
+						return@action
+					}
 
 					if (channelObj is ThreadChannel) {
 						channelObj = channelObj.parent.asChannel()
@@ -1265,16 +1274,19 @@ class UtilityExtension : Extension() {
 						respond {
 							content = "This command can only be run in a guild text channel."
 						}
+
+						return@action
 					}
 
 					val staffRoleId = when (guild?.id) {
 						COMMUNITY_GUILD -> COMMUNITY_MODERATOR_ROLE
 						TOOLCHAIN_GUILD -> TOOLCHAIN_MODERATOR_ROLE
+						COLLAB_GUILD -> COLLAB_MANAGER_ROLE
 
 						else -> null
 					}
 
-					val ch = channelObj as TextChannel
+					val ch = channelObj
 
 					if (staffRoleId != null) {
 						ch.editRolePermission(staffRoleId) {
@@ -1319,7 +1331,16 @@ class UtilityExtension : Extension() {
 				check { hasBaseModeratorRole() }
 
 				action {
-					var channelObj = arguments.channel ?: channel.asChannel()
+					var channelObj = arguments.channel
+						?: channel.asChannelOfOrNull<GuildMessageChannel>()
+
+					if (channelObj == null) {
+						respond {
+							content = "This command can only be run in a guild text channel."
+						}
+
+						return@action
+					}
 
 					if (channelObj is ThreadChannel) {
 						channelObj = (channelObj as ThreadChannel).parent.asChannel()
@@ -1329,6 +1350,8 @@ class UtilityExtension : Extension() {
 						respond {
 							content = "This command can only be run in a guild text channel."
 						}
+
+						return@action
 					}
 
 					val ch = channelObj as TextChannel
@@ -1454,7 +1477,7 @@ class UtilityExtension : Extension() {
 					COMMUNITY_GUILD -> COMMUNITY_MODERATOR_ROLE
 					TOOLCHAIN_GUILD -> TOOLCHAIN_MODERATOR_ROLE
 
-					else -> throw DiscordRelayedException("Incorrect server ID: ${guild?.id?.value}")
+					else -> throw DiscordRelayedException("Unsupported server: ${guild?.asGuildOrNull()?.name}")
 				}
 
 				val moderatorRole = guild!!.getRole(roleId)
@@ -1508,7 +1531,7 @@ class UtilityExtension : Extension() {
 					COMMUNITY_GUILD -> COMMUNITY_MODERATOR_ROLE
 					TOOLCHAIN_GUILD -> TOOLCHAIN_MODERATOR_ROLE
 
-					else -> throw DiscordRelayedException("Incorrect server ID: ${guild?.id?.value}")
+					else -> throw DiscordRelayedException("Unsupported server: ${guild?.asGuildOrNull()?.name}")
 				}
 
 				val moderatorRole = guild!!.getRole(roleId)
@@ -1558,7 +1581,16 @@ class UtilityExtension : Extension() {
 			check { hasBaseModeratorRole() }
 
 			action {
-				var channelObj = arguments.channel ?: channel.asChannel()
+				var channelObj = arguments.channel
+					?: channel.asChannelOfOrNull<GuildMessageChannel>()
+
+				if (channelObj == null) {
+					message.respond {
+						content = "This command can only be run in a guild text channel."
+					}
+
+					return@action
+				}
 
 				if (channelObj is ThreadChannel) {
 					channelObj = (channelObj as ThreadChannel).parent.asChannel()
@@ -1568,11 +1600,14 @@ class UtilityExtension : Extension() {
 					message.respond {
 						content = "This command can only be run in a guild text channel."
 					}
+
+					return@action
 				}
 
 				val staffRoleId = when (guild?.id) {
 					COMMUNITY_GUILD -> COMMUNITY_MODERATOR_ROLE
 					TOOLCHAIN_GUILD -> TOOLCHAIN_MODERATOR_ROLE
+					COLLAB_GUILD -> COLLAB_MANAGER_ROLE
 
 					else -> null
 				}
@@ -1619,7 +1654,16 @@ class UtilityExtension : Extension() {
 			check { hasBaseModeratorRole() }
 
 			action {
-				var channelObj = arguments.channel ?: channel.asChannel()
+				var channelObj = arguments.channel
+					?: channel.asChannelOfOrNull<GuildMessageChannel>()
+
+				if (channelObj == null) {
+					message.respond {
+						content = "This command can only be run in a guild text channel."
+					}
+
+					return@action
+				}
 
 				if (channelObj is ThreadChannel) {
 					channelObj = (channelObj as ThreadChannel).parent.asChannel()
@@ -1629,6 +1673,8 @@ class UtilityExtension : Extension() {
 					message.respond {
 						content = "This command can only be run in a guild text channel."
 					}
+
+					return@action
 				}
 
 				val ch = channelObj as TextChannel
