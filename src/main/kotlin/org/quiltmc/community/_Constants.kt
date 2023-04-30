@@ -100,6 +100,10 @@ internal val TOOLCHAIN_COMMUNITY_TEAM_ROLE = envOrNull("TOOLCHAIN_COMMUNITY_TEAM
 	?.let { Snowflake(it) }
 	?: Snowflake(863765983890374656)
 
+internal val COMMUNITY_DEVELOPER_CATEGORY = envOrNull("COMMUNITY_DEVELOPER_CATEGORY")
+	?.let { Snowflake(it) }
+	?: Snowflake(1102169914858541066)
+
 internal val COMMUNITY_DEVELOPER_ROLE = envOrNull("COMMUNITY_DEVELOPER_ROLE")
 	?.let { Snowflake(it) }
 	?: Snowflake(972868531844710412)

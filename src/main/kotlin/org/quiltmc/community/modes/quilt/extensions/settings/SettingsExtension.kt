@@ -83,7 +83,7 @@ class SettingsExtension : Extension() {
 			}
 		}
 
-		(GUILDS + COLLAB_GUILD).forEach { guildId ->
+		(GUILDS + COLLAB_GUILD).toSet().forEach { guildId ->
 			ephemeralSlashCommand {
 				name = "config"
 				description = "Manage your bot settings"

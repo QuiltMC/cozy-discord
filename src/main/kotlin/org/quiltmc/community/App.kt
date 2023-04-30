@@ -103,6 +103,7 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
 	extensions {
 		add(::ApplicationsExtension)
 		add(::FilterExtension)
+		add(::ForumExtension)
 		add(::LookupExtension)
 		add(::MessageLogExtension)
 		add(::MinecraftExtension)

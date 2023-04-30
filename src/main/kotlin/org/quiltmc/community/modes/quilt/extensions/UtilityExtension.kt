@@ -263,7 +263,7 @@ class UtilityExtension : Extension() {
 			}
 		}
 
-		(GUILDS + COLLAB_GUILD).forEach { guildId ->
+		(GUILDS + COLLAB_GUILD).toSet().forEach { guildId ->
 			ephemeralMessageCommand(::EventModal) {
 				name = "Log Event"
 				allowInDms = false
