@@ -151,6 +151,34 @@
 
         For any question or request regarding your data, please contact us at privacy@quiltmc.org.
 
+- type: roles
+
+  id: community-roles
+
+  title: "Role Assignment"
+  description: "Click the button below to assign or remove any of the following roles."
+  template: "{EMOJI} **{NAME}**: {DESCRIPTION}\n"
+
+  roles:
+      976178214269497366:
+          description: "Get pinged when we post announcements in <#832357051463630947>."
+          emoji: "📢"
+
+      1086037902577909870:
+          description: >
+              Get pinged with infrastructure status updates, notifying you about outages and their resolutions in
+              <#1086035355339333752>.
+
+          emoji: "📢"
+
+      1003614007237816361:
+          description: "Get pinged when a new Minecraft snapshot or release is published in <#838805249271267398>."
+          emoji: "📢"
+
+      976082711817113610:
+          description: "Let people know that you're using a translator to talk."
+          emoji: "<:via_translator:976173251720015922>"
+
 - type: text
   text: https://cdn.discordapp.com/attachments/863707104903561216/977162805373435925/forum-header-community.png
 
