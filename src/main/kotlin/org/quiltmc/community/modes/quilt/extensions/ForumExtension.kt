@@ -12,8 +12,11 @@ package org.quiltmc.community.modes.quilt.extensions
 import com.kotlindiscord.kord.extensions.checks.hasRole
 import com.kotlindiscord.kord.extensions.checks.or
 import com.kotlindiscord.kord.extensions.commands.Arguments
+import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
 import com.kotlindiscord.kord.extensions.commands.converters.impl.channel
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalChannel
+import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalTag
+import com.kotlindiscord.kord.extensions.commands.converters.impl.tag
 import com.kotlindiscord.kord.extensions.components.forms.ModalForm
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
@@ -21,6 +24,7 @@ import com.kotlindiscord.kord.extensions.modules.unsafe.annotations.UnsafeAPI
 import com.kotlindiscord.kord.extensions.modules.unsafe.extensions.unsafeSubCommand
 import com.kotlindiscord.kord.extensions.modules.unsafe.types.InitialSlashCommandResponse
 import com.kotlindiscord.kord.extensions.modules.unsafe.types.ackEphemeral
+import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.extraData
 import dev.kord.common.annotation.KordUnsafe
 import dev.kord.common.entity.ChannelType
@@ -31,6 +35,7 @@ import dev.kord.core.behavior.edit
 import dev.kord.core.behavior.interaction.modal
 import dev.kord.core.behavior.interaction.response.createEphemeralFollowup
 import dev.kord.core.entity.channel.ForumChannel
+import dev.kord.core.entity.channel.thread.TextChannelThread
 import dev.kord.core.entity.channel.thread.ThreadChannel
 import kotlinx.coroutines.delay
 import org.quiltmc.community.*
@@ -58,7 +63,7 @@ class ForumExtension : Extension() {
 				}
 			}
 
-			unsafeSubCommand(::ForumChannelArgs) {
+			unsafeSubCommand(::CreatePostArgs) {
 				name = "create-post"
 				description = "Create a Cozy-managed forum post"
 
@@ -112,9 +117,11 @@ class ForumExtension : Extension() {
 					}
 
 					val thread = forum.startPublicThread(title) {
-						// TODO: Tags?
-
 						message(text)
+
+						if (arguments.tag != null) {
+							appliedTags = mutableListOf(arguments.tag!!.id)
+						}
 					}
 
 					interactionResponse.createEphemeralFollowup {
@@ -147,7 +154,7 @@ class ForumExtension : Extension() {
 				}
 			}
 
-			unsafeSubCommand(::ForumPostArgs) {
+			unsafeSubCommand(::EditPostArgs) {
 				name = "edit-post"
 				description = "Edit an existing Cozy-managed forum post"
 
@@ -230,19 +237,116 @@ class ForumExtension : Extension() {
 					}
 				}
 			}
+
+			ephemeralSubCommand(::PostTagArgs) {
+				name = "add-tag"
+				description = "Add a tag to the given post"
+
+				action {
+					val post = arguments.post.asChannelOfOrNull<TextChannelThread>()
+					val parent = post?.parent?.asChannelOfOrNull<ForumChannel>()
+
+					if (parent == null) {
+						respond {
+							content = "Please provide a forum thread to edit the tags for."
+						}
+
+						return@action
+					}
+
+					if (post.appliedTags.contains(arguments.tag.id)) {
+						respond {
+							content = "This thread already has that tag applied."
+						}
+
+						return@action
+					}
+
+					post.edit {
+						appliedTags = post.appliedTags.toMutableList()
+						appliedTags?.add(arguments.tag.id)
+					}
+
+					respond {
+						content = "Thread tags updated."
+					}
+				}
+			}
+
+			ephemeralSubCommand(::PostTagArgs) {
+				name = "remove-tag"
+				description = "Remove a tag from the given post"
+
+				action {
+					val post = arguments.post.asChannelOfOrNull<TextChannelThread>()
+					val parent = post?.parent?.asChannelOfOrNull<ForumChannel>()
+
+					if (parent == null) {
+						respond {
+							content = "Please provide a forum thread to edit the tags for."
+						}
+
+						return@action
+					}
+
+					if (!post.appliedTags.contains(arguments.tag.id)) {
+						respond {
+							content = "This thread doesn't have that tag applied."
+						}
+
+						return@action
+					}
+
+					post.edit {
+						appliedTags = post.appliedTags.toMutableList()
+						appliedTags?.remove(arguments.tag.id)
+					}
+
+					respond {
+						content = "Thread tags updated."
+					}
+				}
+			}
 		}
 	}
 
-	inner class ForumChannelArgs : Arguments() {
+	inner class PostTagArgs : Arguments() {
+		override val parseForAutocomplete: Boolean = true
+
+		val post by channel {
+			name = "post"
+			description = "Thread to edit the tags for"
+
+			requireChannelType(ChannelType.PublicGuildThread)
+		}
+
+		val tag by tag {
+			name = "tag"
+			description = "Tag to create the post with"
+
+			channelGetter = { post.asChannelOfOrNull<TextChannelThread>()?.parent?.asChannelOfOrNull() }
+		}
+	}
+
+	inner class CreatePostArgs : Arguments() {
+		override val parseForAutocomplete: Boolean = true
+
 		val channel by channel {
 			name = "channel"
 			description = "Forum channel to post in"
 
 			requireChannelType(ChannelType.GuildForum)
 		}
+
+		val tag by optionalTag {
+			name = "tag"
+			description = "Tag to create the post with"
+
+			channelGetter = { channel.asChannelOfOrNull() }
+		}
 	}
 
-	inner class ForumPostArgs : Arguments() {
+	inner class EditPostArgs : Arguments() {
 		val post by optionalChannel {
 			name = "post"
 			description = "Thread to edit the first post for"
