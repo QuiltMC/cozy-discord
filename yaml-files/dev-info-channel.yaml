@@ -1,0 +1,85 @@
+
+
+- type: embed
+
+  embeds:
+    - title: Quilt Development Channels
+      color: 0x57F287
+
+      description: >
+          Welcome to the Quilt Development channels - in this category, you'll find channels representing each of Quilt's
+          development teams, each containing discussions relevant to their respective projects.
+
+
+          Unlike a lot of other channels here, **these channels are strictly on-topic.** Please avoid any off-topic
+          tangents, and don't be too surprised if you're asked to move to another channel when things stray too far
+          from the topic.
+
+    - title: Understanding This Category
+      color: 0x5865F2
+
+      description: >
+          This channel category is set up somewhat differently to the rest of the server. Specifically, take note of the
+          following:
+
+
+          - <#1103979229881831444> may be used for general project-related discussions, and to ask which channel is best
+          for a given project or subject
+
+          - <#1103979333627936818> contains individual development logs, split into a forum post per team - these logs
+          are automatically copied to <#908399987099045999> by Cozy
+
+          - <#1104421317731688609> contains the git logs - you can look at the channel itself to see all of them, or you
+          can look through the threads to find git logs for specific teams
+
+          - The forum channels set up for each team (other than <#1104037919792054282>) are curated by the development
+          teams they were created for - users may not create posts, but you can always ask a developer or moderator to
+          create a post that you feel should be there
+
+    - title: Getting Involved
+      color: 0xFEE75C
+
+      description: >
+          If you'd like to contribute to Quilt and its projects, we recommend the following:
+
+
+          - Head to <#1103979229881831444>, or the relevant forum post or channel, and ask whether there's anything
+          that needs to be done or any projects that need contributors
+
+          - Go to the relevant project [on our GitHub](https://github.com/QuiltMC) and see whether there are any
+          available issues that you could handle - and remember to leave a comment if you're working on an issue
+
+          - Listen in on our monthly developer meetings, where we often discuss the projects that need contributors
+
+          - Take a look at the
+          [pending RFC pull requests](https://github.com/QuiltMC/rfcs/pulls?q=is%3Apr+is%3Aopen+sort%3Aupdated-desc)
+          and provide some reviews
+
+          - Consider donating to [our OpenCollective](https://opencollective.com/quiltmc) to help with Quilt's upkeep
+          costs
+
+
+          Please note that **you do not need to join a team to contribute.** In fact, we encourage you to claim issues
+          and submit pull requests externally, especially if you don't wish to handle project management tasks. While
+          we are happy to accept applications from regular contributors that wish to join a team, please note that
+          this is only necessary if you wish to help out with our project management work - and you shouldn't apply to
+          join a team just for a role icon or a name on our site.
+
+    - title: For Developers
+      color: 0xEB459E
+
+      description: >
+          Existing members of Quilt development teams are able to create new posts (and edit existing ones) in the
+          forum channels in this category. This can be done using the following Cozy commands:
+
+
+          - `/forum create-post <channel> [tag]`
+
+          - `/forum edit-post <post>`
+
+          - `/forum add-tag <post> <tag>`
+
+          - `/forum remove-tag <post> <tag>`
+
+
+          If you run into any issues, please feel free to talk to a Community Manager.
