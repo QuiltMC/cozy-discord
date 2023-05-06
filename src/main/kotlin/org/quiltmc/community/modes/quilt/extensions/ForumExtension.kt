@@ -27,6 +27,7 @@ import com.kotlindiscord.kord.extensions.modules.unsafe.types.ackEphemeral
 import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.extraData
 import dev.kord.common.annotation.KordUnsafe
+import dev.kord.common.entity.ChannelFlag
 import dev.kord.common.entity.ChannelType
 import dev.kord.core.behavior.channel.asChannelOfOrNull
 import dev.kord.core.behavior.channel.createMessage
@@ -76,6 +77,14 @@ class ForumExtension : Extension() {
 					if (forum == null) {
 						ackEphemeral {
 							content = "Please provide a forum channel to create a post within."
+						}
+
+						return@action
+					}
+
+					if (forum.flags?.contains(ChannelFlag.RequireTag) == true && arguments.tag == null) {
+						ackEphemeral {
+							content = "This forum requires that you provide an initial tag for the post."
 						}
 
 						return@action
@@ -172,8 +181,8 @@ class ForumExtension : Extension() {
 
 					if (parent == null) {
 						ackEphemeral {
-							content = "Please provide a forum thread to edit the first post for, or run this " +
-								"command directly within the thread."
+							content = "Please provide a forum post to edit the first post for, or run this " +
+								"command directly within the post thread."
 						}
 
 						return@action
@@ -181,7 +190,7 @@ class ForumExtension : Extension() {
 
 					if (isDeveloper && parent.categoryId != COMMUNITY_DEVELOPER_CATEGORY) {
 						ackEphemeral {
-							content = "Quilt Developers may only use this command for threads in the developer " +
+							content = "Quilt Developers may only use this command for posts in the developer " +
 								"forum channels."
 						}
 
@@ -192,7 +201,7 @@ class ForumExtension : Extension() {
 
 					if (firstMessage == null) {
 						ackEphemeral {
-							content = "Unable to find the first message for this thread - is it a Cozy-managed thread?"
+							content = "Unable to find the first message for this post - is it a Cozy-managed post?"
 						}
 
 						return@action
@@ -248,7 +257,7 @@ class ForumExtension : Extension() {
 
 					if (parent == null) {
 						respond {
-							content = "Please provide a forum thread to edit the tags for."
+							content = "Please provide a forum post to edit the tags for."
 						}
 
 						return@action
@@ -256,7 +265,7 @@ class ForumExtension : Extension() {
 
 					if (post.appliedTags.contains(arguments.tag.id)) {
 						respond {
-							content = "This thread already has that tag applied."
+							content = "This post already has that tag applied."
 						}
 
 						return@action
@@ -268,7 +277,7 @@ class ForumExtension : Extension() {
 					}
 
 					respond {
-						content = "Thread tags updated."
+						content = "Post tags updated."
 					}
 				}
 			}
@@ -283,7 +292,7 @@ class ForumExtension : Extension() {
 
 					if (parent == null) {
 						respond {
-							content = "Please provide a forum thread to edit the tags for."
+							content = "Please provide a forum post to edit the tags for."
 						}
 
 						return@action
@@ -291,7 +300,15 @@ class ForumExtension : Extension() {
 
 					if (!post.appliedTags.contains(arguments.tag.id)) {
 						respond {
-							content = "This thread doesn't have that tag applied."
+							content = "This post doesn't have that tag applied."
+						}
+
+						return@action
+					}
+
+					if (parent.flags?.contains(ChannelFlag.RequireTag) == true && post.appliedTags.size < 2) {
+						respond {
+							content = "You may not remove the last tag for a post in this forum."
 						}
 
 						return@action
@@ -303,7 +320,7 @@ class ForumExtension : Extension() {
 					}
 
 					respond {
-						content = "Thread tags updated."
+						content = "Post tags updated."
 					}
 				}
 			}
