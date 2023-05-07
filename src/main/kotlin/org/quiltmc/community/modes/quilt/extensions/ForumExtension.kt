@@ -63,7 +63,7 @@ import kotlin.time.Duration.Companion.seconds
 private const val TOOLCHAIN_LOGO: String =
 	"https://raw.githubusercontent.com/QuiltMC/art/master/brand/512png/quilt_toolchain_logo_dark.png"
 
-private val ICON_URL_REGEX = Regex("(?:^|\n)Icon URL:([^\n])")
+private val ICON_URL_REGEX = Regex("(?:^|\n)Icon URL:([^\n]+)")
 
 class ForumExtension : Extension() {
 	override val name: String = "forum"
