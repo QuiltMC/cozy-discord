@@ -9,8 +9,8 @@
 
 package org.quiltmc.community.modes.quilt.extensions
 
-import com.kotlindiscord.kord.extensions.checks.hasRole
-import com.kotlindiscord.kord.extensions.checks.or
+import com.kotlindiscord.kord.extensions.DiscordRelayedException
+import com.kotlindiscord.kord.extensions.checks.*
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
 import com.kotlindiscord.kord.extensions.commands.converters.impl.channel
@@ -19,33 +19,57 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalTag
 import com.kotlindiscord.kord.extensions.commands.converters.impl.tag
 import com.kotlindiscord.kord.extensions.components.forms.ModalForm
 import com.kotlindiscord.kord.extensions.extensions.Extension
+import com.kotlindiscord.kord.extensions.extensions.ephemeralMessageCommand
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
+import com.kotlindiscord.kord.extensions.extensions.event
 import com.kotlindiscord.kord.extensions.modules.unsafe.annotations.UnsafeAPI
 import com.kotlindiscord.kord.extensions.modules.unsafe.extensions.unsafeSubCommand
 import com.kotlindiscord.kord.extensions.modules.unsafe.types.InitialSlashCommandResponse
 import com.kotlindiscord.kord.extensions.modules.unsafe.types.ackEphemeral
 import com.kotlindiscord.kord.extensions.types.respond
+import com.kotlindiscord.kord.extensions.utils.addReaction
+import com.kotlindiscord.kord.extensions.utils.ensureWebhook
 import com.kotlindiscord.kord.extensions.utils.extraData
 import dev.kord.common.annotation.KordUnsafe
 import dev.kord.common.entity.ChannelFlag
 import dev.kord.common.entity.ChannelType
+import dev.kord.core.behavior.channel.asChannelOf
 import dev.kord.core.behavior.channel.asChannelOfOrNull
 import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.behavior.channel.threads.edit
 import dev.kord.core.behavior.edit
+import dev.kord.core.behavior.execute
 import dev.kord.core.behavior.interaction.modal
 import dev.kord.core.behavior.interaction.response.createEphemeralFollowup
+import dev.kord.core.entity.Message
 import dev.kord.core.entity.channel.ForumChannel
+import dev.kord.core.entity.channel.NewsChannel
+import dev.kord.core.entity.channel.TopGuildMessageChannel
 import dev.kord.core.entity.channel.thread.TextChannelThread
 import dev.kord.core.entity.channel.thread.ThreadChannel
+import dev.kord.core.event.message.MessageCreateEvent
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.request.*
+import io.ktor.util.*
 import kotlinx.coroutines.delay
+import org.koin.core.component.inject
 import org.quiltmc.community.*
+import org.quiltmc.community.database.collections.UserFlagsCollection
+import org.quiltmc.community.database.entities.UserFlags
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
+private const val TOOLCHAIN_LOGO: String =
+	"https://raw.githubusercontent.com/QuiltMC/art/master/brand/512png/quilt_toolchain_logo_dark.png"
+
+private val ICON_URL_REGEX = Regex("(?:^|\n)Icon URL:([^\n])")
+
 class ForumExtension : Extension() {
 	override val name: String = "forum"
+
+	private val userFlags: UserFlagsCollection by inject()
 
 	override suspend fun setup() {
 		ephemeralSlashCommand {
@@ -325,6 +349,117 @@ class ForumExtension : Extension() {
 				}
 			}
 		}
+
+		ephemeralMessageCommand {
+			name = "Publish devlog"
+
+			check {
+				hasBaseModeratorRole(true)
+
+				or {
+					hasRole(COMMUNITY_DEVELOPER_ROLE)
+
+					if (passed) {
+						event.extraData["isDeveloper"] = true
+					}
+				}
+			}
+
+			check {
+				val parent = topChannelFor(event)
+				val message = messageFor(event)
+
+				if (
+					parent?.id != DEVLOG_FORUM // Wrong forum channel
+				) {
+					fail("This command may only be run in <#$DEVLOG_FORUM>.")
+
+					return@check
+				}
+
+				if (
+					message?.asMessageOrNull()?.author?.id == kord.selfId // Cozy sent the message
+				) {
+					fail("You may not publish a message posted by <@${kord.selfId}>.")
+
+					return@check
+				}
+
+				pass()
+			}
+
+			action {
+				targetMessages.first().publishDevlog()
+
+				respond {
+					content = "Message published."
+				}
+			}
+		}
+
+		event<MessageCreateEvent> {
+			check {
+				val parent = topChannelFor(event)
+				val message = messageFor(event)
+				val user = userFor(event)
+
+				if (
+					parent?.id != DEVLOG_FORUM ||  // Wrong forum channel
+					message?.asMessageOrNull()?.author?.id == kord.selfId ||  // Cozy sent the message
+					user == null  // No user for the event
+				) {
+					fail()
+
+					return@check
+				}
+
+				val flags = userFlags.get(user.id) ?: UserFlags(user.id)
+
+				if (!flags.autoPublish) {  // User settings set to not auto-publish
+					fail()
+
+					return@check
+				}
+
+				pass()
+			}
+
+			action {
+				event.message.publishDevlog()
+			}
+		}
+	}
+
+	private suspend fun Message.publishDevlog() {
+		val publishingChannel = kord.getChannelOf<TopGuildMessageChannel>(DEVLOG_CHANNEL)
+			?: throw DiscordRelayedException("Unable to get the publishing channel")
+
+		val thread = channel.asChannelOf<TextChannelThread>()
+		val firstMessage = thread.getFirstMessage()!!
+
+		val webhook = ensureWebhook(publishingChannel, "Quilt Devlogs") {
+			HttpClient().get(TOOLCHAIN_LOGO).body()
+		}
+
+		val match = ICON_URL_REGEX.find(firstMessage.content)
+
+		val icon = if (match != null) {
+			match.groupValues[1]
+		} else {
+			TOOLCHAIN_LOGO
+		}
+
+		val message = webhook.execute(webhook.token!!) {
+			this.username = thread.name
+			this.avatarUrl = icon
+			this.content = this@publishDevlog.content
+		}
+
+		if (publishingChannel is NewsChannel) {
+			message.publish()
+		}
+
+		addReaction("🚀")
 	}
 
 	inner class PostTagArgs : Arguments() {

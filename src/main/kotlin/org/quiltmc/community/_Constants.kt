@@ -180,3 +180,13 @@ internal val COMMUNITY_RELEASE_CHANNELS = envOrNull("COMMUNITY_RELEASE_CHANNELS"
 	?.split(',')
 	?.map { Snowflake(it.trim()) }
 	?: listOf()
+
+internal val DEVLOG_CHANNEL = Snowflake(
+	envOrNull("DEVLOG_CHANNEL")?.toLong()
+		?: 908399987099045999
+)
+
+internal val DEVLOG_FORUM = Snowflake(
+	envOrNull("DEVLOG_FORUM")?.toLong()
+		?: 1103979333627936818
+)
