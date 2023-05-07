@@ -51,7 +51,6 @@ import dev.kord.core.event.message.MessageCreateEvent
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
-import io.ktor.util.*
 import kotlinx.coroutines.delay
 import org.koin.core.component.inject
 import org.quiltmc.community.*
@@ -447,7 +446,7 @@ class ForumExtension : Extension() {
 			match.groupValues[1]
 		} else {
 			TOOLCHAIN_LOGO
-		}
+		}.trim()
 
 		val message = webhook.execute(webhook.token!!) {
 			this.username = thread.name
