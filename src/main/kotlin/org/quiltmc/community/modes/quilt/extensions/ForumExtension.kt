@@ -22,12 +22,15 @@ import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralMessageCommand
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.extensions.event
+import com.kotlindiscord.kord.extensions.modules.extra.pluralkit.events.PKMessageCreateEvent
+import com.kotlindiscord.kord.extensions.modules.extra.pluralkit.events.PKMessageUpdateEvent
 import com.kotlindiscord.kord.extensions.modules.unsafe.annotations.UnsafeAPI
 import com.kotlindiscord.kord.extensions.modules.unsafe.extensions.unsafeSubCommand
 import com.kotlindiscord.kord.extensions.modules.unsafe.types.InitialSlashCommandResponse
 import com.kotlindiscord.kord.extensions.modules.unsafe.types.ackEphemeral
 import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.addReaction
+import com.kotlindiscord.kord.extensions.utils.deleteOwnReaction
 import com.kotlindiscord.kord.extensions.utils.ensureWebhook
 import com.kotlindiscord.kord.extensions.utils.extraData
 import dev.kord.common.annotation.KordUnsafe
@@ -47,14 +50,15 @@ import dev.kord.core.entity.channel.NewsChannel
 import dev.kord.core.entity.channel.TopGuildMessageChannel
 import dev.kord.core.entity.channel.thread.TextChannelThread
 import dev.kord.core.entity.channel.thread.ThreadChannel
-import dev.kord.core.event.message.MessageCreateEvent
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import kotlinx.coroutines.delay
 import org.koin.core.component.inject
 import org.quiltmc.community.*
+import org.quiltmc.community.database.collections.LinkedMessagesCollection
 import org.quiltmc.community.database.collections.UserFlagsCollection
+import org.quiltmc.community.database.entities.LinkedMessages
 import org.quiltmc.community.database.entities.UserFlags
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
@@ -69,6 +73,7 @@ class ForumExtension : Extension() {
 	override val name: String = "forum"
 
 	private val userFlags: UserFlagsCollection by inject()
+	private val linkedMessages: LinkedMessagesCollection by inject()
 
 	override suspend fun setup() {
 		ephemeralSlashCommand {
@@ -396,15 +401,17 @@ class ForumExtension : Extension() {
 			}
 		}
 
-		event<MessageCreateEvent> {
+		event<PKMessageCreateEvent> {
 			check {
 				val parent = topChannelFor(event)
 				val message = messageFor(event)
 				val user = userFor(event)
 
 				if (
+					message == null || // No message to be found
 					parent?.id != DEVLOG_FORUM ||  // Wrong forum channel
-					message?.asMessageOrNull()?.author?.id == kord.selfId ||  // Cozy sent the message
+					message.asMessageOrNull()?.author?.id == kord.selfId ||  // Cozy sent the message
+					linkedMessages.getBySource(message.id) != null ||  // Already published
 					user == null  // No user for the event
 				) {
 					fail()
@@ -427,11 +434,43 @@ class ForumExtension : Extension() {
 				event.message.publishDevlog()
 			}
 		}
+
+		event<PKMessageUpdateEvent> {
+			check {
+				val parent = topChannelFor(event)
+				val message = messageFor(event)
+				val user = userFor(event)
+
+				if (
+					message == null || // No message to be found
+					parent?.id != DEVLOG_FORUM ||  // Wrong forum channel
+					message.asMessageOrNull()?.author?.id == kord.selfId ||  // Cozy sent the message
+					linkedMessages.getBySource(message.id) == null ||  // Not published
+					user == null  // No user for the event
+				) {
+					fail()
+
+					return@check
+				}
+
+				pass()
+			}
+
+			action {
+				event.message.asMessage().editDevlog()
+			}
+		}
 	}
 
 	private suspend fun Message.publishDevlog() {
 		val publishingChannel = kord.getChannelOf<TopGuildMessageChannel>(DEVLOG_CHANNEL)
 			?: throw DiscordRelayedException("Unable to get the publishing channel")
+
+		val existingLinkedMessage = linkedMessages.getBySource(id)
+
+		if (existingLinkedMessage != null) {
+			throw DiscordRelayedException("This message was already published.")
+		}
 
 		val thread = channel.asChannelOf<TextChannelThread>()
 		val firstMessage = thread.getFirstMessage()!!
@@ -454,11 +493,39 @@ class ForumExtension : Extension() {
 			this.content = this@publishDevlog.content
 		}
 
+		LinkedMessages(id, mutableListOf(message.id)).save()
+
 		if (publishingChannel is NewsChannel) {
 			message.publish()
 		}
 
 		addReaction("🚀")
+	}
+
+	private suspend fun Message.editDevlog() {
+		val publishingChannel = kord.getChannelOf<TopGuildMessageChannel>(DEVLOG_CHANNEL)
+			?: throw DiscordRelayedException("Unable to get the publishing channel")
+
+		val linkedMessage = linkedMessages.getBySource(id)
+			?: return // Hasn't been published yet
+
+		val webhook = ensureWebhook(publishingChannel, "Quilt Devlogs") {
+			HttpClient().get(TOOLCHAIN_LOGO).body()
+		}
+
+		linkedMessage.targets.forEach {
+			val message = webhook.getMessage(webhook.token!!, it)
+
+			message.edit(webhook.id, webhook.token!!) {
+				this.content = this@editDevlog.content
+			}
+		}
+
+		addReaction("✅")
+
+		delay(3.seconds)
+
+		deleteOwnReaction("✅")
 	}
 
 	inner class PostTagArgs : Arguments() {
