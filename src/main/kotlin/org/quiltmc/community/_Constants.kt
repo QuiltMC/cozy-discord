@@ -157,7 +157,7 @@ internal val TOOLCHAIN_GUILD = Snowflake(
 )
 
 internal val COLLAB_GUILD = Snowflake(
-	envOrNull("TOOLCHAIN_GUILD_ID")?.toLong()
+	envOrNull("COLLAB_GUILD_ID")?.toLong()
 		?: 905216141650198530
 )
 

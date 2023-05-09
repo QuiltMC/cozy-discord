@@ -185,15 +185,17 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
 		}
 
 		rolesync {
-			roleToSync(
+			roleToSync(  // Devs: Community -> Toolchain
+				COMMUNITY_DEVELOPER_ROLE,
 				TOOLCHAIN_DEVELOPER_ROLE,
-				COMMUNITY_DEVELOPER_ROLE
 			)
-			roleToSync(
+
+			roleToSync(  // Collabs: Collab -> Toolchain
 				COLLAB_VERIFIED_ROLE,
 				TOOLCHAIN_COLLAB_ROLE
 			)
-			roleToSync(
+
+			roleToSync(  // Collabs: Collab -> Community
 				COLLAB_VERIFIED_ROLE,
 				COMMUNITY_COLLAB_ROLE
 			)

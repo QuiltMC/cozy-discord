@@ -20,7 +20,6 @@ import dev.kord.core.entity.Member
 import dev.kord.core.entity.Role
 import dev.kord.rest.builder.message.create.allowedMentions
 import org.koin.core.component.inject
-import org.quiltmc.community.TOOLCHAIN_GUILD
 import org.quiltmc.community.database.collections.TeamCollection
 import org.quiltmc.community.database.entities.Team
 
@@ -35,8 +34,6 @@ class SubteamsExtension : Extension() {
 			description = "Manage your teams"
 
 			allowInDms = false
-
-			guild(TOOLCHAIN_GUILD)
 
 			publicSubCommand(::TeamArguments) {
 				name = "add"
@@ -99,8 +96,6 @@ class SubteamsExtension : Extension() {
 
 			allowInDms = false
 
-			guild(TOOLCHAIN_GUILD)
-
 			check { hasPermission(Permission.Administrator) }
 
 			ephemeralSubCommand(::ManageTeamAllowArguments) {
@@ -155,15 +150,11 @@ class SubteamsExtension : Extension() {
 		val role by role {
 			name = "team"
 			description = "Which team to add"
-
-			requiredGuild = { TOOLCHAIN_GUILD }
 		}
 
 		val targetUser by member {
 			name = "user"
 			description = "Who to add to the team"
-
-			requiredGuild = { TOOLCHAIN_GUILD }
 		}
 	}
 
@@ -171,15 +162,11 @@ class SubteamsExtension : Extension() {
 		val superior by role {
 			name = "superior"
 			description = "The superior role"
-
-			requiredGuild = { TOOLCHAIN_GUILD }
 		}
 
 		val inferior by role {
 			name = "inferior"
 			description = "The inferior role"
-
-			requiredGuild = { TOOLCHAIN_GUILD }
 		}
 	}
 
@@ -187,8 +174,6 @@ class SubteamsExtension : Extension() {
 		val role by role {
 			name = "role"
 			description = "Role to disallow managing for"
-
-			requiredGuild = { TOOLCHAIN_GUILD }
 		}
 	}
 
