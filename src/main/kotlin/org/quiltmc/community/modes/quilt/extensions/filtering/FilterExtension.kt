@@ -1043,7 +1043,7 @@ class FilterExtension : Extension() {
 	}
 
 	suspend fun FilterEntry.matches(content: String): Boolean = when (matchType) {
-		MatchType.CONTAINS -> homoglyphs.search(match.lowercase()).size > 0
+		MatchType.CONTAINS -> homoglyphs.search(content, match.lowercase()).size > 0
 		MatchType.EXACT -> content.equals(match, ignoreCase = true)
 		MatchType.REGEX -> match.toRegex(RegexOption.IGNORE_CASE).matches(content)
 		MatchType.REGEX_CONTAINS -> content.contains(match.toRegex(RegexOption.IGNORE_CASE))
