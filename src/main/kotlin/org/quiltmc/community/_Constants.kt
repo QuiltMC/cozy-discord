@@ -100,6 +100,10 @@ internal val TOOLCHAIN_COMMUNITY_TEAM_ROLE = envOrNull("TOOLCHAIN_COMMUNITY_TEAM
 	?.let { Snowflake(it) }
 	?: Snowflake(863765983890374656)
 
+internal val COMMUNITY_DEVELOPER_CATEGORY = envOrNull("COMMUNITY_DEVELOPER_CATEGORY")
+	?.let { Snowflake(it) }
+	?: Snowflake(1102169914858541066)
+
 internal val COMMUNITY_DEVELOPER_ROLE = envOrNull("COMMUNITY_DEVELOPER_ROLE")
 	?.let { Snowflake(it) }
 	?: Snowflake(972868531844710412)
@@ -153,7 +157,7 @@ internal val TOOLCHAIN_GUILD = Snowflake(
 )
 
 internal val COLLAB_GUILD = Snowflake(
-	envOrNull("TOOLCHAIN_GUILD_ID")?.toLong()
+	envOrNull("COLLAB_GUILD_ID")?.toLong()
 		?: 905216141650198530
 )
 
@@ -176,3 +180,13 @@ internal val COMMUNITY_RELEASE_CHANNELS = envOrNull("COMMUNITY_RELEASE_CHANNELS"
 	?.split(',')
 	?.map { Snowflake(it.trim()) }
 	?: listOf()
+
+internal val DEVLOG_CHANNEL = Snowflake(
+	envOrNull("DEVLOG_CHANNEL")?.toLong()
+		?: 908399987099045999
+)
+
+internal val DEVLOG_FORUM = Snowflake(
+	envOrNull("DEVLOG_FORUM")?.toLong()
+		?: 1103979333627936818
+)

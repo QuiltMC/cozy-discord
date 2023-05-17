@@ -20,6 +20,7 @@ import dev.kord.common.entity.UserFlag
 import dev.kord.core.Kord
 import dev.kord.core.behavior.UserBehavior
 import dev.kord.core.behavior.channel.MessageChannelBehavior
+import dev.kord.core.behavior.channel.threads.ThreadChannelBehavior
 import dev.kord.core.behavior.getChannelOf
 import dev.kord.core.entity.Guild
 import dev.kord.core.entity.Message
@@ -108,6 +109,7 @@ suspend fun ExtensibleBotBuilder.database(migrate: Boolean = false) {
 				single { FilterCollection() } bind FilterCollection::class
 				single { FilterEventCollection() } bind FilterEventCollection::class
 				single { GlobalSettingsCollection() } bind GlobalSettingsCollection::class
+				single { LinkedMessagesCollection() } bind LinkedMessagesCollection::class
 				single { MetaCollection() } bind MetaCollection::class
 				single { OwnedThreadCollection() } bind OwnedThreadCollection::class
 				single { ServerSettingsCollection() } bind ServerSettingsCollection::class
@@ -169,7 +171,7 @@ suspend fun ExtensibleBotBuilder.settings() {
 fun Guild.getMaxArchiveDuration(): ArchiveDuration {
 	val features = features.filter {
 		it.value == "THREE_DAY_THREAD_ARCHIVE" ||
-				it.value == "SEVEN_DAY_THREAD_ARCHIVE"
+			it.value == "SEVEN_DAY_THREAD_ARCHIVE"
 	}.map { it.value }
 
 	return when {
@@ -183,7 +185,7 @@ fun Guild.getMaxArchiveDuration(): ArchiveDuration {
 // Logging-related extensions
 
 suspend fun <C : SlashCommandContext<C, A, M>, A : Arguments, M : ModalForm>
-		SlashCommandContext<C, A, M>.getGithubLogChannel(): GuildMessageChannel? {
+	SlashCommandContext<C, A, M>.getGithubLogChannel(): GuildMessageChannel? {
 	val channelId = getKoin().get<GlobalSettingsCollection>().get()?.githubLogChannel ?: return null
 
 	return event.kord.getChannelOf<GuildMessageChannel>(channelId)
@@ -284,3 +286,6 @@ fun String.replaceParams(vararg pairs: Pair<String, Any?>): String {
 fun String.replaceParams(pairs: Map<String, Any>): String = this.replaceParams(
 	*pairs.entries.map { it.toPair() }.toTypedArray()
 )
+
+suspend fun ThreadChannelBehavior.getFirstMessage() =
+	getMessageOrNull(id)

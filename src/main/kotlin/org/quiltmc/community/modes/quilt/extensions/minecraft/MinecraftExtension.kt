@@ -52,7 +52,7 @@ private val LINK_REGEX = "<a href=\"(?<url>[^\"]+)\"[^>]*>(?<text>[^<]+)</a>".to
 private val CHANNELS: List<Snowflake> = listOf(
 //    Snowflake(828218532671389736L),  // Testing
 	Snowflake(838805249271267398L),  // Community
-	Snowflake(834195264629243904L),  // Toolchain
+//	Snowflake(834195264629243904L),  // Toolchain
 )
 
 class MinecraftExtension : Extension() {

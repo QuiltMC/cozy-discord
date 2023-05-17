@@ -7,8 +7,8 @@
 package org.quiltmc.community.database.migrations
 
 import org.litote.kmongo.coroutine.CoroutineDatabase
-import org.quiltmc.community.database.collections.AmaConfigCollection
+import org.quiltmc.community.database.collections.LinkedMessagesCollection
 
 suspend fun v22(db: CoroutineDatabase) {
-	db.createCollection(AmaConfigCollection.name)
+	db.createCollection(LinkedMessagesCollection.name)
 }

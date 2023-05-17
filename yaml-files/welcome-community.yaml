@@ -33,15 +33,6 @@
 
         We hope you enjoy your time with us!
 
-    - title: Quilt Development
-
-      thumbnail:
-        url: https://raw.githubusercontent.com/QuiltMC/art/master/brand/1024png/quilt_toolchain_logo_dark.png
-
-      description: >
-        If you're interested in seeing how Quilt is developed, or helping us by contributing to Quilt yourself, then
-        please feel free to join [the Toolchain Discord server](https://discord.gg/afZYcQpbwv)!
-
 - type: text
   text: https://cdn.discordapp.com/attachments/863707104903561216/964999315233857557/community-rules.png
 
@@ -131,13 +122,14 @@
       description: >
         We're lucky to have a few talented artists in our community:
 
-        **»** [**Arathain**](https://twitter.com/arathainfarqoe) - Creator of Pineapple-Chan, Quilt-Chan and a few
+        **»** [**Arathain**](https://twitter.com/arathainfarqoe) - Creator of Pineapple-Chan, Quilt-Chan and a bunch of
         related emotes
-
-        **»** [**Iro**](https://iroki-sueun.tumblr.com/) - Our current banners and logo designer
 
         **»** [**Katto / Digital Whiskers**](https://digital-whiskers.carrd.co/) - Designed a banner and a few other
         pieces
+
+        **»** [**Levi**](https://twitter.com/remote_getaway) - One of our Community Managers, has contributed many
+        banners and icons
 
         We're very grateful to all of them for their amazing work! Don't hesitate to reach out to them if you'd like
         to commission them for your own projects.
@@ -168,7 +160,7 @@
 
 
         If you're interested in long-form discussions, development help, news or community project, please feel free
-        to join our forum at [https://forum.quiltmc.org](https://forum.quiltmc.org)!
+        to join our forum at [https://forum.quiltmc.org](https://forum.quiltmc.org)
 
 - type: links
 
@@ -181,4 +173,4 @@
     QuiltMC Forum: https://forum.quiltmc.org
     QuiltMC on GitHub: https://github.com/QuiltMC
     QuiltMC Website: https://quiltmc.org/
-    Toolchain Server: https://discord.gg/afZYcQpbwv
+    Toolchain Server (defunct): https://discord.gg/afZYcQpbwv

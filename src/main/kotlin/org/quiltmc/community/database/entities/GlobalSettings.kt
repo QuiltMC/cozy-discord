@@ -33,7 +33,7 @@ data class GlobalSettings(
 
 	val quiltGuilds: MutableSet<Snowflake> = mutableSetOf(
 		Snowflake(817576132726620200U),  // Community
-		Snowflake(833872081585700874U),  // Toolchain
+//		Snowflake(833872081585700874U),  // Toolchain
 	),
 
 	var suggestionChannel: Snowflake? = Snowflake(832353359074689084U),

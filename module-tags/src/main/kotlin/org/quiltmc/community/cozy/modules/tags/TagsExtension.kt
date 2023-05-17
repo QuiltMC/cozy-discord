@@ -586,9 +586,9 @@ public class TagsExtension : Extension() {
 				}
 
 				var potentialTags = (
-						tagsData.getTagsByPartialKey(tagKey, this.data.guildId.value) +
-								tagsData.getTagsByPartialTitle(tagKey, this.data.guildId.value)
-						)
+					tagsData.getTagsByPartialKey(tagKey, this.data.guildId.value) +
+						tagsData.getTagsByPartialTitle(tagKey, this.data.guildId.value)
+					)
 					.toSet()
 					.toList()
 

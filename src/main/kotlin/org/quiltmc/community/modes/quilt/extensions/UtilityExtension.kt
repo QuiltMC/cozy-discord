@@ -41,6 +41,7 @@ import dev.kord.core.behavior.channel.*
 import dev.kord.core.behavior.channel.threads.edit
 import dev.kord.core.behavior.edit
 import dev.kord.core.entity.Guild
+import dev.kord.core.entity.channel.ForumChannel
 import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.entity.channel.thread.ThreadChannel
@@ -220,32 +221,52 @@ class UtilityExtension : Extension() {
 
 				// Work around a Discord API race condition - yes, really!
 				// Specifically: "Cannot message this thread until after the post author has sent an initial message."
-				delay(1.seconds)
+				delay(2.seconds)
+
+				val parentForum = event.channel.parent.asChannelOfOrNull<ForumChannel>()
 
 				val message = event.channel.createMessage {
-					content = "Oh hey, that's a nice thread you've got there! Let me just get the mods in on this " +
-						"sweet discussion..."
+					content = "One moment - let me get the team in..."
 				}
 
 				event.channel.withTyping {
-					delay(2.seconds)
+					delay(1.seconds)
 				}
 
-				message.edit {
-					content = "Hey, ${role.mention}, you've gotta check this thread out!"
-				}
+				if (parentForum != null) {
+					message.edit {
+						content = if (parentForum.categoryId == COMMUNITY_DEVELOPER_CATEGORY) {
+							"Hey, ${role.mention} and <@&$COMMUNITY_DEVELOPER_ROLE>, you've gotta check this " +
+								"post out!"
+						} else {
+							"Hey, ${role.mention}, you've gotta check this post out!"
+						}
+					}
 
-				event.channel.withTyping {
-					delay(2.seconds)
-				}
+					event.channel.getFirstMessage()?.pin("First message in the forum post.")
 
-				message.edit {
-					content = "Welcome to your new thread, ${owner.mention}! This message is at the " +
-						"start of the thread. Remember, you're welcome to use the `/thread` commands to manage " +
-						"your thread as needed."
-				}
+					event.channel.withTyping {
+						delay(1.seconds)
+					}
 
-				message.pin("First message in the thread.")
+					message.delete()
+				} else {
+					message.edit {
+						content = "Hey, ${role.mention}, you've gotta check this thread out!"
+					}
+
+					event.channel.withTyping {
+						delay(1.seconds)
+					}
+
+					message.edit {
+						content = "Welcome to your new thread, ${owner.mention}! This message is at the " +
+							"start of the thread. Remember, you're welcome to use the `/thread` commands to manage " +
+							"your thread as needed."
+					}
+
+					message.pin("First message in the thread.")
+				}
 			}
 		}
 
@@ -263,7 +284,7 @@ class UtilityExtension : Extension() {
 			}
 		}
 
-		(GUILDS + COLLAB_GUILD).forEach { guildId ->
+		(GUILDS + COLLAB_GUILD).toSet().forEach { guildId ->
 			ephemeralMessageCommand(::EventModal) {
 				name = "Log Event"
 				allowInDms = false

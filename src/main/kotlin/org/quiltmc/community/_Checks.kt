@@ -80,46 +80,6 @@ suspend fun CheckContext<*>.notInCommunity() {
 	}
 }
 
-suspend fun CheckContext<*>.inToolchain() {
-	anyGuild()
-
-	if (!passed) {
-		return
-	}
-
-	val logger = KotlinLogging.logger("org.quiltmc.community.inToolchain")
-
-	val collection = getKoin().get<ServerSettingsCollection>()
-	val settings = collection.getToolchain()
-
-	if (settings == null) {
-		logger.failed("Toolchain server hasn't been configured yet.")
-		fail("Toolchain server hasn't been configured yet.")
-	} else {
-		inGuild(settings._id)
-	}
-}
-
-suspend fun CheckContext<*>.notInToolchain() {
-	anyGuild()
-
-	if (!passed) {
-		return
-	}
-
-	val logger = KotlinLogging.logger("org.quiltmc.community.notInToolchain")
-
-	val collection = getKoin().get<ServerSettingsCollection>()
-	val settings = collection.getToolchain()
-
-	if (settings == null) {
-		logger.passed("Toolchain server hasn't been configured yet.")
-		pass()
-	} else {
-		notInGuild(settings._id)
-	}
-}
-
 suspend fun CheckContext<*>.inCollab() {
 	anyGuild()
 

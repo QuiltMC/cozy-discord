@@ -40,7 +40,7 @@ object Migrations : KordExKoinComponent {
 			@Suppress("TooGenericExceptionCaught")
 			try {
 				@Suppress("MagicNumber")
-				when (nextVersion) {  // TODO: This should **REEEEEEEEEAAALLLLLLLLLLLLLLLLLLLLLLLY** be annotation-based
+				when (nextVersion) {  // TODO: Someone please make this use annotations I don't have the spoons pls
 					1 -> ::v1
 					2 -> ::v2
 					3 -> ::v3

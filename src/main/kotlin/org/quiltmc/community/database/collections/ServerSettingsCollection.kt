@@ -32,9 +32,6 @@ class ServerSettingsCollection : KordExKoinComponent {
 	suspend fun getCommunity() =
 		col.findOne(ServerSettings::quiltServerType eq QuiltServerType.COMMUNITY)
 
-	suspend fun getToolchain() =
-		col.findOne(ServerSettings::quiltServerType eq QuiltServerType.TOOLCHAIN)
-
 	suspend fun getCollab() =
 		col.findOne(ServerSettings::quiltServerType eq QuiltServerType.COLLAB)
 
