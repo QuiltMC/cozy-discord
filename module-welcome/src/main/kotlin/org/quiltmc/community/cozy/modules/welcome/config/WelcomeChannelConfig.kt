@@ -9,6 +9,7 @@ package org.quiltmc.community.cozy.modules.welcome.config
 import com.kotlindiscord.kord.extensions.checks.types.Check
 import dev.kord.core.entity.Guild
 import dev.kord.core.entity.channel.GuildMessageChannel
+import kotlinx.serialization.modules.PolymorphicModuleBuilder
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
@@ -16,9 +17,13 @@ import org.quiltmc.community.cozy.modules.welcome.blocks.*
 import kotlin.time.Duration
 
 public abstract class WelcomeChannelConfig {
-	public val defaultSerializersModule: SerializersModule =
+	public open val serializerBuilders: List<PolymorphicModuleBuilder<Block>.() -> Unit> = mutableListOf()
+
+	public val defaultSerializersModule: SerializersModule by lazy {
 		SerializersModule {
 			polymorphic(Block::class) {
+				serializerBuilders.forEach { it() }
+
 				subclass(ComplianceBlock::class)
 				subclass(EmbedBlock::class)
 				subclass(LinksBlock::class)
@@ -29,6 +34,7 @@ public abstract class WelcomeChannelConfig {
 				subclass(ThreadListBlock::class)
 			}
 		}
+	}
 
 	/** Get the configured logging channel for the given channel and guild. **/
 	public abstract suspend fun getLoggingChannel(channel: GuildMessageChannel, guild: Guild): GuildMessageChannel?
