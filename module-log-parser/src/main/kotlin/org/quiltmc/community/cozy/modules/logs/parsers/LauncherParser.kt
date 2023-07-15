@@ -6,6 +6,7 @@
 
 package org.quiltmc.community.cozy.modules.logs.parsers
 
+import com.github.zafarkhaja.semver.Version
 import org.quiltmc.community.cozy.modules.logs.data.Launcher
 import org.quiltmc.community.cozy.modules.logs.data.Log
 import org.quiltmc.community.cozy.modules.logs.data.Order
@@ -36,13 +37,25 @@ public class LauncherParser : LogParser() {
 
 		log.launcher = Launcher(launcher, match!!.groups[1]?.value)
 
-		if (launcher == Launcher.Prism) {
-			log.addMessage(
-				"**It looks like you're using Prism.** Please note that Prism [currently breaks uploaded logs]" +
+		// MultiMC-derived launchers declare their version in the log, so we can parse it
+		if (launcher == Launcher.MultiMC || launcher == Launcher.PolyMC || launcher == Launcher.Prism) {
+			val message: String? = match.groups[1]?.value
+			if (message != null) {
+				log.launcherVersion = message.split("version: ")[1]
+			}
+		}
+
+		if (launcher == Launcher.Prism && log.launcherVersion != null) {
+			val version: Version = Version.valueOf(log.launcherVersion!!)
+			if (version.compareTo(Version.valueOf("7.0")) < 0) {
+				log.addMessage(
+					"**It looks like you're using an outdated version of Prism.** +" +
+						"Please note that Prism [formerly broke uploaded logs]" +
 						"(https://github.com/PrismLauncher/PrismLauncher/issues/930), and the information " +
-						"provided here may be incomplete. Until this is fixed, please consider manually " +
-						"uploading your `latest.log` file to the channel instead."
-			)
+						"provided here may be incomplete. Please either update Prism to 7.0+ or manually " +
+						"upload your `latest.log` file to the channel instead."
+				)
+			}
 		}
 	}
 }
