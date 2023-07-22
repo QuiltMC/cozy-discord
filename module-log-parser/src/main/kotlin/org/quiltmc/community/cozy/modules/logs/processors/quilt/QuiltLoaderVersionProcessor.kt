@@ -15,7 +15,7 @@ import org.quiltmc.community.cozy.modules.logs.data.Order
 import org.quiltmc.community.cozy.modules.logs.types.LogProcessor
 
 public class QuiltLoaderVersionProcessor : LogProcessor() {
-	override val identifier: String = "fabric-loader-version"
+	override val identifier: String = "quilt-loader-version"
 	override val order: Order = Order.Default
 
 	private val metaClient = QuiltMetaClient()
