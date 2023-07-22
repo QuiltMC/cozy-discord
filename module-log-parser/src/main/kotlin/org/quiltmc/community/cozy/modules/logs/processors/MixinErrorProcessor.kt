@@ -23,7 +23,7 @@ private val MIXIN_ERROR_REGEXES = arrayOf(
 )
 
 public class MixinErrorProcessor : LogProcessor() {
-	override val identifier: String = "piracy"
+	override val identifier: String = "mixin-error"
 	override val order: Order = Order.Earlier
 
 	override suspend fun process(log: Log) {
