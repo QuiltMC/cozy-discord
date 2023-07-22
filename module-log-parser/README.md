@@ -34,6 +34,7 @@ yourself.
   - Detection for mods that make use of internal Fabric types
   - Detection for mods that are marked incompatible on [Quilt's forum](https://forum.quiltmc.org/t/mod-incompatibility-megathread/261)
   - Detection for out-of-date installations of Quilt Loader and QSL/QFAPI
+  - Detection for the presence of Fabric API or Fabric Language Kotlin
 - **Piracy launcher detection (optional):** Bails when authentication fails or TLauncher is detected
 - **Player IP warning:** Warns users when they upload a log containing player IP addresses
 - **Problematic launcher detection (optional):** Bails when PolyMC is detected and explains why it shouldn't be used
