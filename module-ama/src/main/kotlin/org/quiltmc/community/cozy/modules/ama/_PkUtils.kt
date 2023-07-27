@@ -123,7 +123,7 @@ public suspend fun UserBehavior.getPluralKitSystem(): PKResult<PKSystem> {
 		return PKResult.SystemNotAccessible
 	}
 
-	return systemRequest.body()
+	return PKResult.Success(systemRequest.body())
 }
 
 public suspend fun UserBehavior.getPluralKitMember(text: String): PKResult<PKMember> {
