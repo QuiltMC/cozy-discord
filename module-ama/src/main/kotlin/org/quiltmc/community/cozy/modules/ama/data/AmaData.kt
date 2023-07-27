@@ -6,6 +6,9 @@
 
 package org.quiltmc.community.cozy.modules.ama.data
 
+import com.kotlindiscord.kord.extensions.checks.hasPermission
+import com.kotlindiscord.kord.extensions.checks.types.CheckContextWithCache
+import dev.kord.common.entity.Permission
 import dev.kord.common.entity.Snowflake
 
 public interface AmaData {
@@ -16,4 +19,13 @@ public interface AmaData {
 	public suspend fun modifyButton(guildId: Snowflake, enabled: Boolean)
 
 	public suspend fun setConfig(config: AmaConfig)
+
+	public suspend fun usePluralKitFronter(user: Snowflake): Boolean
+
+	public suspend fun CheckContextWithCache<*>.managementChecks() {
+		hasPermission(Permission.ManageGuild)
+	}
+
+	public suspend fun CheckContextWithCache<*>.userChecks() {
+	}
 }

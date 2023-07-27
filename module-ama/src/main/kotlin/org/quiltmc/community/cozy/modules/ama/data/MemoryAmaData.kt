@@ -9,42 +9,34 @@ package org.quiltmc.community.cozy.modules.ama.data
 import dev.kord.common.entity.Snowflake
 
 public class MemoryAmaData : AmaData {
-	private val ama: MutableList<AmaConfig> = mutableListOf()
+	private val ama: MutableMap<Snowflake, AmaConfig> = mutableMapOf()
 
 	override suspend fun getConfig(guildId: Snowflake): AmaConfig? =
-		ama.firstOrNull {
-			it.guildId == guildId
-		}
+		ama[guildId]
 
 	override suspend fun isButtonEnabled(guildId: Snowflake): Boolean? =
-		ama.firstOrNull {
-			it.guildId == guildId
-		}?.enabled
+		ama[guildId]?.enabled
 
 	override suspend fun modifyButton(guildId: Snowflake, enabled: Boolean) {
-		val amaConfig = ama.firstOrNull {
-			it.guildId == guildId
-		}
+		val amaConfig = ama[guildId]
 
-		ama.remove(amaConfig)
-
-		ama.add(
-			AmaConfig(
-				amaConfig!!.guildId,
-				amaConfig.answerQueueChannel,
-				amaConfig.liveChatChannel,
-				amaConfig.buttonChannel,
-				amaConfig.approvalQueueChannel,
-				amaConfig.flaggedQuestionChannel,
-				amaConfig.embedConfig,
-				amaConfig.buttonMessage,
-				amaConfig.buttonId,
-				enabled
-			)
+		ama[guildId] = AmaConfig(
+			amaConfig!!.guildId,
+			amaConfig.answerQueueChannel,
+			amaConfig.liveChatChannel,
+			amaConfig.buttonChannel,
+			amaConfig.approvalQueueChannel,
+			amaConfig.flaggedQuestionChannel,
+			amaConfig.embedConfig,
+			amaConfig.buttonMessage,
+			amaConfig.buttonId,
+			enabled
 		)
 	}
 
 	override suspend fun setConfig(config: AmaConfig) {
-		ama.add(config)
+		ama[config.guildId] = config
 	}
+
+	override suspend fun usePluralKitFronter(user: Snowflake): Boolean = false
 }

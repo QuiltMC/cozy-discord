@@ -6,6 +6,7 @@
 
 package org.quiltmc.community.database.collections
 
+import com.kotlindiscord.kord.extensions.checks.types.CheckContextWithCache
 import com.kotlindiscord.kord.extensions.koin.KordExKoinComponent
 import dev.kord.common.entity.Snowflake
 import org.koin.core.component.inject
@@ -16,10 +17,12 @@ import org.quiltmc.community.cozy.modules.ama.data.AmaData
 import org.quiltmc.community.database.Collection
 import org.quiltmc.community.database.Database
 import org.quiltmc.community.database.entities.AmaEntity
+import org.quiltmc.community.hasBaseModeratorRole
 
 class AmaConfigCollection : KordExKoinComponent, AmaData {
 	private val database: Database by inject()
 	private val col = database.mongo.getCollection<AmaEntity>(name)
+	private val userFlags: UserFlagsCollection by inject()
 
 	override suspend fun getConfig(guildId: Snowflake): AmaConfig? =
 		col.findOne(AmaConfig::guildId eq guildId)?.toAmaConfig()
@@ -34,6 +37,12 @@ class AmaConfigCollection : KordExKoinComponent, AmaData {
 	override suspend fun setConfig(config: AmaConfig) {
 		col.save(AmaEntity.fromAmaConfig(config))
 	}
+
+	override suspend fun usePluralKitFronter(user: Snowflake): Boolean =
+		userFlags.get(user)?.usePKFronter ?: false
+
+	override suspend fun CheckContextWithCache<*>.managementChecks() =
+		hasBaseModeratorRole(includeCommunityManagers = true)
 
 	companion object : Collection("ama_config")
 }

@@ -7,8 +7,16 @@
 package org.quiltmc.community.database.migrations
 
 import org.litote.kmongo.coroutine.CoroutineDatabase
+import org.litote.kmongo.exists
+import org.litote.kmongo.setTo
 import org.quiltmc.community.database.collections.AmaConfigCollection
+import org.quiltmc.community.database.collections.UserFlagsCollection
+import org.quiltmc.community.database.entities.UserFlags
 
 suspend fun v23(db: CoroutineDatabase) {
 	db.createCollection(AmaConfigCollection.name)
+	db.getCollection<UserFlagsCollection>(UserFlagsCollection.name).updateMany(
+		UserFlags::usePKFronter.exists(false),
+		UserFlags::usePKFronter setTo false
+	)
 }

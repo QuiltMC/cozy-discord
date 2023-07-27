@@ -8,7 +8,6 @@ package org.quiltmc.community.cozy.modules.ama
 
 import com.kotlindiscord.kord.extensions.checks.anyGuild
 import com.kotlindiscord.kord.extensions.checks.guildFor
-import com.kotlindiscord.kord.extensions.checks.hasPermission
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
 import com.kotlindiscord.kord.extensions.commands.converters.impl.channel
@@ -40,8 +39,10 @@ import dev.kord.core.behavior.edit
 import dev.kord.core.behavior.getChannelOf
 import dev.kord.core.behavior.interaction.modal
 import dev.kord.core.behavior.interaction.response.EphemeralMessageInteractionResponseBehavior
+import dev.kord.core.behavior.interaction.response.MessageInteractionResponseBehavior
 import dev.kord.core.behavior.interaction.response.createEphemeralFollowup
 import dev.kord.core.entity.Message
+import dev.kord.core.entity.User
 import dev.kord.core.entity.channel.Channel
 import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.core.entity.channel.TopGuildChannel
@@ -67,11 +68,13 @@ public class AmaExtension : Extension() {
 			ephemeralSubCommand(::AmaConfigArgs, ::AmaConfigModal) {
 				name = "config"
 				description = "Configure your AMA settings"
+				requirePermission(Permission.SendMessages)
 
 				check {
 					anyGuild()
-					hasPermission(Permission.ManageGuild)
-					requirePermission(Permission.SendMessages)
+					with(amaData) {
+						managementChecks()
+					}
 				}
 
 				var buttonMessage: Message?
@@ -123,11 +126,13 @@ public class AmaExtension : Extension() {
 			ephemeralSubCommand {
 				name = "start"
 				description = "Start the AMA for this server"
+				requirePermission(Permission.SendMessages)
 
 				check {
 					anyGuild()
-					hasPermission(Permission.ManageGuild)
-					requirePermission(Permission.SendMessages)
+					with(amaData) {
+						managementChecks()
+					}
 				}
 
 				action {
@@ -135,7 +140,7 @@ public class AmaExtension : Extension() {
 
 					if (config == null) {
 						respond {
-							content = "There is no AMA config for this guild!"
+							content = "There is no AMA config for this guild! Please run `/ama config` first."
 						}
 						return@action
 					}
@@ -171,11 +176,13 @@ public class AmaExtension : Extension() {
 			ephemeralSubCommand {
 				name = "stop"
 				description = "Stop the AMA for this server"
+				requirePermission(Permission.SendMessages)
 
 				check {
 					anyGuild()
-					hasPermission(Permission.ManageGuild)
-					requirePermission(Permission.SendMessages)
+					with(amaData) {
+						managementChecks()
+					}
 				}
 
 				action {
@@ -222,6 +229,9 @@ public class AmaExtension : Extension() {
 			check {
 				anyGuild()
 				failIfNot { event.interaction.componentId.contains("ama-button.") }
+				with(amaData) {
+					userChecks()
+				}
 			}
 
 			action {
@@ -247,8 +257,13 @@ public class AmaExtension : Extension() {
 				val channel = guildFor(event)?.getChannelOf<GuildMessageChannel>(channelId)
 
 				val originalInteractionUser = event.interaction.user
+				val pkMember = checkPK(originalInteractionUser, modalObj.pkId.value, interactionResponse)
+				if (pkMember !is PKResult.Success) {
+					return@action
+				}
+
 				val embedMessage = channel?.createEmbed {
-					questionEmbed(originalInteractionUser, modalObj.question.value, QuestionStatusFlag.NO_FLAG)
+					questionEmbed(originalInteractionUser, modalObj.question.value, QuestionStatusFlag.NO_FLAG, pkMember.result)
 				}
 
 				val answerQueueChannel = guildFor(event)?.getChannelOf<GuildMessageChannel>(config.answerQueueChannel)
@@ -264,6 +279,7 @@ public class AmaExtension : Extension() {
 						questionComponents(
 							embedMessage,
 							originalInteractionUser,
+							pkMember.result,
 							modalObj.question.value,
 							answerQueueChannel,
 							liveChatChannel,
@@ -283,7 +299,12 @@ public class AmaExtension : Extension() {
 
 			initialResponse = InitialSlashCommandResponse.None
 
-			check { anyGuild() }
+			check {
+				anyGuild()
+				with(amaData) {
+					userChecks()
+				}
+			}
 
 			action {
 				if (amaData.isButtonEnabled(guild!!.id) == false) {
@@ -311,8 +332,19 @@ public class AmaExtension : Extension() {
 				val channel = guild?.getChannelOf<GuildMessageChannel>(channelId)
 
 				val originalInteractionUser = event.interaction.user
+
+				val pkMember = checkPK(originalInteractionUser, modalObj.pkId.value, interactionResponse)
+				if (pkMember !is PKResult.Success) {
+					return@action
+				}
+
 				val embedMessage = channel?.createEmbed {
-					questionEmbed(originalInteractionUser, modalObj.question.value, QuestionStatusFlag.NO_FLAG)
+					questionEmbed(
+						originalInteractionUser,
+						modalObj.question.value,
+						QuestionStatusFlag.NO_FLAG,
+						pkMember.result
+					)
 				}
 
 				val answerQueueChannel = guild?.getChannelOf<GuildMessageChannel>(config.answerQueueChannel)
@@ -328,6 +360,7 @@ public class AmaExtension : Extension() {
 						questionComponents(
 							embedMessage,
 							originalInteractionUser,
+							pkMember.result,
 							modalObj.question.value,
 							answerQueueChannel,
 							liveChatChannel,
@@ -346,6 +379,56 @@ public class AmaExtension : Extension() {
 		this ?: return null
 		val topGuildChannel = this.asChannelOfOrNull<TopGuildChannel>() ?: return null
 		return topGuildChannel.getEffectivePermissions(kord.selfId).contains(permissions)
+	}
+
+	private suspend fun checkPK(
+		user: User,
+		pkId: String?,
+		interactionResponse: MessageInteractionResponseBehavior?
+	): PKResult<PKMember?> {
+		if (pkId == null) {
+			return PKResult.Success(null)
+		}
+
+		val result = user.getPluralKitMember(pkId)
+		when (result) {
+			PKResult.SystemNotFound -> {
+				if (pkId.isBlank()) {
+					return PKResult.Success(null)
+				}
+
+				interactionResponse?.createEphemeralFollowup {
+					content = "**Error**: No PK system is associated with your Discord account. Please try " +
+						"again, leaving the field blank."
+				}
+			}
+			PKResult.SystemNotAccessible -> {
+				if (pkId.isBlank()) {
+					return PKResult.Success(null)
+				}
+
+				interactionResponse?.createEphemeralFollowup {
+					content = "**Error**: The PK system associated with your Discord account is not " +
+						"accessible. Please try again, leaving the field blank, or contact a staff member."
+				}
+			}
+			PKResult.MemberNotFound -> interactionResponse?.createEphemeralFollowup {
+				content = "**Error**: No PK member was found with the provided information. If you used " +
+					"a member's name, please try again with their ID or UUID."
+			}
+			PKResult.MemberNotFromUser -> interactionResponse?.createEphemeralFollowup {
+				content = "**Error**: The PK member you provided is not from your system. Please try " +
+					"again with a member from your system, or leave the field blank."
+			}
+			PKResult.NotPermitted -> interactionResponse?.createEphemeralFollowup {
+				content = "**Error**: The PK system or member not accessible. Please try again, leaving the field " +
+					"blank, or contact a staff member."
+			}
+			PKResult.NoFronter -> return PKResult.Success(null)
+			is PKResult.Success -> return result
+		}
+
+		return result
 	}
 
 	public inner class AmaConfigArgs : Arguments() {
@@ -435,6 +518,12 @@ public class AmaExtension : Extension() {
 			label = "Question"
 			placeholder = "What are you doing today?"
 			required = true
+		}
+
+		public val pkId: LineTextWidget = lineText {
+			label = "PluralKit Member (Optional)"
+			placeholder = "Either a member name, ID, or UUID"
+			required = false
 		}
 	}
 }

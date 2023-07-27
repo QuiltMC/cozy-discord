@@ -15,6 +15,7 @@ import com.kotlindiscord.kord.extensions.components.ComponentContainer
 import com.kotlindiscord.kord.extensions.components.components
 import com.kotlindiscord.kord.extensions.components.ephemeralButton
 import com.kotlindiscord.kord.extensions.utils.loadModule
+import dev.kord.common.Color
 import dev.kord.common.entity.ButtonStyle
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.channel.createEmbed
@@ -26,6 +27,12 @@ import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.rest.builder.message.EmbedBuilder
 import dev.kord.rest.builder.message.create.embed
 import dev.kord.rest.builder.message.modify.embed
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 import org.koin.dsl.bind
 import org.quiltmc.community.cozy.modules.ama.data.AmaData
 import org.quiltmc.community.cozy.modules.ama.enums.QuestionStatusFlag
@@ -36,18 +43,36 @@ public fun ExtensibleBotBuilder.ExtensionsBuilder.extAma(data: AmaData) {
 	add(::AmaExtension)
 }
 
+public val User.uniqueName: String
+	get() = if (this.discriminator == "0") {
+		// Migrated to new username system
+		"@${this.username}"
+	} else {
+		// Still using name#discrim system
+		this.tag
+	}
+
 public fun EmbedBuilder.questionEmbed(
 	interactionUser: User,
 	question: String?,
 	flag: QuestionStatusFlag,
+	pkMember: PKMember?,
 	flaggedBy: User? = null,
 	claimedOrSkippedBy: User? = null,
 	viaStage: Boolean? = null
 ) {
-	author {
-		name = "${interactionUser.tag} (${interactionUser.id})"
-		icon = interactionUser.avatar?.cdnUrl?.toUrl()
+	if (pkMember != null) {
+		author {
+			name = "${pkMember.displayName ?: pkMember.name} (${interactionUser.id})"
+			icon = pkMember.avatarUrl ?: pkMember.webhookAvatarUrl
+		}
+	} else {
+		author {
+			name = "${interactionUser.uniqueName} (${interactionUser.id})"
+			icon = interactionUser.avatar?.cdnUrl?.toUrl()
+		}
 	}
+
 	description = question
 	color = when (flag) {
 		QuestionStatusFlag.ACCEPTED, QuestionStatusFlag.CLAIMED -> DISCORD_GREEN
@@ -61,7 +86,7 @@ public fun EmbedBuilder.questionEmbed(
 		QuestionStatusFlag.FLAGGED ->
 			if (flaggedBy != null) {
 				footer {
-					text = "Flagged by ${flaggedBy.tag}"
+					text = "Flagged by ${flaggedBy.uniqueName}"
 					icon = flaggedBy.avatar?.cdnUrl?.toUrl()
 				}
 			}
@@ -69,7 +94,7 @@ public fun EmbedBuilder.questionEmbed(
 		QuestionStatusFlag.CLAIMED ->
 			if (claimedOrSkippedBy != null) {
 				footer {
-					text = "Claimed by ${claimedOrSkippedBy.tag}"
+					text = "Claimed by ${claimedOrSkippedBy.uniqueName}"
 					icon = claimedOrSkippedBy.avatar?.cdnUrl?.toUrl()
 				}
 			}
@@ -77,7 +102,7 @@ public fun EmbedBuilder.questionEmbed(
 		QuestionStatusFlag.SKIPPED ->
 			if (claimedOrSkippedBy != null) {
 				footer {
-					text = "Skipped by ${claimedOrSkippedBy.tag}"
+					text = "Skipped by ${claimedOrSkippedBy.uniqueName}"
 					icon = claimedOrSkippedBy.avatar?.cdnUrl?.toUrl()
 				}
 			}
@@ -86,7 +111,7 @@ public fun EmbedBuilder.questionEmbed(
 			if (claimedOrSkippedBy != null) {
 				val answerMethod = if (viaStage == true) "stage" else "text"
 				footer {
-					text = "Question answered via $answerMethod by ${claimedOrSkippedBy.tag}"
+					text = "Question answered via $answerMethod by ${claimedOrSkippedBy.uniqueName}"
 				}
 			}
 
@@ -97,6 +122,7 @@ public fun EmbedBuilder.questionEmbed(
 public suspend inline fun ComponentContainer.questionComponents(
 	embedMessage: Message,
 	interactionUser: User,
+	pkMember: PKMember?,
 	question: String?,
 	answerQueueChannel: GuildMessageChannel?,
 	liveChatChannel: GuildMessageChannel?,
@@ -111,7 +137,7 @@ public suspend inline fun ComponentContainer.questionComponents(
 			var answerQueueMessage: Message? = null
 			answerQueueMessage = answerQueueChannel?.createMessage {
 				embed {
-					questionEmbed(interactionUser, question, QuestionStatusFlag.ACCEPTED)
+					questionEmbed(interactionUser, question, QuestionStatusFlag.ACCEPTED, pkMember)
 				}
 				components {
 					ephemeralButton {
@@ -126,6 +152,7 @@ public suspend inline fun ComponentContainer.questionComponents(
 										interactionUser,
 										question,
 										QuestionStatusFlag.CLAIMED,
+										pkMember,
 										claimedOrSkippedBy = event.interaction.user
 									)
 								}
@@ -135,6 +162,7 @@ public suspend inline fun ComponentContainer.questionComponents(
 										claimer,
 										liveChatChannel,
 										interactionUser,
+										pkMember,
 										question,
 										answerQueueMessage
 									)
@@ -154,6 +182,7 @@ public suspend inline fun ComponentContainer.questionComponents(
 										interactionUser,
 										question,
 										QuestionStatusFlag.SKIPPED,
+										pkMember,
 										claimedOrSkippedBy = event.interaction.user
 									)
 								}
@@ -168,7 +197,8 @@ public suspend inline fun ComponentContainer.questionComponents(
 					questionEmbed(
 						interactionUser,
 						question,
-						QuestionStatusFlag.ACCEPTED
+						QuestionStatusFlag.ACCEPTED,
+						pkMember
 					)
 				}
 				components { removeAll() }
@@ -183,7 +213,7 @@ public suspend inline fun ComponentContainer.questionComponents(
 		action {
 			embedMessage.edit {
 				embed {
-					questionEmbed(interactionUser, question, QuestionStatusFlag.DENIED)
+					questionEmbed(interactionUser, question, QuestionStatusFlag.DENIED, pkMember)
 				}
 				components { removeAll() }
 			}
@@ -199,7 +229,13 @@ public suspend inline fun ComponentContainer.questionComponents(
 				var flaggedMessage: Message? = null
 				flaggedMessage = flaggedQueueChannel?.createMessage {
 					embed {
-						questionEmbed(interactionUser, question, QuestionStatusFlag.FLAGGED, event.interaction.user)
+						questionEmbed(
+							interactionUser,
+							question,
+							QuestionStatusFlag.FLAGGED,
+							pkMember,
+							flaggedBy = event.interaction.user
+						)
 					}
 					components {
 						ephemeralButton {
@@ -210,7 +246,7 @@ public suspend inline fun ComponentContainer.questionComponents(
 								var answerQueueMessage: Message? = null
 								answerQueueMessage = answerQueueChannel?.createMessage {
 									embed {
-										questionEmbed(interactionUser, question, QuestionStatusFlag.ACCEPTED)
+										questionEmbed(interactionUser, question, QuestionStatusFlag.ACCEPTED, pkMember)
 									}
 									components {
 										ephemeralButton {
@@ -225,6 +261,7 @@ public suspend inline fun ComponentContainer.questionComponents(
 															interactionUser,
 															question,
 															QuestionStatusFlag.CLAIMED,
+															pkMember,
 															claimedOrSkippedBy = event.interaction.user
 														)
 													}
@@ -234,6 +271,7 @@ public suspend inline fun ComponentContainer.questionComponents(
 															claimer,
 															liveChatChannel,
 															interactionUser,
+															pkMember,
 															question,
 															answerQueueMessage
 														)
@@ -253,6 +291,7 @@ public suspend inline fun ComponentContainer.questionComponents(
 															interactionUser,
 															question,
 															QuestionStatusFlag.SKIPPED,
+															pkMember,
 															claimedOrSkippedBy = event.interaction.user
 														)
 													}
@@ -267,7 +306,8 @@ public suspend inline fun ComponentContainer.questionComponents(
 										questionEmbed(
 											interactionUser,
 											question,
-											QuestionStatusFlag.ACCEPTED
+											QuestionStatusFlag.ACCEPTED,
+											pkMember
 										)
 									}
 									components { removeAll() }
@@ -277,7 +317,8 @@ public suspend inline fun ComponentContainer.questionComponents(
 										questionEmbed(
 											interactionUser,
 											question,
-											QuestionStatusFlag.ACCEPTED
+											QuestionStatusFlag.ACCEPTED,
+											pkMember
 										)
 									}
 									components { removeAll() }
@@ -292,7 +333,7 @@ public suspend inline fun ComponentContainer.questionComponents(
 							action {
 								flaggedMessage?.edit {
 									embed {
-										questionEmbed(interactionUser, question, QuestionStatusFlag.DENIED)
+										questionEmbed(interactionUser, question, QuestionStatusFlag.DENIED, pkMember)
 									}
 									components { removeAll() }
 								}
@@ -301,7 +342,8 @@ public suspend inline fun ComponentContainer.questionComponents(
 										questionEmbed(
 											interactionUser,
 											question,
-											QuestionStatusFlag.DENIED
+											QuestionStatusFlag.DENIED,
+											pkMember
 										)
 									}
 									components { removeAll() }
@@ -316,6 +358,7 @@ public suspend inline fun ComponentContainer.questionComponents(
 							interactionUser,
 							question,
 							QuestionStatusFlag.FLAGGED,
+							pkMember,
 							flaggedBy = event.interaction.user
 						)
 					}
@@ -330,6 +373,7 @@ public suspend inline fun ComponentContainer.answeringButtons(
 	claimer: User,
 	liveChatChannel: GuildMessageChannel?,
 	interactionUser: User,
+	pkMember: PKMember?,
 	question: String?,
 	answerQueueMessage: Message?
 ) {
@@ -349,6 +393,7 @@ public suspend inline fun ComponentContainer.answeringButtons(
 					interactionUser,
 					question,
 					QuestionStatusFlag.ANSWERED,
+					pkMember,
 					claimedOrSkippedBy = claimer,
 					viaStage = true
 				)
@@ -372,11 +417,25 @@ public suspend inline fun ComponentContainer.answeringButtons(
 					interactionUser,
 					question,
 					QuestionStatusFlag.ANSWERED,
+					pkMember,
 					claimedOrSkippedBy = claimer,
 					viaStage = false
 				)
 			}
 			answerQueueMessage!!.edit { components { removeAll() } }
 		}
+	}
+}
+
+@Suppress("MagicNumber")
+internal object ColorHexCodeSerializer : KSerializer<Color> {
+	override val descriptor: SerialDescriptor =
+		PrimitiveSerialDescriptor("Color", PrimitiveKind.STRING)
+
+	override fun deserialize(decoder: Decoder): Color =
+		Color(decoder.decodeString().trimStart('#').toInt(16))
+
+	override fun serialize(encoder: Encoder, value: Color) {
+		encoder.encodeString(value.rgb.toString(16))
 	}
 }
