@@ -16,6 +16,7 @@ public typealias Logs = List<Log>
 public open class Log {
 	public val environment: Environment = Environment()
 	public var launcher: Launcher? = null
+	public var launcherVersion: String? = null
 	public var url: URL? = null
 
 	public val extraEmbeds: MutableList<suspend (EmbedBuilder).() -> Unit> = mutableListOf()
