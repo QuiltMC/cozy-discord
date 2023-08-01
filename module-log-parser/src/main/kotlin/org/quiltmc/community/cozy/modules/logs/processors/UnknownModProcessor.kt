@@ -16,7 +16,7 @@ import org.quiltmc.community.cozy.modules.logs.types.LogProcessor
 private val UNKNOWN_MOD_REGEX = "Unknown file in mods folder: <mods>[\\\\/]([^\n]+)\n".toRegex(RegexOption.IGNORE_CASE)
 
 public class UnknownModProcessor : LogProcessor() {
-	override val identifier: String = "piracy"
+	override val identifier: String = "unknown-mod"
 	override val order: Order = Order.Earlier
 
 	override suspend fun predicate(log: Log, event: Event): Boolean =

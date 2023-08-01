@@ -18,6 +18,7 @@ import org.quiltmc.community.cozy.modules.logs.types.LogParser
 private val OPENING_LINES = arrayOf(
 	"Loading \\d+ mods:\n".toRegex(RegexOption.IGNORE_CASE),
 	"-- Mods --\n".toRegex(RegexOption.IGNORE_CASE),
+	"-- Mod Table --\n".toRegex(RegexOption.IGNORE_CASE),
 	"\tQuilt Mods: \n".toRegex(RegexOption.IGNORE_CASE),
 )
 
@@ -27,8 +28,7 @@ public class QuiltModsParser : LogParser() {
 	override val identifier: String = "mods-quilt"
 	override val order: Order = Order.Default
 
-	override suspend fun predicate(log: Log, event: Event): Boolean =
-		log.getLoaderVersion(LoaderType.Quilt) != null
+	override suspend fun predicate(log: Log, event: Event): Boolean = log.getLoaderVersion(LoaderType.Quilt) != null
 
 	override suspend fun process(log: Log) {
 		val openingLine = OPENING_LINES.first { it in log.content }
@@ -72,7 +72,8 @@ public class QuiltModsParser : LogParser() {
 			log.addMod(
 				Mod(
 					mod["id"]!!,
-					Version(mod["version"]!!)
+					Version(mod["version"]!!),
+					mod["file(s)"]
 				)
 			)
 		}

@@ -36,7 +36,8 @@ public class FabricModsParser : LogParser() {
 				log.addMod(
 					Mod(
 						split.first(),
-						Version(split.last())
+						Version(split.last()),
+						null
 					)
 				)
 			}

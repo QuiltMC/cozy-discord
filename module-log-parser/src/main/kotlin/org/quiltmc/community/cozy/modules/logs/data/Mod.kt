@@ -10,5 +10,7 @@ import org.quiltmc.community.cozy.modules.logs.Version
 
 public data class Mod(
 	val id: String,
-	val version: Version
+	val version: Version,
+	// Only present on Quilt Loader
+	val path: String?
 )

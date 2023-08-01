@@ -14,7 +14,7 @@ import org.quiltmc.community.cozy.modules.logs.types.LogParser
 private val PATTERNS = listOf(
 	// Impossible to do this for vanilla; the logs don't contain the MC version for some reason
 
-	"\n\\|[\\s\\d]+\\| Minecraft\\s+\\| minecraft\\s+\\| (\\S+).+\n"
+	"\\| Minecraft\\s+\\| minecraft\\s+\\| (\\S+).+"
 		.toRegex(RegexOption.IGNORE_CASE),  // Quilt mods table
 
 	": Loading Minecraft (\\S+)".toRegex(RegexOption.IGNORE_CASE), // Fabric, Quilt

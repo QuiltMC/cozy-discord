@@ -13,7 +13,7 @@ import org.quiltmc.community.cozy.modules.logs.data.Order
 import org.quiltmc.community.cozy.modules.logs.types.LogParser
 
 private val PATTERNS = mapOf(
-	"\n\\|[\\s\\d]+\\| Quilt Loader\\s+\\| quilt_loader\\s+\\| (\\S+).+\n"
+	"\\| Quilt Loader\\s+\\| quilt_loader\\s+\\| (\\S+).+"
 		.toRegex(RegexOption.IGNORE_CASE) to LoaderType.Quilt,  // Quilt mods table
 
 	": Loading .+ with Quilt Loader (\\S+)".toRegex(RegexOption.IGNORE_CASE) to LoaderType.Quilt,

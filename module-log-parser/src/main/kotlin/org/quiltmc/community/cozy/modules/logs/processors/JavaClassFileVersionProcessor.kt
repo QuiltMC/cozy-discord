@@ -45,7 +45,7 @@ private val VERSION_MAP = mutableMapOf(
 )
 
 public class JavaClassFileVersionProcessor : LogProcessor() {
-	override val identifier: String = "piracy"
+	override val identifier: String = "java-class-file-version"
 	override val order: Order = Order.Earlier
 
 	override suspend fun predicate(log: Log, event: Event): Boolean =
