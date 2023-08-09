@@ -9,15 +9,14 @@ package org.quiltmc.community.cozy.modules.logs.processors.quilt
 import dev.kord.core.event.Event
 import io.ktor.client.call.*
 import io.ktor.client.request.*
-import io.ktor.client.statement.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.decodeFromJsonElement
 import org.quiltmc.community.cozy.modules.logs.data.LoaderType
 import org.quiltmc.community.cozy.modules.logs.data.Log
 import org.quiltmc.community.cozy.modules.logs.data.Order
@@ -25,7 +24,7 @@ import org.quiltmc.community.cozy.modules.logs.types.LogProcessor
 import kotlin.time.Duration.Companion.minutes
 
 private const val THREAD_LINK = "https://forum.quiltmc.org/t/mod-incompatibility-megathread/261"
-private const val THREAD_JSON = "$THREAD_LINK.json"
+private const val JSON_LINK = "https://quiltmc.org/incompatible-mods.json"
 
 private val CHECK_DELAY = 15.minutes
 
@@ -117,18 +116,10 @@ public class IncompatibleModProcessor : LogProcessor() {
 				}
 			}
 
-			val postText = client.get(THREAD_JSON)
-				.body<DiscoursePosts>()
-				.postStream
-				.posts
-				.first()
-				.cooked
+			val cozyJson = client.get(JSON_LINK)
+				.body<JsonElement>()
 
-			val cozyJson = postText
-				.substringAfter("// START COZY JSON")
-				.substringBefore("// END COZY JSON")
-
-			incompatibleMods = json.decodeFromString(cozyJson)
+			incompatibleMods = json.decodeFromJsonElement(cozyJson)
 			lastCheck = now
 		}
 	}
@@ -147,21 +138,5 @@ public class IncompatibleModProcessor : LogProcessor() {
 		public val name: String,
 		public val type: Incompatibility,
 		public val note: String? = null,
-	)
-
-	@Serializable
-	public data class DiscoursePosts(
-		@SerialName("post_stream")
-		public val postStream: PostStream
-	)
-
-	@Serializable
-	public data class PostStream(
-		public val posts: List<CookedPost>
-	)
-
-	@Serializable
-	public data class CookedPost(
-		public val cooked: String
 	)
 }
