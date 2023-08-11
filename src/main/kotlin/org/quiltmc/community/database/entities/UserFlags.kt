@@ -21,6 +21,7 @@ data class UserFlags(
 	var hasUsedPK: Boolean = false,
 	var autoPublish: Boolean = true,
 	var syncNicks: Boolean = true,
+	var usePKFronter: Boolean = false,
 ) : Entity<Snowflake> {
 	suspend fun save() {
 		val collection = getKoin().get<UserFlagsCollection>()

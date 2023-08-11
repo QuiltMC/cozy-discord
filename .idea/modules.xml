@@ -5,6 +5,8 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/CozyDiscord.main.iml" filepath="$PROJECT_DIR$/.idea/modules/CozyDiscord.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/CozyDiscord.test.iml" filepath="$PROJECT_DIR$/.idea/modules/CozyDiscord.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/cozy-discord.iml" filepath="$PROJECT_DIR$/.idea/cozy-discord.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/org.quiltmc.community.CozyDiscord.main.iml" filepath="$PROJECT_DIR$/.idea/modules/org.quiltmc.community.CozyDiscord.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/org.quiltmc.community.CozyDiscord.test.iml" filepath="$PROJECT_DIR$/.idea/modules/org.quiltmc.community.CozyDiscord.test.iml" />
     </modules>
   </component>
 </project>

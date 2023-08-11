@@ -25,6 +25,7 @@ import dev.kord.gateway.PrivilegedIntent
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.lastOrNull
+import org.quiltmc.community.cozy.modules.ama.extAma
 import org.quiltmc.community.cozy.modules.logs.extLogParser
 import org.quiltmc.community.cozy.modules.logs.processors.PiracyProcessor
 import org.quiltmc.community.cozy.modules.logs.processors.ProblematicLauncherProcessor
@@ -32,6 +33,7 @@ import org.quiltmc.community.cozy.modules.moderation.moderation
 import org.quiltmc.community.cozy.modules.rolesync.rolesync
 import org.quiltmc.community.cozy.modules.tags.tags
 import org.quiltmc.community.cozy.modules.welcome.welcomeChannel
+import org.quiltmc.community.database.collections.AmaConfigCollection
 import org.quiltmc.community.database.collections.TagsCollection
 import org.quiltmc.community.database.collections.WelcomeChannelCollection
 import org.quiltmc.community.logs.NonQuiltLoaderProcessor
@@ -117,6 +119,8 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
 		add(::VerificationExtension)
 
 		extPluralKit()
+
+		extAma(getKoin().get<AmaConfigCollection>())
 
 		extLogParser {
 			// Bundled non-default processors
