@@ -58,6 +58,7 @@ public class SimpleLogParserConfig(private val builder: Builder) : LogParserConf
 			QuiltLibrariesVersionProcessor(),
 			QuiltLoaderVersionProcessor(),
 			UnknownModProcessor(),
+			MissingItemProcessor(),
 		)
 
 		public var retrievers: MutableList<LogRetriever> = mutableListOf(
