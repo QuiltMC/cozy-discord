@@ -15,5 +15,6 @@ indent_style = space
 charset = unset
 insert_final_newline = unset
 indent_style = unset
-trim_trailing_whitespace = unset
+trim_trailing_whitespace = false
 max_line_length = unset
+ij_formatter_enabled = false
