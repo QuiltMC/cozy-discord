@@ -51,17 +51,19 @@ class LogParseTests {
 	}
 
 	@Test
-	fun `Test Quilt crash log`(): Unit = runBlocking {
+	fun `Test Quilt crash log`() {
 		if (System.getenv("CI") != null) {
 			logger.error { "Weird bug with CI testing, please notify if reproducible" }
-			return@runBlocking
+			return
 		}
 
-		val file = ClassLoader.getSystemResource("quilt-crash.txt")
-		val log = loadLog(file)
+		runBlocking {
+			val file = ClassLoader.getSystemResource("quilt-crash.txt")
+			val log = loadLog(file)
 
-		assertEquals(167, log.getMods().size)
-		assertEquals(Version("1.19.3"), log.minecraftVersion)
-		assertEquals(mapOf(LoaderType.Quilt to Version("0.18.10")), log.getLoaders())
+			assertEquals(167, log.getMods().size)
+			assertEquals(Version("1.19.3"), log.minecraftVersion)
+			assertEquals(mapOf(LoaderType.Quilt to Version("0.18.10")), log.getLoaders())
+		}
 	}
 }
