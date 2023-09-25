@@ -9,3 +9,11 @@ max_line_length = 120
 
 [*.yml]
 indent_style = space
+
+# Reset for log tests
+[*.txt]
+charset = unset
+insert_final_newline = unset
+indent_style = unset
+trim_trailing_whitespace = unset
+max_line_length = unset
