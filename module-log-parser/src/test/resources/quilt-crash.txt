@@ -106,7 +106,7 @@ Details:
 	Swap memory total (MB): 38224.00
 	Swap memory used (MB): 12012.66
 	JVM Flags: 2 total; -Xms512m -Xmx4096m
-	Quilt Mods:
+	Quilt Mods: 
 		| Index | Mod                                               | ID                                                    | Version                           | Plugin                 | File(s)                                                                                      | Sub-Files                                                                           | Sub-Files                                                      | Sub-Files                                       |
 		|------:|---------------------------------------------------|-------------------------------------------------------|-----------------------------------|------------------------|----------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|----------------------------------------------------------------|-------------------------------------------------|
 		|    27 | 3d Skin Layers                                    | skinlayers                                            | 1.5.3-mc1.19.3                    | quilted_fabric_loader  | <mods>/3dskinlayers-fabric-1.5.3-mc1.19.3.jar                                                |                                                                                     |                                                                |                                                 |
@@ -277,7 +277,7 @@ Details:
 		|    30 | toml4j                                            | com_moandjiezana_toml_toml4j                          | 0.7.2                             | quilted_fabric_loader  | <mods>/EMITrades-fabric-1.1.0+mc1.19.3.jar                                                   | /META-INF/jars/toml4j-0.7.2.jar                                                     |                                                                |                                                 |
 		|    21 | velocity-native                                   | com_velocitypowered_velocity-native                   | 3.1.2-SNAPSHOT                    | quilted_fabric_loader  | <mods>/krypton-0.2.1.jar                                                                     | /META-INF/jars/velocity-native-3.1.2-SNAPSHOT.jar                                   |                                                                |                                                 |
 		|------:|---------------------------------------------------|-------------------------------------------------------|-----------------------------------|------------------------|----------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|----------------------------------------------------------------|-------------------------------------------------|
-
+		
 	Quilted Fabric API: !! WARNING !! This instance is using Fabric API modules re-implemented by QSL. If the issue comes from Quilted Fabric API, DO NOT report to Fabric; report them to Quilt instead!
 	Server Running: true
 	Player Count: 1 / 8; [class_3222['Ampflower'/1, l='ServerLevel[Painsit]', x=4.50, y=-60.00, z=1.50]]
