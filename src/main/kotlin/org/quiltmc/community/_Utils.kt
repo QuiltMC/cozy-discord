@@ -141,11 +141,16 @@ suspend fun ExtensibleBotBuilder.common() {
 	extensions {
 		sentry {
 			val sentryDsn = envOrNull("SENTRY_DSN")
+			val version: String? = object {}::class.java.`package`.implementationVersion
 
 			if (sentryDsn != null) {
 				enable = true
 
 				dsn = sentryDsn
+			}
+
+			if (version != null) {
+				release = version
 			}
 		}
 

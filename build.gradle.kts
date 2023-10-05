@@ -122,6 +122,12 @@ tasks {
 			attributes(
 				"Main-Class" to "org.quiltmc.community.AppKt"
 			)
+
+			if (System.getenv("GITHUB_SHA") != null) {
+				attributes(
+					"Implementation-Version" to System.getenv("GITHUB_SHA")
+				)
+			}
 		}
 	}
 }
