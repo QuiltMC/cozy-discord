@@ -9,7 +9,7 @@ package org.quiltmc.community.cozy.modules.tags.config
 import com.kotlindiscord.kord.extensions.checks.types.Check
 import dev.kord.core.entity.Guild
 import dev.kord.core.entity.channel.GuildMessageChannel
-import dev.kord.rest.builder.message.create.embed
+import dev.kord.rest.builder.message.embed
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.lastOrNull

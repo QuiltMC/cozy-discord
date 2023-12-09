@@ -25,10 +25,9 @@ import dev.kord.core.entity.Message
 import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.core.event.interaction.InteractionCreateEvent
 import dev.kord.core.supplier.EntitySupplyStrategy
+import dev.kord.rest.builder.message.allowedMentions
 import dev.kord.rest.builder.message.create.UserMessageCreateBuilder
-import dev.kord.rest.builder.message.create.allowedMentions
-import dev.kord.rest.builder.message.create.embed
-import dev.kord.rest.builder.message.modify.allowedMentions
+import dev.kord.rest.builder.message.embed
 import dev.kord.rest.request.RestRequestException
 import io.ktor.client.*
 import io.ktor.client.call.*

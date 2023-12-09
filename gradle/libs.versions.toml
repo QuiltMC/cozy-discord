@@ -1,26 +1,26 @@
 [versions]
-detekt = "1.22.0"
-kotlin = "1.8.0"
+detekt = "1.23.4"
+kotlin = "1.9.21"
 graphql = "6.3.5"
 
 autolink = "0.10.1"
 commons-text = "1.10.0"
 excelkt = "1.0.2"
-flexver = "1.1.0"
-groovy = "3.0.14"
+flexver = "1.1.1"
+groovy = "3.0.19"
 homoglyph = "1.2.1"
-jansi = "2.4.0"
-jsoup = "1.15.3"
-kaml = "0.53.0"
+jansi = "2.4.1"
+jsoup = "1.17.1"
+kaml = "0.55.0"
 kmongo = "4.8.0"
-kordex = "1.5.7-SNAPSHOT"
+kordex = "1.7.1-SNAPSHOT"
 kotlintest = "3.4.2"
-ktor = "2.2.1"
-kx-ser = "1.4.1"
-logback = "1.4.5"
-logback-groovy = "1.14.0"
-logging = "2.1.23"
-moshi = "1.13.0"
+ktor = "2.2.4"
+kx-ser = "1.6.2"
+logback = "1.4.14"
+logback-groovy = "1.14.5"
+logging = "5.1.1"
+moshi = "1.15.0"
 rgxgen = "1.4"
 semver = "1.4.2"
 
@@ -54,7 +54,7 @@ ktor-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation",
 kx-ser = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kx-ser" }
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 logback-groovy = { module = "io.github.virtualdogbert:logback-groovy-config", version.ref = "logback-groovy" }
-logging = { module = "io.github.microutils:kotlin-logging", version.ref = "logging" }
+logging = { module = "io.github.oshai:kotlin-logging", version.ref = "logging" }
 moshi-adapters = { module = "com.squareup.moshi:moshi-adapters", version.ref = "moshi" }
 moshi-kotlin = { module = "com.squareup.moshi:moshi-kotlin", version.ref = "moshi" }
 rgxgen = { module = "com.github.curious-odd-man:rgxgen", version.ref = "rgxgen" }

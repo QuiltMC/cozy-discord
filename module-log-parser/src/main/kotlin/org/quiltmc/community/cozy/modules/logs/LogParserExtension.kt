@@ -20,14 +20,14 @@ import com.kotlindiscord.kord.extensions.utils.scheduling.Scheduler
 import dev.kord.core.entity.Message
 import dev.kord.core.event.Event
 import dev.kord.rest.builder.message.create.MessageCreateBuilder
-import dev.kord.rest.builder.message.create.embed
+import dev.kord.rest.builder.message.embed
+import io.github.oshai.kotlinlogging.KLogger
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import kotlinx.serialization.decodeFromString
-import mu.KLogger
-import mu.KotlinLogging
 import org.koin.core.component.inject
 import org.quiltmc.community.cozy.modules.logs.config.LogParserConfig
 import org.quiltmc.community.cozy.modules.logs.data.Log
@@ -288,6 +288,9 @@ public class LogParserExtension : Extension() {
 				embed { it(this) }
 			}
 		}
+
+		if (embeds == null) embeds = mutableListOf()
+		val embeds = embeds!!
 
 		if (embeds.size > 10) {
 			val extraEmbeds = embeds.size - 10

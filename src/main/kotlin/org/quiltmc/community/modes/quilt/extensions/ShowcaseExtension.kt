@@ -8,7 +8,10 @@
 
 package org.quiltmc.community.modes.quilt.extensions
 
-import com.kotlindiscord.kord.extensions.checks.*
+import com.kotlindiscord.kord.extensions.checks.anyGuild
+import com.kotlindiscord.kord.extensions.checks.hasPermission
+import com.kotlindiscord.kord.extensions.checks.isNotInThread
+import com.kotlindiscord.kord.extensions.checks.notHasPermission
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
 import com.kotlindiscord.kord.extensions.commands.application.slash.group
@@ -21,10 +24,10 @@ import com.kotlindiscord.kord.extensions.modules.extra.pluralkit.events.PKMessag
 import com.kotlindiscord.kord.extensions.modules.extra.pluralkit.events.ProxiedMessageCreateEvent
 import com.kotlindiscord.kord.extensions.storage.StorageType
 import com.kotlindiscord.kord.extensions.storage.StorageUnit
-import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.authorId
 import com.kotlindiscord.kord.extensions.utils.capitalizeWords
 import com.kotlindiscord.kord.extensions.utils.dm
+import com.kotlindiscord.kord.extensions.utils.tagOrUsername
 import dev.kord.common.entity.ChannelType
 import dev.kord.common.entity.MessageType
 import dev.kord.common.entity.Permission
@@ -119,7 +122,7 @@ class ShowcaseExtension : Extension() {
 
 				val thread = channel.startPublicThreadWithMessage(
 					event.message.id, title
-				) { reason = "Showcase thread created for ${event.message.author?.tag}" }
+				) { reason = "Showcase thread created for ${event.message.author?.tagOrUsername()}" }
 
 				threads.set(
 					OwnedThread(thread.id, authorId, guild.id)

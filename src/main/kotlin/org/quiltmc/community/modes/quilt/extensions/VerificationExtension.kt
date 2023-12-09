@@ -10,9 +10,9 @@ import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.event
 import dev.kord.core.event.guild.GuildCreateEvent
 import dev.kord.core.event.guild.MemberUpdateEvent
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
-import mu.KotlinLogging
 import org.koin.core.component.inject
 import org.quiltmc.community.database.collections.ServerSettingsCollection
 import org.quiltmc.community.inQuiltGuild

@@ -19,15 +19,13 @@ import com.kotlindiscord.kord.extensions.modules.unsafe.extensions.unsafeSubComm
 import com.kotlindiscord.kord.extensions.modules.unsafe.types.InitialSlashCommandResponse
 import com.kotlindiscord.kord.extensions.modules.unsafe.types.ackEphemeral
 import com.kotlindiscord.kord.extensions.modules.unsafe.types.respondEphemeral
-import com.kotlindiscord.kord.extensions.types.editingPaginator
-import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.FilterStrategy
 import com.kotlindiscord.kord.extensions.utils.suggestStringMap
 import dev.kord.common.annotation.KordUnsafe
 import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.behavior.interaction.modal
 import dev.kord.core.behavior.interaction.suggestString
-import dev.kord.rest.builder.message.create.allowedMentions
+import dev.kord.rest.builder.message.allowedMentions
 import org.koin.core.component.inject
 import org.quiltmc.community.cozy.modules.tags.config.TagsConfig
 import org.quiltmc.community.cozy.modules.tags.data.Tag

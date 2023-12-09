@@ -16,20 +16,19 @@ import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.time.TimestampType
 import com.kotlindiscord.kord.extensions.time.toDiscord
-import com.kotlindiscord.kord.extensions.types.editingPaginator
-import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.scheduling.Scheduler
 import com.kotlindiscord.kord.extensions.utils.scheduling.Task
+import com.kotlindiscord.kord.extensions.utils.tagOrUsername
 import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.entity.Guild
 import dev.kord.core.entity.Member
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.request.forms.*
 import io.ktor.utils.io.jvm.javaio.*
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.toList
 import kotlinx.datetime.Clock
 import kotlinx.datetime.toJavaInstant
-import mu.KotlinLogging
 import org.quiltmc.community.cozy.modules.cleanup.config.UserCleanupConfig
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -107,7 +106,7 @@ public class UserCleanupExtension(
 							description = "**Mention** | **Tag** | **Join date**\n\n"
 
 							chunk.forEach { member ->
-								description += "${member.mention} | ${member.tag} |" +
+								description += "${member.mention} | ${member.tagOrUsername()} |" +
 										"${member.joinedAt.toDiscord(TimestampType.Default)}\n"
 							}
 						}
@@ -152,7 +151,7 @@ public class UserCleanupExtension(
 						"| ------- | --- | --------------- |\n" +
 
 						removed.joinToString("\n") {
-							"| ${it.id} | ${it.tag} | ${instantFormatter.format(it.joinedAt.toJavaInstant())} |"
+							"| ${it.id} | ${it.tagOrUsername()} | ${instantFormatter.format(it.joinedAt.toJavaInstant())} |"
 						}
 
 				config.getLoggingChannel(guild).createMessage {

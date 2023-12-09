@@ -26,13 +26,7 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.extensions.event
-import com.kotlindiscord.kord.extensions.types.editingPaginator
-import com.kotlindiscord.kord.extensions.types.respond
-import com.kotlindiscord.kord.extensions.utils.deleteIgnoringNotFound
-import com.kotlindiscord.kord.extensions.utils.dm
-import com.kotlindiscord.kord.extensions.utils.getJumpUrl
-import com.kotlindiscord.kord.extensions.utils.respond
-import com.kotlindiscord.kord.extensions.utils.timeout
+import com.kotlindiscord.kord.extensions.utils.*
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.ban
 import dev.kord.core.behavior.channel.createEmbed
@@ -45,8 +39,8 @@ import dev.kord.core.event.message.MessageCreateEvent
 import dev.kord.core.event.message.MessageUpdateEvent
 import dev.kord.core.event.user.UserUpdateEvent
 import dev.kord.rest.builder.message.EmbedBuilder
-import dev.kord.rest.builder.message.create.embed
-import mu.KotlinLogging
+import dev.kord.rest.builder.message.embed
+import io.github.oshai.kotlinlogging.KotlinLogging
 import net.codebox.homoglyph.HomoglyphBuilder
 import org.koin.core.component.inject
 import org.quiltmc.community.*
@@ -204,7 +198,7 @@ class FilterExtension : Extension() {
 
 								field {
 									name = "Moderator"
-									value = "${user.mention} (`${user.id.value}` / `${user.asUser().tag}`)"
+									value = "${user.mention} (`${user.id.value}` / `${user.asUser().tagOrUsername()}`)"
 								}
 							}
 
@@ -248,7 +242,7 @@ class FilterExtension : Extension() {
 
 								field {
 									name = "Moderator"
-									value = "${user.mention} (`${user.id.value}` / `${user.asUser().tag}`)"
+									value = "${user.mention} (`${user.id.value}` / `${user.asUser().tagOrUsername()}`)"
 								}
 							}
 
@@ -311,7 +305,7 @@ class FilterExtension : Extension() {
 
 								field {
 									name = "Moderator"
-									value = "${user.mention} (`${user.id.value}` / `${user.asUser().tag}`)"
+									value = "${user.mention} (`${user.id.value}` / `${user.asUser().tagOrUsername()}`)"
 								}
 							}
 
@@ -364,7 +358,7 @@ class FilterExtension : Extension() {
 
 								field {
 									name = "Moderator"
-									value = "${user.mention} (`${user.id.value}` / `${user.asUser().tag}`)"
+									value = "${user.mention} (`${user.id.value}` / `${user.asUser().tagOrUsername()}`)"
 								}
 							}
 
@@ -408,7 +402,7 @@ class FilterExtension : Extension() {
 
 								field {
 									name = "Moderator"
-									value = "${user.mention} (`${user.id.value}` / `${user.asUser().tag}`)"
+									value = "${user.mention} (`${user.id.value}` / `${user.asUser().tagOrUsername()}`)"
 								}
 							}
 
@@ -461,7 +455,7 @@ class FilterExtension : Extension() {
 
 								field {
 									name = "Moderator"
-									value = "${user.mention} (`${user.id.value}` / `${user.asUser().tag}`)"
+									value = "${user.mention} (`${user.id.value}` / `${user.asUser().tagOrUsername()}`)"
 								}
 							}
 
@@ -525,7 +519,7 @@ class FilterExtension : Extension() {
 
 								field {
 									name = "Moderator"
-									value = "${user.mention} (`${user.id.value}` / `${user.asUser().tag}`)"
+									value = "${user.mention} (`${user.id.value}` / `${user.asUser().tagOrUsername()}`)"
 								}
 							}
 
@@ -568,7 +562,7 @@ class FilterExtension : Extension() {
 
 								field {
 									name = "Moderator"
-									value = "${user.mention} (`${user.id.value}` / `${user.asUser().tag}`)"
+									value = "${user.mention} (`${user.id.value}` / `${user.asUser().tagOrUsername()}`)"
 								}
 							}
 
@@ -764,7 +758,7 @@ class FilterExtension : Extension() {
 				field {
 					inline = true
 					name = "User"
-					value = "${member.mention} (`${member.id}` / `${member.tag}`)"
+					value = "${member.mention} (`${member.id}` / `${member.tagOrUsername()}`)"
 				}
 
 				field {
@@ -980,7 +974,7 @@ class FilterExtension : Extension() {
 				field {
 					inline = true
 					name = "Author"
-					value = "${message.author!!.mention} (`${message.author!!.id.value}` / `${message.author!!.tag}`)"
+					value = "${message.author!!.mention} (`${message.author!!.id.value}` / `${message.author!!.tagOrUsername()}`)"
 				}
 
 				field {

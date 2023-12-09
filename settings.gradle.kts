@@ -13,15 +13,7 @@ pluginManagement {
 
 rootProject.name = "CozyDiscord"
 
-enableFeaturePreview("VERSION_CATALOGS")
-
-dependencyResolutionManagement {
-	versionCatalogs {
-		create("libs") {
-			from(files("libs.versions.toml"))
-		}
-	}
-}
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 include(":module-log-parser")
 include(":module-moderation")

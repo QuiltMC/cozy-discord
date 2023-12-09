@@ -16,12 +16,11 @@ import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.time.TimestampType
 import com.kotlindiscord.kord.extensions.time.toDiscord
-import com.kotlindiscord.kord.extensions.types.editingPaginator
-import com.kotlindiscord.kord.extensions.types.respond
+import com.kotlindiscord.kord.extensions.utils.tagOrUsername
 import com.kotlindiscord.kord.extensions.utils.translate
 import dev.kord.common.entity.Snowflake
 import dev.kord.rest.Image
-import dev.kord.rest.builder.message.create.embed
+import dev.kord.rest.builder.message.embed
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
@@ -69,14 +68,14 @@ class LookupExtension : Extension() {
 					return@action
 				}
 
-				val flags = user.publicFlags?.flags ?: listOf()
+				val flags = user.publicFlags?.values ?: listOf()
 
 				respond {
 					embed {
 						color = DISCORD_BLURPLE
 
 						description = "**__Basic Information__**\n" +
-							"**Tag:** `${user.tag}`\n" +
+							"**Tag:** `${user.tagOrUsername()}`\n" +
 							"**ID:** `${user.id.value}`\n" +
 							"**Mention:** ${user.mention}\n\n" +
 
@@ -92,13 +91,13 @@ class LookupExtension : Extension() {
 
 							if (flags.isNotEmpty()) {
 								"(${flags.size})\n" +
-									flags.joinToString(", ") { it.name }
+									flags.joinToString(", ") { it.getName() }
 							} else {
 								"\nNo flags."
 							}
 
 						author {
-							name = user.tag
+							name = user.tagOrUsername()
 							icon = user.avatar?.cdnUrl?.toUrl()
 						}
 
@@ -266,11 +265,11 @@ class LookupExtension : Extension() {
 				builder.append("**Mention:** ${channel?.mention}\n\n")
 
 				if (user != null) {
-					val flags = user.publicFlags?.flags ?: listOf()
+					val flags = user.publicFlags?.values ?: listOf()
 
 					builder.append(
 						"**__Inviter Information__**\n" +
-							"**Tag:** `${user.tag}`\n" +
+							"**Tag:** `${user.tagOrUsername()}`\n" +
 							"**ID:** `${user.id.value}`\n" +
 							"**Mention:** ${user.mention}\n\n" +
 

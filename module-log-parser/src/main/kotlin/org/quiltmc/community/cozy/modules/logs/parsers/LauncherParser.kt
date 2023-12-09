@@ -32,7 +32,7 @@ public class LauncherParser : LogParser() {
 	override suspend fun process(log: Log) {
 		val (launcher, match) = PATTERNS.entries
 			.map { (launcher, pattern) -> Pair(launcher, pattern.find(log.content)) }
-			.firstOrNull() { (_, match) -> match != null }
+			.firstOrNull { (_, match) -> match != null }
 			?: return
 
 		log.launcher = Launcher(launcher, match!!.groups[1]?.value)

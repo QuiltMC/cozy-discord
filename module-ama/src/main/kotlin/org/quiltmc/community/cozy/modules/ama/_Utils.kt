@@ -15,6 +15,7 @@ import com.kotlindiscord.kord.extensions.components.ComponentContainer
 import com.kotlindiscord.kord.extensions.components.components
 import com.kotlindiscord.kord.extensions.components.ephemeralButton
 import com.kotlindiscord.kord.extensions.utils.loadModule
+import com.kotlindiscord.kord.extensions.utils.tagOrUsername
 import dev.kord.common.Color
 import dev.kord.common.entity.ButtonStyle
 import dev.kord.common.entity.Snowflake
@@ -25,8 +26,7 @@ import dev.kord.core.entity.Message
 import dev.kord.core.entity.User
 import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.rest.builder.message.EmbedBuilder
-import dev.kord.rest.builder.message.create.embed
-import dev.kord.rest.builder.message.modify.embed
+import dev.kord.rest.builder.message.embed
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
@@ -49,7 +49,7 @@ public val User.uniqueName: String
 		"@${this.username}"
 	} else {
 		// Still using name#discrim system
-		this.tag
+		this.tagOrUsername()
 	}
 
 public fun EmbedBuilder.questionEmbed(
@@ -383,7 +383,7 @@ public suspend inline fun ComponentContainer.answeringButtons(
 
 		check {
 			if (event.interaction.user != claimer) {
-				fail("You did not claim this question! ${claimer.tag} did")
+				fail("You did not claim this question! ${claimer.tagOrUsername()} did")
 			}
 		}
 
@@ -407,7 +407,7 @@ public suspend inline fun ComponentContainer.answeringButtons(
 		style = ButtonStyle.Success
 		check {
 			if (event.interaction.user != claimer) {
-				fail("You did not claim the question! ${claimer.tag} did")
+				fail("You did not claim the question! ${claimer.tagOrUsername()} did")
 			}
 		}
 

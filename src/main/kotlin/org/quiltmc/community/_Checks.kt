@@ -13,7 +13,7 @@ import com.kotlindiscord.kord.extensions.utils.translate
 import dev.kord.common.entity.Permission
 import dev.kord.core.behavior.channel.asChannelOfOrNull
 import dev.kord.core.entity.channel.CategorizableChannel
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.quiltmc.community.database.collections.ServerSettingsCollection
 
 suspend fun CheckContext<*>.notInStaffChannel() {

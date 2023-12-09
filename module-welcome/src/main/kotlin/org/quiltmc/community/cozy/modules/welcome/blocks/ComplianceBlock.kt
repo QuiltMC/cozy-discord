@@ -10,6 +10,7 @@ package org.quiltmc.community.cozy.modules.welcome.blocks
 
 import com.kotlindiscord.kord.extensions.DISCORD_BLURPLE
 import com.kotlindiscord.kord.extensions.koin.KordExKoinComponent
+import com.kotlindiscord.kord.extensions.utils.tagOrUsername
 import dev.kord.common.entity.ButtonStyle
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
@@ -21,12 +22,10 @@ import dev.kord.core.entity.Role
 import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.event.interaction.ButtonInteractionCreateEvent
 import dev.kord.core.event.interaction.InteractionCreateEvent
+import dev.kord.rest.builder.message.actionRow
+import dev.kord.rest.builder.message.allowedMentions
 import dev.kord.rest.builder.message.create.MessageCreateBuilder
-import dev.kord.rest.builder.message.create.actionRow
-import dev.kord.rest.builder.message.create.allowedMentions
 import dev.kord.rest.builder.message.modify.MessageModifyBuilder
-import dev.kord.rest.builder.message.modify.actionRow
-import dev.kord.rest.builder.message.modify.allowedMentions
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.datetime.Clock
 import kotlinx.serialization.SerialName
@@ -135,7 +134,7 @@ public data class ComplianceBlock(
 				inline = true
 				name = "User"
 
-				value = "${user.mention} (`${user.tag}` / `${user.id}`)"
+				value = "${user.mention} (`${user.tagOrUsername()}` / `${user.id}`)"
 			}
 		}
 

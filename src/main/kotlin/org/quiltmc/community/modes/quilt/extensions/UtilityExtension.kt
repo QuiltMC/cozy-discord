@@ -31,9 +31,6 @@ import com.kotlindiscord.kord.extensions.extensions.*
 import com.kotlindiscord.kord.extensions.i18n.SupportedLocales
 import com.kotlindiscord.kord.extensions.time.TimestampType
 import com.kotlindiscord.kord.extensions.time.toDiscord
-import com.kotlindiscord.kord.extensions.types.edit
-import com.kotlindiscord.kord.extensions.types.respond
-import com.kotlindiscord.kord.extensions.types.respondEphemeral
 import com.kotlindiscord.kord.extensions.utils.*
 import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.*
@@ -50,9 +47,9 @@ import dev.kord.core.event.channel.thread.ThreadUpdateEvent
 import dev.kord.core.event.gateway.ReadyEvent
 import dev.kord.core.event.guild.MemberUpdateEvent
 import dev.kord.core.event.message.MessageCreateEvent
-import dev.kord.rest.builder.message.create.allowedMentions
-import dev.kord.rest.builder.message.create.embed
-import dev.kord.rest.builder.message.modify.embed
+import dev.kord.rest.builder.message.allowedMentions
+import dev.kord.rest.builder.message.embed
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.request.forms.*
 import io.ktor.utils.io.jvm.javaio.*
 import kotlinx.coroutines.delay
@@ -62,7 +59,6 @@ import kotlinx.datetime.*
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import mu.KotlinLogging
 import org.koin.core.component.inject
 import org.quiltmc.community.*
 import org.quiltmc.community.cozy.modules.moderation.compareTo
@@ -210,7 +206,7 @@ class UtilityExtension : Extension() {
 			action {
 				val owner = event.channel.owner.asUser()
 
-				logger.info { "Thread created by ${owner.tag}" }
+				logger.info { "Thread created by ${owner.tagOrUsername()}" }
 
 				val role = when (event.channel.guildId) {
 					COMMUNITY_GUILD -> event.channel.guild.getRole(COMMUNITY_MODERATOR_ROLE)
@@ -450,7 +446,7 @@ class UtilityExtension : Extension() {
 					val roles = member.roles.toList().map { it.id }
 
 					if (privilegedRoles.any { it in roles }) {
-						targetMessages.forEach { it.pin("Pinned by ${member.tag}") }
+						targetMessages.forEach { it.pin("Pinned by ${member.tagOrUsername()}") }
 						edit { content = "Messages pinned." }
 
 						return@action
@@ -462,7 +458,7 @@ class UtilityExtension : Extension() {
 						return@action
 					}
 
-					targetMessages.forEach { it.pin("Pinned by ${member.tag}") }
+					targetMessages.forEach { it.pin("Pinned by ${member.tagOrUsername()}") }
 
 					edit { content = "Messages pinned." }
 				}
@@ -483,7 +479,7 @@ class UtilityExtension : Extension() {
 					val roles = member.roles.toList().map { it.id }
 
 					if (privilegedRoles.any { it in roles }) {
-						targetMessages.forEach { it.unpin("Unpinned by ${member.tag}") }
+						targetMessages.forEach { it.unpin("Unpinned by ${member.tagOrUsername()}") }
 						edit { content = "Messages unpinned." }
 
 						return@action
@@ -495,7 +491,7 @@ class UtilityExtension : Extension() {
 						return@action
 					}
 
-					targetMessages.forEach { it.unpin("Unpinned by ${member.tag}") }
+					targetMessages.forEach { it.unpin("Unpinned by ${member.tagOrUsername()}") }
 
 					edit { content = "Messages unpinned." }
 				}
@@ -524,7 +520,7 @@ class UtilityExtension : Extension() {
 						val thread = channel.asChannelOfOrNull<ThreadChannel>()
 
 						if (thread == null) {
-							respondEphemeral {
+							respondOpposite {
 								content = "**Error:** This channel isn't a thread!"
 							}
 
@@ -535,7 +531,7 @@ class UtilityExtension : Extension() {
 						val formatter = DateTimeFormatter.ofPattern("dd LL, yyyy -  kk:mm:ss")
 
 						if (thread.lastMessageId == null) {
-							respondEphemeral {
+							respondOpposite {
 								content = "**Error:** This thread has no messages!"
 							}
 
@@ -561,7 +557,7 @@ class UtilityExtension : Extension() {
 							)
 
 							if (msg.content.isNotEmpty() || msg.attachments.isNotEmpty()) {
-								val authorName = author?.tag ?: msg.data.author.username
+								val authorName = author?.tagOrUsername() ?: msg.data.author.username
 
 								this@UtilityExtension.logger.debug { "\nAuthor name: `$authorName`\n${msg.content}\n" }
 
@@ -604,7 +600,7 @@ class UtilityExtension : Extension() {
 							)
 
 							if (msg.content.isNotEmpty() || msg.attachments.isNotEmpty()) {
-								val authorName = author?.tag ?: msg.data.author.username
+								val authorName = author?.tagOrUsername() ?: msg.data.author.username
 
 								if (msg.type == MessageType.ChatInputCommand) {
 									builder.append("🖥️ ")
@@ -664,7 +660,7 @@ class UtilityExtension : Extension() {
 							channel.edit {
 								name = arguments.name
 
-								reason = "Renamed by ${member.tag}"
+								reason = "Renamed by ${member.tagOrUsername()}"
 							}
 
 							edit { content = "Thread renamed." }
@@ -681,7 +677,7 @@ class UtilityExtension : Extension() {
 						channel.edit {
 							name = arguments.name
 
-							reason = "Renamed by ${member.tag}"
+							reason = "Renamed by ${member.tagOrUsername()}"
 						}
 
 						edit { content = "Thread renamed." }
@@ -710,7 +706,7 @@ class UtilityExtension : Extension() {
 								this.archived = true
 								this.locked = arguments.lock
 
-								reason = "Archived by ${user.asUser().tag}"
+								reason = "Archived by ${user.asUser().tagOrUsername()}"
 							}
 
 							edit {
@@ -755,7 +751,7 @@ class UtilityExtension : Extension() {
 						channel.edit {
 							archived = true
 
-							reason = "Archived by ${user.asUser().tag}"
+							reason = "Archived by ${user.asUser().tagOrUsername()}"
 						}
 
 						edit { content = "Thread archived." }
@@ -782,7 +778,7 @@ class UtilityExtension : Extension() {
 						}
 
 						if (privilegedRoles.any { it in roles }) {
-							arguments.message.pin("Pinned by ${member.tag}")
+							arguments.message.pin("Pinned by ${member.tagOrUsername()}")
 							edit { content = "Message pinned." }
 
 							return@action
@@ -794,7 +790,7 @@ class UtilityExtension : Extension() {
 							return@action
 						}
 
-						arguments.message.pin("Pinned by ${member.tag}")
+						arguments.message.pin("Pinned by ${member.tagOrUsername()}")
 
 						edit { content = "Message pinned." }
 					}
@@ -820,7 +816,7 @@ class UtilityExtension : Extension() {
 						}
 
 						if (privilegedRoles.any { it in roles }) {
-							arguments.message.unpin("Unpinned by ${member.tag}")
+							arguments.message.unpin("Unpinned by ${member.tagOrUsername()}")
 							edit { content = "Message unpinned." }
 
 							return@action
@@ -832,7 +828,7 @@ class UtilityExtension : Extension() {
 							return@action
 						}
 
-						arguments.message.unpin("Unpinned by ${member.tag}")
+						arguments.message.unpin("Unpinned by ${member.tagOrUsername()}")
 
 						edit { content = "Message unpinned." }
 					}
@@ -854,7 +850,7 @@ class UtilityExtension : Extension() {
 						if (channel.isArchived) {
 							channel.edit {
 								archived = false
-								reason = "`/thread prevent-archiving` run by ${member.tag}"
+								reason = "`/thread prevent-archiving` run by ${member.tagOrUsername()}"
 							}
 						}
 
@@ -1091,7 +1087,7 @@ class UtilityExtension : Extension() {
 									.filter { allowedPerms?.contains(it) == true }
 									.forEach { allowed += it }
 
-								reason = "Mute role permissions update triggered by ${user.asUser().tag}"
+								reason = "Mute role permissions update triggered by ${user.asUser().tagOrUsername()}"
 							}
 
 							channelsUpdated += 1
@@ -1110,7 +1106,7 @@ class UtilityExtension : Extension() {
 						role.edit {
 							permissions = Permissions()
 
-							reason = "Mute role permissions update triggered by ${user.asUser().tag}"
+							reason = "Mute role permissions update triggered by ${user.asUser().tagOrUsername()}"
 						}
 
 						respond { content = "Mute role permissions cleared." }
@@ -1180,7 +1176,7 @@ class UtilityExtension : Extension() {
 							.minus(Permission.SendMessages)
 							.minus(Permission.SendMessagesInThreads)
 
-						reason = "Server locked down by ${user.asUser().tag}"
+						reason = "Server locked down by ${user.asUser().tagOrUsername()}"
 					}
 
 					moderatorRole.edit {
@@ -1191,7 +1187,7 @@ class UtilityExtension : Extension() {
 							.plus(Permission.SendMessages)
 							.plus(Permission.SendMessagesInThreads)
 
-						reason = "Server locked down by ${user.asUser().tag}"
+						reason = "Server locked down by ${user.asUser().tagOrUsername()}"
 					}
 
 					guild?.asGuildOrNull()?.getModLogChannel()?.createEmbed {
@@ -1237,7 +1233,7 @@ class UtilityExtension : Extension() {
 							.plus(Permission.SendMessages)
 							.plus(Permission.SendMessagesInThreads)
 
-						reason = "Server unlocked by ${user.asUser().tag}"
+						reason = "Server unlocked by ${user.asUser().tagOrUsername()}"
 					}
 
 					moderatorRole.edit {
@@ -1248,7 +1244,7 @@ class UtilityExtension : Extension() {
 							.minus(Permission.SendMessages)
 							.minus(Permission.SendMessagesInThreads)
 
-						reason = "Server unlocked by ${user.asUser().tag}"
+						reason = "Server unlocked by ${user.asUser().tagOrUsername()}"
 					}
 
 					guild?.asGuildOrNull()?.getModLogChannel()?.createEmbed {
@@ -1313,14 +1309,14 @@ class UtilityExtension : Extension() {
 						ch.editRolePermission(staffRoleId) {
 							SPEAKING_PERMISSIONS.forEach { allowed += it }
 
-							reason = "Channel locked by ${user.asUser().tag}"
+							reason = "Channel locked by ${user.asUser().tagOrUsername()}"
 						}
 					}
 
 					ch.editRolePermission(guild!!.id) {
 						SPEAKING_PERMISSIONS.forEach { denied += it }
 
-						reason = "Channel locked by ${user.asUser().tag}"
+						reason = "Channel locked by ${user.asUser().tagOrUsername()}"
 					}
 
 					ch.createMessage {
@@ -1378,7 +1374,7 @@ class UtilityExtension : Extension() {
 					val ch = channelObj as TextChannel
 
 					ch.getPermissionOverwritesForRole(guild!!.id)
-						?.delete("Channel unlocked by ${user.asUser().tag}")
+						?.delete("Channel unlocked by ${user.asUser().tagOrUsername()}")
 
 					ch.createMessage {
 						content = "Channel unlocked by a moderator."
@@ -1512,7 +1508,7 @@ class UtilityExtension : Extension() {
 						.minus(Permission.SendMessages)
 						.minus(Permission.SendMessagesInThreads)
 
-					reason = "Server locked down by ${user?.asUser()?.tag}"
+					reason = "Server locked down by ${user?.asUser()?.tagOrUsername()}"
 				}
 
 				moderatorRole.edit {
@@ -1523,7 +1519,7 @@ class UtilityExtension : Extension() {
 						.plus(Permission.SendMessages)
 						.plus(Permission.SendMessagesInThreads)
 
-					reason = "Server locked down by ${user?.asUser()?.tag}"
+					reason = "Server locked down by ${user?.asUser()?.tagOrUsername()}"
 				}
 
 				guild?.asGuildOrNull()?.getModLogChannel()?.createEmbed {
@@ -1566,7 +1562,7 @@ class UtilityExtension : Extension() {
 						.plus(Permission.SendMessages)
 						.plus(Permission.SendMessagesInThreads)
 
-					reason = "Server unlocked by ${user?.asUser()?.tag}"
+					reason = "Server unlocked by ${user?.asUser()?.tagOrUsername()}"
 				}
 
 				moderatorRole.edit {
@@ -1577,7 +1573,7 @@ class UtilityExtension : Extension() {
 						.minus(Permission.SendMessages)
 						.minus(Permission.SendMessagesInThreads)
 
-					reason = "Server unlocked by ${user?.asUser()?.tag}"
+					reason = "Server unlocked by ${user?.asUser()?.tagOrUsername()}"
 				}
 
 				guild?.asGuildOrNull()?.getModLogChannel()?.createEmbed {
@@ -1639,14 +1635,14 @@ class UtilityExtension : Extension() {
 					ch.editRolePermission(staffRoleId) {
 						SPEAKING_PERMISSIONS.forEach { allowed += it }
 
-						reason = "Channel locked by ${user?.asUser()?.tag}"
+						reason = "Channel locked by ${user?.asUser()?.tagOrUsername()}"
 					}
 				}
 
 				ch.editRolePermission(guild!!.id) {
 					SPEAKING_PERMISSIONS.forEach { denied += it }
 
-					reason = "Channel locked by ${user?.asUser()?.tag}"
+					reason = "Channel locked by ${user?.asUser()?.tagOrUsername()}"
 				}
 
 				ch.createMessage {
@@ -1701,7 +1697,7 @@ class UtilityExtension : Extension() {
 				val ch = channelObj as TextChannel
 
 				ch.getPermissionOverwritesForRole(guild!!.id)
-					?.delete("Channel unlocked by ${user?.asUser()?.tag}")
+					?.delete("Channel unlocked by ${user?.asUser()?.tagOrUsername()}")
 
 				ch.createMessage {
 					content = "Channel unlocked by a moderator."

@@ -20,8 +20,6 @@ import com.kotlindiscord.kord.extensions.events.extra.models.GuildJoinRequestRes
 import com.kotlindiscord.kord.extensions.extensions.*
 import com.kotlindiscord.kord.extensions.time.TimestampType
 import com.kotlindiscord.kord.extensions.time.toDiscord
-import com.kotlindiscord.kord.extensions.types.editingPaginator
-import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.*
 import dev.kord.common.Color
 import dev.kord.common.entity.ButtonStyle
@@ -39,15 +37,13 @@ import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.entity.channel.TopGuildMessageChannel
 import dev.kord.core.event.interaction.ButtonInteractionCreateEvent
 import dev.kord.rest.builder.message.EmbedBuilder
-import dev.kord.rest.builder.message.create.actionRow
-import dev.kord.rest.builder.message.create.embed
-import dev.kord.rest.builder.message.modify.actionRow
-import dev.kord.rest.builder.message.modify.embed
+import dev.kord.rest.builder.message.actionRow
+import dev.kord.rest.builder.message.embed
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.toList
 import kotlinx.datetime.Instant
-import mu.KotlinLogging
 import org.koin.core.component.inject
 import org.quiltmc.community.GUILDS
 import org.quiltmc.community.database.collections.ServerApplicationCollection
@@ -137,13 +133,13 @@ class ApplicationsExtension : Extension() {
 							field {
 								inline = true
 								name = "Moderator"
-								value = "${user.asUser().tag} (${user.mention})"
+								value = "${user.asUser().tagOrUsername()} (${user.mention})"
 							}
 
 							field {
 								inline = true
 								name = "User"
-								value = "${member.tag} (${member.mention})"
+								value = "${member.tagOrUsername()} (${member.mention})"
 							}
 						}
 
@@ -334,13 +330,13 @@ class ApplicationsExtension : Extension() {
 						field {
 							inline = true
 							name = "Moderator"
-							value = "${user!!.asUser().tag} (${user!!.mention})"
+							value = "${user!!.asUser().tagOrUsername()} (${user!!.mention})"
 						}
 
 						field {
 							inline = true
 							name = "User"
-							value = "${member.tag} (${member.mention})"
+							value = "${member.tagOrUsername()} (${member.mention})"
 						}
 					}
 
@@ -435,7 +431,7 @@ class ApplicationsExtension : Extension() {
 
 							// Not actually deprecated, Kord walled themselves into a hole here
 							@Suppress("DEPRECATION_ERROR")
-							val thread = threadChannel.startPrivateThread("App: ${user.tag}")
+							val thread = threadChannel.startPrivateThread("App: ${user.tagOrUsername()}")
 							val initialMessage = thread.createMessage("Better get the mods in...")
 
 							initialMessage.edit { content = settings.moderatorRoles.joinToString { "<@&$it>" } }
@@ -443,7 +439,7 @@ class ApplicationsExtension : Extension() {
 
 							initialMessage.edit {
 								content = buildString {
-									appendLine("**Application thread for ${user.tag}**")
+									appendLine("**Application thread for ${user.tagOrUsername()}**")
 									append("User ID below.")
 								}
 							}
@@ -507,13 +503,13 @@ class ApplicationsExtension : Extension() {
 							field {
 								inline = true
 								name = "Moderator"
-								value = "${event.interaction.user.tag} (${event.interaction.user.mention})"
+								value = "${event.interaction.user.tagOrUsername()} (${event.interaction.user.mention})"
 							}
 
 							field {
 								inline = true
 								name = "User"
-								value = "${member.tag} (${member.mention})"
+								value = "${member.tagOrUsername()} (${member.mention})"
 							}
 						}
 
@@ -790,7 +786,7 @@ class ApplicationsExtension : Extension() {
 		title = "Application (${event.request.status.name.capitalizeWords()})"
 
 		description = buildString {
-			appendLine("**User:** ${user.tag}")
+			appendLine("**User:** ${user.tagOrUsername()}")
 			appendLine("**Mention:** ${user.mention}")
 			appendLine(
 				"**Created:** ${user.id.timestamp.longAndRelative}"

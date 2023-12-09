@@ -9,9 +9,8 @@ package org.quiltmc.community.cozy.modules.welcome.blocks
 import com.kotlindiscord.kord.extensions.DISCORD_BLURPLE
 import dev.kord.common.Color
 import dev.kord.rest.builder.message.create.MessageCreateBuilder
-import dev.kord.rest.builder.message.create.embed
+import dev.kord.rest.builder.message.embed
 import dev.kord.rest.builder.message.modify.MessageModifyBuilder
-import dev.kord.rest.builder.message.modify.embed
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

@@ -21,7 +21,6 @@ import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.extensions.event
 import com.kotlindiscord.kord.extensions.modules.extra.pluralkit.events.ProxiedMessageCreateEvent
 import com.kotlindiscord.kord.extensions.modules.extra.pluralkit.events.UnProxiedMessageCreateEvent
-import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.*
 import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.ButtonStyle
@@ -41,12 +40,10 @@ import dev.kord.core.entity.interaction.ButtonInteraction
 import dev.kord.core.event.channel.thread.ThreadChannelCreateEvent
 import dev.kord.core.event.interaction.InteractionCreateEvent
 import dev.kord.core.event.message.MessageCreateEvent
+import dev.kord.rest.builder.message.actionRow
 import dev.kord.rest.builder.message.create.MessageCreateBuilder
-import dev.kord.rest.builder.message.create.actionRow
-import dev.kord.rest.builder.message.create.embed
+import dev.kord.rest.builder.message.embed
 import dev.kord.rest.builder.message.modify.MessageModifyBuilder
-import dev.kord.rest.builder.message.modify.actionRow
-import dev.kord.rest.builder.message.modify.embed
 import io.github.evanrupert.excelkt.Sheet
 import io.github.evanrupert.excelkt.workbook
 import io.ktor.client.request.forms.*
@@ -125,7 +122,8 @@ class SuggestionsExtension : Extension() {
 
 					owner = event.message.author!!.id,
 					ownerAvatar = event.message.author!!.avatar?.cdnUrl?.toUrl(),
-					ownerName = event.message.author!!.asMember(event.message.getGuild().id).displayName,
+					ownerName = event.message.author!!.asMember(event.message.getGuild().id)
+						.let { it.globalName ?: it.username },
 
 					positiveVoters = mutableListOf(event.message.author!!.id)
 				)
@@ -162,7 +160,7 @@ class SuggestionsExtension : Extension() {
 
 					owner = event.pkMessage.sender,
 					ownerAvatar = event.pkMessage.member?.avatarUrl,
-					ownerName = event.pkMessage.member?.name ?: event.author.displayName,
+					ownerName = event.pkMessage.member?.name ?: event.author.globalName ?: event.author.username,
 
 					positiveVoters = mutableListOf(event.pkMessage.sender),
 

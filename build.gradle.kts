@@ -87,13 +87,13 @@ dependencies {
 	implementation(libs.kx.ser)
 	implementation(libs.graphql)
 
-	implementation(project(":module-ama"))
-	implementation(project(":module-log-parser"))
-	implementation(project(":module-moderation"))
-	implementation(project(":module-role-sync"))
-	implementation(project(":module-tags"))
-	implementation(project(":module-user-cleanup"))
-	implementation(project(":module-welcome"))
+	implementation(projects.moduleAma)
+	implementation(projects.moduleLogParser)
+	implementation(projects.moduleModeration)
+	implementation(projects.moduleRoleSync)
+	implementation(projects.moduleTags)
+	implementation(projects.moduleUserCleanup)
+	implementation(projects.moduleWelcome)
 }
 
 graphql {
@@ -107,7 +107,7 @@ graphql {
 
 application {
 	// This is deprecated, but the Shadow plugin requires it
-	mainClassName = "org.quiltmc.community.AppKt"
+	mainClass = "org.quiltmc.community.AppKt"
 }
 
 gitHooks {

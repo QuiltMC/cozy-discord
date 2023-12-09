@@ -10,7 +10,6 @@ import com.kotlindiscord.kord.extensions.annotations.DoNotChain
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.extensions.event
-import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.hasRole
 import dev.kord.core.event.guild.MemberJoinEvent
 import dev.kord.core.event.guild.MemberUpdateEvent
@@ -74,7 +73,7 @@ public class RoleSyncExtension(
 			}
 		}
 
-		ephemeralSlashCommand() {
+		ephemeralSlashCommand {
 			name = "role-sync"
 			description = "Manually sync roles"
 

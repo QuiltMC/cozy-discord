@@ -14,18 +14,17 @@ import com.kotlindiscord.kord.extensions.annotations.DoNotChain
 import com.kotlindiscord.kord.extensions.checks.anyGuild
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
-import com.kotlindiscord.kord.extensions.commands.converters.impl.*
+import com.kotlindiscord.kord.extensions.commands.converters.impl.duration
+import com.kotlindiscord.kord.extensions.commands.converters.impl.member
+import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalDuration
+import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalString
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.chatCommand
 import com.kotlindiscord.kord.extensions.extensions.chatGroupCommand
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.modules.extra.pluralkit.events.PKMessageCreateEvent
 import com.kotlindiscord.kord.extensions.modules.extra.pluralkit.events.ProxiedMessageCreateEvent
-import com.kotlindiscord.kord.extensions.types.respond
-import com.kotlindiscord.kord.extensions.utils.deleteIgnoringNotFound
-import com.kotlindiscord.kord.extensions.utils.removeTimeout
-import com.kotlindiscord.kord.extensions.utils.respond
-import com.kotlindiscord.kord.extensions.utils.timeout
+import com.kotlindiscord.kord.extensions.utils.*
 import dev.kord.common.Color
 import dev.kord.core.behavior.channel.*
 import dev.kord.core.behavior.channel.threads.edit
@@ -33,7 +32,7 @@ import dev.kord.core.entity.Member
 import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.entity.channel.thread.ThreadChannel
-import dev.kord.rest.builder.message.create.embed
+import dev.kord.rest.builder.message.embed
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withTimeoutOrNull
@@ -129,11 +128,11 @@ public class ModerationExtension(
 									if (event.pkMessage.system != null) {
 										append(event.pkMessage.system?.tag ?: "(${event.pkMessage.system?.id})")
 									} else {
-										append("(${event.author.displayName})")
+										append("(${event.author.globalName})")
 									}
 								}
 							} else {
-								event.author!!.displayName
+								event.author!!.globalName
 							}
 
 							icon = if (event is ProxiedMessageCreateEvent && event.pkMessage.member != null) {
@@ -164,7 +163,7 @@ public class ModerationExtension(
 				if (arguments.duration != null) {
 					arguments.user.timeout(
 						arguments.duration!!,
-						reason = "Timed out by ${user.asUser().tag}: $reason"
+						reason = "Timed out by ${user.asUser().tagOrUsername()}: $reason"
 					)
 
 					respond {
@@ -172,7 +171,7 @@ public class ModerationExtension(
 					}
 				} else {
 					arguments.user.removeTimeout(
-						reason = "Timeout removed by ${user.asUser().tag}: $reason"
+						reason = "Timeout removed by ${user.asUser().tagOrUsername()}: $reason"
 					)
 
 					respond {
@@ -282,7 +281,7 @@ public class ModerationExtension(
 				if (arguments.duration != null) {
 					arguments.user.timeout(
 						arguments.duration!!,
-						reason = "Timed out by ${user?.asUser()?.tag}: $reason"
+						reason = "Timed out by ${user?.asUser()?.tagOrUsername()}: $reason"
 					)
 
 					message.respond {
@@ -290,7 +289,7 @@ public class ModerationExtension(
 					}
 				} else {
 					arguments.user.removeTimeout(
-						reason = "Timeout removed by ${user?.asUser()?.tag}: $reason"
+						reason = "Timeout removed by ${user?.asUser()?.tagOrUsername()}: $reason"
 					)
 
 					message.respond {

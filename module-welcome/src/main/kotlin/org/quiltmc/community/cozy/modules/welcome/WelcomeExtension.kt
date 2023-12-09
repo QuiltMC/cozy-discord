@@ -15,7 +15,7 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.extensions.event
-import com.kotlindiscord.kord.extensions.types.respond
+import com.kotlindiscord.kord.extensions.utils.tagOrUsername
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.channel.asChannelOf
 import dev.kord.core.behavior.channel.asChannelOfOrNull
@@ -25,7 +25,7 @@ import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.core.event.guild.GuildCreateEvent
 import dev.kord.core.event.interaction.InteractionCreateEvent
 import dev.kord.rest.builder.message.create.UserMessageCreateBuilder
-import dev.kord.rest.builder.message.create.embed
+import dev.kord.rest.builder.message.embed
 import kotlinx.coroutines.flow.toList
 import org.koin.core.component.inject
 import org.quiltmc.community.cozy.modules.welcome.config.WelcomeChannelConfig
@@ -142,7 +142,7 @@ public class WelcomeExtension : Extension() {
 									name = "Staff Member"
 									value = "${user.mention} (" +
 											"`${user.id}` / " +
-											"`${user.asUser().tag}`" +
+											"`${user.asUser().tagOrUsername()}`" +
 											")"
 								}
 							}
@@ -217,7 +217,7 @@ public class WelcomeExtension : Extension() {
 								name = "Staff Member"
 								value = "${user.mention} (" +
 										"`${user.id}` / " +
-										"`${user.asUser().tag}`" +
+										"`${user.asUser().tagOrUsername()}`" +
 										")"
 							}
 						}
@@ -286,7 +286,7 @@ public class WelcomeExtension : Extension() {
 								name = "Staff Member"
 								value = "${user.mention} (" +
 										"`${user.id}` / " +
-										"`${user.asUser().tag}`" +
+										"`${user.asUser().tagOrUsername()}`" +
 										")"
 							}
 						}

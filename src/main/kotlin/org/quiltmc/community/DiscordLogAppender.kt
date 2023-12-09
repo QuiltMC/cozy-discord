@@ -21,15 +21,9 @@ import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
 import dev.kord.core.behavior.WebhookBehavior
 import dev.kord.core.behavior.execute
-import dev.kord.rest.builder.message.create.embed
-import io.ktor.client.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.request.*
-import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
+import dev.kord.rest.builder.message.embed
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.datetime.Instant
-import mu.KotlinLogging
 import org.koin.core.component.inject
 
 class DiscordLogAppender : AppenderBase<ILoggingEvent>(), KordExKoinComponent {

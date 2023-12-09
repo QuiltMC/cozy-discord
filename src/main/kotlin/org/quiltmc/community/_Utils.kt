@@ -10,10 +10,7 @@ import com.kotlindiscord.kord.extensions.builders.ExtensibleBotBuilder
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.SlashCommandContext
 import com.kotlindiscord.kord.extensions.components.forms.ModalForm
-import com.kotlindiscord.kord.extensions.utils.env
-import com.kotlindiscord.kord.extensions.utils.envOrNull
-import com.kotlindiscord.kord.extensions.utils.getKoin
-import com.kotlindiscord.kord.extensions.utils.loadModule
+import com.kotlindiscord.kord.extensions.utils.*
 import dev.kord.common.entity.ArchiveDuration
 import dev.kord.common.entity.Snowflake
 import dev.kord.common.entity.UserFlag
@@ -135,7 +132,7 @@ suspend fun ExtensibleBotBuilder.common() {
 
 	applicationCommands {
 		// Need to disable this due to the slash command perms experiment
-		syncPermissions = false
+//		syncPermissions = false
 	}
 
 	extensions {
@@ -217,7 +214,7 @@ suspend fun Guild.getFilterLogChannel(): GuildMessageChannel? {
 suspend fun EmbedBuilder.userField(user: UserBehavior, role: String? = null, inline: Boolean = false) {
 	field {
 		name = role ?: "User"
-		value = "${user.mention} (`${user.id}` / `${user.asUser().tag}`)"
+		value = "${user.mention} (`${user.id}` / `${user.asUser().tagOrUsername()}`)"
 
 		this.inline = inline
 	}
@@ -258,6 +255,7 @@ fun Message.contentToThreadName(fallbackPrefix: String): String {
 		?: "$fallbackPrefix | $id"
 }
 
+@Suppress("DEPRECATION_ERROR") // Either this, or the when block needs an else branch
 fun UserFlag.getName(): String = when (this) {
 	UserFlag.ActiveDeveloper -> "Active Developer"
 	UserFlag.BotHttpInteractions -> "HTTP-Based Commands"
@@ -275,6 +273,7 @@ fun UserFlag.getName(): String = when (this) {
 	UserFlag.TeamUser -> "Team User"
 	UserFlag.VerifiedBot -> "Verified Bot"
 	UserFlag.VerifiedBotDeveloper -> "Early Verified Bot Developer"
+	is UserFlag.Unknown -> "Unknown"
 }
 
 fun String.replaceParams(vararg pairs: Pair<String, Any?>): String {

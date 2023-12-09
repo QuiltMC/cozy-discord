@@ -51,10 +51,10 @@ public inline fun <reified T, reified R> List<T>.ifNotEmpty(body: (Collection<T>
 
 public fun MessageCreateBuilder.isSimilar(other: Message): Boolean {
 	val builderComponents = components
-		.mapNotNull { it.build().components.value }
-		.ifNotEmpty {
+		?.mapNotNull { it.build().components.value }
+		?.ifNotEmpty {
 			reduce { left, right -> left + right }
-		}
+		} ?: emptyList()
 
 	val messageComponents = other.actionRows
 		.map { it.components }
@@ -75,14 +75,14 @@ public fun MessageCreateBuilder.isSimilar(other: Message): Boolean {
 	}
 
 	return content == other.content &&
-			embeds.size == messageEmbedBuilders.size &&
+			embeds?.size == messageEmbedBuilders.size &&
 			componentsAreSimilar(builderComponents, messageComponents) &&
 
-			embeds.filterIndexed { index, embed ->
+			embeds?.filterIndexed { index, embed ->
 				val otherEmbed = messageEmbedBuilders[index]
 
 				embed.isSimilar(otherEmbed)
-			}.size == embeds.size
+			}?.size == embeds?.size
 }
 
 public fun componentsAreSimilar(

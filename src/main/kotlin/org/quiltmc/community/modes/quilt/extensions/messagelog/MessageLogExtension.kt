@@ -13,6 +13,7 @@ import com.kotlindiscord.kord.extensions.extensions.event
 import com.kotlindiscord.kord.extensions.utils.deltas.MessageDelta
 import com.kotlindiscord.kord.extensions.utils.getJumpUrl
 import com.kotlindiscord.kord.extensions.utils.isEphemeral
+import com.kotlindiscord.kord.extensions.utils.tagOrUsername
 import dev.kord.common.entity.Snowflake
 import dev.kord.common.entity.optional.Optional
 import dev.kord.core.entity.Guild
@@ -27,8 +28,9 @@ import dev.kord.core.event.message.MessageBulkDeleteEvent
 import dev.kord.core.event.message.MessageDeleteEvent
 import dev.kord.core.event.message.MessageUpdateEvent
 import dev.kord.rest.builder.message.EmbedBuilder
-import dev.kord.rest.builder.message.create.allowedMentions
-import dev.kord.rest.builder.message.create.embed
+import dev.kord.rest.builder.message.allowedMentions
+import dev.kord.rest.builder.message.embed
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.request.forms.*
 import io.ktor.utils.io.jvm.javaio.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -42,7 +44,6 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import mu.KotlinLogging
 import org.quiltmc.community.*
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -107,7 +108,7 @@ class MessageLogExtension : Extension() {
 						messages += "**ID:** ${it.id.value}\n\n"
 
 						if (it.author != null) {
-							messages += "**Author:** ${it.author!!.tag}\n"
+							messages += "**Author:** ${it.author!!.tagOrUsername()}\n"
 							messages += "**Author ID:** ${it.author!!.id.value}\n\n"
 						} else {
 							messages += "**Display Name:** ${it.data.author.username}\n"
@@ -551,7 +552,7 @@ class MessageLogExtension : Extension() {
 
 			field {
 				name = "Author ID/Tag"
-				value = "`${author.id.value}` / `${author.tag}`"
+				value = "`${author.id.value}` / `${author.tagOrUsername()}`"
 				inline = true
 			}
 		} else {
