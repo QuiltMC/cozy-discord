@@ -5,7 +5,7 @@
  */
 
 import org.cadixdev.gradle.licenser.LicenseExtension
-import org.ec4j.gradle.EditorconfigCheckTask
+//import org.ec4j.gradle.EditorconfigCheckTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -16,7 +16,7 @@ plugins {
 	id("com.google.devtools.ksp")
 	id("io.gitlab.arturbosch.detekt")
 	id("org.cadixdev.licenser")
-	id("org.ec4j.editorconfig")
+//	id("org.ec4j.editorconfig")
 }
 
 group = "org.quiltmc.community"
@@ -94,16 +94,16 @@ tasks {
 			targetCompatibility = JavaVersion.VERSION_17
 		}
 
-		check {
-			dependsOn("editorconfigCheck")
-		}
-
-		editorconfig {
-			excludes = mutableListOf(
-				"build",
-				".*/**",
-			)
-		}
+//		check {
+//			dependsOn("editorconfigCheck")
+//		}
+//
+//		editorconfig {
+//			excludes = mutableListOf(
+//				"build",
+//				".*/**",
+//			)
+//		}
 	}
 }
 

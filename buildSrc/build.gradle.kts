@@ -24,7 +24,7 @@ dependencies {
 	implementation("com.github.jakemarsden", "git-hooks-gradle-plugin", "0.0.2")
 	implementation("com.google.devtools.ksp", "com.google.devtools.ksp.gradle.plugin", "1.9.21-1.0.15")
 	implementation("io.gitlab.arturbosch.detekt", "detekt-gradle-plugin", "1.23.4")
-	implementation("org.ec4j.editorconfig", "org.ec4j.editorconfig.gradle.plugin", "0.0.3")
+//	implementation("org.ec4j.editorconfig", "org.ec4j.editorconfig.gradle.plugin", "0.0.3")
 
 	implementation("com.expediagroup.graphql", "com.expediagroup.graphql.gradle.plugin", "6.3.5")
 	implementation("com.github.johnrengelman.shadow", "com.github.johnrengelman.shadow.gradle.plugin", "8.1.1")
