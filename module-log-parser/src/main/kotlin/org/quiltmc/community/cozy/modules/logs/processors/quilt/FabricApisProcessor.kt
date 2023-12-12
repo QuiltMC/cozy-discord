@@ -22,6 +22,7 @@ public class FabricApisProcessor : LogProcessor() {
 	override suspend fun process(log: Log) {
 		val fabricApi = log.getMod("fabric")
 		val fabricLanguageKotlin = log.getMod("fabric-language-kotlin")
+		val quiltStandardLibraries = log.getMod("qsl")
 
 		if (fabricApi != null) {
 			log.hasProblems = true
@@ -31,7 +32,7 @@ public class FabricApisProcessor : LogProcessor() {
 			)
 		}
 
-		if (fabricLanguageKotlin != null) {
+		if (fabricLanguageKotlin != null && quiltStandardLibraries != null) {
 			log.hasProblems = true
 
 			log.addMessage(
