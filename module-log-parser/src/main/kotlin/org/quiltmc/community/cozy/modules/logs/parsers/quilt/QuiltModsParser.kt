@@ -38,7 +38,7 @@ public class QuiltModsParser : LogParser() {
 
 		val lines = table
 			.split("\n")
-			.map { it.trim('|') }  // Don't strip spaces here, but do remove border pipes
+			.map { it.trim().trim('|') }  // Don't strip spaces here, but do remove border pipes
 			.toMutableList()
 
 		// The first line is the headers
@@ -74,8 +74,8 @@ public class QuiltModsParser : LogParser() {
 					mod["id"]!!,
 					Version(mod["version"]!!),
 					mod["file(s)"],
-					mod["File Hash (SHA-1)"],
-					mod["Type"]
+					mod["file hash (sha-1)"],
+					mod["type"]
 				)
 			)
 		}
