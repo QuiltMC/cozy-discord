@@ -12,18 +12,18 @@ import org.quiltmc.community.cozy.modules.logs.types.LogProcessor
 
 // ClassNotFoundException: package.name.ClassName
 private val CLASS_REGEX =
-	"""java\.lang\.ClassNotFoundException: ((?:[^\n.]\.)*)([^\n.]+)"""
+	"""java\.lang\.ClassNotFoundException: ((?:[^\n.]+[\.\/])*)([^\n.()]+)"""
 	.toRegex(RegexOption.IGNORE_CASE)
 
 // NoSuchMethodError: 'ReturnType package.name.ClassName.methodName(ParamType, ParamType, ParamType)'
 private val METHOD_REGEX =
-	"""java\.lang\.NoSuchMethodError: '([^\n]+) ((?:[^\n.]\.)*)([^\n.]+)\.([^\n.]+)\.([^\n(]+)\(([^)]*)\)"""
+	"""java\.lang\.NoSuchMethodError: '([^\n]+) ((?:[^\n.]+[\.\/])*)([^\n.()]+)\.([^\n.]+)\.([^\n(]+)\(([^)]*)\)"""
 	.toRegex(RegexOption.IGNORE_CASE)
 
 // This is the new format for NoSuchFieldError (the old one has no useful information)
 // NoSuchFieldError: Class package.name.ClassName does not have member field 'Type fieldName'
 private val FIELD_REGEX =
-	"""java\.lang\.NoSuchFieldError: Class ((?:[^\n.]\.)*)([^\n.]+) does not have member field '([^\n]+)'"""
+	"""java\.lang\.NoSuchFieldError: Class ((?:[^\n.]+[\.\/])*)([^\n.()]+) does not have member field '([^\n]+)'"""
 	.toRegex(RegexOption.IGNORE_CASE)
 
 public class MissingItemProcessor : LogProcessor() {
@@ -42,7 +42,7 @@ public class MissingItemProcessor : LogProcessor() {
 		for (match in classMatches) {
 			val pkg = match.groupValues[1]
 			if (pkg.isNotBlank()) {
-				packages.add(pkg)
+				packages.add(pkg.replace('/', '.'))
 			} else {
 				topLevelClasses.add(match.groupValues[2])
 			}
@@ -51,7 +51,7 @@ public class MissingItemProcessor : LogProcessor() {
 		for (match in methodMatches) {
 			val pkg = match.groupValues[2]
 			if (pkg.isNotBlank()) {
-				packages.add(pkg)
+				packages.add(pkg.replace('/', '.'))
 			} else {
 				topLevelClasses.add(match.groupValues[3])
 			}
@@ -60,7 +60,7 @@ public class MissingItemProcessor : LogProcessor() {
 		for (match in fieldMatches) {
 			val pkg = match.groupValues[1]
 			if (pkg.isNotBlank()) {
-				packages.add(pkg)
+				packages.add(pkg.replace('/', '.'))
 			} else {
 				topLevelClasses.add(match.groupValues[2])
 			}
