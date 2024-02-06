@@ -163,7 +163,7 @@ public class ModerationExtension(
 				if (arguments.duration != null) {
 					arguments.user.timeout(
 						arguments.duration!!,
-						reason = "Timed out by ${user.asUser().tagOrUsername()}: $reason"
+						reason = "Timed out by ${user.asUser().tag}: $reason"
 					)
 
 					respond {
@@ -171,7 +171,7 @@ public class ModerationExtension(
 					}
 				} else {
 					arguments.user.removeTimeout(
-						reason = "Timeout removed by ${user.asUser().tagOrUsername()}: $reason"
+						reason = "Timeout removed by ${user.asUser().tag}: $reason"
 					)
 
 					respond {
@@ -281,7 +281,7 @@ public class ModerationExtension(
 				if (arguments.duration != null) {
 					arguments.user.timeout(
 						arguments.duration!!,
-						reason = "Timed out by ${user?.asUser()?.tagOrUsername()}: $reason"
+						reason = "Timed out by ${user?.asUser()?.tag}: $reason"
 					)
 
 					message.respond {
@@ -289,7 +289,7 @@ public class ModerationExtension(
 					}
 				} else {
 					arguments.user.removeTimeout(
-						reason = "Timeout removed by ${user?.asUser()?.tagOrUsername()}: $reason"
+						reason = "Timeout removed by ${user?.asUser()?.tag}: $reason"
 					)
 
 					message.respond {

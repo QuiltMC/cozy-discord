@@ -112,7 +112,7 @@ action {
 	val member = user.asMember(guild!!.id)
 	val roles = member.roles.toList().map { it.id }
 	if (MODERATOR_ROLES.any { it in roles }) {
-		targetMessages.forEach { it.pin("Pinned by ${member.tagOrUsername()}") }
+		targetMessages.forEach { it.pin("Pinned by ${member.tag}") }
 		edit { content = "Messages pinned." }
 		return@action
 	}
@@ -120,7 +120,7 @@ action {
 		respond { content = "**Error:** This is not your thread." }
 		return@action
 	}
-	targetMessages.forEach { it.pin("Pinned by ${member.tagOrUsername()}") }
+	targetMessages.forEach { it.pin("Pinned by ${member.tag}") }
 	edit { content = "Messages pinned." }
 }
 ```
@@ -130,7 +130,7 @@ action {
 	if (this.member?.asMemberOrNull()?.mayManageRole(arguments.role) == true) {
 		arguments.targetUser.removeRole(
 			arguments.role.id,
-			"${this.user.asUserOrNull()?.tagOrUsername() ?: this.user.id} used /team remove"
+			"${this.user.asUserOrNull()?.tag ?: this.user.id} used /team remove"
 		)
 		respond {
 			content = "Successfully removed ${arguments.targetUser.mention} from " +
@@ -166,7 +166,7 @@ action {
 	val roles = member.roles.toList().map { it.id }
 
 	if (MODERATOR_ROLES.any { it in roles }) {
-		targetMessages.forEach { it.pin("Pinned by ${member.tagOrUsername()}") }
+		targetMessages.forEach { it.pin("Pinned by ${member.tag}") }
 		edit { content = "Messages pinned." }
 
 		return@action
@@ -178,7 +178,7 @@ action {
 		return@action
 	}
 
-	targetMessages.forEach { it.pin("Pinned by ${member.tagOrUsername()}") }
+	targetMessages.forEach { it.pin("Pinned by ${member.tag}") }
 
 	edit { content = "Messages pinned." }
 }
@@ -190,7 +190,7 @@ action {
 		arguments.targetUser.removeRole(
 			arguments.role.id,
 
-			"${this.user.asUserOrNull()?.tagOrUsername() ?: this.user.id} used /team remove"
+			"${this.user.asUserOrNull()?.tag ?: this.user.id} used /team remove"
 		)
 
 		respond {

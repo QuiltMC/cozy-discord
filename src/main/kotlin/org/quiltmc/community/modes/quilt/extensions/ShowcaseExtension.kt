@@ -27,7 +27,6 @@ import com.kotlindiscord.kord.extensions.storage.StorageUnit
 import com.kotlindiscord.kord.extensions.utils.authorId
 import com.kotlindiscord.kord.extensions.utils.capitalizeWords
 import com.kotlindiscord.kord.extensions.utils.dm
-import com.kotlindiscord.kord.extensions.utils.tagOrUsername
 import dev.kord.common.entity.ChannelType
 import dev.kord.common.entity.MessageType
 import dev.kord.common.entity.Permission
@@ -122,7 +121,7 @@ class ShowcaseExtension : Extension() {
 
 				val thread = channel.startPublicThreadWithMessage(
 					event.message.id, title
-				) { reason = "Showcase thread created for ${event.message.author?.tagOrUsername()}" }
+				) { reason = "Showcase thread created for ${event.message.author?.tag}" }
 
 				threads.set(
 					OwnedThread(thread.id, authorId, guild.id)

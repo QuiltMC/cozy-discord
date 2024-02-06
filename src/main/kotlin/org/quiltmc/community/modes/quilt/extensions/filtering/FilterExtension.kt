@@ -198,7 +198,7 @@ class FilterExtension : Extension() {
 
 								field {
 									name = "Moderator"
-									value = "${user.mention} (`${user.id.value}` / `${user.asUser().tagOrUsername()}`)"
+									value = "${user.mention} (`${user.id.value}` / `${user.asUser().tag}`)"
 								}
 							}
 
@@ -242,7 +242,7 @@ class FilterExtension : Extension() {
 
 								field {
 									name = "Moderator"
-									value = "${user.mention} (`${user.id.value}` / `${user.asUser().tagOrUsername()}`)"
+									value = "${user.mention} (`${user.id.value}` / `${user.asUser().tag}`)"
 								}
 							}
 
@@ -305,7 +305,7 @@ class FilterExtension : Extension() {
 
 								field {
 									name = "Moderator"
-									value = "${user.mention} (`${user.id.value}` / `${user.asUser().tagOrUsername()}`)"
+									value = "${user.mention} (`${user.id.value}` / `${user.asUser().tag}`)"
 								}
 							}
 
@@ -358,7 +358,7 @@ class FilterExtension : Extension() {
 
 								field {
 									name = "Moderator"
-									value = "${user.mention} (`${user.id.value}` / `${user.asUser().tagOrUsername()}`)"
+									value = "${user.mention} (`${user.id.value}` / `${user.asUser().tag}`)"
 								}
 							}
 
@@ -402,7 +402,7 @@ class FilterExtension : Extension() {
 
 								field {
 									name = "Moderator"
-									value = "${user.mention} (`${user.id.value}` / `${user.asUser().tagOrUsername()}`)"
+									value = "${user.mention} (`${user.id.value}` / `${user.asUser().tag}`)"
 								}
 							}
 
@@ -455,7 +455,7 @@ class FilterExtension : Extension() {
 
 								field {
 									name = "Moderator"
-									value = "${user.mention} (`${user.id.value}` / `${user.asUser().tagOrUsername()}`)"
+									value = "${user.mention} (`${user.id.value}` / `${user.asUser().tag}`)"
 								}
 							}
 
@@ -519,7 +519,7 @@ class FilterExtension : Extension() {
 
 								field {
 									name = "Moderator"
-									value = "${user.mention} (`${user.id.value}` / `${user.asUser().tagOrUsername()}`)"
+									value = "${user.mention} (`${user.id.value}` / `${user.asUser().tag}`)"
 								}
 							}
 
@@ -562,7 +562,7 @@ class FilterExtension : Extension() {
 
 								field {
 									name = "Moderator"
-									value = "${user.mention} (`${user.id.value}` / `${user.asUser().tagOrUsername()}`)"
+									value = "${user.mention} (`${user.id.value}` / `${user.asUser().tag}`)"
 								}
 							}
 
@@ -758,7 +758,7 @@ class FilterExtension : Extension() {
 				field {
 					inline = true
 					name = "User"
-					value = "${member.mention} (`${member.id}` / `${member.tagOrUsername()}`)"
+					value = "${member.mention} (`${member.id}` / `${member.tag}`)"
 				}
 
 				field {
@@ -974,7 +974,7 @@ class FilterExtension : Extension() {
 				field {
 					inline = true
 					name = "Author"
-					value = "${message.author!!.mention} (`${message.author!!.id.value}` / `${message.author!!.tagOrUsername()}`)"
+					value = "${message.author!!.mention} (`${message.author!!.id.value}` / `${message.author!!.tag}`)"
 				}
 
 				field {

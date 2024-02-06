@@ -18,7 +18,6 @@ import com.kotlindiscord.kord.extensions.time.TimestampType
 import com.kotlindiscord.kord.extensions.time.toDiscord
 import com.kotlindiscord.kord.extensions.utils.scheduling.Scheduler
 import com.kotlindiscord.kord.extensions.utils.scheduling.Task
-import com.kotlindiscord.kord.extensions.utils.tagOrUsername
 import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.entity.Guild
 import dev.kord.core.entity.Member
@@ -106,7 +105,7 @@ public class UserCleanupExtension(
 							description = "**Mention** | **Tag** | **Join date**\n\n"
 
 							chunk.forEach { member ->
-								description += "${member.mention} | ${member.tagOrUsername()} |" +
+								description += "${member.mention} | ${member.tag} |" +
 										"${member.joinedAt.toDiscord(TimestampType.Default)}\n"
 							}
 						}
@@ -151,7 +150,7 @@ public class UserCleanupExtension(
 						"| ------- | --- | --------------- |\n" +
 
 						removed.joinToString("\n") {
-							"| ${it.id} | ${it.tagOrUsername()} | ${instantFormatter.format(it.joinedAt.toJavaInstant())} |"
+							"| ${it.id} | ${it.tag} | ${instantFormatter.format(it.joinedAt.toJavaInstant())} |"
 						}
 
 				config.getLoggingChannel(guild).createMessage {

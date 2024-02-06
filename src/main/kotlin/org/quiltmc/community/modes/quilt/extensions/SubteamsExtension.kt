@@ -14,7 +14,6 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.member
 import com.kotlindiscord.kord.extensions.commands.converters.impl.role
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
-import com.kotlindiscord.kord.extensions.utils.tagOrUsername
 import dev.kord.common.entity.Permission
 import dev.kord.core.entity.Member
 import dev.kord.core.entity.Role
@@ -43,7 +42,7 @@ class SubteamsExtension : Extension() {
 					if (this.member?.asMemberOrNull()?.mayManageRole(arguments.role) == true) {
 						arguments.targetUser.addRole(
 							arguments.role.id,
-							"${this.user.asUserOrNull()?.tagOrUsername() ?: this.user.id} used /team add"
+							"${this.user.asUserOrNull()?.tag ?: this.user.id} used /team add"
 						)
 
 						respond {
@@ -70,7 +69,7 @@ class SubteamsExtension : Extension() {
 					if (this.member?.asMemberOrNull()?.mayManageRole(arguments.role) == true) {
 						arguments.targetUser.removeRole(
 							arguments.role.id,
-							"${this.user.asUserOrNull()?.tagOrUsername() ?: this.user.id} used /team remove"
+							"${this.user.asUserOrNull()?.tag ?: this.user.id} used /team remove"
 						)
 						respond {
 							content = "Successfully removed ${arguments.targetUser.mention} from " +

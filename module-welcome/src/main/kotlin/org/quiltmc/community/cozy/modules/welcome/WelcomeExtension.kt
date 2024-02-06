@@ -15,7 +15,6 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.extensions.event
-import com.kotlindiscord.kord.extensions.utils.tagOrUsername
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.channel.asChannelOf
 import dev.kord.core.behavior.channel.asChannelOfOrNull
@@ -142,7 +141,7 @@ public class WelcomeExtension : Extension() {
 									name = "Staff Member"
 									value = "${user.mention} (" +
 											"`${user.id}` / " +
-											"`${user.asUser().tagOrUsername()}`" +
+											"`${user.asUser().tag}`" +
 											")"
 								}
 							}
@@ -217,7 +216,7 @@ public class WelcomeExtension : Extension() {
 								name = "Staff Member"
 								value = "${user.mention} (" +
 										"`${user.id}` / " +
-										"`${user.asUser().tagOrUsername()}`" +
+										"`${user.asUser().tag}`" +
 										")"
 							}
 						}
@@ -286,7 +285,7 @@ public class WelcomeExtension : Extension() {
 								name = "Staff Member"
 								value = "${user.mention} (" +
 										"`${user.id}` / " +
-										"`${user.asUser().tagOrUsername()}`" +
+										"`${user.asUser().tag}`" +
 										")"
 							}
 						}

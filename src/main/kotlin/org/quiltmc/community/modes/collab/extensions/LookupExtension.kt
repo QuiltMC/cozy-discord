@@ -16,7 +16,6 @@ import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.time.TimestampType
 import com.kotlindiscord.kord.extensions.time.toDiscord
-import com.kotlindiscord.kord.extensions.utils.tagOrUsername
 import com.kotlindiscord.kord.extensions.utils.translate
 import dev.kord.common.entity.Snowflake
 import dev.kord.rest.Image
@@ -75,7 +74,7 @@ class LookupExtension : Extension() {
 						color = DISCORD_BLURPLE
 
 						description = "**__Basic Information__**\n" +
-							"**Tag:** `${user.tagOrUsername()}`\n" +
+							"**Tag:** `${user.tag}`\n" +
 							"**ID:** `${user.id.value}`\n" +
 							"**Mention:** ${user.mention}\n\n" +
 
@@ -97,7 +96,7 @@ class LookupExtension : Extension() {
 							}
 
 						author {
-							name = user.tagOrUsername()
+							name = user.tag
 							icon = user.avatar?.cdnUrl?.toUrl()
 						}
 
@@ -269,7 +268,7 @@ class LookupExtension : Extension() {
 
 					builder.append(
 						"**__Inviter Information__**\n" +
-							"**Tag:** `${user.tagOrUsername()}`\n" +
+							"**Tag:** `${user.tag}`\n" +
 							"**ID:** `${user.id.value}`\n" +
 							"**Mention:** ${user.mention}\n\n" +
 

@@ -13,7 +13,6 @@ import com.kotlindiscord.kord.extensions.extensions.event
 import com.kotlindiscord.kord.extensions.utils.deltas.MessageDelta
 import com.kotlindiscord.kord.extensions.utils.getJumpUrl
 import com.kotlindiscord.kord.extensions.utils.isEphemeral
-import com.kotlindiscord.kord.extensions.utils.tagOrUsername
 import dev.kord.common.entity.Snowflake
 import dev.kord.common.entity.optional.Optional
 import dev.kord.core.entity.Guild
@@ -108,7 +107,7 @@ class MessageLogExtension : Extension() {
 						messages += "**ID:** ${it.id.value}\n\n"
 
 						if (it.author != null) {
-							messages += "**Author:** ${it.author!!.tagOrUsername()}\n"
+							messages += "**Author:** ${it.author!!.tag}\n"
 							messages += "**Author ID:** ${it.author!!.id.value}\n\n"
 						} else {
 							messages += "**Display Name:** ${it.data.author.username}\n"
@@ -552,7 +551,7 @@ class MessageLogExtension : Extension() {
 
 			field {
 				name = "Author ID/Tag"
-				value = "`${author.id.value}` / `${author.tagOrUsername()}`"
+				value = "`${author.id.value}` / `${author.tag}`"
 				inline = true
 			}
 		} else {

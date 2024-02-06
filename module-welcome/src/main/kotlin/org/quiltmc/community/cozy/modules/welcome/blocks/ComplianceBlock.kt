@@ -10,7 +10,6 @@ package org.quiltmc.community.cozy.modules.welcome.blocks
 
 import com.kotlindiscord.kord.extensions.DISCORD_BLURPLE
 import com.kotlindiscord.kord.extensions.koin.KordExKoinComponent
-import com.kotlindiscord.kord.extensions.utils.tagOrUsername
 import dev.kord.common.entity.ButtonStyle
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
@@ -134,7 +133,7 @@ public data class ComplianceBlock(
 				inline = true
 				name = "User"
 
-				value = "${user.mention} (`${user.tagOrUsername()}` / `${user.id}`)"
+				value = "${user.mention} (`${user.tag}` / `${user.id}`)"
 			}
 		}
 

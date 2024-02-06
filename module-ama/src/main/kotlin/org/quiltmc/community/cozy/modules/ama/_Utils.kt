@@ -15,7 +15,6 @@ import com.kotlindiscord.kord.extensions.components.ComponentContainer
 import com.kotlindiscord.kord.extensions.components.components
 import com.kotlindiscord.kord.extensions.components.ephemeralButton
 import com.kotlindiscord.kord.extensions.utils.loadModule
-import com.kotlindiscord.kord.extensions.utils.tagOrUsername
 import dev.kord.common.Color
 import dev.kord.common.entity.ButtonStyle
 import dev.kord.common.entity.Snowflake
@@ -49,7 +48,7 @@ public val User.uniqueName: String
 		"@${this.username}"
 	} else {
 		// Still using name#discrim system
-		this.tagOrUsername()
+		this.tag
 	}
 
 public fun EmbedBuilder.questionEmbed(
@@ -383,7 +382,7 @@ public suspend inline fun ComponentContainer.answeringButtons(
 
 		check {
 			if (event.interaction.user != claimer) {
-				fail("You did not claim this question! ${claimer.tagOrUsername()} did")
+				fail("You did not claim this question! ${claimer.tag} did")
 			}
 		}
 
@@ -407,7 +406,7 @@ public suspend inline fun ComponentContainer.answeringButtons(
 		style = ButtonStyle.Success
 		check {
 			if (event.interaction.user != claimer) {
-				fail("You did not claim the question! ${claimer.tagOrUsername()} did")
+				fail("You did not claim the question! ${claimer.tag} did")
 			}
 		}
 

@@ -133,13 +133,13 @@ class ApplicationsExtension : Extension() {
 							field {
 								inline = true
 								name = "Moderator"
-								value = "${user.asUser().tagOrUsername()} (${user.mention})"
+								value = "${user.asUser().tag} (${user.mention})"
 							}
 
 							field {
 								inline = true
 								name = "User"
-								value = "${member.tagOrUsername()} (${member.mention})"
+								value = "${member.tag} (${member.mention})"
 							}
 						}
 
@@ -330,13 +330,13 @@ class ApplicationsExtension : Extension() {
 						field {
 							inline = true
 							name = "Moderator"
-							value = "${user!!.asUser().tagOrUsername()} (${user!!.mention})"
+							value = "${user!!.asUser().tag} (${user!!.mention})"
 						}
 
 						field {
 							inline = true
 							name = "User"
-							value = "${member.tagOrUsername()} (${member.mention})"
+							value = "${member.tag} (${member.mention})"
 						}
 					}
 
@@ -431,7 +431,7 @@ class ApplicationsExtension : Extension() {
 
 							// Not actually deprecated, Kord walled themselves into a hole here
 							@Suppress("DEPRECATION_ERROR")
-							val thread = threadChannel.startPrivateThread("App: ${user.tagOrUsername()}")
+							val thread = threadChannel.startPrivateThread("App: ${user.tag}")
 							val initialMessage = thread.createMessage("Better get the mods in...")
 
 							initialMessage.edit { content = settings.moderatorRoles.joinToString { "<@&$it>" } }
@@ -439,7 +439,7 @@ class ApplicationsExtension : Extension() {
 
 							initialMessage.edit {
 								content = buildString {
-									appendLine("**Application thread for ${user.tagOrUsername()}**")
+									appendLine("**Application thread for ${user.tag}**")
 									append("User ID below.")
 								}
 							}
@@ -503,13 +503,13 @@ class ApplicationsExtension : Extension() {
 							field {
 								inline = true
 								name = "Moderator"
-								value = "${event.interaction.user.tagOrUsername()} (${event.interaction.user.mention})"
+								value = "${event.interaction.user.tag} (${event.interaction.user.mention})"
 							}
 
 							field {
 								inline = true
 								name = "User"
-								value = "${member.tagOrUsername()} (${member.mention})"
+								value = "${member.tag} (${member.mention})"
 							}
 						}
 
@@ -786,7 +786,7 @@ class ApplicationsExtension : Extension() {
 		title = "Application (${event.request.status.name.capitalizeWords()})"
 
 		description = buildString {
-			appendLine("**User:** ${user.tagOrUsername()}")
+			appendLine("**User:** ${user.tag}")
 			appendLine("**Mention:** ${user.mention}")
 			appendLine(
 				"**Created:** ${user.id.timestamp.longAndRelative}"

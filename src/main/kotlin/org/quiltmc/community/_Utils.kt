@@ -214,7 +214,7 @@ suspend fun Guild.getFilterLogChannel(): GuildMessageChannel? {
 suspend fun EmbedBuilder.userField(user: UserBehavior, role: String? = null, inline: Boolean = false) {
 	field {
 		name = role ?: "User"
-		value = "${user.mention} (`${user.id}` / `${user.asUser().tagOrUsername()}`)"
+		value = "${user.mention} (`${user.id}` / `${user.asUser().tag}`)"
 
 		this.inline = inline
 	}
