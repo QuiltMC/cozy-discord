@@ -10,6 +10,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PatchNoteEntries(
-	val entries: List<PatchNote>,
+	val entries: List<PatchNoteEntry>,
 	val version: Int,
 )

@@ -39,7 +39,7 @@ import org.quiltmc.community.*
 private const val PAGINATOR_TIMEOUT = 60_000L  // One minute
 private const val CHUNK_SIZE = 10
 
-private const val BASE_URL = "https://launchercontent.mojang.com"
+private const val BASE_URL = "https://launchercontent.mojang.com/v2"
 private const val JSON_URL = "$BASE_URL/javaPatchNotes.json"
 
 private const val CHECK_DELAY = 60L
@@ -111,7 +111,7 @@ class MinecraftExtension : Extension() {
 
 						respond {
 							embed {
-								patchNotes(patch)
+								patchNotes(patch.get())
 							}
 						}
 					}
@@ -213,7 +213,7 @@ class MinecraftExtension : Extension() {
 
 			currentEntries.entries.forEach {
 				if (it.version !in knownVersions) {
-					relayUpdate(it)
+					relayUpdate(it.get())
 					knownVersions.add(it.version)
 				}
 			}
@@ -294,7 +294,7 @@ class MinecraftExtension : Extension() {
 		return result to 0
 	}
 
-	private fun EmbedBuilder.patchNotes(patchNote: PatchNote, maxLength: Int = 1000) {
+	private suspend fun EmbedBuilder.patchNotes(patchNote: PatchNote, maxLength: Int = 1000) {
 		val (truncated, remaining) = patchNote.body.formatHTML().truncateMarkdown(maxLength)
 
 		title = patchNote.title
@@ -347,6 +347,9 @@ class MinecraftExtension : Extension() {
 			}
 		}
 	}
+
+	private suspend fun PatchNoteEntry.get() =
+		client.get("$BASE_URL/$contentPath").body<PatchNote>()
 
 	@OptIn(KordPreview::class)
 	class CheckArguments : Arguments() {
