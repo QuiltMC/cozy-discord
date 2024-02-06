@@ -73,7 +73,8 @@ public class QuiltModsParser : LogParser() {
 				Mod(
 					mod["id"]!!,
 					Version(mod["version"]!!),
-					mod["file(s)"]
+					mod["file(s)"],
+					mod["File Hash (SHA-1)"]
 				)
 			)
 		}
