@@ -14,5 +14,6 @@ public data class Mod(
 
 	// Only present on Quilt Loader
 	val path: String?,
-	val hash: String?
+	val hash: String?,
+	val type: String?
 )
