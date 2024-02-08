@@ -37,6 +37,8 @@ public class FabricModsParser : LogParser() {
 					Mod(
 						split.first(),
 						Version(split.last()),
+						null,
+						null,
 						null
 					)
 				)

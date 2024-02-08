@@ -51,6 +51,7 @@ public class SimpleLogParserConfig(private val builder: Builder) : LogParserConf
 			FabricApisProcessor(),
 			FabricImplProcessor(),
 			IncompatibleModProcessor(),
+			FabricModUsedWhenQuiltVersionExistsProcessor(),
 			CrashReportProcessor(),
 			JavaClassFileVersionProcessor(),
 			MixinErrorProcessor(),

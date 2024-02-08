@@ -11,6 +11,7 @@ import com.kotlindiscord.kord.extensions.koin.KordExKoinComponent
 import dev.kord.core.event.Event
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
@@ -29,6 +30,9 @@ public abstract class LogProcessor : BaseLogHandler, KordExKoinComponent {
 				kotlinx.serialization.json.Json { ignoreUnknownKeys = true },
 				ContentType.Any
 			)
+		}
+		install(UserAgent) {
+			agent = "QuiltMC/cozy-discord (quiltmc.org)"
 		}
 	}
 
