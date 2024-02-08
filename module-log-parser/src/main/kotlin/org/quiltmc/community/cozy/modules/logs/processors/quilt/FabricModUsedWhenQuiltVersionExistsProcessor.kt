@@ -38,13 +38,12 @@ public class FabricModUsedWhenQuiltVersionExistsProcessor : LogProcessor() {
 	override suspend fun process(log: Log) {
 		val mcVersion = log.minecraftVersion?.string ?: log.getMod("minecraft")?.version?.string ?: return
 
-		val hashToMod = log.getMods().filter {
-			it.value.type?.lowercase(Locale.getDefault()).equals("fabric") && it.value.hash != null
-		}.map { (_, mod) -> mod.hash!! to mod }.toMap()
+		val hashToMod = log.getMods().values.filter {
+			it.type?.lowercase(Locale.getDefault()) == "fabric" && it.hash != null
+		}.associateBy { it.hash!! }
 		if (hashToMod.isEmpty()) return
 
-		val hashesRequest = client.post {
-			url("$MODRINTH_API_BASE/version_files")
+		val hashesRequest = client.post("$MODRINTH_API_BASE/version_files") {
 			setBody(json.encodeToString(HashLookupParam(hashToMod.keys.toList(), "sha1")))
 			contentType(ContentType.Application.Json)
 		}
