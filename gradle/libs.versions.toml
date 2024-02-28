@@ -1,27 +1,27 @@
 [versions]
-detekt = "1.23.4"
-kotlin = "1.9.21"
-graphql = "6.3.5"
+detekt = "1.23.5"
+kotlin = "1.9.22"
+graphql = "7.0.2"
 
-autolink = "0.10.1"
-commons-text = "1.10.0"
+autolink = "0.11.0"
+commons-text = "1.11.0"
 excelkt = "1.0.2"
 flexver = "1.1.1"
-groovy = "3.0.19"
+groovy = "3.0.20"
 homoglyph = "1.2.1"
 jansi = "2.4.1"
-jsoup = "1.17.1"
-kaml = "0.55.0"
-kmongo = "4.8.0"
-kordex = "1.7.1-SNAPSHOT"
+jsoup = "1.17.2"
+kaml = "0.57.0"
+kmongo = "4.11.0"
+kordex = "1.8.0-SNAPSHOT"
 kotlintest = "3.4.2"
-ktor = "2.2.4"
-kx-ser = "1.6.2"
-logback = "1.4.14"
+ktor = "2.3.8"
+kx-ser = "1.6.3"
+logback = "1.5.1"
 logback-groovy = "1.14.5"
-logging = "5.1.1"
+logging = "6.0.3"
 moshi = "1.15.0"
-rgxgen = "1.4"
+rgxgen = "2.0"
 semver = "1.4.2"
 
 [libraries]
@@ -45,6 +45,8 @@ kordex-mappings = { module = "com.kotlindiscord.kord.extensions:extra-mappings",
 kordex-phishing = { module = "com.kotlindiscord.kord.extensions:extra-phishing", version.ref = "kordex" }
 kordex-pluralkit = { module = "com.kotlindiscord.kord.extensions:extra-pluralkit", version.ref = "kordex" }
 kordex-unsafe = { module = "com.kotlindiscord.kord.extensions:unsafe", version.ref = "kordex" }
+kordex-tags = { module = "com.kotlindiscord.kord.extensions:extra-tags", version.ref = "kordex" }
+kordex-welcome = { module = "com.kotlindiscord.kord.extensions:extra-welcome", version.ref = "kordex" }
 kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8" }

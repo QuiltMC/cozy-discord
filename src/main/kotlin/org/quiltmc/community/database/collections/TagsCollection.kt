@@ -7,13 +7,13 @@
 package org.quiltmc.community.database.collections
 
 import com.kotlindiscord.kord.extensions.koin.KordExKoinComponent
+import com.kotlindiscord.kord.extensions.modules.extra.tags.data.Tag
+import com.kotlindiscord.kord.extensions.modules.extra.tags.data.TagsData
 import dev.kord.common.entity.Snowflake
 import org.bson.conversions.Bson
 import org.koin.core.component.inject
 import org.litote.kmongo.eq
 import org.litote.kmongo.or
-import org.quiltmc.community.cozy.modules.tags.data.Tag
-import org.quiltmc.community.cozy.modules.tags.data.TagsData
 import org.quiltmc.community.database.Collection
 import org.quiltmc.community.database.Database
 import org.quiltmc.community.database.entities.TagEntity

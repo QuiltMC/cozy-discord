@@ -14,6 +14,8 @@ import com.kotlindiscord.kord.extensions.modules.extra.mappings.extMappings
 import com.kotlindiscord.kord.extensions.modules.extra.phishing.DetectionAction
 import com.kotlindiscord.kord.extensions.modules.extra.phishing.extPhishing
 import com.kotlindiscord.kord.extensions.modules.extra.pluralkit.extPluralKit
+import com.kotlindiscord.kord.extensions.modules.extra.tags.tags
+import com.kotlindiscord.kord.extensions.modules.extra.welcome.welcomeChannel
 import com.kotlindiscord.kord.extensions.utils.envOrNull
 import com.kotlindiscord.kord.extensions.utils.getKoin
 import dev.kord.core.entity.channel.GuildMessageChannel
@@ -29,8 +31,6 @@ import org.quiltmc.community.cozy.modules.logs.processors.PiracyProcessor
 import org.quiltmc.community.cozy.modules.logs.processors.ProblematicLauncherProcessor
 import org.quiltmc.community.cozy.modules.moderation.moderation
 import org.quiltmc.community.cozy.modules.rolesync.rolesync
-import org.quiltmc.community.cozy.modules.tags.tags
-import org.quiltmc.community.cozy.modules.welcome.welcomeChannel
 import org.quiltmc.community.database.collections.AmaConfigCollection
 import org.quiltmc.community.database.collections.TagsCollection
 import org.quiltmc.community.database.collections.WelcomeChannelCollection
