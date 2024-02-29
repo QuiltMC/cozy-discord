@@ -269,7 +269,6 @@ fun UserFlag.getName(): String = when (this) {
 	UserFlag.HouseBravery -> "HypeSquad: Bravery"
 	UserFlag.HouseBrilliance -> "HypeSquad: Brilliance"
 	UserFlag.HypeSquad -> "HypeSquad"
-	UserFlag.System -> "System User"
 	UserFlag.TeamUser -> "Team User"
 	UserFlag.VerifiedBot -> "Verified Bot"
 	UserFlag.VerifiedBotDeveloper -> "Early Verified Bot Developer"

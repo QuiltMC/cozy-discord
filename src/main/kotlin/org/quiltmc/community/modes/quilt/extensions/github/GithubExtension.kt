@@ -37,7 +37,7 @@ import org.quiltmc.community.modes.quilt.extensions.github.types.GitHubSimpleUse
 import quilt.ghgen.DeleteIssue
 import quilt.ghgen.FindIssueId
 import quilt.ghgen.findissueid.*
-import java.net.URL
+import java.net.URI
 
 private const val USERS_PER_PAGE = 10
 private const val BLOCKS_URL = "https://api.github.com/orgs/{ORG}/blocks"
@@ -48,7 +48,7 @@ class GithubExtension : Extension() {
 	val logger = KotlinLogging.logger { }
 
 	private val graphQlClient = GraphQLKtorClient(
-		URL("https://api.github.com/graphql"),
+		URI.create("https://api.github.com/graphql").toURL(),
 
 		HttpClient(engineFactory = CIO) {
 			defaultRequest {

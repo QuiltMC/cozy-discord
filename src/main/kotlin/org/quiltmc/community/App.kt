@@ -101,7 +101,6 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
 	}
 
 	extensions {
-		add(::ApplicationsExtension)
 		add(::FilterExtension)
 		add(::ForumExtension)
 		add(::LookupExtension)
@@ -114,7 +113,6 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
 		add(::SuggestionsExtension)
 		add(::SyncExtension)
 		add(::UtilityExtension)
-		add(::VerificationExtension)
 
 		extPluralKit()
 
