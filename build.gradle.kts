@@ -54,7 +54,7 @@ allprojects {
 }
 
 dependencies {
-	implementation("io.ktor:ktor-client-encoding:2.2.4")
+	implementation("io.ktor:ktor-client-encoding:2.3.9")
 	detektPlugins(libs.detekt)
 	detektPlugins(libs.detekt.libraries)
 
