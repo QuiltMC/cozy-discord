@@ -20,7 +20,7 @@ kx-ser = "1.6.3"
 logback = "1.5.1"
 logback-groovy = "1.14.5"
 logging = "6.0.3"
-moshi = "1.15.0"
+moshi = "1.15.1"
 rgxgen = "2.0"
 semver = "1.4.2"
 
