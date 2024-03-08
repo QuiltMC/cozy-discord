@@ -10,7 +10,10 @@ import com.kotlindiscord.kord.extensions.builders.ExtensibleBotBuilder
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.SlashCommandContext
 import com.kotlindiscord.kord.extensions.components.forms.ModalForm
-import com.kotlindiscord.kord.extensions.utils.*
+import com.kotlindiscord.kord.extensions.utils.env
+import com.kotlindiscord.kord.extensions.utils.envOrNull
+import com.kotlindiscord.kord.extensions.utils.getKoin
+import com.kotlindiscord.kord.extensions.utils.loadModule
 import dev.kord.common.entity.ArchiveDuration
 import dev.kord.common.entity.Snowflake
 import dev.kord.common.entity.UserFlag
@@ -255,7 +258,6 @@ fun Message.contentToThreadName(fallbackPrefix: String): String {
 		?: "$fallbackPrefix | $id"
 }
 
-@Suppress("DEPRECATION_ERROR") // Either this, or the when block needs an else branch
 fun UserFlag.getName(): String = when (this) {
 	UserFlag.ActiveDeveloper -> "Active Developer"
 	UserFlag.BotHttpInteractions -> "HTTP-Based Commands"
@@ -269,10 +271,10 @@ fun UserFlag.getName(): String = when (this) {
 	UserFlag.HouseBravery -> "HypeSquad: Bravery"
 	UserFlag.HouseBrilliance -> "HypeSquad: Brilliance"
 	UserFlag.HypeSquad -> "HypeSquad"
-	UserFlag.System -> "System User"
 	UserFlag.TeamUser -> "Team User"
 	UserFlag.VerifiedBot -> "Verified Bot"
 	UserFlag.VerifiedBotDeveloper -> "Early Verified Bot Developer"
+
 	is UserFlag.Unknown -> "Unknown"
 }
 

@@ -109,7 +109,7 @@ tasks {
 
 detekt {
 	buildUponDefaultConfig = true
-	config = rootProject.files("detekt.yml")
+	config.from(rootProject.files("detekt.yml"))
 }
 
 // Credit to ZML for this workaround.

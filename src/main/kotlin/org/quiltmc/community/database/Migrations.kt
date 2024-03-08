@@ -64,6 +64,7 @@ object Migrations : KordExKoinComponent {
 					21 -> ::v21
 					22 -> ::v22
 					23 -> ::v23
+					24 -> ::v24
 
 					else -> break
 				}(db.mongo)

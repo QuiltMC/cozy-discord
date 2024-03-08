@@ -69,7 +69,9 @@ dependencies {
 	implementation(libs.kordex.mappings)
 	implementation(libs.kordex.phishing)
 	implementation(libs.kordex.pluralkit)
+	implementation(libs.kordex.tags)
 	implementation(libs.kordex.unsafe)
+	implementation(libs.kordex.welcome)
 
 	implementation(libs.commons.text)
 	implementation(libs.homoglyph)
@@ -91,9 +93,7 @@ dependencies {
 	implementation(projects.moduleLogParser)
 	implementation(projects.moduleModeration)
 	implementation(projects.moduleRoleSync)
-	implementation(projects.moduleTags)
 	implementation(projects.moduleUserCleanup)
-	implementation(projects.moduleWelcome)
 }
 
 graphql {

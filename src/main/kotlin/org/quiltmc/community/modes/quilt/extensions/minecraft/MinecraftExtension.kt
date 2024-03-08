@@ -33,6 +33,7 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.datetime.Clock
+import kotlinx.serialization.json.Json
 import org.apache.commons.text.StringEscapeUtils
 import org.quiltmc.community.*
 
@@ -60,7 +61,11 @@ class MinecraftExtension : Extension() {
 
 	private val client = HttpClient {
 		install(ContentNegotiation) {
-			json()
+			json(
+				Json {
+					ignoreUnknownKeys = true
+				}
+			)
 		}
 
 		expectSuccess = true
@@ -294,7 +299,7 @@ class MinecraftExtension : Extension() {
 		return result to 0
 	}
 
-	private suspend fun EmbedBuilder.patchNotes(patchNote: PatchNote, maxLength: Int = 1000) {
+	private fun EmbedBuilder.patchNotes(patchNote: PatchNote, maxLength: Int = 1000) {
 		val (truncated, remaining) = patchNote.body.formatHTML().truncateMarkdown(maxLength)
 
 		title = patchNote.title

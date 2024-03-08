@@ -85,7 +85,6 @@ class FilterExtension : Extension() {
 
 	init {
 		RgxGenOption.INFINITE_PATTERN_REPETITION.setInProperties(rgxProperties, 2)
-		RgxGen.setDefaultProperties(rgxProperties)
 	}
 
 	val filters: FilterCollection by inject()
@@ -1105,7 +1104,7 @@ class FilterExtension : Extension() {
 
 		if (filter.matchType == MatchType.REGEX || filter.matchType == MatchType.REGEX_CONTAINS) {
 			try {
-				val generator = RgxGen(filter.match)
+				val generator = RgxGen.parse(rgxProperties, filter.match)
 				val examples = mutableSetOf<String>()
 
 				repeat(FILTERS_PER_PAGE * 2) {
