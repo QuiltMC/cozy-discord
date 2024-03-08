@@ -23,7 +23,7 @@ jobs:
           java-version: 1.17
 
       - name: Gradle (Build)
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@v3
         with:
           arguments: build
 
@@ -49,7 +49,7 @@ jobs:
           path: module-*/build/libs/*.jar
 
       - name: Gradle (Publish)
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@v3
 
         env:
           ORG_GRADLE_PROJECT_signingKey: "${{ secrets.SIGNING_KEY }}"
