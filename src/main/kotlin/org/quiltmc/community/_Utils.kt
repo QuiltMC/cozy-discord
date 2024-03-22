@@ -28,6 +28,7 @@ import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.rest.builder.message.EmbedBuilder
 import dev.kord.rest.request.RestRequestException
 import kotlinx.coroutines.runBlocking
+import mu.KotlinLogging
 import org.koin.dsl.bind
 import org.quiltmc.community.database.Database
 import org.quiltmc.community.database.collections.*
@@ -131,6 +132,8 @@ suspend fun ExtensibleBotBuilder.database(migrate: Boolean = false) {
 }
 
 suspend fun ExtensibleBotBuilder.common() {
+	val logger = KotlinLogging.logger { }
+
 	dataAdapter(::MongoDBDataAdapter)
 
 	applicationCommands {
@@ -140,13 +143,12 @@ suspend fun ExtensibleBotBuilder.common() {
 
 	extensions {
 		sentry {
-			val sentryDsn = envOrNull("SENTRY_DSN")
 			val version: String? = object {}::class.java.`package`.implementationVersion
 
-			if (sentryDsn != null) {
-				enable = true
+			enableIfDSN(envOrNull("SENTRY_DSN"))
 
-				dsn = sentryDsn
+			if (enable) {
+				logger.info { "Sentry enabled." }
 			}
 
 			if (version != null) {
