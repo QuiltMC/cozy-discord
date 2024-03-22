@@ -36,6 +36,7 @@ import org.quiltmc.community.cozy.modules.logs.events.DefaultEventHandler
 import org.quiltmc.community.cozy.modules.logs.events.EventHandler
 import org.quiltmc.community.cozy.modules.logs.events.PKEventHandler
 import org.quiltmc.community.cozy.modules.logs.types.BaseLogHandler
+import java.net.URI
 import java.net.URL
 import kotlin.time.Duration.Companion.minutes
 
@@ -96,7 +97,7 @@ public class LogParserExtension : Extension() {
 		}
 
 		val logs = (parseLinks(message.content) + message.attachments.map { it.url })
-			.map { URL(it) }
+			.map { URI(it).toURL() }
 			.map { handleLink(it, event) }
 			.flatten()
 			.filter {

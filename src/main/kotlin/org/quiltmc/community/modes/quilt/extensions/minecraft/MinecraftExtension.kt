@@ -17,14 +17,18 @@ import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.pagination.pages.Page
 import com.kotlindiscord.kord.extensions.utils.scheduling.Scheduler
 import com.kotlindiscord.kord.extensions.utils.scheduling.Task
+import com.kotlindiscord.kord.extensions.utils.toReaction
 import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.Permission
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.channel.createMessage
+import dev.kord.core.builder.components.emoji
+import dev.kord.core.entity.ReactionEmoji
 import dev.kord.core.entity.channel.NewsChannel
 import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.entity.channel.TopGuildMessageChannel
-import dev.kord.rest.builder.message.EmbedBuilder
+import dev.kord.rest.builder.message.MessageBuilder
+import dev.kord.rest.builder.message.actionRow
 import dev.kord.rest.builder.message.embed
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.*
@@ -49,7 +53,7 @@ private val LINK_REGEX = "<a href=\"(?<url>[^\"]+)\"[^>]*>(?<text>[^<]+)</a>".to
 
 @Suppress("MagicNumber", "UnderscoresInNumericLiterals")
 private val CHANNELS: List<Snowflake> = listOf(
-//    Snowflake(828218532671389736L),  // Testing
+//	Snowflake(1220660330191917056L),  // Testing
 	Snowflake(838805249271267398L),  // Community
 //	Snowflake(834195264629243904L),  // Toolchain
 )
@@ -95,7 +99,7 @@ class MinecraftExtension : Extension() {
 				ephemeralSubCommand(::CheckArguments) {
 					name = "get"
 					description = "Retrieve the patch notes for a given Minecraft version, or the latest if not " +
-							"supplied."
+						"supplied."
 
 					action {
 						if (!::currentEntries.isInitialized) {
@@ -115,9 +119,7 @@ class MinecraftExtension : Extension() {
 						}
 
 						respond {
-							embed {
-								patchNotes(patch.get())
-							}
+							patchNotes(patch.get())
 						}
 					}
 				}
@@ -262,14 +264,17 @@ class MinecraftExtension : Extension() {
 		result = result.replace("<code>", "`")
 		result = result.replace("</code>", "`")
 
-		result = result.replace("[\n]*<h\\d+>[\n]*".toRegex(), "\n\n__**")
-		result = result.replace("[\n]*</h\\d+>[\n]*".toRegex(), "**__\n")
+		@Suppress("MagicNumber")
+		for (i in 1..6) {
+			result = result.replace("[\n]*<h$i>[\n]*".toRegex(), "\n\n${"#".repeat(i)} ")
+			result = result.replace("[\n]*</h$i>[\n]*".toRegex(), "\n")
+		}
 
 		result = result.replace("[\n]*<[ou]l>[\n]*".toRegex(), "\n\n")
 		result = result.replace("[\n]*</[ou]l>[\n]*".toRegex(), "\n\n")
 
-		result = result.replace("[\n]*</li>\n+<li>[\n]*".toRegex(), "\n**»** ")
-		result = result.replace("([\n]{2,})?<li>[\n]*".toRegex(), "\n**»** ")
+		result = result.replace("[\n]*</li>\n+<li>[\n]*".toRegex(), "\n- ")
+		result = result.replace("([\n]{2,})?<li>[\n]*".toRegex(), "\n- ")
 		result = result.replace("[\n]*</li>[\n]*".toRegex(), "\n\n")
 
 		val links = LINK_REGEX.findAll(result)
@@ -299,25 +304,34 @@ class MinecraftExtension : Extension() {
 		return result to 0
 	}
 
-	private fun EmbedBuilder.patchNotes(patchNote: PatchNote, maxLength: Int = 1000) {
+	private fun MessageBuilder.patchNotes(patchNote: PatchNote, maxLength: Int = 4000) {
 		val (truncated, remaining) = patchNote.body.formatHTML().truncateMarkdown(maxLength)
 
-		title = patchNote.title
-		color = DISCORD_GREEN
+		actionRow {
+			linkButton("https://quiltmc.org/mc-patchnotes/#${patchNote.version}") {
+				label = "Read more..."
 
-		description = "[Full patch notes](https://quiltmc.org/mc-patchnotes/#${patchNote.version})\n\n"
-		description += truncated
-
-		if (remaining > 0) {
-			description += "\n\n[... $remaining more lines]"
+				emoji("🔗".toReaction() as ReactionEmoji.Unicode)
+			}
 		}
 
-		thumbnail {
-			url = "$BASE_URL${patchNote.image.url}"
-		}
+		embed {
+			title = patchNote.title
+			color = DISCORD_GREEN
 
-		footer {
-			text = "URL: https://quiltmc.org/mc-patchnotes/#${patchNote.version}"
+			description = truncated
+
+			if (remaining > 0) {
+				description += "\n\n[... $remaining more lines]"
+			}
+
+			thumbnail {
+				url = "$BASE_URL${patchNote.image.url}"
+			}
+
+			footer {
+				text = "URL: https://quiltmc.org/mc-patchnotes/#${patchNote.version}"
+			}
 		}
 	}
 
@@ -327,7 +341,8 @@ class MinecraftExtension : Extension() {
 			if (guildId == COMMUNITY_GUILD) {
 				content = "<@&$MINECRAFT_UPDATE_PING_ROLE>"
 			}
-			embed { patchNotes(patchNote, maxLength) }
+
+			patchNotes(patchNote, maxLength)
 		}
 
 		val title = if (patchNote.title.startsWith("minecraft ", true)) {
