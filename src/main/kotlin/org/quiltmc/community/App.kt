@@ -166,7 +166,6 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
 		}
 
 		extPhishing {
-			appName = "QuiltMC's Cozy Bot"
 			detectionAction = DetectionAction.Kick
 			logChannelName = "cozy-logs"
 			requiredCommandPermission = null

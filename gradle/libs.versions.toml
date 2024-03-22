@@ -1,26 +1,26 @@
 [versions]
 detekt = "1.23.5"
-kotlin = "1.9.22"
+kotlin = "1.9.23"
 graphql = "7.0.2"
 
 autolink = "0.11.0"
 commons-text = "1.11.0"
 excelkt = "1.0.2"
 flexver = "1.1.1"
-groovy = "3.0.20"
+groovy = "3.0.21"
 homoglyph = "1.2.1"
 jansi = "2.4.1"
 jsoup = "1.17.2"
-kaml = "0.57.0"
+kaml = "0.58.0"
 kmongo = "4.11.0"
 kordex = "1.8.0-SNAPSHOT"
 kotlintest = "3.4.2"
-ktor = "2.3.8"
+ktor = "2.3.9"
 kx-ser = "1.6.3"
-logback = "1.5.1"
+logback = "1.5.3"
 logback-groovy = "1.14.5"
 logging = "6.0.3"
-moshi = "1.15.0"
+moshi = "1.15.1"
 rgxgen = "2.0"
 semver = "1.4.2"
 
@@ -52,6 +52,8 @@ kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref =
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8" }
 kotlintest = { module = "io.kotlintest:kotlintest-runner-junit5", version.ref = "kotlintest" }
 ktor-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
+ktor-client-encoding = { module = "io.ktor:ktor-client-encoding", version.ref = "ktor" }
 ktor-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 kx-ser = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kx-ser" }
 logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }

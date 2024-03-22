@@ -16,6 +16,8 @@ dependencies {
 
 	ksp(libs.kordex.annotationProcessor)
 
+	implementation(libs.ktor.client.cio)
+
 	implementation(libs.kordex.annotations)
 	implementation(libs.kordex.core)
 	implementation(libs.kordex.unsafe)
