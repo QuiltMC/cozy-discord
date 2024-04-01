@@ -97,8 +97,7 @@ public class IncompatibleModProcessor : LogProcessor() {
 
 				appendLine()
 				append(
-					"**Note:** The list of incompatible mods may not be perfectly up-to-date. For more " +
-							"information, please see [the Quilt mod incompatibility mega-thread]($THREAD_LINK)."
+					"**Note:** The full list of known incompatibilities can be found [on the website](https://quiltmc.org/incompatible-mods.json). To add a new one, please make a pull request!"
 				)
 			}
 		)
