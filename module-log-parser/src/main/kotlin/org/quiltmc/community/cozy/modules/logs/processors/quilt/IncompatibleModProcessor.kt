@@ -23,7 +23,7 @@ import org.quiltmc.community.cozy.modules.logs.data.Order
 import org.quiltmc.community.cozy.modules.logs.types.LogProcessor
 import kotlin.time.Duration.Companion.minutes
 
-private const val THREAD_LINK = "https://forum.quiltmc.org/t/mod-incompatibility-megathread/261"
+private const val THREAD_LINK = "https://quiltmc.org/incompatible-mods.json"
 private const val JSON_LINK = "https://quiltmc.org/incompatible-mods.json"
 
 private val CHECK_DELAY = 15.minutes
@@ -97,7 +97,8 @@ public class IncompatibleModProcessor : LogProcessor() {
 
 				appendLine()
 				append(
-					"**Note:** The full list of known incompatibilities can be found [on the website](https://quiltmc.org/incompatible-mods.json). To add a new one, please make a pull request!"
+					"**Note:** The full list of known incompatibilities can be found [on the website]($THREAD_LINK)." + 
+					"To add a new one, please make a pull request!"
 				)
 			}
 		)
