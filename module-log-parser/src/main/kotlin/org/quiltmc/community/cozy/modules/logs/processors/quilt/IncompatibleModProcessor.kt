@@ -97,7 +97,7 @@ public class IncompatibleModProcessor : LogProcessor() {
 
 				appendLine()
 				append(
-					"**Note:** The full list of known incompatibilities can be found [on the website]($THREAD_LINK)." + 
+					"**Note:** The full list of known incompatibilities can be found [on the website]($THREAD_LINK)." +
 					"To add a new one, please make a pull request!"
 				)
 			}
