@@ -1,6 +1,6 @@
 [versions]
 detekt = "1.23.5"
-kotlin = "1.9.23"
+kotlin = "1.9.24"
 graphql = "7.0.2"
 
 autolink = "0.11.0"
