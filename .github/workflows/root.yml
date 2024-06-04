@@ -73,3 +73,11 @@ jobs:
       - run: docker build -t ghcr.io/quiltmc/cozy-discord:latest -t ghcr.io/quiltmc/cozy-discord:${GITHUB_SHA} .
       - run: docker push ghcr.io/quiltmc/cozy-discord:latest
       - run: docker push ghcr.io/quiltmc/cozy-discord:${GITHUB_SHA}
+
+      - name: Dispatch quilt-helm-charts update event
+        uses: peter-evans/repository-dispatch@v3
+        with:
+            token: ${{ secrets.QHC_TOKEN }}
+            repository: QuiltMC/quilt-helm-charts
+            event-type: cozy_update
+            client-payload: '{"tag": "${{ github.sha }}"}'
