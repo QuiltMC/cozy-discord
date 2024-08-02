@@ -7,8 +7,8 @@
 package org.quiltmc.community.database.migrations
 
 import org.litote.kmongo.coroutine.CoroutineDatabase
-import org.quiltmc.community.database.collections.FilterEventCollection
 
+@Suppress("UnusedParameter")
 suspend fun v6(db: CoroutineDatabase) {
-	db.createCollection(FilterEventCollection.name)
+	// Filter event storage no longer exists as a feature, so no migration is necessary.
 }

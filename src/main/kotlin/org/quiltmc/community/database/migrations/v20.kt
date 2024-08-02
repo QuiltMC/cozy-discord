@@ -7,8 +7,8 @@
 package org.quiltmc.community.database.migrations
 
 import org.litote.kmongo.coroutine.CoroutineDatabase
-import org.quiltmc.community.database.collections.ServerApplicationCollection
 
+@Suppress("UnusedParameter")
 suspend fun v20(db: CoroutineDatabase) {
-	db.createCollection(ServerApplicationCollection.name)
+	// Server applications no longer exist as a feature, so no migration is necessary.
 }

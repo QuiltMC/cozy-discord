@@ -7,8 +7,8 @@
 package org.quiltmc.community.database.migrations
 
 import org.litote.kmongo.coroutine.CoroutineDatabase
-import org.quiltmc.community.database.collections.TeamCollection
 
+@Suppress("UnusedParameter")
 suspend fun v4(db: CoroutineDatabase) {
-	db.createCollection(TeamCollection.name)
+	// Teams no longer exist as a feature, so no migration is necessary.
 }

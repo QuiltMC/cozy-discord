@@ -15,8 +15,7 @@ rootProject.name = "CozyDiscord"
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
+include(":module-ama")
 include(":module-log-parser")
 include(":module-moderation")
 include(":module-role-sync")
-include(":module-user-cleanup")
-include(":module-ama")

@@ -1,28 +1,27 @@
 [versions]
-detekt = "1.23.5"
-kotlin = "1.9.23"
-graphql = "7.0.2"
+detekt = "1.23.6"
+kotlin = "2.0.20-Beta1"
+graphql = "7.1.4"
 
 autolink = "0.11.0"
 commons-text = "1.11.0"
 excelkt = "1.0.2"
 flexver = "1.1.1"
-groovy = "3.0.21"
+groovy = "3.0.22"
 homoglyph = "1.2.1"
 jansi = "2.4.1"
-jsoup = "1.17.2"
-kaml = "0.58.0"
+jsoup = "1.18.1"
+kaml = "0.60.0"
 kmongo = "4.11.0"
-kordex = "1.8.0-SNAPSHOT"
 kotlintest = "3.4.2"
-ktor = "2.3.9"
-kx-ser = "1.6.3"
-logback = "1.5.3"
+ktor = "2.3.12"
+kx-ser = "1.7.1"
+logback = "1.5.6"
 logback-groovy = "1.14.5"
-logging = "6.0.3"
+logging = "7.0.0"
 moshi = "1.15.1"
 rgxgen = "2.0"
-semver = "1.4.2"
+semver = "2.0.0"
 
 [libraries]
 autolink = { module = "org.nibor.autolink:autolink", version.ref = "autolink" }
@@ -38,15 +37,6 @@ jansi = { module = "org.fusesource.jansi:jansi", version.ref = "jansi" }
 jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
 kaml = { module = "com.charleskorn.kaml:kaml", version.ref = "kaml" }
 kmongo = { module = "org.litote.kmongo:kmongo-coroutine-serialization", version.ref = "kmongo" }
-kordex-annotations = { module = "com.kotlindiscord.kord.extensions:annotations", version.ref = "kordex" }
-kordex-annotationProcessor = { module = "com.kotlindiscord.kord.extensions:annotation-processor", version.ref = "kordex" }
-kordex-core = { module = "com.kotlindiscord.kord.extensions:kord-extensions", version.ref = "kordex" }
-kordex-mappings = { module = "com.kotlindiscord.kord.extensions:extra-mappings", version.ref = "kordex" }
-kordex-phishing = { module = "com.kotlindiscord.kord.extensions:extra-phishing", version.ref = "kordex" }
-kordex-pluralkit = { module = "com.kotlindiscord.kord.extensions:extra-pluralkit", version.ref = "kordex" }
-kordex-unsafe = { module = "com.kotlindiscord.kord.extensions:unsafe", version.ref = "kordex" }
-kordex-tags = { module = "com.kotlindiscord.kord.extensions:extra-tags", version.ref = "kordex" }
-kordex-welcome = { module = "com.kotlindiscord.kord.extensions:extra-welcome", version.ref = "kordex" }
 kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8" }

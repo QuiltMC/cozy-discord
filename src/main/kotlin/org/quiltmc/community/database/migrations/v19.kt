@@ -7,11 +7,8 @@
 package org.quiltmc.community.database.migrations
 
 import org.litote.kmongo.coroutine.CoroutineDatabase
-import org.quiltmc.community.database.entities.Suggestion
 
+@Suppress("UnusedParameter")
 suspend fun v19(db: CoroutineDatabase) {
-	db.getCollection<Suggestion>("suggestions").updateMany(
-		"{}",
-		"{\$rename: {isTupper: \"isPluralkit\"}}"
-	)
+	// Suggestions no longer exist as a feature, so no migration is necessary.
 }

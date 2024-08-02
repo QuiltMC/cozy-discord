@@ -32,13 +32,10 @@ import dev.kord.rest.builder.message.embed
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.request.forms.*
 import io.ktor.utils.io.jvm.javaio.*
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.encodeToString
@@ -498,7 +495,7 @@ class MessageLogExtension : Extension() {
 
 	suspend fun send(message: LogMessage) = messageChannel.send(message)
 
-	@OptIn(ExperimentalCoroutinesApi::class)
+	@OptIn(DelicateCoroutinesApi::class)
 	private suspend fun sendLoop() {
 		for (logMessage in messageChannel) {
 			val rotator = rotators[logMessage.guild.id]

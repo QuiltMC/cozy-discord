@@ -15,6 +15,7 @@ import com.kotlindiscord.kord.extensions.DISCORD_BLURPLE
 import com.kotlindiscord.kord.extensions.DISCORD_GREEN
 import com.kotlindiscord.kord.extensions.DISCORD_RED
 import com.kotlindiscord.kord.extensions.DISCORD_YELLOW
+import com.kotlindiscord.kord.extensions.annotations.DoNotChain
 import com.kotlindiscord.kord.extensions.checks.isNotBot
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.converters.impl.enumChoice
@@ -45,7 +46,6 @@ import net.codebox.homoglyph.HomoglyphBuilder
 import org.koin.core.component.inject
 import org.quiltmc.community.*
 import org.quiltmc.community.database.collections.FilterCollection
-import org.quiltmc.community.database.collections.FilterEventCollection
 import org.quiltmc.community.database.collections.GlobalSettingsCollection
 import org.quiltmc.community.database.collections.ServerSettingsCollection
 import org.quiltmc.community.database.entities.FilterEntry
@@ -89,7 +89,6 @@ class FilterExtension : Extension() {
 
 	val filters: FilterCollection by inject()
 	val filterCache: MutableMap<UUID, FilterEntry> = mutableMapOf()
-	val filterEvents: FilterEventCollection by inject()
 
 	override suspend fun setup() {
 		reloadFilters()
@@ -733,10 +732,6 @@ class FilterExtension : Extension() {
 			else -> {}  // Nothing
 		}
 
-		filterEvents.add(
-			this, guild, member, null, null
-		)
-
 		guild.getFilterLogChannel()?.createMessage {
 			if (pingStaff) {
 				val modRole = when (guild.id) {
@@ -836,6 +831,7 @@ class FilterExtension : Extension() {
 		}
 	}
 
+	@OptIn(DoNotChain::class)
 	suspend fun FilterEntry.action(message: Message) {
 		val guild = message.getGuild()
 
@@ -947,10 +943,6 @@ class FilterExtension : Extension() {
 
 			null -> {}  // Nothing
 		}
-
-		filterEvents.add(
-			this, message.getGuild(), message.author!!, message.channel, message
-		)
 
 		guild.getFilterLogChannel()?.createMessage {
 			if (pingStaff) {
