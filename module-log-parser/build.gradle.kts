@@ -14,16 +14,7 @@ dependencies {
 	detektPlugins(libs.detekt)
 	detektPlugins(libs.detekt.libraries)
 
-	ksp(libs.kordex.annotationProcessor)
-
 	implementation(libs.ktor.client.cio)
-
-	implementation(libs.kordex.annotations)
-	implementation(libs.kordex.core)
-	implementation(libs.kordex.unsafe)
-
-	// Optional for bots that don't need it
-	compileOnly(libs.kordex.pluralkit)
 
 	implementation(libs.autolink)
 	implementation(libs.flexver)
@@ -34,4 +25,10 @@ dependencies {
 
 	implementation(platform(libs.kotlin.bom))
 	implementation(libs.kotlin.stdlib)
+}
+
+kordEx {
+	module("annotations")
+	module("extra-pluralkit")
+	module("unsafe")
 }

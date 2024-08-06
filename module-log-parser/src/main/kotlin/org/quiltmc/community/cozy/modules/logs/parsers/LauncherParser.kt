@@ -46,8 +46,8 @@ public class LauncherParser : LogParser() {
 		}
 
 		if (launcher == Launcher.Prism && log.launcherVersion != null) {
-			val version: Version = Version.valueOf(log.launcherVersion!!)
-			if (version.compareTo(Version.valueOf("7.0")) < 0) {
+			val version: Version = Version.parse(log.launcherVersion!!)
+			if (version.compareTo(Version.parse("7.0")) < 0) {
 				log.addMessage(
 					"**It looks like you're using an outdated version of Prism.** +" +
 						"Please note that Prism [formerly broke uploaded logs]" +

@@ -15,6 +15,7 @@ import com.kotlindiscord.kord.extensions.DISCORD_GREEN
 import com.kotlindiscord.kord.extensions.DISCORD_RED
 import com.kotlindiscord.kord.extensions.DiscordRelayedException
 import com.kotlindiscord.kord.extensions.annotations.DoNotChain
+import com.kotlindiscord.kord.extensions.annotations.UnexpectedFunctionBehaviour
 import com.kotlindiscord.kord.extensions.checks.channelType
 import com.kotlindiscord.kord.extensions.checks.hasPermission
 import com.kotlindiscord.kord.extensions.checks.isInThread
@@ -106,6 +107,7 @@ class UtilityExtension : Extension() {
 		encodeDefaults = false
 	}
 
+	@OptIn(UnexpectedFunctionBehaviour::class)
 	override suspend fun setup() {
 		if (STATUS_CHANNEL_ID != null) {
 			event<ReadyEvent> {

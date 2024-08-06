@@ -10,46 +10,12 @@ plugins {
 	`cozy-module`
 	`shadow-module`
 
-	application
-
 	id("com.github.jakemarsden.git-hooks")
 }
 
 allprojects {
 	repositories {
 		mavenLocal()
-		mavenCentral()
-		google()
-
-		maven {
-			name = "Sonatype Snapshots (Legacy)"
-			url = uri("https://oss.sonatype.org/content/repositories/snapshots")
-		}
-
-		maven {
-			name = "Sonatype Snapshots"
-			url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots")
-		}
-
-		maven {
-			name = "Fabric"
-			url = uri("https://maven.fabricmc.net")
-		}
-
-		maven {
-			name = "QuiltMC (Releases)"
-			url = uri("https://maven.quiltmc.org/repository/release/")
-		}
-
-		maven {
-			name = "QuiltMC (Snapshots)"
-			url = uri("https://maven.quiltmc.org/repository/snapshot/")
-		}
-
-		maven {
-			name = "JitPack"
-			url = uri("https://jitpack.io")
-		}
 	}
 }
 
@@ -57,22 +23,11 @@ dependencies {
 	detektPlugins(libs.detekt)
 	detektPlugins(libs.detekt.libraries)
 
-	ksp(libs.kordex.annotationProcessor)
-
 	implementation(libs.excelkt)
 	implementation(libs.kmongo)
 	implementation(libs.rgxgen)
 
 	implementation(libs.ktor.client.encoding)
-
-	implementation(libs.kordex.annotations)
-	implementation(libs.kordex.core)
-	implementation(libs.kordex.mappings)
-	implementation(libs.kordex.phishing)
-	implementation(libs.kordex.pluralkit)
-	implementation(libs.kordex.tags)
-	implementation(libs.kordex.unsafe)
-	implementation(libs.kordex.welcome)
 
 	implementation(libs.commons.text)
 	implementation(libs.homoglyph)
@@ -94,7 +49,20 @@ dependencies {
 	implementation(projects.moduleLogParser)
 	implementation(projects.moduleModeration)
 	implementation(projects.moduleRoleSync)
-	implementation(projects.moduleUserCleanup)
+}
+
+kordEx {
+	bot {
+		mainClass = "org.quiltmc.community.AppKt"
+	}
+
+	module("annotations")
+	module("extra-mappings")
+	module("extra-phishing")
+	module("extra-pluralkit")
+	module("extra-tags")
+	module("extra-welcome")
+	module("unsafe")
 }
 
 graphql {
@@ -104,11 +72,6 @@ graphql {
 		packageName = "quilt.ghgen"
 		serializer = GraphQLSerializer.KOTLINX
 	}
-}
-
-application {
-	// This is deprecated, but the Shadow plugin requires it
-	mainClass = "org.quiltmc.community.AppKt"
 }
 
 gitHooks {

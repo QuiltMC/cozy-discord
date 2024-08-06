@@ -14,6 +14,7 @@ import org.nibor.autolink.LinkExtractor
 import org.nibor.autolink.LinkType
 import org.quiltmc.community.cozy.modules.logs.config.LogParserConfig
 import org.quiltmc.community.cozy.modules.logs.config.SimpleLogParserConfig
+import java.net.URI
 import java.net.URL
 
 public inline fun ExtensibleBotBuilder.ExtensionsBuilder.extLogParser(
@@ -38,7 +39,7 @@ public val linkExtractor: LinkExtractor = LinkExtractor.builder()
 
 public fun String.parseUrls(): List<URL> =
 	linkExtractor.extractLinks(this).map {
-		URL(this.substring(it.beginIndex, it.endIndex))
+		URI(this.substring(it.beginIndex, it.endIndex)).toURL()
 	}
 
 public fun String.versionCompare(other: String): Int =

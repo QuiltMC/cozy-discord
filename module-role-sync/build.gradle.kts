@@ -14,13 +14,12 @@ dependencies {
 	detektPlugins(libs.detekt)
 	detektPlugins(libs.detekt.libraries)
 
-	ksp(libs.kordex.annotationProcessor)
-
-	implementation(libs.kordex.annotations)
-	implementation(libs.kordex.core)
-
 	implementation(libs.logging)
 
 	implementation(platform(libs.kotlin.bom))
 	implementation(libs.kotlin.stdlib)
+}
+
+kordEx {
+	module("annotations")
 }

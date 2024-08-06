@@ -24,7 +24,6 @@ import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.delay
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import kotlinx.datetime.toInstant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -99,7 +98,7 @@ private suspend inline fun get(url: String, block: HttpRequestBuilder.() -> Unit
 	while (true) {
 		val response = client.get(url, block)
 		if (response.status == HttpStatusCode.TooManyRequests) {
-			val retryAfter = response.headers["X-RateLimit-Reset"]?.toInstant()
+			val retryAfter = response.headers["X-RateLimit-Reset"]?.let { Instant.parse(it) }
 			if (retryAfter != null) {
 				val waitTime = retryAfter.toEpochMilliseconds() - Clock.System.now().toEpochMilliseconds()
 				if (waitTime > 0) {

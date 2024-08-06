@@ -44,7 +44,6 @@ import org.quiltmc.community.modes.quilt.extensions.messagelog.MessageLogExtensi
 import org.quiltmc.community.modes.quilt.extensions.minecraft.MinecraftExtension
 import org.quiltmc.community.modes.quilt.extensions.modhostverify.ModHostingVerificationExtension
 import org.quiltmc.community.modes.quilt.extensions.settings.SettingsExtension
-import org.quiltmc.community.modes.quilt.extensions.suggestions.SuggestionsExtension
 import kotlin.time.Duration.Companion.minutes
 
 val MODE = envOrNull("MODE")?.lowercase() ?: "quilt"
@@ -66,8 +65,6 @@ suspend fun setupDev() = ExtensibleBot(DISCORD_TOKEN) {
 	database()
 
 	extensions {
-		add(::SubteamsExtension)
-
 		extMappings { }
 
 		if (GITHUB_TOKEN != null) {
@@ -107,10 +104,8 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
 		add(::MessageLogExtension)
 		add(::MinecraftExtension)
 		add(::ModHostingVerificationExtension)
-		add(::PKExtension)
 		add(::SettingsExtension)
 		add(::ShowcaseExtension)
-		add(::SuggestionsExtension)
 		add(::SyncExtension)
 		add(::UtilityExtension)
 

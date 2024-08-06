@@ -27,8 +27,8 @@ import dev.kord.core.entity.Message
 import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.rest.builder.message.EmbedBuilder
 import dev.kord.rest.request.RestRequestException
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.runBlocking
-import mu.KotlinLogging
 import org.koin.dsl.bind
 import org.quiltmc.community.database.Database
 import org.quiltmc.community.database.collections.*
@@ -108,15 +108,11 @@ suspend fun ExtensibleBotBuilder.database(migrate: Boolean = false) {
 			loadModule {
 				single { AmaConfigCollection() } bind AmaConfigCollection::class
 				single { FilterCollection() } bind FilterCollection::class
-				single { FilterEventCollection() } bind FilterEventCollection::class
 				single { GlobalSettingsCollection() } bind GlobalSettingsCollection::class
 				single { LinkedMessagesCollection() } bind LinkedMessagesCollection::class
 				single { MetaCollection() } bind MetaCollection::class
 				single { OwnedThreadCollection() } bind OwnedThreadCollection::class
 				single { ServerSettingsCollection() } bind ServerSettingsCollection::class
-				single { ServerApplicationCollection() } bind ServerApplicationCollection::class
-				single { SuggestionsCollection() } bind SuggestionsCollection::class
-				single { TeamCollection() } bind TeamCollection::class
 				single { UserFlagsCollection() } bind UserFlagsCollection::class
 				single { TagsCollection() } bind TagsCollection::class
 				single { WelcomeChannelCollection() } bind WelcomeChannelCollection::class
