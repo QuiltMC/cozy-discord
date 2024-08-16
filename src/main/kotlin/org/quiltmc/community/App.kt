@@ -8,20 +8,19 @@
 
 package org.quiltmc.community
 
-import com.kotlindiscord.kord.extensions.ExtensibleBot
-import com.kotlindiscord.kord.extensions.checks.guildFor
-import com.kotlindiscord.kord.extensions.modules.extra.mappings.extMappings
-import com.kotlindiscord.kord.extensions.modules.extra.phishing.DetectionAction
-import com.kotlindiscord.kord.extensions.modules.extra.phishing.extPhishing
-import com.kotlindiscord.kord.extensions.modules.extra.pluralkit.extPluralKit
-import com.kotlindiscord.kord.extensions.modules.extra.tags.tags
-import com.kotlindiscord.kord.extensions.modules.extra.welcome.welcomeChannel
-import com.kotlindiscord.kord.extensions.utils.envOrNull
-import com.kotlindiscord.kord.extensions.utils.getKoin
 import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.gateway.ALL
 import dev.kord.gateway.Intents
 import dev.kord.gateway.PrivilegedIntent
+import dev.kordex.core.ExtensibleBot
+import dev.kordex.core.checks.guildFor
+import dev.kordex.core.utils.envOrNull
+import dev.kordex.core.utils.getKoin
+import dev.kordex.modules.func.phishing.DetectionAction
+import dev.kordex.modules.func.phishing.extPhishing
+import dev.kordex.modules.func.tags.tags
+import dev.kordex.modules.func.welcome.welcomeChannel
+import dev.kordex.modules.pluralkit.extPluralKit
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.lastOrNull
@@ -65,8 +64,6 @@ suspend fun setupDev() = ExtensibleBot(DISCORD_TOKEN) {
 	database()
 
 	extensions {
-		extMappings { }
-
 		if (GITHUB_TOKEN != null) {
 			add(::GithubExtension)
 		}

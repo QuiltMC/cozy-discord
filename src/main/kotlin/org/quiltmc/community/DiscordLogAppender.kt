@@ -11,9 +11,6 @@ package org.quiltmc.community
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.AppenderBase
-import com.kotlindiscord.kord.extensions.*
-import com.kotlindiscord.kord.extensions.koin.KordExKoinComponent
-import com.soywiz.korio.async.launch
 import dev.kord.common.Color
 import dev.kord.common.annotation.KordExperimental
 import dev.kord.common.annotation.KordUnsafe
@@ -22,7 +19,10 @@ import dev.kord.core.Kord
 import dev.kord.core.behavior.WebhookBehavior
 import dev.kord.core.behavior.execute
 import dev.kord.rest.builder.message.embed
+import dev.kordex.core.*
+import dev.kordex.core.koin.KordExKoinComponent
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
 import org.koin.core.component.inject
 

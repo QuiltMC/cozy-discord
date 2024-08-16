@@ -11,9 +11,9 @@
 package org.quiltmc.community.database.entities
 
 import com.github.jershell.kbson.UUIDSerializer
-import com.kotlindiscord.kord.extensions.modules.extra.tags.data.Tag
 import dev.kord.common.Color
 import dev.kord.common.entity.Snowflake
+import dev.kordex.modules.func.tags.data.Tag
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 import org.quiltmc.community.database.Entity

@@ -8,12 +8,12 @@
 
 package org.quiltmc.community
 
-import com.kotlindiscord.kord.extensions.DISCORD_BLURPLE
-import com.kotlindiscord.kord.extensions.DISCORD_GREEN
-import com.kotlindiscord.kord.extensions.DISCORD_RED
-import com.kotlindiscord.kord.extensions.utils.env
-import com.kotlindiscord.kord.extensions.utils.envOrNull
 import dev.kord.common.entity.Snowflake
+import dev.kordex.core.DISCORD_BLURPLE
+import dev.kordex.core.DISCORD_GREEN
+import dev.kordex.core.DISCORD_RED
+import dev.kordex.core.utils.env
+import dev.kordex.core.utils.envOrNull
 
 internal val DISCORD_TOKEN = env("TOKEN")
 internal val GITHUB_TOKEN = envOrNull("GITHUB_TOKEN")

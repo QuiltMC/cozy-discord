@@ -6,14 +6,6 @@
 
 package org.quiltmc.community
 
-import com.kotlindiscord.kord.extensions.builders.ExtensibleBotBuilder
-import com.kotlindiscord.kord.extensions.commands.Arguments
-import com.kotlindiscord.kord.extensions.commands.application.slash.SlashCommandContext
-import com.kotlindiscord.kord.extensions.components.forms.ModalForm
-import com.kotlindiscord.kord.extensions.utils.env
-import com.kotlindiscord.kord.extensions.utils.envOrNull
-import com.kotlindiscord.kord.extensions.utils.getKoin
-import com.kotlindiscord.kord.extensions.utils.loadModule
 import dev.kord.common.entity.ArchiveDuration
 import dev.kord.common.entity.Snowflake
 import dev.kord.common.entity.UserFlag
@@ -27,6 +19,14 @@ import dev.kord.core.entity.Message
 import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.rest.builder.message.EmbedBuilder
 import dev.kord.rest.request.RestRequestException
+import dev.kordex.core.builders.ExtensibleBotBuilder
+import dev.kordex.core.commands.Arguments
+import dev.kordex.core.commands.application.slash.SlashCommandContext
+import dev.kordex.core.components.forms.ModalForm
+import dev.kordex.core.utils.env
+import dev.kordex.core.utils.envOrNull
+import dev.kordex.core.utils.getKoin
+import dev.kordex.core.utils.loadModule
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.runBlocking
 import org.koin.dsl.bind

@@ -21,5 +21,13 @@ dependencies {
 }
 
 kordEx {
-	module("annotations")
+	plugin {
+		id = "quiltmc-role-sync"
+		pluginClass = "org.quiltmc.community.cozy.modules.rolesync.RoleSyncPlugin"
+		version = "1.0.1"
+
+		author = "QuiltMC"
+		description = "Cross-server role synchronisation plugin"
+		license = "MPL-2.0"
+	}
 }

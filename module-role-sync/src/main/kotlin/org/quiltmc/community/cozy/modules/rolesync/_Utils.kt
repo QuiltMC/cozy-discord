@@ -6,11 +6,11 @@
 
 package org.quiltmc.community.cozy.modules.rolesync
 
-import com.kotlindiscord.kord.extensions.ExtensibleBot
-import com.kotlindiscord.kord.extensions.builders.ExtensibleBotBuilder
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
 import dev.kord.core.entity.Role
+import dev.kordex.core.ExtensibleBot
+import dev.kordex.core.builders.ExtensibleBotBuilder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapConcat

@@ -6,8 +6,8 @@
 
 package org.quiltmc.community.cozy.modules.logs.config
 
-import com.kotlindiscord.kord.extensions.checks.types.Check
 import dev.kord.core.event.Event
+import dev.kordex.core.checks.types.Check
 import org.quiltmc.community.cozy.modules.logs.types.BaseLogHandler
 import org.quiltmc.community.cozy.modules.logs.types.LogParser
 import org.quiltmc.community.cozy.modules.logs.types.LogProcessor

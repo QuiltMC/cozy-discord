@@ -6,26 +6,6 @@
 
 package org.quiltmc.community.cozy.modules.ama
 
-import com.kotlindiscord.kord.extensions.checks.anyGuild
-import com.kotlindiscord.kord.extensions.checks.guildFor
-import com.kotlindiscord.kord.extensions.commands.Arguments
-import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
-import com.kotlindiscord.kord.extensions.commands.converters.impl.channel
-import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalChannel
-import com.kotlindiscord.kord.extensions.components.ComponentRegistry
-import com.kotlindiscord.kord.extensions.components.components
-import com.kotlindiscord.kord.extensions.components.ephemeralButton
-import com.kotlindiscord.kord.extensions.components.forms.ModalForm
-import com.kotlindiscord.kord.extensions.components.forms.widgets.LineTextWidget
-import com.kotlindiscord.kord.extensions.components.forms.widgets.ParagraphTextWidget
-import com.kotlindiscord.kord.extensions.extensions.Extension
-import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
-import com.kotlindiscord.kord.extensions.extensions.event
-import com.kotlindiscord.kord.extensions.modules.unsafe.annotations.UnsafeAPI
-import com.kotlindiscord.kord.extensions.modules.unsafe.extensions.unsafeSlashCommand
-import com.kotlindiscord.kord.extensions.modules.unsafe.types.InitialSlashCommandResponse
-import com.kotlindiscord.kord.extensions.modules.unsafe.types.ackEphemeral
-import com.kotlindiscord.kord.extensions.modules.unsafe.types.respondEphemeral
 import dev.kord.common.entity.ButtonStyle
 import dev.kord.common.entity.ChannelType
 import dev.kord.common.entity.Permission
@@ -47,6 +27,24 @@ import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.core.entity.channel.TopGuildChannel
 import dev.kord.core.event.interaction.GuildButtonInteractionCreateEvent
 import dev.kord.rest.builder.message.embed
+import dev.kordex.core.checks.anyGuild
+import dev.kordex.core.checks.guildFor
+import dev.kordex.core.commands.Arguments
+import dev.kordex.core.commands.application.slash.ephemeralSubCommand
+import dev.kordex.core.commands.converters.impl.channel
+import dev.kordex.core.commands.converters.impl.optionalChannel
+import dev.kordex.core.components.ComponentRegistry
+import dev.kordex.core.components.components
+import dev.kordex.core.components.ephemeralButton
+import dev.kordex.core.components.forms.ModalForm
+import dev.kordex.core.components.forms.widgets.LineTextWidget
+import dev.kordex.core.components.forms.widgets.ParagraphTextWidget
+import dev.kordex.core.extensions.Extension
+import dev.kordex.core.extensions.ephemeralSlashCommand
+import dev.kordex.core.extensions.event
+import dev.kordex.modules.dev.unsafe.annotations.UnsafeAPI
+import dev.kordex.modules.dev.unsafe.commands.slash.InitialSlashCommandResponse
+import dev.kordex.modules.dev.unsafe.extensions.unsafeSlashCommand
 import org.koin.core.component.inject
 import org.quiltmc.community.cozy.modules.ama.data.AmaConfig
 import org.quiltmc.community.cozy.modules.ama.data.AmaData
@@ -435,6 +433,7 @@ public class AmaExtension : Extension() {
 			name = "answer-queue-channel"
 			description = "The channel for asked questions to queue up in before response"
 			requiredChannelTypes = mutableSetOf(ChannelType.GuildText)
+
 			validate {
 				val checkResult = value.checkPermission(Permissions(Permission.ViewChannel, Permission.SendMessages))
 				failIf(checkResult == false, "The bot cannot see this channel")
@@ -446,6 +445,7 @@ public class AmaExtension : Extension() {
 			name = "live-chat-channel"
 			description = "The channel questions will be sent to when answered by staff"
 			requiredChannelTypes = mutableSetOf(ChannelType.GuildText)
+
 			validate {
 				val checkResult = value.checkPermission(Permissions(Permission.ViewChannel, Permission.SendMessages))
 				failIf(checkResult == false, "The bot cannot see this channel")

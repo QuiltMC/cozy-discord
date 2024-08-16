@@ -6,10 +6,10 @@
 
 package org.quiltmc.community.database.collections
 
-import com.kotlindiscord.kord.extensions.koin.KordExKoinComponent
-import com.kotlindiscord.kord.extensions.modules.extra.tags.data.Tag
-import com.kotlindiscord.kord.extensions.modules.extra.tags.data.TagsData
 import dev.kord.common.entity.Snowflake
+import dev.kordex.core.koin.KordExKoinComponent
+import dev.kordex.modules.func.tags.data.Tag
+import dev.kordex.modules.func.tags.data.TagsData
 import org.bson.conversions.Bson
 import org.koin.core.component.inject
 import org.litote.kmongo.eq

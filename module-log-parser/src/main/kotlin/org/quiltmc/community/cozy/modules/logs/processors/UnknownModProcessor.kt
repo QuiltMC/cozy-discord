@@ -6,8 +6,8 @@
 
 package org.quiltmc.community.cozy.modules.logs.processors
 
-import com.kotlindiscord.kord.extensions.DISCORD_YELLOW
 import dev.kord.core.event.Event
+import dev.kordex.core.DISCORD_YELLOW
 import org.quiltmc.community.cozy.modules.logs.data.LoaderType
 import org.quiltmc.community.cozy.modules.logs.data.Log
 import org.quiltmc.community.cozy.modules.logs.data.Order

@@ -6,14 +6,14 @@
 
 package org.quiltmc.community.cozy.modules.ama
 
-import com.kotlindiscord.kord.extensions.modules.extra.pluralkit.api.PKMemberPrivacy
-import com.kotlindiscord.kord.extensions.modules.extra.pluralkit.api.PKProxyTag
-import com.kotlindiscord.kord.extensions.modules.extra.pluralkit.api.PKSystem
-import com.kotlindiscord.kord.extensions.utils.envOrNull
-import com.kotlindiscord.kord.extensions.utils.getKoin
 import dev.kord.common.Color
 import dev.kord.common.entity.optional.Optional
 import dev.kord.core.behavior.UserBehavior
+import dev.kordex.core.utils.envOrNull
+import dev.kordex.core.utils.getKoin
+import dev.kordex.modules.pluralkit.api.PKMemberPrivacy
+import dev.kordex.modules.pluralkit.api.PKProxyTag
+import dev.kordex.modules.pluralkit.api.PKSystem
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.contentnegotiation.*

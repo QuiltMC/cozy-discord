@@ -6,7 +6,7 @@
 
 package org.quiltmc.community.modes.quilt.extensions.filtering
 
-import com.kotlindiscord.kord.extensions.commands.application.slash.converters.ChoiceEnum
+import dev.kordex.core.commands.application.slash.converters.ChoiceEnum
 import kotlinx.serialization.Serializable
 
 @Serializable

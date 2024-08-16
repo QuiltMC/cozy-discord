@@ -6,9 +6,9 @@
 
 package org.quiltmc.community.cozy.modules.logs
 
-import com.kotlindiscord.kord.extensions.builders.ExtensibleBotBuilder
-import com.kotlindiscord.kord.extensions.utils.loadModule
 import com.unascribed.flexver.FlexVerComparator
+import dev.kordex.core.builders.ExtensibleBotBuilder
+import dev.kordex.core.utils.loadModule
 import org.koin.dsl.bind
 import org.nibor.autolink.LinkExtractor
 import org.nibor.autolink.LinkType

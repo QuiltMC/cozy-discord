@@ -6,8 +6,8 @@
 
 package org.quiltmc.community.database
 
-import com.kotlindiscord.kord.extensions.utils.getKoin
 import dev.kord.core.behavior.GuildBehavior
+import dev.kordex.core.utils.getKoin
 import org.quiltmc.community.database.collections.ServerSettingsCollection
 import org.quiltmc.community.database.entities.ServerSettings
 

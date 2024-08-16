@@ -6,7 +6,7 @@
 
 package org.quiltmc.community.cozy.modules.moderation
 
-import com.kotlindiscord.kord.extensions.builders.ExtensibleBotBuilder
+import dev.kordex.core.builders.ExtensibleBotBuilder
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimePeriod
 import kotlinx.datetime.TimeZone.Companion.UTC

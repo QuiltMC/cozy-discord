@@ -15,7 +15,6 @@ dependencies {
 }
 
 kordEx {
-	module("annotations")
-	module("extra-pluralkit")
-	module("unsafe")
+	module("pluralkit")
+	module("dev-unsafe")
 }

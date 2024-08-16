@@ -8,8 +8,8 @@
 
 package org.quiltmc.community.database.entities
 
-import com.kotlindiscord.kord.extensions.utils.getKoin
 import dev.kord.common.entity.Snowflake
+import dev.kordex.core.utils.getKoin
 import kotlinx.serialization.Serializable
 import org.quiltmc.community.database.Entity
 import org.quiltmc.community.database.collections.LinkedMessagesCollection

@@ -9,18 +9,18 @@
 package org.quiltmc.community.cozy.modules.logs
 
 import com.charleskorn.kaml.Yaml
-import com.kotlindiscord.kord.extensions.DISCORD_GREEN
-import com.kotlindiscord.kord.extensions.DISCORD_RED
-import com.kotlindiscord.kord.extensions.DISCORD_YELLOW
-import com.kotlindiscord.kord.extensions.extensions.Extension
-import com.kotlindiscord.kord.extensions.utils.capitalizeWords
-import com.kotlindiscord.kord.extensions.utils.envOrNull
-import com.kotlindiscord.kord.extensions.utils.respond
-import com.kotlindiscord.kord.extensions.utils.scheduling.Scheduler
 import dev.kord.core.entity.Message
 import dev.kord.core.event.Event
 import dev.kord.rest.builder.message.create.MessageCreateBuilder
 import dev.kord.rest.builder.message.embed
+import dev.kordex.core.DISCORD_GREEN
+import dev.kordex.core.DISCORD_RED
+import dev.kordex.core.DISCORD_YELLOW
+import dev.kordex.core.extensions.Extension
+import dev.kordex.core.utils.capitalizeWords
+import dev.kordex.core.utils.envOrNull
+import dev.kordex.core.utils.respond
+import dev.kordex.core.utils.scheduling.Scheduler
 import io.github.oshai.kotlinlogging.KLogger
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.*

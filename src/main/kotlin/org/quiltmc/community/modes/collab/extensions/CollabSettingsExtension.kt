@@ -6,7 +6,7 @@
 
 package org.quiltmc.community.modes.collab.extensions
 
-import com.kotlindiscord.kord.extensions.extensions.Extension
+import dev.kordex.core.extensions.Extension
 
 class CollabSettingsExtension : Extension() {
 	override val name = "collab-settings"

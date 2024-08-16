@@ -6,13 +6,13 @@
 
 package org.quiltmc.community.cozy.modules.rolesync
 
-import com.kotlindiscord.kord.extensions.annotations.DoNotChain
-import com.kotlindiscord.kord.extensions.extensions.Extension
-import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
-import com.kotlindiscord.kord.extensions.extensions.event
-import com.kotlindiscord.kord.extensions.utils.hasRole
 import dev.kord.core.event.guild.MemberJoinEvent
 import dev.kord.core.event.guild.MemberUpdateEvent
+import dev.kordex.core.annotations.DoNotChain
+import dev.kordex.core.extensions.Extension
+import dev.kordex.core.extensions.ephemeralSlashCommand
+import dev.kordex.core.extensions.event
+import dev.kordex.core.utils.hasRole
 import kotlinx.coroutines.flow.filter
 import org.quiltmc.community.cozy.modules.rolesync.config.RoleSyncConfig
 
