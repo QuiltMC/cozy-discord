@@ -132,6 +132,13 @@ suspend fun ExtensibleBotBuilder.common() {
 
 	dataAdapter(::MongoDBDataAdapter)
 
+	about {
+		logoUrl = "https://github.com/QuiltMC/art/blob/master/misc/cozy-icons/original-raster/cozy-discord.png?raw=true"
+
+		sourceButton("https://github.com/QuiltMC/cozy-discord")
+		websiteButton("https://quiltmc.org/")
+	}
+
 	applicationCommands {
 		// Need to disable this due to the slash command perms experiment
 //		syncPermissions = false

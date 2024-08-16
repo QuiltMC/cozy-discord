@@ -52,6 +52,11 @@ suspend fun setupCollab() = ExtensibleBot(DISCORD_TOKEN) {
 	common()
 	database()
 
+	about {
+		name = "Cozy: Collab"
+		description = "Quilt's Discord bot, Community Collab edition."
+	}
+
 	extensions {
 		sentry {
 			distribution = "collab"
@@ -62,6 +67,13 @@ suspend fun setupCollab() = ExtensibleBot(DISCORD_TOKEN) {
 suspend fun setupDev() = ExtensibleBot(DISCORD_TOKEN) {
 	common()
 	database()
+
+	about {
+		name = "Cozy: Dev Tools"
+		description = "Quilt's Discord bot, Dev Tools edition.\n\n" +
+			"Once provided mappings commands, but you should use the Linkie Discord bot or " +
+			"[Linkie Web](https://linkie.shedaniel.dev/) going forward."
+	}
 
 	extensions {
 		if (GITHUB_TOKEN != null) {
@@ -78,6 +90,13 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
 	common()
 	database(true)
 	settings()
+
+	about {
+		name = "Cozy: Community"
+		description = "Quilt's Discord bot, Community edition.\n\n" +
+			"Provides a ton of commands and other utilities, to help staff with moderation and provide users with " +
+			"day-to-day features on the main Discord server."
+	}
 
 	chatCommands {
 		defaultPrefix = "%"
@@ -206,6 +225,13 @@ suspend fun setupShowcase() = ExtensibleBot(DISCORD_TOKEN) {
 	database()
 	settings()
 
+	about {
+		name = "Cozy: Showcase"
+		description = "Quilt's Discord bot, Showcase edition.\n\n" +
+			"This bot is currently in development, but someday we hope it'll let you post in the showcase " +
+			"channels from your project servers."
+	}
+
 	extensions {
 		sentry {
 			distribution = "showcase"
@@ -215,8 +241,8 @@ suspend fun setupShowcase() = ExtensibleBot(DISCORD_TOKEN) {
 
 suspend fun main() {
 	val bot = when (MODE) {
-		"dev" -> setupDev()
 		"collab" -> setupCollab()
+		"dev" -> setupDev()
 		"quilt" -> setupQuilt()
 		"showcase" -> setupShowcase()
 
