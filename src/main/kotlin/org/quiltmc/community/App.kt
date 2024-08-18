@@ -71,7 +71,7 @@ suspend fun setupDev() = ExtensibleBot(DISCORD_TOKEN) {
 	about {
 		name = "Cozy: Dev Tools"
 		description = "Quilt's Discord bot, Dev Tools edition.\n\n" +
-			"Once provided mappings commands, but you should use the Linkie Discord bot or " +
+			"Once provided mappings commands, but you should use the Allium Discord bot or " +
 			"[Linkie Web](https://linkie.shedaniel.dev/) going forward."
 	}
 
