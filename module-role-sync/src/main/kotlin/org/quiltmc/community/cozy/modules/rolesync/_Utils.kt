@@ -10,7 +10,7 @@ import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
 import dev.kord.core.entity.Role
 import dev.kordex.core.ExtensibleBot
-import dev.kordex.core.builders.ExtensibleBotBuilder
+import dev.kordex.core.builders.ExtensionsBuilder
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapConcat
@@ -21,9 +21,9 @@ import org.quiltmc.community.cozy.modules.rolesync.config.SimpleRoleSyncConfig
 public suspend fun getGuildForRoleSnowflake(roleId: Snowflake, bot: ExtensibleBot): Role =
 	bot.getKoin().get<Kord>().guilds.flatMapConcat { it.roles }.first { it.id == roleId }
 
-public fun ExtensibleBotBuilder.ExtensionsBuilder.rolesync(config: RoleSyncConfig) {
+public fun ExtensionsBuilder.rolesync(config: RoleSyncConfig) {
 	add { RoleSyncExtension(config) }
 }
 
-public fun ExtensibleBotBuilder.ExtensionsBuilder.rolesync(body: SimpleRoleSyncConfig.Builder.() -> Unit): Unit =
+public fun ExtensionsBuilder.rolesync(body: SimpleRoleSyncConfig.Builder.() -> Unit): Unit =
 	rolesync(SimpleRoleSyncConfig(body))

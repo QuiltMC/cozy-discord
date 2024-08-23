@@ -21,7 +21,7 @@ import dev.kordex.core.DISCORD_BLURPLE
 import dev.kordex.core.DISCORD_GREEN
 import dev.kordex.core.DISCORD_RED
 import dev.kordex.core.DISCORD_YELLOW
-import dev.kordex.core.builders.ExtensibleBotBuilder
+import dev.kordex.core.builders.ExtensionsBuilder
 import dev.kordex.core.components.ComponentContainer
 import dev.kordex.core.components.components
 import dev.kordex.core.components.ephemeralButton
@@ -36,7 +36,7 @@ import org.koin.dsl.bind
 import org.quiltmc.community.cozy.modules.ama.data.AmaData
 import org.quiltmc.community.cozy.modules.ama.enums.QuestionStatusFlag
 
-public fun ExtensibleBotBuilder.ExtensionsBuilder.extAma(data: AmaData) {
+public fun ExtensionsBuilder.extAma(data: AmaData) {
 	loadModule { single { data } bind AmaData::class }
 
 	add(::AmaExtension)

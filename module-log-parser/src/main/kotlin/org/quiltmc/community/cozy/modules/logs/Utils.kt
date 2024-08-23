@@ -7,7 +7,7 @@
 package org.quiltmc.community.cozy.modules.logs
 
 import com.unascribed.flexver.FlexVerComparator
-import dev.kordex.core.builders.ExtensibleBotBuilder
+import dev.kordex.core.builders.ExtensionsBuilder
 import dev.kordex.core.utils.loadModule
 import org.koin.dsl.bind
 import org.nibor.autolink.LinkExtractor
@@ -17,7 +17,7 @@ import org.quiltmc.community.cozy.modules.logs.config.SimpleLogParserConfig
 import java.net.URI
 import java.net.URL
 
-public inline fun ExtensibleBotBuilder.ExtensionsBuilder.extLogParser(
+public inline fun ExtensionsBuilder.extLogParser(
 	builder: (SimpleLogParserConfig.Builder).() -> Unit
 ) {
 	val config = SimpleLogParserConfig(builder)
@@ -27,7 +27,7 @@ public inline fun ExtensibleBotBuilder.ExtensionsBuilder.extLogParser(
 	add(::LogParserExtension)
 }
 
-public fun ExtensibleBotBuilder.ExtensionsBuilder.extLogParser(config: LogParserConfig) {
+public fun ExtensionsBuilder.extLogParser(config: LogParserConfig) {
 	loadModule { single { config } bind LogParserConfig::class }
 
 	add(::LogParserExtension)

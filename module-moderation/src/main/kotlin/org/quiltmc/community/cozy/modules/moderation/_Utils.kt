@@ -6,7 +6,7 @@
 
 package org.quiltmc.community.cozy.modules.moderation
 
-import dev.kordex.core.builders.ExtensibleBotBuilder
+import dev.kordex.core.builders.ExtensionsBuilder
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimePeriod
 import kotlinx.datetime.TimeZone.Companion.UTC
@@ -23,9 +23,9 @@ public fun DateTimePeriod.toTotalSeconds(): Int {
 	return (now.plus(this, UTC) - now).toInt(DurationUnit.SECONDS)
 }
 
-public fun ExtensibleBotBuilder.ExtensionsBuilder.moderation(config: ModerationConfig) {
+public fun ExtensionsBuilder.moderation(config: ModerationConfig) {
 	add { ModerationExtension(config) }
 }
 
-public fun ExtensibleBotBuilder.ExtensionsBuilder.moderation(body: SimpleModerationConfig.Builder.() -> Unit): Unit =
+public fun ExtensionsBuilder.moderation(body: SimpleModerationConfig.Builder.() -> Unit): Unit =
 	moderation(SimpleModerationConfig(body))

@@ -53,8 +53,11 @@ suspend fun setupCollab() = ExtensibleBot(DISCORD_TOKEN) {
 	database()
 
 	about {
-		name = "Cozy: Collab"
-		description = "Quilt's Discord bot, Community Collab edition."
+		addGeneral(
+			"Cozy: Collab",
+
+			"Quilt's Discord bot, Community Collab edition."
+		)
 	}
 
 	extensions {
@@ -69,10 +72,13 @@ suspend fun setupDev() = ExtensibleBot(DISCORD_TOKEN) {
 	database()
 
 	about {
-		name = "Cozy: Dev Tools"
-		description = "Quilt's Discord bot, Dev Tools edition.\n\n" +
-			"Once provided mappings commands, but you should use the Allium Discord bot or " +
-			"[Linkie Web](https://linkie.shedaniel.dev/) going forward."
+		addGeneral(
+			"Cozy: Dev Tools",
+
+			"Quilt's Discord bot, Dev Tools edition.\n\n" +
+				"Once provided mappings commands, but you should use the Allium Discord bot or " +
+				"[Linkie Web](https://linkie.shedaniel.dev/) going forward."
+		)
 	}
 
 	extensions {
@@ -92,10 +98,13 @@ suspend fun setupQuilt() = ExtensibleBot(DISCORD_TOKEN) {
 	settings()
 
 	about {
-		name = "Cozy: Community"
-		description = "Quilt's Discord bot, Community edition.\n\n" +
-			"Provides a ton of commands and other utilities, to help staff with moderation and provide users with " +
-			"day-to-day features on the main Discord server."
+		addGeneral(
+			"Cozy: Community",
+
+			"Quilt's Discord bot, Community edition.\n\n" +
+				"Provides a ton of commands and other utilities, to help staff with moderation and provide users " +
+				"with day-to-day features on the main Discord server."
+		)
 	}
 
 	chatCommands {
@@ -226,10 +235,13 @@ suspend fun setupShowcase() = ExtensibleBot(DISCORD_TOKEN) {
 	settings()
 
 	about {
-		name = "Cozy: Showcase"
-		description = "Quilt's Discord bot, Showcase edition.\n\n" +
-			"This bot is currently in development, but someday we hope it'll let you post in the showcase " +
-			"channels from your project servers."
+		addGeneral(
+			"Cozy: Showcase",
+
+			"Quilt's Discord bot, Showcase edition.\n\n" +
+				"This bot is currently in development, but someday we hope it'll let you post in the showcase " +
+				"channels from your project servers."
+		)
 	}
 
 	extensions {
