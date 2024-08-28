@@ -10,6 +10,7 @@ import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.Permission
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.channel.createMessage
+import dev.kord.core.behavior.edit
 import dev.kord.core.builder.components.emoji
 import dev.kord.core.entity.ReactionEmoji
 import dev.kord.core.entity.channel.NewsChannel
@@ -21,15 +22,19 @@ import dev.kord.rest.builder.message.embed
 import dev.kordex.core.DISCORD_FUCHSIA
 import dev.kordex.core.DISCORD_GREEN
 import dev.kordex.core.checks.hasPermission
+import dev.kordex.core.checks.or
 import dev.kordex.core.commands.Arguments
 import dev.kordex.core.commands.application.slash.ephemeralSubCommand
+import dev.kordex.core.commands.converters.impl.message
 import dev.kordex.core.commands.converters.impl.optionalString
+import dev.kordex.core.commands.converters.impl.string
 import dev.kordex.core.extensions.Extension
 import dev.kordex.core.extensions.ephemeralSlashCommand
 import dev.kordex.core.pagination.pages.Page
 import dev.kordex.core.utils.scheduling.Scheduler
 import dev.kordex.core.utils.scheduling.Task
 import dev.kordex.core.utils.toReaction
+import dev.kordex.parser.Cursor
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -40,6 +45,7 @@ import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
 import org.apache.commons.text.StringEscapeUtils
 import org.quiltmc.community.*
+import kotlin.system.exitProcess
 
 private const val PAGINATOR_TIMEOUT = 60_000L  // One minute
 private const val CHUNK_SIZE = 10
@@ -49,7 +55,7 @@ private const val JSON_URL = "$BASE_URL/javaPatchNotes.json"
 
 private const val CHECK_DELAY = 60L
 
-private val LINK_REGEX = "<a href=\"(?<url>[^\"]+)\"[^>]*>(?<text>[^<]+)</a>".toRegex()
+private val LINK_REGEX = "<a href=\"?(?<url>[^\"\\s]+)\"?[^>]*>(?<text>[^<]+)</a>".toRegex()
 
 @Suppress("MagicNumber", "UnderscoresInNumericLiterals")
 private val CHANNELS: List<Snowflake> = listOf(
@@ -160,9 +166,13 @@ class MinecraftExtension : Extension() {
 					name = "forget"
 					description = "Forget a version (the last one by default), allowing it to be relayed again."
 
-					check { hasBaseModeratorRole() }
+					check {
+						hasBaseModeratorRole()
 
-					check { hasPermission(Permission.Administrator) }
+						or {
+							hasPermission(Permission.Administrator)
+						}
+					}
 
 					action {
 						if (!::currentEntries.isInitialized) {
@@ -189,11 +199,52 @@ class MinecraftExtension : Extension() {
 					}
 				}
 
+				ephemeralSubCommand(::UpdateArguments) {
+					name = "update"
+					description = "Edit the given message to replace its embed. Useful when formatting code changes."
+
+					check {
+						hasBaseModeratorRole()
+
+						or {
+							hasPermission(Permission.Administrator)
+						}
+					}
+
+					action {
+						if (!::currentEntries.isInitialized) {
+							respond { content = "Still setting up - try again a bit later!" }
+							return@action
+						}
+
+						val entry = currentEntries.entries.firstOrNull {
+							it.version.equals(arguments.version, true)
+						}
+
+						if (entry == null) {
+							respond { content = "Unknown version supplied: `${arguments.version}`" }
+							return@action
+						}
+
+						arguments.message.edit {
+							patchNotes(entry.get())
+						}
+
+						respond { content = "Message edit to match version: `${entry.version}`" }
+					}
+				}
+
 				ephemeralSubCommand {
 					name = "run"
 					description = "Run the check task now, without waiting for it."
 
-					check { hasBaseModeratorRole() }
+					check {
+						hasBaseModeratorRole()
+
+						or {
+							hasPermission(Permission.Administrator)
+						}
+					}
 
 					action {
 						respond { content = "Checking now..." }
@@ -247,7 +298,7 @@ class MinecraftExtension : Extension() {
 			.forEach { it.relay(patchNote) }
 
 	fun String.formatHTML(): String {
-		var result = this
+		var result = StringEscapeUtils.unescapeHtml4(trim('\n'))
 
 		result = result.replace("\u200B", "")
 		result = result.replace("<p></p>", "")
@@ -260,6 +311,9 @@ class MinecraftExtension : Extension() {
 
 		result = result.replace("<strong>", "**")
 		result = result.replace("</strong>", "**")
+
+		result = result.replace("<em>", "_")
+		result = result.replace("</em>", "_")
 
 		result = result.replace("<code>", "`")
 		result = result.replace("</code>", "`")
@@ -286,10 +340,55 @@ class MinecraftExtension : Extension() {
 			)
 		}
 
-		return StringEscapeUtils.unescapeHtml4(result.trim('\n'))
+		val cursor = Cursor(result)
+		var isQuote = false
+
+		result = ""
+
+		@Suppress("LoopWithTooManyJumpStatements")  // Nah.
+		while (cursor.hasNext) {
+			result = result + (
+				cursor.consumeWhile { it != '<' }?.prefixQuote(isQuote)
+					?: break
+				)
+
+			val temp = cursor.consumeWhile { it != '>' }
+				?.plus(cursor.nextOrNull() ?: "")
+				?: break
+
+			if (temp == "<blockquote>") {
+				isQuote = true
+
+				if (cursor.peekNext() == '\n') {
+					cursor.next()
+				}
+
+				continue
+			} else if (temp == "</blockquote>") {
+				isQuote = false
+
+				continue
+			}
+
+			result = result + temp.prefixQuote(isQuote)
+		}
+
+		result = result.replace("&#60", "<")
+
+		return result.trim()
 	}
 
-	fun String.truncateMarkdown(maxLength: Int = 1000): Pair<String, Int> {
+	fun String.prefixQuote(prefix: Boolean) =
+		if (prefix) {
+			split("\n")
+				.joinToString("\n") {
+					"> $it"
+				}
+		} else {
+			this
+		}
+
+	fun String.truncateMarkdown(maxLength: Int = 3000): Pair<String, Int> {
 		var result = this
 
 		if (length > maxLength) {
@@ -304,7 +403,7 @@ class MinecraftExtension : Extension() {
 		return result to 0
 	}
 
-	private fun MessageBuilder.patchNotes(patchNote: PatchNote, maxLength: Int = 4000) {
+	private fun MessageBuilder.patchNotes(patchNote: PatchNote, maxLength: Int = 3000) {
 		val (truncated, remaining) = patchNote.body.formatHTML().truncateMarkdown(maxLength)
 
 		actionRow {
@@ -335,14 +434,14 @@ class MinecraftExtension : Extension() {
 		}
 	}
 
-	private suspend fun TopGuildMessageChannel.relay(patchNote: PatchNote, maxLength: Int = 1000) {
+	private suspend fun TopGuildMessageChannel.relay(patchNote: PatchNote) {
 		val message = createMessage {
 			// If we are in the community guild, ping the update role
 			if (guildId == COMMUNITY_GUILD) {
 				content = "<@&$MINECRAFT_UPDATE_PING_ROLE>"
 			}
 
-			patchNotes(patchNote, maxLength)
+			patchNotes(patchNote)
 		}
 
 		val title = if (patchNote.title.startsWith("minecraft ", true)) {
@@ -368,7 +467,10 @@ class MinecraftExtension : Extension() {
 		}
 	}
 
-	private suspend fun PatchNoteEntry.get() =
+	fun getLatest() =
+		currentEntries.entries.first()
+
+	suspend fun PatchNoteEntry.get() =
 		client.get("$BASE_URL/$contentPath").body<PatchNote>()
 
 	@OptIn(KordPreview::class)
@@ -378,4 +480,32 @@ class MinecraftExtension : Extension() {
 			description = "Specific version to get patch notes for"
 		}
 	}
+
+	@OptIn(KordPreview::class)
+	class UpdateArguments : Arguments() {
+		val version by string {
+			name = "version"
+			description = "Specific version to get patch notes for"
+		}
+
+		val message by message {
+			name = "message"
+			description = "Message to edit with a new embed"
+		}
+	}
+}
+
+// In-dev testing function
+@Suppress("unused")
+private suspend fun main() {
+	val ext = MinecraftExtension()
+	ext.populateVersions()
+
+	val current = ext.getLatest()
+
+	with(ext) {
+		println(current.get().body.formatHTML())
+	}
+
+	exitProcess(0)
 }
