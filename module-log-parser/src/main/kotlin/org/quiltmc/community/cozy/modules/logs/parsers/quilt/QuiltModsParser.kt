@@ -6,8 +6,8 @@
 
 package org.quiltmc.community.cozy.modules.logs.parsers.quilt
 
-import com.kotlindiscord.kord.extensions.parser.Cursor
 import dev.kord.core.event.Event
+import dev.kordex.parser.Cursor
 import org.quiltmc.community.cozy.modules.logs.Version
 import org.quiltmc.community.cozy.modules.logs.data.LoaderType
 import org.quiltmc.community.cozy.modules.logs.data.Log

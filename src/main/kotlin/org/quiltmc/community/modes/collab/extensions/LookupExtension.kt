@@ -8,18 +8,18 @@
 
 package org.quiltmc.community.modes.collab.extensions
 
-import com.kotlindiscord.kord.extensions.DISCORD_BLURPLE
-import com.kotlindiscord.kord.extensions.commands.Arguments
-import com.kotlindiscord.kord.extensions.commands.converters.impl.snowflake
-import com.kotlindiscord.kord.extensions.commands.converters.impl.string
-import com.kotlindiscord.kord.extensions.extensions.Extension
-import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
-import com.kotlindiscord.kord.extensions.time.TimestampType
-import com.kotlindiscord.kord.extensions.time.toDiscord
-import com.kotlindiscord.kord.extensions.utils.translate
 import dev.kord.common.entity.Snowflake
 import dev.kord.rest.Image
 import dev.kord.rest.builder.message.embed
+import dev.kordex.core.DISCORD_BLURPLE
+import dev.kordex.core.commands.Arguments
+import dev.kordex.core.commands.converters.impl.snowflake
+import dev.kordex.core.commands.converters.impl.string
+import dev.kordex.core.extensions.Extension
+import dev.kordex.core.extensions.publicSlashCommand
+import dev.kordex.core.time.TimestampType
+import dev.kordex.core.time.toDiscord
+import dev.kordex.core.utils.translate
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*

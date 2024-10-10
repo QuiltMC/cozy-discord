@@ -6,9 +6,9 @@
 
 package org.quiltmc.community.database.collections
 
-import com.kotlindiscord.kord.extensions.checks.types.CheckContextWithCache
-import com.kotlindiscord.kord.extensions.koin.KordExKoinComponent
 import dev.kord.common.entity.Snowflake
+import dev.kordex.core.checks.types.CheckContextWithCache
+import dev.kordex.core.koin.KordExKoinComponent
 import org.koin.core.component.inject
 import org.litote.kmongo.eq
 import org.litote.kmongo.setValue

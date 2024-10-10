@@ -6,22 +6,9 @@
 
 package org.quiltmc.community.cozy.modules.moderation
 
-import com.kotlindiscord.kord.extensions.plugins.KordExPlugin
-import com.kotlindiscord.kord.extensions.plugins.annotations.plugins.WiredPlugin
-import org.pf4j.PluginWrapper
+import dev.kordex.core.plugins.KordExPlugin
 
-/**
- * Plugin containing the [ModerationExtension], providing various moderation tools.
- */
-@WiredPlugin(
-	id = ModerationPlugin.id,
-	version = "1.0.1-SNAPSHOT",
-
-	author = "QuiltMC",
-	description = "Various moderation tools for the QuiltMC community.",
-	license = "Mozilla Public License 2.0"
-)
-public class ModerationPlugin(wrapper: PluginWrapper) : KordExPlugin(wrapper) {
+public class ModerationPlugin : KordExPlugin() {
 	override suspend fun setup() {
 // TODO: We can't really use the plugin system just yet since it doesn't currently support any configuration tooling
 //        extension(::ModerationExtension)

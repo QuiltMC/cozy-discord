@@ -6,8 +6,8 @@
 
 package org.quiltmc.community.cozy.modules.logs.events
 
-import com.kotlindiscord.kord.extensions.extensions.event
 import dev.kord.core.event.message.MessageCreateEvent
+import dev.kordex.core.extensions.event
 import org.quiltmc.community.cozy.modules.logs.LogParserExtension
 
 public class DefaultEventHandler(private val extension: LogParserExtension) : EventHandler {

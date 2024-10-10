@@ -6,13 +6,13 @@
 
 package org.quiltmc.community
 
-import com.kotlindiscord.kord.extensions.checks.*
-import com.kotlindiscord.kord.extensions.checks.types.CheckContext
-import com.kotlindiscord.kord.extensions.utils.hasPermission
-import com.kotlindiscord.kord.extensions.utils.translate
 import dev.kord.common.entity.Permission
 import dev.kord.core.behavior.channel.asChannelOfOrNull
 import dev.kord.core.entity.channel.CategorizableChannel
+import dev.kordex.core.checks.*
+import dev.kordex.core.checks.types.CheckContext
+import dev.kordex.core.utils.hasPermission
+import dev.kordex.core.utils.translate
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.quiltmc.community.database.collections.ServerSettingsCollection
 

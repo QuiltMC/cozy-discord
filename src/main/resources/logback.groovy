@@ -4,8 +4,9 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-import ch.qos.logback.core.joran.spi.ConsoleTarget
+import ch.qos.logback.classic.Level
 import ch.qos.logback.core.ConsoleAppender
+import ch.qos.logback.core.joran.spi.ConsoleTarget
 import org.quiltmc.community.DiscordLogAppender
 
 def environment = System.getenv("ENVIRONMENT") ?: "prod"

@@ -83,7 +83,7 @@ ENVIRONMENT=dev
 
 * `GITHUB_TOKEN`: GitHub auth token, for the GitHub project management commands
 
-Once you've filled out your `.env` file, you can use the `run` gradle task to launch the bot. If this is your first
+Once you've filled out your `.env` file, you can use the `dev` gradle task to launch the bot. If this is your first
 run, you'll want to start with the `quilt` mode as this is the mode that runs the database migrations. After that,
 feel free to set up and test whichever mode you need to work with.
 

@@ -456,7 +456,7 @@ importsAcceptList = [
 	'java.lang.System.getProperty',
 	'java.lang.System.getenv',
 	'java.util.Map.getOrDefault',
-	'com.kotlindiscord.kord.extensions.utils._EnvironmentKt.envOrNull',
+	'dev.kordex.core.utils._EnvironmentKt.envOrNull',
 	'org.quiltmc.community._ConstantsKt.getLOGGING_ENV',
 	'org.quiltmc.community._ConstantsKt.getLOGGING_URL'
 ]

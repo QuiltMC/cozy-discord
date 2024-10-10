@@ -6,8 +6,8 @@
 
 package org.quiltmc.community.cozy.modules.logs.processors
 
-import com.kotlindiscord.kord.extensions.utils.runSuspended
 import dev.kord.core.event.Event
+import dev.kordex.core.utils.runSuspended
 import org.quiltmc.community.cozy.modules.logs.data.Log
 import org.quiltmc.community.cozy.modules.logs.data.Order
 import org.quiltmc.community.cozy.modules.logs.types.LogProcessor

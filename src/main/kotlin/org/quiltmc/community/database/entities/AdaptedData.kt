@@ -11,8 +11,8 @@
 package org.quiltmc.community.database.entities
 
 import com.github.jershell.kbson.UUIDSerializer
-import com.kotlindiscord.kord.extensions.storage.StorageType
 import dev.kord.common.entity.Snowflake
+import dev.kordex.core.storage.StorageType
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 import org.quiltmc.community.database.Entity

@@ -6,8 +6,8 @@
 
 package org.quiltmc.community.cozy.modules.rolesync.config
 
-import com.kotlindiscord.kord.extensions.checks.types.Check
 import dev.kord.common.entity.Snowflake
+import dev.kordex.core.checks.types.Check
 
 public class SimpleRoleSyncConfig(builder: Builder) : RoleSyncConfig() {
 	private val rolesToSync: MutableList<RoleToSync> = builder.rolesToSync

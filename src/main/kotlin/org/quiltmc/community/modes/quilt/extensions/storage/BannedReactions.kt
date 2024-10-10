@@ -6,8 +6,8 @@
 
 package org.quiltmc.community.modes.quilt.extensions.storage
 
-import com.kotlindiscord.kord.extensions.storage.Data
 import dev.kord.common.entity.Snowflake
+import dev.kordex.core.storage.Data
 import kotlinx.serialization.Serializable
 
 @Serializable

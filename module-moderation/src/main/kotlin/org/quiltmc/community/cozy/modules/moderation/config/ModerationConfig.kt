@@ -6,10 +6,10 @@
 
 package org.quiltmc.community.cozy.modules.moderation.config
 
-import com.kotlindiscord.kord.extensions.checks.types.Check
 import dev.kord.core.entity.Guild
 import dev.kord.core.entity.Role
 import dev.kord.core.entity.channel.GuildMessageChannel
+import dev.kordex.core.checks.types.Check
 
 /**
  * Abstract class representing the configuration for the user moderation module.

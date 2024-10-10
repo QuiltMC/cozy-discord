@@ -11,11 +11,11 @@
 package org.quiltmc.community.database.entities
 
 import com.github.jershell.kbson.UUIDSerializer
-import com.kotlindiscord.kord.extensions.DISCORD_BLURPLE
-import com.kotlindiscord.kord.extensions.utils.getKoin
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
 import dev.kord.rest.builder.message.EmbedBuilder
+import dev.kordex.core.DISCORD_BLURPLE
+import dev.kordex.core.utils.getKoin
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 import org.quiltmc.community.database.Entity

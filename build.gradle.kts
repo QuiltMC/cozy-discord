@@ -1,4 +1,5 @@
 import com.expediagroup.graphql.plugin.gradle.config.GraphQLSerializer
+import dev.kordex.gradle.plugins.kordex.DataCollection
 
 /*
  * This Source Code Form is subject to the terms of the Mozilla Public
@@ -52,17 +53,21 @@ dependencies {
 }
 
 kordEx {
+	version = "2.2.1-SNAPSHOT"
+
 	bot {
+		dataCollection(DataCollection.Minimal)
+
 		mainClass = "org.quiltmc.community.AppKt"
 	}
 
-	module("annotations")
-	module("extra-mappings")
-	module("extra-phishing")
-	module("extra-pluralkit")
-	module("extra-tags")
-	module("extra-welcome")
-	module("unsafe")
+	module("dev-unsafe")
+
+	module("func-phishing")
+	module("func-tags")
+	module("func-welcome")
+
+	module("pluralkit")
 }
 
 graphql {
@@ -76,7 +81,7 @@ graphql {
 
 gitHooks {
 	setHooks(
-		mapOf("pre-commit" to "updateLicense detekt")
+		mapOf("pre-commit" to "applyLicenses detekt")
 	)
 }
 

@@ -6,14 +6,6 @@
 
 package org.quiltmc.community
 
-import com.kotlindiscord.kord.extensions.builders.ExtensibleBotBuilder
-import com.kotlindiscord.kord.extensions.commands.Arguments
-import com.kotlindiscord.kord.extensions.commands.application.slash.SlashCommandContext
-import com.kotlindiscord.kord.extensions.components.forms.ModalForm
-import com.kotlindiscord.kord.extensions.utils.env
-import com.kotlindiscord.kord.extensions.utils.envOrNull
-import com.kotlindiscord.kord.extensions.utils.getKoin
-import com.kotlindiscord.kord.extensions.utils.loadModule
 import dev.kord.common.entity.ArchiveDuration
 import dev.kord.common.entity.Snowflake
 import dev.kord.common.entity.UserFlag
@@ -26,7 +18,20 @@ import dev.kord.core.entity.Guild
 import dev.kord.core.entity.Message
 import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.rest.builder.message.EmbedBuilder
+import dev.kord.rest.builder.message.actionRow
+import dev.kord.rest.builder.message.embed
 import dev.kord.rest.request.RestRequestException
+import dev.kordex.core.DISCORD_FUCHSIA
+import dev.kordex.core.builders.AboutBuilder
+import dev.kordex.core.builders.ExtensibleBotBuilder
+import dev.kordex.core.builders.about.CopyrightType
+import dev.kordex.core.commands.Arguments
+import dev.kordex.core.commands.application.slash.SlashCommandContext
+import dev.kordex.core.components.forms.ModalForm
+import dev.kordex.core.utils.env
+import dev.kordex.core.utils.envOrNull
+import dev.kordex.core.utils.getKoin
+import dev.kordex.core.utils.loadModule
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.runBlocking
 import org.koin.dsl.bind
@@ -132,9 +137,23 @@ suspend fun ExtensibleBotBuilder.common() {
 
 	dataAdapter(::MongoDBDataAdapter)
 
-	applicationCommands {
-		// Need to disable this due to the slash command perms experiment
-//		syncPermissions = false
+	about {
+		copyright("Autolink", "MIT", CopyrightType.Library, "https://github.com/robinst/autolink-java")
+
+		copyright(
+			"Apache: Commons Text",
+			"Apache-2.0",
+			CopyrightType.Library,
+			"https://commons.apache.org/proper/commons-text/"
+		)
+
+		copyright("ExcelKt", "MIT", CopyrightType.Library, "https://github.com/evanrupert/ExcelKt")
+		copyright("Homoglyph", "MIT", CopyrightType.Library, "https://github.com/codebox/homoglyph")
+		copyright("KMongo", "Apache-2.0", CopyrightType.Library, "https://litote.org/kmongo/")
+		copyright("Kotlin Semver", "MIT", CopyrightType.Library, "https://github.com/z4kn4fein/kotlin-semver")
+		copyright("RgxGen", "Apache-2.0", CopyrightType.Library, "https://github.com/curious-odd-man/RgxGen")
+
+		copyright("GraphQL", "MIT", CopyrightType.Tool, "https://graphql.org/")
 	}
 
 	extensions {
@@ -158,7 +177,7 @@ suspend fun ExtensibleBotBuilder.common() {
 	}
 
 	plugins {
-		if (ENVIRONMENT != "production") {
+		if (this@common.devMode) {
 			// Add plugin build folders here for testing in dev
 			// pluginPath("module-tags/build/libs")
 		}
@@ -293,3 +312,34 @@ fun String.replaceParams(pairs: Map<String, Any>): String = this.replaceParams(
 
 suspend fun ThreadChannelBehavior.getFirstMessage() =
 	getMessageOrNull(id)
+
+suspend fun AboutBuilder.addGeneral(name: String, desc: String) {
+	general {
+		message {
+			embed {
+				color = DISCORD_FUCHSIA
+				description = desc
+				title = name
+
+				thumbnail {
+					url = "https://github.com/QuiltMC/art/blob/master/misc/cozy-icons/original-raster/" +
+						"cozy-discord.png?raw=true"
+				}
+			}
+
+			actionRow {
+				linkButton("https://opencollective.com/quiltmc") {
+					label = "Open Collective"
+				}
+
+				linkButton("https://github.com/QuiltMC/cozy-discord") {
+					label = "Source Code"
+				}
+
+				linkButton("https://quiltmc.org") {
+					label = "Website"
+				}
+			}
+		}
+	}
+}

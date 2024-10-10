@@ -6,15 +6,6 @@
 
 package org.quiltmc.community.cozy.modules.ama
 
-import com.kotlindiscord.kord.extensions.DISCORD_BLURPLE
-import com.kotlindiscord.kord.extensions.DISCORD_GREEN
-import com.kotlindiscord.kord.extensions.DISCORD_RED
-import com.kotlindiscord.kord.extensions.DISCORD_YELLOW
-import com.kotlindiscord.kord.extensions.builders.ExtensibleBotBuilder
-import com.kotlindiscord.kord.extensions.components.ComponentContainer
-import com.kotlindiscord.kord.extensions.components.components
-import com.kotlindiscord.kord.extensions.components.ephemeralButton
-import com.kotlindiscord.kord.extensions.utils.loadModule
 import dev.kord.common.Color
 import dev.kord.common.entity.ButtonStyle
 import dev.kord.common.entity.Snowflake
@@ -26,6 +17,15 @@ import dev.kord.core.entity.User
 import dev.kord.core.entity.channel.GuildMessageChannel
 import dev.kord.rest.builder.message.EmbedBuilder
 import dev.kord.rest.builder.message.embed
+import dev.kordex.core.DISCORD_BLURPLE
+import dev.kordex.core.DISCORD_GREEN
+import dev.kordex.core.DISCORD_RED
+import dev.kordex.core.DISCORD_YELLOW
+import dev.kordex.core.builders.ExtensionsBuilder
+import dev.kordex.core.components.ComponentContainer
+import dev.kordex.core.components.components
+import dev.kordex.core.components.ephemeralButton
+import dev.kordex.core.utils.loadModule
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
@@ -36,7 +36,7 @@ import org.koin.dsl.bind
 import org.quiltmc.community.cozy.modules.ama.data.AmaData
 import org.quiltmc.community.cozy.modules.ama.enums.QuestionStatusFlag
 
-public fun ExtensibleBotBuilder.ExtensionsBuilder.extAma(data: AmaData) {
+public fun ExtensionsBuilder.extAma(data: AmaData) {
 	loadModule { single { data } bind AmaData::class }
 
 	add(::AmaExtension)

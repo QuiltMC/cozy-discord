@@ -21,6 +21,15 @@ dependencies {
 }
 
 kordEx {
-	module("annotations")
-	module("extra-pluralkit")
+	module("pluralkit")
+
+	plugin {
+		pluginClass = "org.quiltmc.community.cozy.modules.moderation.ModerationPlugin"
+		id = "quiltmc-moderation"
+		version = "1.0.1"
+
+		author = "QuiltMC"
+		description = "Various moderation tools for the QuiltMC community."
+		license = "MPL-2.0"
+	}
 }

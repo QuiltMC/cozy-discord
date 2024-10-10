@@ -6,8 +6,8 @@
 
 package org.quiltmc.community.cozy.modules.logs.parsers.launchers
 
-import com.kotlindiscord.kord.extensions.utils.capitalizeWords
 import dev.kord.core.event.Event
+import dev.kordex.core.utils.capitalizeWords
 import org.quiltmc.community.cozy.modules.logs.data.Launcher
 import org.quiltmc.community.cozy.modules.logs.data.Log
 import org.quiltmc.community.cozy.modules.logs.data.Order

@@ -6,7 +6,7 @@
 
 package org.quiltmc.community.cozy.modules.logs.config
 
-import com.kotlindiscord.kord.extensions.checks.types.Check
+import dev.kordex.core.checks.types.Check
 import org.quiltmc.community.cozy.modules.logs.parsers.EnvironmentParser
 import org.quiltmc.community.cozy.modules.logs.parsers.LauncherParser
 import org.quiltmc.community.cozy.modules.logs.parsers.LoaderParser

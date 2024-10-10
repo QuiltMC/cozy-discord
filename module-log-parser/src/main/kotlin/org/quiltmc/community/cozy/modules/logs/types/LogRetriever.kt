@@ -6,9 +6,9 @@
 
 package org.quiltmc.community.cozy.modules.logs.types
 
-import com.kotlindiscord.kord.extensions.ExtensibleBot
-import com.kotlindiscord.kord.extensions.koin.KordExKoinComponent
 import dev.kord.core.event.Event
+import dev.kordex.core.ExtensibleBot
+import dev.kordex.core.koin.KordExKoinComponent
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.contentnegotiation.*

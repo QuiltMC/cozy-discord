@@ -8,14 +8,14 @@
 
 package org.quiltmc.community.database.entities
 
-import com.kotlindiscord.kord.extensions.DISCORD_BLURPLE
-import com.kotlindiscord.kord.extensions.utils.getKoin
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
 import dev.kord.core.behavior.getChannelOfOrNull
 import dev.kord.core.entity.channel.Category
 import dev.kord.core.entity.channel.TopGuildMessageChannel
 import dev.kord.rest.builder.message.EmbedBuilder
+import dev.kordex.core.DISCORD_BLURPLE
+import dev.kordex.core.utils.getKoin
 import kotlinx.serialization.Serializable
 import org.quiltmc.community.database.Entity
 import org.quiltmc.community.database.collections.ServerSettingsCollection

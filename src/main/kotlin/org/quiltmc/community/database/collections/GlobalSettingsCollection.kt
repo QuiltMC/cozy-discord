@@ -6,8 +6,8 @@
 
 package org.quiltmc.community.database.collections
 
-import com.kotlindiscord.kord.extensions.koin.KordExKoinComponent
 import com.mongodb.client.result.UpdateResult
+import dev.kordex.core.koin.KordExKoinComponent
 import org.koin.core.component.inject
 import org.quiltmc.community.database.Collection
 import org.quiltmc.community.database.Database
