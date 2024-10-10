@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
 
       - name: Set up Java
         uses: actions/setup-java@v1
@@ -28,21 +28,21 @@ jobs:
           arguments: build
 
       - name: Upload artifacts (Main JAR)
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
 
         with:
           name: Main JAR
           path: build/libs/*-all.jar
 
       - name: Upload artifacts (JARs)
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
 
         with:
           name: JARs
           path: build/libs/*.jar
 
       - name: Upload artifacts (Module JARs)
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
 
         with:
           name: Module JARs
