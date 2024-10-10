@@ -53,18 +53,21 @@ dependencies {
 }
 
 kordEx {
+	version = "2.2.1-SNAPSHOT"
+
 	bot {
 		dataCollection(DataCollection.Minimal)
 
 		mainClass = "org.quiltmc.community.AppKt"
 	}
 
-	module("pluralkit")
-
 	module("dev-unsafe")
+
 	module("func-phishing")
 	module("func-tags")
 	module("func-welcome")
+
+	module("pluralkit")
 }
 
 graphql {
